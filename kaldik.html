@@ -2,634 +2,1385 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#800000">
-    <title>Sistem Kalender Akademik Sekolah</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#7f1d1d">
+    <title>Sistem Informasi Akademik - SDN Kakatua</title>
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            /* --- WARNA DASAR --- */
-            --bg-body: #f4f6f8; 
-            --bg-card: #ffffff; 
-            --bg-input: #ffffff;
-            --text-main: #2d3436; 
-            --text-muted: #636e72; 
-            --border-color: #dfe6e9;
+            /* --- PALET WARNA MODERN --- */
+            --bg-body: #f0f2f5; 
+            --bg-surface: #ffffff; 
+            --bg-glass: rgba(255, 255, 255, 0.85);
             
-            /* --- IDENTITAS SEKOLAH --- */
-            --primary: #800000; 
-            --accent: #d4af37;
-            --header-pattern: repeating-linear-gradient(45deg, #800000, #800000 10px, #600000 10px, #600000 20px);
+            --text-primary: #1a1a1a; 
+            --text-secondary: #64748b; 
+            --text-tertiary: #94a3b8;
+            
+            /* --- BRAND IDENTITY (Premium Maroon & Gold) --- */
+            --brand-primary: #7f1d1d; 
+            --brand-primary-light: #991b1b;
+            --brand-accent: #d97706; 
+            --brand-accent-soft: #fffbeb;
 
-            /* --- KATEGORI WARNA --- */
-            --c-libur-bg: #ffebee; --c-libur-text: #b71c1c;
-            --c-ujian-bg: #fff8e1; --c-ujian-text: #e65100;
-            --c-mpls-bg: #e8f5e9;  --c-mpls-text: #1b5e20;
-            --c-rapor-bg: #f3e5f5; --c-rapor-text: #4a148c;
+            /* --- INDIKATOR WARNA --- */
+            --tag-libur-bg: #fee2e2; --tag-libur-text: #991b1b; --tag-libur-shadow: rgba(239, 68, 68, 0.3);
+            --tag-ujian-bg: #fef3c7; --tag-ujian-text: #92400e; --tag-ujian-shadow: rgba(245, 158, 11, 0.3);
+            --tag-mpls-bg: #dcfce7;  --tag-mpls-text: #166534; --tag-mpls-shadow: rgba(16, 185, 129, 0.3);
+            --tag-rapor-bg: #f3e8ff; --tag-rapor-text: #6b21a8; --tag-rapor-shadow: rgba(139, 92, 246, 0.3);
+
+            /* --- UI VARIABLES --- */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+            --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.05);
+            
+            --radius-md: 12px;
+            --radius-lg: 24px;
         }
 
         body.dark-mode {
-            --bg-body: #121212; --bg-card: #1e1e1e; --bg-input: #2c2c2c; 
-            --text-main: #ececec; --text-muted: #b0b0b0; --border-color: #333;
-            --c-libur-bg: #5c1b1b; --c-libur-text: #ffcdd2; 
-            --c-ujian-bg: #573a00; --c-ujian-text: #ffe0b2;
-            --c-mpls-bg: #143818;  --c-mpls-text: #c8e6c9; 
-            --c-rapor-bg: #34124a; --c-rapor-text: #e1bee7;
+            --bg-body: #0f172a; --bg-surface: #1e293b; --bg-glass: rgba(30, 41, 59, 0.9);
+            --text-primary: #f8fafc; --text-secondary: #94a3b8;
+            --brand-primary: #ef4444; 
+            --brand-accent: #fbbf24;
+            
+            --tag-libur-bg: #450a0a; --tag-libur-text: #fca5a5; --tag-libur-shadow: rgba(239, 68, 68, 0.1);
+            --tag-ujian-bg: #451a03; --tag-ujian-text: #fcd34d; --tag-ujian-shadow: rgba(245, 158, 11, 0.1);
+            --tag-mpls-bg: #052e16;  --tag-mpls-text: #86efac; --tag-mpls-shadow: rgba(16, 185, 129, 0.1);
+            --tag-rapor-bg: #3b0764; --tag-rapor-text: #d8b4fe; --tag-rapor-shadow: rgba(139, 92, 246, 0.1);
+            
+            --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg-body); color: var(--text-main); margin: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-body); color: var(--text-primary); 
+            font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; 
+            display: flex; flex-direction: column; transition: background 0.4s ease, color 0.4s ease;
+        }
 
-        /* HEADER */
+        /* --- TOP NAVIGATION BAR --- */
+        .top-nav {
+            background-color: #2a0a0a;
+            color: white;
+            position: sticky; top: 0; z-index: 110;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .top-nav { background-color: #020617; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; padding: 0 20px;
+            display: flex; align-items: center; gap: 30px;
+            overflow-x: auto; white-space: nowrap;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .nav-container::-webkit-scrollbar { display: none; }
+
+        .nav-link {
+            display: inline-flex; align-items: center; padding: 12px 0;
+            color: rgba(255,255,255,0.7); text-decoration: none;
+            font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 2px solid transparent; transition: all 0.3s; cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--brand-accent); border-bottom-color: var(--brand-accent);
+        }
+        .nav-icon-home { display: flex; align-items: center; height: 100%; }
+
+        /* --- HEADER --- */
         header {
-            background: var(--header-pattern); color: white; padding: 15px 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-bottom: 5px solid var(--accent);
+            background: linear-gradient(135deg, var(--brand-primary), #450a0a);
+            color: white; padding: 20px 30px;
             display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 43px; z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .header-left { display: flex; align-items: center; gap: 10px; }
         
-        /* SYNC INDICATOR */
-        .sync-status { width: 30px; height: 30px; background: rgba(0,0,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.3); }
-        .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        .sync-dot.synced { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
-        .sync-dot.syncing { background: #f1c40f; animation: pulse 1s infinite; }
-        .sync-dot.offline { background: #e74c3c; }
-        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.2); opacity: 1; } }
-
-        .header-content h1 { margin: 0; font-size: clamp(1.2rem, 3vw, 1.8rem); font-family: 'Georgia', serif; }
-        .header-content p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
-
-        .btn-admin-login {
-            background: rgba(0,0,0,0.2); border: 1px solid var(--accent); color: var(--accent);
-            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: bold;
-            transition: 0.3s;
-        }
-        .btn-admin-login:hover, .btn-admin-login.active { background: var(--accent); color: #800000; box-shadow: 0 0 10px var(--accent); }
-
-        /* LAYOUT */
-        .main-container { flex: 1; display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+        .brand-wrapper { display: flex; align-items: center; gap: 15px; }
         
-        /* CALENDAR */
-        .calendar-wrapper { flex: 3; background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
-        .cal-controls { display: flex; align-items: center; padding: 15px; background: var(--bg-body); gap: 10px; border-bottom: 1px solid var(--border-color); }
-        .btn-nav { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-left: auto; font-size: 0.85rem; }
-        .current-month { font-size: 1.3rem; font-weight: bold; color: var(--primary); flex-grow: 1; text-align: center; font-family: 'Georgia', serif; }
-        .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--primary); color: white; text-align: center; padding: 10px 0; font-weight: bold; font-size: 0.9rem; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 5px; gap: 5px; min-height: 400px; }
-        .day-cell { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 5px; min-height: 90px; cursor: pointer; display: flex; flex-direction: column; position: relative; user-select: none; }
-        .day-cell.today { border: 2px solid var(--accent); background: linear-gradient(135deg, var(--bg-card), rgba(212, 175, 55, 0.08)); }
-        .day-cell.empty { background: transparent; border: none; cursor: default; }
-        .date-num { font-weight: bold; margin-bottom: 5px; font-size: 1rem; color: var(--text-muted); }
-        .date-num.red { color: #e74c3c; }
-        .event-dot { font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; border-left: 3px solid rgba(0,0,0,0.2); font-weight: 600; }
-        .bg-libur { background: var(--c-libur-bg); color: var(--c-libur-text); }
-        .bg-ujian { background: var(--c-ujian-bg); color: var(--c-ujian-text); }
-        .bg-mpls { background: var(--c-mpls-bg); color: var(--c-mpls-text); }
-        .bg-rapor { background: var(--c-rapor-bg); color: var(--c-rapor-text); }
-
-        /* SEMESTER & SIDEBAR */
-        .semester-view { display: none; padding: 20px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        .semester-view.active { display: grid; }
-        .mini-month { border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; cursor: pointer; background: var(--bg-body); }
-        .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.6rem; text-align: center; }
-        .mini-cell { height: 25px; background: var(--bg-card); display: flex; justify-content: center; align-items: center; border-radius: 3px; }
-        .mini-cell.has-event { background: var(--accent); color: white; }
-        .sidebar { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 20px; }
-        .widget-box { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-flex { display: flex; justify-content: space-around; text-align: center; margin-top: 10px; }
-        .stat-item strong { display: block; font-size: 1.8rem; }
-        .agenda-list { max-height: 400px; overflow-y: auto; }
-        .agenda-item { display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); padding: 10px 0; font-size: 0.9rem; }
-        .agenda-date { font-weight: bold; color: var(--primary); min-width: 30px; }
-
-        /* --- UI ESTETIK --- */
-        .modal-overlay, .custom-modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); 
-            z-index: 3000; display: none; justify-content: center; align-items: center; 
-            opacity: 0; transition: opacity 0.3s ease; 
+        .logo-btn { 
+            width: 45px; height: 45px; background: rgba(255,255,255,0.15); 
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+            cursor: pointer; transition: all 0.3s; padding: 0; margin: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .modal-overlay.active, .custom-modal-overlay.active { display: flex; opacity: 1; }
+        .logo-btn:hover { background: white; color: var(--brand-primary); transform: scale(1.05); }
+        .logo-btn:active { transform: scale(0.95); }
 
-        /* CARDS */
-        .modal-card, .login-card, .confirm-card {
-            background: var(--bg-card); width: 95%; max-width: 450px;
-            border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color); overflow: hidden;
-            transform: translateY(20px); transition: transform 0.3s;
-            display: flex; flex-direction: column;
+        .header-text h1 { margin: 0; font-family: 'Playfair Display', serif; font-size: 1.5rem; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .header-text p { margin: 2px 0 0 0; font-size: 0.8rem; opacity: 0.85; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+
+        .btn-admin-icon {
+            width: 40px; height: 40px; background: rgba(255,255,255,0.15); 
+            border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
         }
-        .active .modal-card, .active .login-card, .active .confirm-card { transform: translateY(0); }
-        .confirm-card { text-align: center; padding: 30px; max-width: 320px; }
-        .login-card { text-align: center; padding: 30px; max-width: 350px; }
+        .btn-admin-icon:hover { background: white; color: var(--brand-primary); transform: rotate(10deg); }
+        .btn-admin-icon.active { background: #fecaca; color: #991b1b; border-color: #fca5a5; }
 
-        .modal-header { background: var(--primary); color: white; padding: 20px; text-align: center; }
-        .modal-body { padding: 20px; overflow-y: auto; max-height: 70vh; }
-
-        /* LIST EVENT (READ ONLY) */
-        .event-item-admin { display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 8px; background: var(--bg-body); border-radius: 8px; border-left: 4px solid #ccc; border: 1px solid var(--border-color); }
+        /* --- ANNOUNCEMENT BANNER --- */
+        .announcement-bar {
+            background: var(--brand-accent-soft);
+            color: var(--brand-accent);
+            border-bottom: 1px solid rgba(217, 119, 6, 0.1);
+            overflow: hidden;
+            white-space: nowrap;
+            position: sticky; top: 128px; z-index: 90;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .ticker-wrap { width: 100%; overflow: hidden; height: 40px; display: flex; align-items: center; }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 25s linear infinite; }
+        .ticker__item { display: inline-block; padding: 0 2rem; color: #92400e; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         
-        /* --- ADMIN FORM YANG DIPERBAIKI (MARGIN & SPACING) --- */
-        .admin-form { 
-            display: none; 
-            margin-top: 25px; 
-            padding: 20px; 
-            background-color: var(--bg-body); /* Memberikan kontras */
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-        .admin-form.show { display: block; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body.dark-mode .announcement-bar { background: #2a1c05; border-bottom: 1px solid #451a03; }
+        body.dark-mode .ticker__item { color: #fbbf24; }
 
-        /* Input Spacing Improved */
-        .form-group { margin-bottom: 15px; } 
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-muted); font-weight: 600; }
-        
-        .form-group input, .form-group select { 
-            width: 100%; padding: 12px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            background: var(--bg-input); 
-            color: var(--text-main); 
-            font-size: 0.95rem;
-        }
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        /* --- LAYOUT UTAMA --- */
+        .main-container { 
+            max-width: 1400px; width: 100%; margin: 30px auto; padding: 0 20px;
+            display: grid; grid-template-columns: 3fr 1.2fr; gap: 30px; padding-bottom: 80px;
         }
 
-        .btn-action-small { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; color: white; font-size: 0.8rem; margin-left: 5px; font-weight: bold; }
-        .btn-primary-block { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-primary-block:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(128,0,0,0.3); }
-
-        /* LOGIN & CONFIRM ICONS */
-        .modal-icon { width: 60px; height: 60px; background: var(--bg-body); border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 1.5rem; border: 2px solid var(--accent); }
-        .modal-icon.warning { color: #e67e22; border-color: #e67e22; }
+        /* --- PROFILE PAGE STYLES --- */
+        .profile-container {
+            display: none; /* Sembunyi by default */
+            max-width: 1000px; margin: 30px auto; padding: 0 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        .profile-header-card {
+            background: linear-gradient(135deg, var(--brand-primary), #450a0a);
+            border-radius: var(--radius-lg); padding: 40px; color: white;
+            text-align: center; box-shadow: var(--shadow-lg); margin-bottom: 30px;
+            position: relative; overflow: hidden;
+        }
+        .profile-header-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            opacity: 0.5; pointer-events: none;
+        }
+        .ph-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; font-weight: 700; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .ph-subtitle { font-size: 1.1rem; opacity: 0.9; margin-top: 10px; letter-spacing: 1px; font-weight: 300; }
+        .ph-badge { 
+            display: inline-block; background: var(--brand-accent); color: #fff; 
+            padding: 5px 15px; border-radius: 50px; font-weight: 700; font-size: 0.8rem; 
+            margin-top: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .data-card {
+            background: var(--bg-surface); border-radius: var(--radius-lg);
+            padding: 25px; box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.05);
+        }
+        .data-card h3 { 
+            margin-top: 0; color: var(--brand-primary); 
+            border-bottom: 2px solid var(--bg-body); padding-bottom: 10px; margin-bottom: 20px;
+            font-size: 1.2rem; display: flex; align-items: center; gap: 10px;
+        }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+        .data-table td { padding: 12px 5px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: top; }
+        .data-table td:first-child { font-weight: 600; color: var(--text-secondary); width: 140px; }
+        .data-table td:last-child { color: var(--text-primary); font-weight: 500; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .maps-frame { width: 100%; height: 300px; border: none; border-radius: 12px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); }
         
-        /* LOGIN INPUTS */
-        .custom-input-group { position: relative; margin-bottom: 15px; text-align: left; }
-        .custom-input-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--text-muted); font-weight: 600; }
-        .custom-input { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; }
-        .custom-input:focus { border-color: var(--accent); }
+        /* Tambahan CSS Profil Lengkap */
+        .kepsek-section { display: flex; gap: 25px; align-items: flex-start; }
+        .kepsek-photo-frame { flex-shrink: 0; width: 140px; height: 180px; background: #ddd; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md); border: 3px solid white; }
+        .kepsek-img { width: 100%; height: 100%; object-fit: cover; }
+        .kepsek-text p { margin-top: 0; line-height: 1.6; color: var(--text-secondary); text-align: justify; }
+        .quote-box { border-left: 4px solid var(--brand-accent); background: var(--bg-body); padding: 15px; margin: 15px 0; font-style: italic; color: var(--brand-primary); font-size: 0.9rem; }
+        .visi-box { text-align: center; margin-bottom: 20px; }
+        .visi-text { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--brand-primary); font-weight: 700; }
+        .misi-list { padding-left: 20px; }
+        .misi-list li { margin-bottom: 8px; color: var(--text-secondary); line-height: 1.5; }
+        .org-chart-box { background: var(--bg-body); border-radius: 12px; padding: 30px; text-align: center; border: 2px dashed var(--text-tertiary); color: var(--text-tertiary); font-weight: 500; }
+        .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
+        .teacher-card { background: var(--bg-body); border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s; border: 1px solid rgba(0,0,0,0.05); }
+        .teacher-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); background: var(--bg-surface); }
+        .teacher-img-circle { width: 70px; height: 70px; border-radius: 50%; background: #ccc; margin: 0 auto 10px; object-fit: cover; border: 2px solid var(--brand-primary); }
+        .teacher-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 2px; }
+        .teacher-role { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* CONFIRM BUTTONS */
-        .confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-confirm-cancel { flex: 1; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-confirm-yes { flex: 1; background: #c0392b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { 
+            .profile-grid { grid-template-columns: 1fr; } 
+            .ph-title { font-size: 1.8rem; }
+            .kepsek-section { flex-direction: column; align-items: center; text-align: center; }
+            .kepsek-text p { text-align: left; }
+        }
 
-        /* TOAST & FAB */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 7000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 250px; background: var(--bg-card); padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); display: flex; gap: 12px; border-left: 5px solid; transform: translateX(100%); opacity: 0; transition: all 0.4s; }
-        .toast.show { transform: translateX(0); opacity: 1; }
-        .toast.success { border-left-color: #27ae60; } .toast.error { border-left-color: #c0392b; } .toast.info { border-left-color: #2980b9; }
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: var(--text-main); color: var(--bg-card); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 2000; }
+        /* --- KALENDER --- */
+        .calendar-card {
+            background: var(--bg-surface); border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md); overflow: hidden;
+            display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.03);
+            touch-action: pan-y; 
+        }
+
+        .cal-controls { padding: 25px; display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); }
+        .month-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--brand-primary); font-weight: 700; margin: 0 20px; text-align: center; flex: 1; user-select: none; }
+        .nav-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--bg-body);
+            color: var(--text-primary); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-btn:hover { background: var(--brand-primary); color: white; transform: scale(1.1); box-shadow: var(--shadow-md); }
+        .btn-text { background: transparent; color: var(--text-secondary); border: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .btn-text:hover { color: var(--brand-primary); }
+
+        .cal-header { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 20px 10px 20px; text-align: center; }
+        .cal-header span { font-size: 0.75rem; font-weight: 700; color: var(--text-tertiary); letter-spacing: 1px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 20px 25px 20px; gap: 12px; min-height: 400px; }
+
+        /* --- DAY CELLS --- */
+        .day-cell {
+            background: var(--bg-surface); border-radius: 16px; min-height: 60px; padding: 10px;
+            position: relative; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.1); box-shadow: var(--shadow-sm);
+        }
+        .day-cell.empty { background: transparent; border: none; box-shadow: none; cursor: default; }
+        @media (hover: hover) {
+            .day-cell:not(.empty):hover { 
+                transform: translateY(-3px); border-color: var(--brand-accent);
+                box-shadow: 0 0 0 1px var(--brand-accent), 0 10px 20px rgba(0,0,0,0.08); z-index: 2;
+            }
+        }
+        body.dark-mode .day-cell { border: 1px solid rgba(255,255,255,0.12); }
+        body.dark-mode .day-cell:not(.empty):hover { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent), 0 10px 20px rgba(0,0,0,0.3); }
         
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 5000; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--primary); }
+        .day-cell.today { border: 2px solid var(--brand-accent); background: linear-gradient(180deg, var(--bg-surface), var(--brand-accent-soft)); }
+        .date-num { 
+            font-weight: 600; font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 8px; display: inline-block;
+            width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 50%;
+            background: var(--bg-body); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .day-cell:hover .date-num { background: var(--bg-surface); color: var(--brand-primary); }
+        .day-cell.today .date-num { background: var(--brand-accent); color: white; box-shadow: 0 4px 10px rgba(217, 119, 6, 0.4); }
+        .date-num.red { color: #ef4444; }
 
-        @media (max-width: 850px) { .main-container { flex-direction: column; } .sidebar { width: 100%; } }
+        /* --- EVENT PILL --- */
+        .event-pill {
+            display: block; font-size: 0.7rem; padding: 4px 8px; border-radius: 6px;
+            margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-weight: 600; transition: 0.2s; position: relative;
+        }
+        .event-pill.bg-libur { background: var(--tag-libur-bg); color: var(--tag-libur-text); box-shadow: 0 2px 6px var(--tag-libur-shadow); }
+        .event-pill.bg-ujian { background: var(--tag-ujian-bg); color: var(--tag-ujian-text); box-shadow: 0 2px 6px var(--tag-ujian-shadow); }
+        .event-pill.bg-mpls { background: var(--tag-mpls-bg); color: var(--tag-mpls-text); box-shadow: 0 2px 6px var(--tag-mpls-shadow); }
+        .event-pill.bg-rapor { background: var(--tag-rapor-bg); color: var(--tag-rapor-text); box-shadow: 0 2px 6px var(--tag-rapor-shadow); }
+
+        /* --- SIDEBAR --- */
+        .widget { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 25px; margin-bottom: 25px; box-shadow: var(--shadow-md); border: 1px solid rgba(0,0,0,0.03); }
+        .widget h4 { margin: 0 0 20px 0; font-size: 1rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { position: relative; padding: 20px 15px; border-radius: 18px; text-align: center; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .stat-box.eff { background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #047857; }
+        .stat-box.lib { background: linear-gradient(135deg, #fef2f2, #fee2e2); color: #b91c1c; }
+        .stat-num { font-size: 2.5rem; font-weight: 800; line-height: 1; z-index: 2; position: relative; }
+        .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-top: 5px; opacity: 0.8; z-index: 2; }
+        .stat-deco { position: absolute; bottom: -10px; right: -10px; width: 60px; height: 60px; opacity: 0.1; transform: rotate(-20deg); }
+        body.dark-mode .stat-box.eff { background: linear-gradient(135deg, #064e3b, #065f46); color: #a7f3d0; }
+        body.dark-mode .stat-box.lib { background: linear-gradient(135deg, #7f1d1d, #991b1b); color: #fecaca; }
+
+        .agenda-scroll { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .agenda-card { display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 12px; background: var(--bg-body); border-radius: 14px; transition: all 0.2s; border-left: 4px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .agenda-card:hover { transform: translateX(5px); background: var(--bg-surface); box-shadow: var(--shadow-md); }
+        .ac-date { min-width: 50px; height: 50px; background: var(--bg-surface); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); }
+        .ac-d-m { font-size: 0.65rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; }
+        .ac-d-d { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+        .ac-info h5 { margin: 0 0 3px 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+        .ac-info span { font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+        .agenda-card.bg-libur { border-left-color: #ef4444; } .agenda-card.bg-libur .ac-d-d { color: #ef4444; }
+        .agenda-card.bg-ujian { border-left-color: #f59e0b; } .agenda-card.bg-ujian .ac-d-d { color: #d97706; }
+        .agenda-card.bg-mpls { border-left-color: #10b981; }  .agenda-card.bg-mpls .ac-d-d { color: #059669; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-float { background: var(--bg-surface); width: 90%; max-width: 420px; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-lg); transform: scale(0.95) translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 85vh; display: flex; flex-direction: column; }
+        .active .modal-float { transform: scale(1) translateY(0); }
+        .mf-header { background: var(--bg-body); padding: 30px 20px 20px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.05); position: relative; }
+        .mf-big-date { font-size: 4rem; font-weight: 800; color: var(--brand-primary); line-height: 0.8; letter-spacing: -2px; font-family: 'Inter', sans-serif; text-shadow: 2px 2px 0px rgba(0,0,0,0.05); }
+        .mf-my { font-size: 1rem; font-weight: 600; color: var(--text-tertiary); margin-top: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        .mf-close { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(0,0,0,0.05); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .mf-close:hover { background: #fee2e2; color: #ef4444; }
+        .mf-body { padding: 25px; overflow-y: auto; }
+        
+        .btn-wa { background: #25D366; color: white; border: none; padding: 6px 12px; border-radius: 50px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: 0.2s; margin-left: auto; box-shadow: 0 2px 5px rgba(37, 211, 102, 0.3); }
+        .btn-wa:hover { background: #1ebc57; transform: translateY(-2px); }
+
+        .modern-input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); background: var(--bg-body); color: var(--text-primary); margin-bottom: 15px; font-family: inherit; font-size: 0.95rem; transition: 0.2s; }
+        .modern-input:focus { border-color: var(--brand-accent); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1); }
+        .btn-primary { width: 100%; padding: 14px; border-radius: 12px; background: var(--brand-primary); color: white; border: none; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 12px rgba(127, 29, 29, 0.2); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(127, 29, 29, 0.3); }
+
+        /* Sync Indicator */
+        .sync-badge { position: relative; width: 12px; height: 12px; border-radius: 50%; background: #ddd; display: inline-block; }
+        .sync-badge.synced { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .sync-badge.syncing { background: #f59e0b; animation: pulse 1.5s infinite; }
+        .sync-badge.offline { background: #ef4444; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+
+        /* FAB */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--text-primary); color: var(--bg-surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 900; transition: transform 0.3s; }
+        .fab:hover { transform: rotate(45deg); }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } .calendar-card { min-height: auto; } }
+        @media (max-width: 600px) {
+            .header-text h1 { font-size: 1.2rem; }
+            .cal-header span { font-size: 0.65rem; }
+            .day-cell { min-height: 60px; border-radius: 10px; padding: 4px; }
+            .event-pill { width: 8px; height: 8px; padding: 0; display: inline-block; margin: 1px; color: transparent; border-radius: 50%; box-shadow: none; }
+            .date-num { width: 24px; height: 24px; line-height: 24px; font-size: 0.9rem; margin-bottom: 2px; }
+            .modal-float { width: 90%; border-radius: 20px; }
+            .mf-big-date { font-size: 3rem; }
+            .announcement-bar { top: 118px; } /* Updated for header + nav height */
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-left">
-        <div class="sync-status" title="Status Sinkronisasi">
-            <div id="syncIndicator" class="sync-dot synced"></div>
+<nav class="top-nav">
+    <div class="nav-container">
+    <a href="#" class="nav-link active" onclick="switchPage('home')" id="nav-home" aria-label="Beranda">
+        <div class="nav-icon-home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
         </div>
-        <div class="header-content">
+    </a>
+    <a href="#" class="nav-link" onclick="switchPage('profile')" id="nav-profile">Profil</a>
+    <a href="#" class="nav-link" onclick="switchPage('akademik')" id="nav-akademik">Akademik</a>
+    <a href="#" class="nav-link" onclick="switchPage('kesiswaan')" id="nav-kesiswaan">Kesiswaan</a>
+    <a href="#" class="nav-link" onclick="switchPage('ppdb')" id="nav-ppdb">PPDB</a>
+    <a href="#" class="nav-link" onclick="switchPage('fasilitas')" id="nav-fasilitas">Fasilitas</a>
+    <a href="#" class="nav-link" onclick="switchPage('galeri')" id="nav-galeri">Galeri</a>
+    <a href="#" class="nav-link" onclick="switchPage('kontak')" id="nav-kontak">Kontak</a>
+</div>
+
+</nav>
+
+<header>
+    <div class="brand-wrapper">
+        <button class="logo-btn" onclick="goToToday()" title="Kembali ke Hari Ini">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4 8 4v14M6 10h12M6 14h12M6 18h12"/></svg>
+        </button>
+        <div class="header-text">
             <h1>SDN KAKATUA</h1>
-            <p>Kalender Akademik 2025/2026</p>
+            <p> Sistem Informasi Akademik</p>
         </div>
     </div>
-    <button class="btn-admin-login" onclick="toggleAdminMode()" id="btnAdmin">Login Admin</button>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="sync-badge synced" id="syncIndicator" title="Status"></div>
+        <button class="btn-admin-icon" id="btnAdmin" onclick="toggleAdminMode()" title="Login Admin"></button>
+    </div>
 </header>
 
-<div class="main-container">
-    <div class="calendar-wrapper">
-        <div class="cal-controls">
-            <button class="btn-nav" onclick="changeMonth(-1)">&#10094;</button>
-            <div class="current-month" id="monthDisplay">Juli 2025</div>
-            <button class="btn-nav" onclick="changeMonth(1)">&#10095;</button>
-            <button class="btn-nav btn-outline" onclick="toggleSemesterView()" id="btnSemesterToggle">Lihat Semester</button>
+<div class="announcement-bar">
+    <div class="ticker-wrap">
+        <div class="ticker">
+            <div class="ticker__item">Selamat Datang di Sistem Informasi Akademik SDN Kakatua Tahun Pelajaran 2025/2026.</div>
+            <div class="ticker__item">Klik 2x pada tanggal untuk melihat detail kegiatan dan berbagi via WhatsApp.</div>
+            <div class="ticker__item">Pantau terus jadwal kegiatan dan info sekolah terbaru di sini.</div>
         </div>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="calendar-card" id="calendarCard">
+        <div class="cal-controls">
+            <button class="nav-btn" onclick="navAction(-1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <div class="month-title" id="monthDisplay">July 2025</div>
+            <button class="nav-btn" onclick="navAction(1)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+        
+        <div style="text-align:right; padding:0 20px;">
+            <button class="btn-text" onclick="toggleSemesterView()" id="btnSemesterToggle">Lihat Mode Semester</button>
+        </div>
+
         <div id="monthViewContainer">
-            <div class="cal-header"><div>MIN</div><div>SEN</div><div>SEL</div><div>RAB</div><div>KAM</div><div>JUM</div><div>SAB</div></div>
+            <div class="cal-header">
+                <span style="color:#ef4444">MIN</span><span>SEN</span><span>SEL</span><span>RAB</span><span>KAM</span><span>JUM</span><span>SAB</span>
+            </div>
             <div class="cal-grid" id="calendarGrid"></div>
         </div>
-        <div class="semester-view" id="semesterViewGrid"></div>
+        
+        <div id="semesterViewGrid" style="display:none; padding:20px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;"></div>
     </div>
 
     <div class="sidebar">
-        <div class="widget-box">
-            <h4>Statistik Bulan Ini</h4>
-            <div class="stat-flex">
-                <div><strong id="statEfektif" style="color: green;">0</strong><small>Hari Efektif</small></div>
-                <div><strong id="statLibur" style="color: red;">0</strong><small>Hari Libur</small></div>
+        <div class="widget">
+            <div class="stats-container">
+                <div class="stat-box eff">
+                    <span class="stat-num" id="statEfektif">0</span>
+                    <span class="stat-label">Hari Efektif</span>
+                    <svg class="stat-deco" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
+                </div>
+                <div class="stat-box lib">
+                    <span class="stat-num" id="statLibur">0</span>
+                    <span class="stat-label">Hari Libur</span>
+                    <svg class="stat-deco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 11h2v2H7v-2zm14-5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2zM5 8h14V6H5v2zm14 12V10H5v10h14z"/></svg>
+                </div>
             </div>
         </div>
-        <div class="widget-box" style="flex: 1;">
-            <h4>Agenda</h4>
-            <div class="agenda-list" id="agendaList"></div>
+
+        <div class="widget">
+            <center><h4>Detail Agenda</h4></center>
+            <div class="agenda-scroll" id="agendaList"></div>
         </div>
     </div>
 </div>
+
+<div class="profile-container" id="profilePage">
+    <div class="profile-header-card">
+        <h2 class="ph-title">UPT SPF SD NEGERI KAKATUA</h2>
+        <div class="ph-badge">Akreditasi A</div>
+    </div>
+
+    <div class="profile-grid">
+        
+        <div class="data-card" style="grid-column: 1 / -1;">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Sambutan Kepala Sekolah
+            </h3>
+            <div class="kepsek-section">
+                <div class="kepsek-photo-frame">
+                    <img src="https://ui-avatars.com/api/?name=Kepala+Sekolah&background=random&size=200" class="kepsek-img" alt="Kepala Sekolah">
+                </div>
+                <div class="kepsek-text">
+                    <p><strong>Assalamu?alaikum Warahmatullahi Wabarakatuh,</strong></p>
+                    <p>Selamat datang di website resmi UPT SPF SDN Kakatua. Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa atas segala limpahan rahmat-Nya, sehingga kita dapat terus berkarya memajukan pendidikan.</p>
+                    <div class="quote-box">
+                        "Pendidikan adalah tiket ke masa depan. Hari esok dimiliki oleh orang-orang yang mempersiapkan dirinya pada hari ini."
+                    </div>
+                    <p>Melalui website ini, kami berharap dapat menjalin komunikasi yang lebih baik dengan orang tua, siswa, dan masyarakat luas. Mari bersinergi mewujudkan visi sekolah demi masa depan anak-anak kita yang gemilang.</p>
+                    <p style="margin-top:10px;"><strong>Kepala UPT SPF SDN Kakatua</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Sejarah Sekolah
+            </h3>
+            <div style="color:var(--text-secondary); line-height:1.6; text-align:justify;">
+                <p>UPT SPF SDN Kakatua didirikan berdasarkan SK Pendirian Nomor 421.2/433/DP/II/2016 pada tanggal 1 Februari 2016. Berlokasi strategis di Kota Makassar, sekolah ini hadir untuk menjawab kebutuhan masyarakat akan pendidikan dasar yang berkualitas.</p>
+                <p>Sejak awal berdirinya, sekolah ini terus berbenah meningkatkan sarana dan prasarana serta kualitas tenaga pendidik untuk mencetak lulusan yang berprestasi dan berakhlak mulia.</p>
+            </div>
+        </div>
+
+        <div class="data-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 12l5-5m-5 5 5 5"></path><circle cx="12" cy="12" r="3"></circle><path d="M12 2a10 10 0 0 1 10 10 10 10 0 0 1-10 10A10 10 0 0 1 2 12"></path></svg>
+                Visi & Misi
+            </h3>
+            <div class="visi-box">
+                <div style="font-size:0.8rem; text-transform:uppercase; color:var(--text-tertiary);">Visi</div>
+                <div class="visi-text">"Unggul dalam Prestasi, Berkarakter, dan Berwawasan Lingkungan"</div>
+            </div>
+            <div style="font-size:0.8rem; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:5px;">Misi</div>
+            <ul class="misi-list">
+                <li>Melaksanakan pembelajaran yang aktif, kreatif, dan menyenangkan.</li>
+                <li>Menanamkan nilai-nilai karakter religius dan disiplin.</li>
+                <li>Mewujudkan lingkungan sekolah yang bersih, hijau, dan sehat.</li>
+                <li>Mengembangkan bakat dan minat siswa melalui ekstrakurikuler.</li>
+            </ul>
+        </div>
+
+        <div class="data-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path></svg>
+                Identitas & Legalitas
+            </h3>
+            <table class="data-table">
+                <tr><td>NPSN</td><td>40313498</td></tr>
+                <tr><td>Status</td><td>Negeri</td></tr>
+                <tr><td>Akreditasi</td><td>A (Unggul)</td></tr>
+                <tr><td>Bentuk Pendidikan</td><td>Sekolah Dasar (SD)</td></tr>
+                <tr><td>SK Pendirian</td><td>421.2/433/DP/II/2016</td></tr>
+                <tr><td>Tgl SK Pendirian</td><td>2016-02-01</td></tr>
+                <tr><td>Jumlah Siswa</td><td>354 Orang</td></tr>
+                <tr><td>Waktu Belajar</td><td>Pagi/Siang (2 Rombel)</td></tr>
+            </table>
+        </div>
+
+        <div class="data-card">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Lokasi Sekolah
+            </h3>
+            <table class="data-table" style="margin-bottom:15px;">
+                <tr><td>Alamat</td><td>Jl. Gagak No. 24</td></tr>
+                <tr><td>Kelurahan</td><td>Mariso</td></tr>
+                <tr><td>Kecamatan</td><td>Kec. Mariso</td></tr>
+                <tr><td>Kota</td><td>Kota Makassar</td></tr>
+                <tr><td>Kode Pos</td><td>90121</td></tr>
+            </table>
+            <iframe class="maps-frame" src="https://maps.google.com/maps?q=-5.1600000,119.4100000&hl=id&z=16&output=embed" style="height:180px;"></iframe>
+        </div>
+
+        <div class="data-card" style="grid-column: 1 / -1;">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                Struktur Organisasi
+            </h3>
+            <div class="org-chart-box">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.3; margin-bottom:10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                <br>
+                [Bagan Struktur Organisasi Sekolah]<br>
+                <small>Kepala Sekolah - Komite Sekolah - Tata Usaha - Dewan Guru - Siswa</small>
+            </div>
+        </div>
+
+        <div class="data-card" style="grid-column: 1 / -1;">
+            <h3>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                Guru & Tenaga Kependidikan
+            </h3>
+            <div class="teacher-grid">
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Ahmad&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Ahmad S.Pd.</div><div class="teacher-role">Guru Kelas 1</div>
+                </div>
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Siti&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Siti Aminah S.Pd.</div><div class="teacher-role">Guru Kelas 2</div>
+                </div>
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Budi&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Budi Santoso S.Pd.</div><div class="teacher-role">Guru Kelas 3</div>
+                </div>
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Dewi&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Dewi Kartika S.Pd.SD</div><div class="teacher-role">Guru Kelas 4</div>
+                </div>
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Rahmat&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Rahmat Hidayat S.Pd.</div><div class="teacher-role">Guru PJOK</div>
+                </div>
+                <div class="teacher-card">
+                    <img src="https://ui-avatars.com/api/?name=Nurul&background=random" class="teacher-img-circle" alt="Guru">
+                    <div class="teacher-name">Nurul Hasanah S.Ag.</div><div class="teacher-role">Guru PAI</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="akademikPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">Akademik</h2>
+        <p class="ph-subtitle">Mewujudkan Generasi Cerdas & Berkarakter</p>
+    </div>
+    <div class="profile-grid">
+        <div class="data-card">
+            <h3>Kurikulum & Program</h3>
+            <p style="color:var(--text-secondary); line-height:1.6;">
+                Kami menerapkan <strong>Kurikulum Merdeka</strong> yang berfokus pada pengembangan karakter dan kompetensi siswa.
+            </p>
+            <ul class="misi-list">
+                <li>Program Tahfidz Al-Qur'an (Juz 30)</li>
+                <li>Literasi & Numerasi Digital</li>
+                <li>Kelas Bilingual (Dasar)</li>
+                <li>Bimbingan Olimpiade Sains & Matematika</li>
+            </ul>
+        </div>
+        <div class="data-card">
+            <h3>Jadwal Pembelajaran</h3>
+            <table class="data-table">
+                <tr><td>Senin - Kamis</td><td>07:00 - 12:30</td></tr>
+                <tr><td>Jumat</td><td>07:00 - 11:00</td></tr>
+                <tr><td>Sabtu</td><td>Ekskul / Libur</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="kesiswaanPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">Kesiswaan</h2>
+        <p class="ph-subtitle">Wadah Kreativitas & Bakat Siswa</p>
+    </div>
+    <div class="profile-grid">
+        <div class="data-card">
+            <h3>Ekstrakurikuler Wajib</h3>
+            <div style="display:flex; gap:15px; margin-top:15px;">
+                <div class="teacher-card" style="flex:1;">
+                    <div class="teacher-img-circle" style="background:#7f1d1d;"></div>
+                    <div class="teacher-name">Pramuka</div>
+                </div>
+            </div>
+        </div>
+        <div class="data-card">
+            <h3>Ekstrakurikuler Pilihan</h3>
+            <div class="teacher-grid">
+                <div class="teacher-card">
+                    <div class="teacher-img-circle" style="background:#1e40af;"></div>
+                    <div class="teacher-name">Futsal</div>
+                </div>
+                <div class="teacher-card">
+                    <div class="teacher-img-circle" style="background:#b45309;"></div>
+                    <div class="teacher-name">Tari Daerah</div>
+                </div>
+                <div class="teacher-card">
+                    <div class="teacher-img-circle" style="background:#047857;"></div>
+                    <div class="teacher-name">Drumband</div>
+                </div>
+                <div class="teacher-card">
+                    <div class="teacher-img-circle" style="background:#6b21a8;"></div>
+                    <div class="teacher-name">PMR Dokcil</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ppdbPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">PPDB Online</h2>
+        <span class="ph-badge">Tahun Ajaran 2025/2026</span>
+        <p class="ph-subtitle">Bergabunglah Bersama Keluarga Besar SDN Kakatua</p>
+    </div>
+    <div class="profile-grid">
+        <div class="data-card" style="grid-column: 1 / -1; text-align:center;">
+            <h3>Informasi Pendaftaran</h3>
+            <p>Pendaftaran dibuka mulai <strong>1 Mei - 30 Juni 2025</strong>.</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="btn-primary" style="max-width:200px;" onclick="alert('Formulir belum dibuka!')">Daftar Sekarang</button>
+                <button class="logo-btn" style="width:auto; padding:0 20px; border-radius:12px; font-weight:600;" onclick="window.open('https://wa.me/628123456789','_blank')">Hubungi Panitia</button>
+            </div>
+        </div>
+        <div class="data-card">
+            <h3>Persyaratan Umum</h3>
+            <ul class="misi-list">
+                <li>Usia minimal 6 tahun per 1 Juli.</li>
+                <li>Fotokopi Akta Kelahiran (3 lembar).</li>
+                <li>Fotokopi Kartu Keluarga (3 lembar).</li>
+                <li>Pas Foto 3x4 (4 lembar, latar merah).</li>
+            </ul>
+        </div>
+        <div class="data-card">
+            <h3>Alur Pendaftaran</h3>
+            <ol class="misi-list" style="padding-left:20px;">
+                <li>Mengisi Formulir Online/Offline.</li>
+                <li>Verifikasi Berkas Fisik di Sekolah.</li>
+                <li>Wawancara Orang Tua & Calon Siswa.</li>
+                <li>Pengumuman Hasil Seleksi.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div id="fasilitasPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">Fasilitas Sekolah</h2>
+        <p class="ph-subtitle">Sarana Penunjang Pembelajaran Modern</p>
+    </div>
+    <div class="teacher-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+        <div class="data-card" style="text-align:center;">
+            <div style="height:120px; background:#eee; border-radius:8px; margin-bottom:10px;"></div>
+            <h4>Ruang Kelas AC</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Nyaman & Kondusif</p>
+        </div>
+        <div class="data-card" style="text-align:center;">
+            <div style="height:120px; background:#eee; border-radius:8px; margin-bottom:10px;"></div>
+            <h4>Perpustakaan</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Koleksi Buku Lengkap</p>
+        </div>
+        <div class="data-card" style="text-align:center;">
+            <div style="height:120px; background:#eee; border-radius:8px; margin-bottom:10px;"></div>
+            <h4>Lab. Komputer</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Akses Internet Cepat</p>
+        </div>
+        <div class="data-card" style="text-align:center;">
+            <div style="height:120px; background:#eee; border-radius:8px; margin-bottom:10px;"></div>
+            <h4>Musholla</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Sarana Ibadah Bersih</p>
+        </div>
+    </div>
+</div>
+
+<div id="galeriPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">Galeri Kegiatan</h2>
+        <p class="ph-subtitle">Dokumentasi Aktivitas Siswa</p>
+    </div>
+    <div class="profile-grid">
+        <div class="data-card" style="height:200px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">Foto Kegiatan 1</div>
+        <div class="data-card" style="height:200px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">Foto Kegiatan 2</div>
+        <div class="data-card" style="height:200px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">Foto Kegiatan 3</div>
+        <div class="data-card" style="height:200px; background:#f3f4f6; display:flex; align-items:center; justify-content:center;">Foto Kegiatan 4</div>
+    </div>
+</div>
+
+<div id="kontakPage" class="profile-container" style="display: none;">
+    <div class="profile-header-card">
+        <h2 class="ph-title">Hubungi Kami</h2>
+        <p class="ph-subtitle">Kami Siap Melayani Anda</p>
+    </div>
+    <div class="profile-grid">
+        <div class="data-card">
+            <h3>Kirim Pesan via WhatsApp</h3>
+            <p style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 15px;">
+                Silakan isi formulir di bawah ini, pesan akan otomatis terkirim ke Admin Sekolah.
+            </p>
+            
+            <input type="text" id="waName" class="modern-input" placeholder="Nama Lengkap">
+            <input type="text" id="waContact" class="modern-input" placeholder="Email / No. HP Anda">
+            <textarea id="waMessage" class="modern-input" rows="4" placeholder="Tulis pesan Anda disini..."></textarea>
+            
+            <button class="btn-primary" onclick="kirimKeWA()">
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Kirim Pesan
+                </div>
+            </button>
+        </div>
+        <div class="data-card">
+            <h3>Informasi Kontak</h3>
+            <table class="data-table">
+                <tr><td>Alamat</td><td>Jl. Gagak No. 24, Makassar</td></tr>
+                <tr><td>Telepon</td><td>0856-5722-2581</td></tr>
+                <tr><td>WA Ops</td><td>0823-9522-3314</td></tr>
+                <tr><td>Email</td><td>sdnkakatua@gmail.com</td></tr>
+            </table>
+            <div style="margin-top:20px;">
+                <iframe class="maps-frame" src="https://maps.google.com/maps?q=Jl.+Gagak+No.+18,+Mariso,+Makassar&t=&z=15&ie=UTF8&iwloc=&output=embed" style="height:200px;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <div class="modal-overlay" id="dateModal" onclick="closeModal()">
-    <div class="modal-card" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h2 id="modalDateNum">17</h2>
-            <p id="modalDateFull">Agustus 2025</p>
+    <div class="modal-float" onclick="event.stopPropagation()">
+        <div class="mf-header">
+            <button class="mf-close" onclick="closeModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="mf-big-date" id="modalDateNum">17</div>
+            <div class="mf-my" id="modalDateFull">AGUSTUS 2025</div>
         </div>
-        <div class="modal-body">
+        
+        <div class="mf-body">
             <div id="modalContent"></div>
             
-            <div id="adminPanel" class="admin-form">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h4 style="margin:0; color:var(--primary);" id="formTitle">Tambah Kegiatan</h4>
-                    <button id="btnCancelEdit" onclick="resetForm()" style="display:none; font-size:0.75rem; padding:5px 10px; border:none; background:#ccc; cursor:pointer; border-radius:4px; font-weight:bold;">Batal Edit</button>
+            <div id="adminPanel" style="display:none; margin-top:20px; padding-top:20px; border-top:1px dashed #ddd;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                    <h5 style="margin:0; font-size:1rem;">Kelola Kegiatan</h5>
+                    <span onclick="resetForm()" style="font-size:0.8rem; color:#ef4444; cursor:pointer; display:none;" id="btnCancelEdit">Batal Edit</span>
                 </div>
-                
                 <input type="hidden" id="oldTitleVal"><input type="hidden" id="oldStartVal">
-                
-                <div class="form-group">
-                    <label>Nama Kegiatan</label>
-                    <input type="text" id="inpTitle" placeholder="Misal: Ujian Semester">
+                <input type="text" id="inpTitle" class="modern-input" placeholder="Nama Kegiatan...">
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="inpStart" class="modern-input">
+                    <input type="date" id="inpEnd" class="modern-input">
                 </div>
-                
-                <div class="form-group" style="display:flex; gap:15px;">
-                    <div style="flex:1;">
-                        <label>Mulai</label>
-                        <input type="date" id="inpStart">
-                    </div>
-                    <div style="flex:1;">
-                        <label>Selesai</label>
-                        <input type="date" id="inpEnd">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Jenis Warna</label>
-                    <select id="inpType">
-                        <option value="bg-libur">Merah (Libur)</option>
-                        <option value="bg-ujian">Kuning (Ujian)</option>
-                        <option value="bg-mpls">Hijau (Kegiatan/MPLS)</option>
-                        <option value="bg-rapor">Ungu (Rapor)</option>
-                    </select>
-                </div>
-                
-                <button class="btn-primary-block" onclick="saveEvent()">SIMPAN PERUBAHAN</button>
+                <select id="inpType" class="modern-input">
+                    <option value="bg-libur">Merah (Libur Nasional/Minggu)</option>
+                    <option value="bg-ujian">Kuning (Ujian/PTS/PAS)</option>
+                    <option value="bg-mpls">Hijau (Kegiatan/MPLS)</option>
+                    <option value="bg-rapor">Ungu (Pembagian Rapor)</option>
+                </select>
+                <button class="btn-primary" onclick="saveEvent()">SIMPAN PERUBAHAN</button>
             </div>
         </div>
-        <button onclick="closeModal()" style="padding:15px; background:transparent; border:none; border-top:1px solid var(--border-color); cursor:pointer; width:100%; color:var(--text-muted);">TUTUP</button>
     </div>
 </div>
 
-<div class="custom-modal-overlay" id="loginModal" onclick="closeLogin(event)">
-    <div class="login-card">
-        <div class="modal-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-        <h3>Login Admin</h3>
-        <div class="custom-input-group"><label>Username</label><input type="text" id="userIn" class="custom-input"></div>
-        <div class="custom-input-group"><label>Password</label><input type="password" id="passIn" class="custom-input"></div>
-        <button class="btn-primary-block" onclick="submitLogin()">Masuk</button>
-        <button onclick="closeLogin('force')" style="margin-top:10px; background:none; border:none; color:#666; cursor:pointer;">Batal</button>
+<div class="modal-overlay" id="loginModal" onclick="closeLogin(event)">
+    <div class="modal-float" style="max-width:350px; padding:30px; text-align:center;">
+        <h3 style="margin-top:0;">Admin Access</h3>
+        <input type="text" id="userIn" class="modern-input" placeholder="Username">
+        <input type="password" id="passIn" class="modern-input" placeholder="Password">
+        <button class="btn-primary" onclick="submitLogin()">Masuk</button>
     </div>
 </div>
 
-<div class="custom-modal-overlay" id="confirmModal">
-    <div class="confirm-card">
-        <div class="modal-icon warning"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-        <h3 id="confirmTitle">Konfirmasi</h3>
-        <p id="confirmMsg" style="color:var(--text-muted); margin-bottom:20px;">Yakin?</p>
-        <div class="confirm-actions">
-            <button id="btnConfNo" class="btn-confirm-cancel">Batal</button>
-            <button id="btnConfYes" class="btn-confirm-yes">Ya, Hapus</button>
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-float" style="max-width:320px; padding:30px; text-align:center;">
+        <h3 style="margin-top:0;" id="confirmTitle">Yakin?</h3>
+        <p id="confirmMsg" style="color:#666; margin-bottom:20px;"></p>
+        <div style="display:flex; gap:10px;">
+            <button id="btnConfNo" style="flex:1; padding:10px; border-radius:8px; border:1px solid #ddd; background:transparent;">Batal</button>
+            <button id="btnConfYes" style="flex:1; padding:10px; border-radius:8px; border:none; background:#ef4444; color:white;">Hapus</button>
         </div>
     </div>
 </div>
 
-<div class="toast-container" id="toastContainer"></div>
-<div class="fab" onclick="document.body.classList.toggle('dark-mode')"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+<div id="toastContainer" style="position:fixed; top:20px; right:20px; z-index:2000; display:flex; flex-direction:column; gap:10px;"></div>
+<div class="fab" onclick="toggleDarkMode()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</div>
+
 
 <script>
     // =========================================================
-    // CONFIG: GANTI URL DI SINI DENGAN HASIL DEPLOY TERBARU
+    // CONFIG: GANTI URL INI DENGAN URL APPS SCRIPT ANDA SENDIRI
     // =========================================================
-    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjto7qG6kX0CyMYgrRG31UW820WB4hjLyg_nwxNbMjVVOve6XOxknQYHiXXH4Yg98IPQ/exec'; 
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRzSOGyyi_L5p3Eij3BEpWvCYmPlwmfEfqVA5LY_L1DzXrtIUZkKsZwDqtftzW4cM9/exec'; 
     // =========================================================
 
-    let eventsData = []; 
-    let syncQueue = JSON.parse(localStorage.getItem('kaldik_queue') || '[]');
-    let isAdminMode = false;
-    let isSemesterView = false;
+    // SVG ICONS
+    const ICON_LOGIN = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>`;
+    const ICON_LOGOUT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`;
+    const ICON_WA = `<svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="0"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.148-.148.347-.446.52-.669.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.017-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.084 1.758-.719 2.005-1.413.248-.695.248-1.29.173-1.414z"/></svg>`;
+
+    let eventsData = [], syncQueue = [];
+    try {
+        syncQueue = JSON.parse(localStorage.getItem('kaldik_queue') || '[]');
+    } catch(e) { syncQueue = []; }
+
+    let isAdminMode = false, isSemesterView = false;
     let currentDate = new Date();
-    if(currentDate.getFullYear() < 2025) currentDate = new Date(2025, 6, 1);
-
+    // Default ke tahun ajaran baru jika diperlukan, tapi direm dulu agar load hari ini
+    // if(currentDate.getFullYear() < 2025) currentDate = new Date(2025, 6, 1);
+    
     const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-    // --- INIT ---
+    // --- SWIPE VARIABLES ---
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // --- EXECUTE INIT IMMEDIATELY ---
     init();
 
     async function init() {
-        if(APP_SCRIPT_URL.includes('URL_WEB_APP')) { alert("Ganti URL Script di HTML!"); return; }
+        console.log("System initializing...");
         
-        // 1. Load from Cache
+        // 1. LOAD PREFERENCES & RENDER IMMEDIATELY
+        loadPreferences();
+        
+        // Ambil cache jika ada
         const cached = localStorage.getItem('kaldik_events');
-        if (cached) { eventsData = JSON.parse(cached); render(); }
+        if (cached) { 
+            try { eventsData = JSON.parse(cached); } catch(e){ eventsData = []; }
+        }
         
-        // 2. Process Queue
-        if (syncQueue.length > 0) processQueue();
+        // PENTING: Render duluan sebelum fetch data agar kalender tampil
+        render();
 
-        // 3. Fetch Latest
-        await fetchLatestData();
+        // 2. CHECK LOGIN STATE
+        if (localStorage.getItem('kaldik_is_admin') === '1') {
+            isAdminMode = true;
+        }
+        renderAdminButton();
+
+        // 3. INIT SWIPE LISTENER
+        const calCard = document.getElementById('calendarCard');
+        if(calCard) {
+            calCard.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, {passive: true});
+            calCard.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, {passive: true});
+        }
+
+        // 4. PROCESS QUEUE & FETCH DATA (ASYNC)
+        if (syncQueue.length > 0) processQueue();
+        
+        // Panggil data tanpa 'await' blocking agar UI tidak macet
+        fetchNationalHolidays();
+        fetchLatestData();
     }
 
-    // --- SYNC ---
+    // --- NAVIGASI HALAMAN ---
+    function switchPage(pageName) {
+        const calendarContainer = document.querySelector('.main-container');
+        const announcementBar = document.querySelector('.announcement-bar');
+        const allPages = ['profile', 'akademik', 'kesiswaan', 'ppdb', 'fasilitas', 'galeri', 'kontak'];
+        
+        // Nav Styles
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        const activeNav = document.getElementById('nav-' + pageName);
+        if(activeNav) activeNav.classList.add('active');
+
+        // Logic Display
+        if (pageName === 'home') {
+            if(calendarContainer) calendarContainer.style.display = 'grid';
+            if(announcementBar) announcementBar.style.display = 'block';
+            allPages.forEach(page => {
+                const el = document.getElementById(page + 'Page');
+                if(el) el.style.display = 'none';
+            });
+            // Re-render saat kembali ke home untuk memastikan ukuran benar
+            setTimeout(render, 100); 
+        } else {
+            if(calendarContainer) calendarContainer.style.display = 'none';
+            if(announcementBar) announcementBar.style.display = 'none';
+            allPages.forEach(page => {
+                const el = document.getElementById(page + 'Page');
+                if(el) el.style.display = 'none';
+            });
+            const targetPage = document.getElementById(pageName + 'Page');
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                window.scrollTo(0, 0);
+            }
+        }
+    }
+
+    // --- FETCH DATA FUNCTIONS ---
+    async function fetchNationalHolidays() {
+        try {
+            const res = await fetch('https://dayoffapi.vercel.app/api?year=' + currentDate.getFullYear());
+            if(!res.ok) return;
+            const holidays = await res.json();
+            
+            const holidayEvents = holidays.map(h => ({
+                startDate: h.date, endDate: h.date, title: h.keterangan, type: 'bg-libur', isAuto: true 
+            }));
+
+            let hasNew = false;
+            holidayEvents.forEach(h => {
+                if (!eventsData.some(e => e.startDate === h.startDate && e.title === h.title)) {
+                    eventsData.push(h); hasNew = true;
+                }
+            });
+
+            if(hasNew) {
+                localStorage.setItem('kaldik_events', JSON.stringify(eventsData));
+                render(); // Update tampilan jika ada libur baru
+            }
+        } catch (e) {
+            console.warn("Gagal ambil libur nasional:", e);
+        }
+    }
+
     async function fetchLatestData() {
-        updateSyncIcon('syncing');
+        updateSync('syncing');
         try {
             const res = await fetch(APP_SCRIPT_URL);
-            const data = await res.json();
-            eventsData = data;
-            localStorage.setItem('kaldik_events', JSON.stringify(data)); 
-            render();
-            updateSyncIcon('synced');
-        } catch (e) {
-            console.log("Offline");
-            updateSyncIcon('offline');
+            if(!res.ok) throw new Error("Network response was not ok");
+            
+            const serverData = await res.json();
+            
+            // Filter dan Merge
+            const manualEvents = serverData.filter(e => !e.isAuto);
+            const autoEvents = eventsData.filter(e => e.isAuto);
+            
+            eventsData = [...manualEvents, ...autoEvents];
+            localStorage.setItem('kaldik_events', JSON.stringify(eventsData)); 
+            
+            render(); 
+            updateSync('synced');
+        } catch (e) { 
+            console.error("Fetch Error:", e);
+            updateSync('offline');
+            // Tetap render apa adanya dari cache
+            render(); 
+        }
+    }
+
+    function loadPreferences() {
+        try {
+            const prefDark = localStorage.getItem('kaldik_pref_dark');
+            if (prefDark === '1') document.body.classList.add('dark-mode');
+            
+            const prefView = localStorage.getItem('kaldik_pref_view');
+            if (prefView === '1') {
+                isSemesterView = true;
+                const btn = document.getElementById('btnSemesterToggle');
+                if(btn) btn.innerText = "Lihat Bulan";
+            }
+
+            const prefDate = localStorage.getItem('kaldik_pref_date');
+            if (prefDate) {
+                const savedDate = new Date(parseInt(prefDate));
+                if (!isNaN(savedDate.getTime())) {
+                    currentDate = savedDate;
+                }
+            }
+        } catch(e) { console.log("Pref error"); }
+    }
+    
+    function goToToday() {
+        currentDate = new Date();
+        saveDatePreference();
+        render();
+        showToast("Info", "Kembali ke hari ini", "success");
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('kaldik_pref_dark', isDark ? '1' : '0');
+    }
+
+    function saveDatePreference() {
+        localStorage.setItem('kaldik_pref_date', currentDate.getTime().toString());
+    }
+
+    function handleSwipe() {
+        const threshold = 50; 
+        if (touchEndX < touchStartX - threshold) navAction(1);
+        if (touchEndX > touchStartX + threshold) navAction(-1);
+    }
+
+    function navAction(dir) {
+        if(isSemesterView) {
+            changeMonth(dir * 6);
+        } else {
+            changeMonth(dir);
+        }
+    }
+
+    function renderAdminButton() {
+        const btn = document.getElementById('btnAdmin');
+        if(!btn) return;
+        if (isAdminMode) {
+            btn.innerHTML = ICON_LOGOUT;
+            btn.title = "Logout Admin";
+            btn.classList.add('active');
+        } else {
+            btn.innerHTML = ICON_LOGIN;
+            btn.title = "Login Admin";
+            btn.classList.remove('active');
         }
     }
 
     function addToSyncQueue(payload) {
-        // Optimistic UI Update
-        if (payload.action === 'add') {
-            eventsData.push({startDate: payload.start, endDate: payload.end, title: payload.title, type: payload.type});
-        } else if (payload.action === 'delete') {
-            eventsData = eventsData.filter(e => !(e.startDate == payload.oldStart && e.title == payload.oldTitle));
-        } else if (payload.action === 'edit') {
+        if (payload.action === 'add') eventsData.push({startDate: payload.start, endDate: payload.end, title: payload.title, type: payload.type});
+        else if (payload.action === 'delete') eventsData = eventsData.filter(e => !(e.startDate == payload.oldStart && e.title == payload.oldTitle));
+        else if (payload.action === 'edit') {
             const idx = eventsData.findIndex(e => e.startDate == payload.oldStart && e.title == payload.oldTitle);
             if(idx !== -1) eventsData[idx] = {startDate: payload.newStart, endDate: payload.newEnd, title: payload.newTitle, type: payload.newType};
         }
-        
-        localStorage.setItem('kaldik_events', JSON.stringify(eventsData));
-        render(); closeModal();
-
-        // Queue
-        syncQueue.push(payload);
-        localStorage.setItem('kaldik_queue', JSON.stringify(syncQueue));
+        localStorage.setItem('kaldik_events', JSON.stringify(eventsData)); render(); closeModal();
+        syncQueue.push(payload); localStorage.setItem('kaldik_queue', JSON.stringify(syncQueue));
         processQueue();
     }
 
     async function processQueue() {
         if (syncQueue.length === 0) return;
-        updateSyncIcon('syncing');
-        const payload = syncQueue[0];
-
+        updateSync('syncing');
         try {
-            const res = await fetch(APP_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-            const result = await res.json();
-
-            if (result.status === "success") {
-                showToast("Tersimpan", "Data sinkron.", "success");
-                syncQueue.shift(); 
-                localStorage.setItem('kaldik_queue', JSON.stringify(syncQueue));
-                if (syncQueue.length > 0) processQueue(); else updateSyncIcon('synced');
-            } else {
-                showToast("Gagal Sync", result.message, "error");
-                updateSyncIcon('offline');
-            }
-        } catch (e) {
-            console.error("Sync fail");
-            updateSyncIcon('offline');
-        }
+            const res = await fetch(APP_SCRIPT_URL, { method: "POST", body: JSON.stringify(syncQueue[0]) });
+            const r = await res.json();
+            if (r.status === "success") { showToast("Berhasil", "Data tersimpan", "success"); syncQueue.shift(); localStorage.setItem('kaldik_queue', JSON.stringify(syncQueue)); if(syncQueue.length>0) processQueue(); else updateSync('synced'); }
+            else { showToast("Gagal", r.message, "error"); updateSync('offline'); }
+        } catch (e) { updateSync('offline'); }
     }
 
-    function updateSyncIcon(status) {
-        document.getElementById('syncIndicator').className = `sync-dot ${status}`;
+    function updateSync(s) { 
+        const el = document.getElementById('syncIndicator');
+        if(el) el.className = `sync-badge ${s}`; 
     }
 
-    // --- LOGIN ---
-    async function submitLogin() {
-        const u = document.getElementById('userIn').value;
-        const p = document.getElementById('passIn').value;
-        const btn = document.querySelector('.login-card .btn-primary-block');
-        btn.innerText = "Memeriksa...";
-
-        try {
-            const res = await fetch(APP_SCRIPT_URL, { 
-                method: "POST", 
-                body: JSON.stringify({ action: 'login', u: u, p: p }) 
-            });
-            const result = await res.json();
-
-            if (result.status === "success") {
-                isAdminMode = true;
-                document.getElementById('btnAdmin').innerText = "Admin (Aktif)";
-                document.getElementById('btnAdmin').classList.add('active');
-                showToast("Login Berhasil", "Mode Admin Aktif", "success");
-                closeLogin('force');
-            } else {
-                showToast("Login Gagal", "Username/Password Salah", "error");
-            }
-        } catch (e) {
-            showToast("Error", "Gagal menghubungi server", "error");
-        }
-        btn.innerText = "Masuk";
-    }
-
-    // --- CRUD ---
-    function saveEvent() {
-        const title = document.getElementById('inpTitle').value;
-        const start = document.getElementById('inpStart').value;
-        const end = document.getElementById('inpEnd').value;
-        const type = document.getElementById('inpType').value;
-        const oldTitle = document.getElementById('oldTitleVal').value;
-        const oldStart = document.getElementById('oldStartVal').value;
-
-        if(!title || !start) { showToast("Error", "Data tidak lengkap", "error"); return; }
-
-        let payload = {};
-        if (oldTitle && oldStart) {
-            payload = { action: "edit", oldTitle: oldTitle, oldStart: oldStart, newTitle: title, newStart: start, newEnd: end||start, newType: type };
-        } else {
-            payload = { action: "add", title: title, start: start, end: end||start, type: type };
-        }
-        addToSyncQueue(payload);
-    }
-
-    async function deleteEvent(title, start) {
-        const yes = await showConfirm("Hapus Kegiatan?", `Hapus "${title}" selamanya?`);
-        if (yes) addToSyncQueue({ action: "delete", oldTitle: title, oldStart: start });
-    }
-
-    // --- HELPER ---
-    function toggleAdminMode() {
-        if (!isAdminMode) document.getElementById('loginModal').classList.add('active');
-        else {
-            isAdminMode = false;
-            document.getElementById('btnAdmin').innerText = "Login Admin";
-            document.getElementById('btnAdmin').classList.remove('active');
-            showToast("Logout", "Mode Admin Nonaktif", "info");
-            document.getElementById('adminPanel').classList.remove('show');
-        }
-    }
-    function closeLogin(e) { if(e==='force' || e.target.id === 'loginModal') document.getElementById('loginModal').classList.remove('active'); }
-    
-    function showToast(title, msg, type) {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div'); t.className = `toast ${type}`;
-        t.innerHTML = `<div class="toast-content"><span class="toast-title">${title}</span><span class="toast-msg">${msg}</span></div>`;
-        c.appendChild(t);
-        requestAnimationFrame(() => t.classList.add('show'));
-        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
-    }
-
-    function showConfirm(title, msg) {
-        return new Promise(resolve => {
-            const m = document.getElementById('confirmModal');
-            document.getElementById('confirmTitle').innerText = title;
-            document.getElementById('confirmMsg').innerText = msg;
-            m.classList.add('active');
-            document.getElementById('btnConfYes').onclick = () => { m.classList.remove('active'); resolve(true); };
-            document.getElementById('btnConfNo').onclick = () => { m.classList.remove('active'); resolve(false); };
-        });
-    }
-
-    function resetForm() {
-        document.getElementById('formTitle').innerText = "Tambah Kegiatan";
-        document.getElementById('btnCancelEdit').style.display = 'none';
-        document.getElementById('inpTitle').value = "";
-        document.getElementById('oldTitleVal').value = "";
-        document.getElementById('oldStartVal').value = "";
-    }
-
-    function prepareEdit(title, start, end, type) {
-        document.getElementById('formTitle').innerText = "Edit Kegiatan";
-        document.getElementById('btnCancelEdit').style.display = 'inline-block';
-        document.getElementById('inpTitle').value = title;
-        document.getElementById('inpStart').value = start;
-        document.getElementById('inpEnd').value = end;
-        document.getElementById('inpType').value = type;
-        document.getElementById('oldTitleVal').value = title;
-        document.getElementById('oldStartVal').value = start;
-        document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'});
-    }
-
-    // --- RENDER ---
+    // --- RENDER FUNCTION (INTI KALENDER) ---
     function render() {
-        if(isSemesterView) { renderSemesterView(); return; }
         const y = currentDate.getFullYear(), m = currentDate.getMonth();
-        document.getElementById('monthDisplay').innerText = `${monthNames[m]} ${y}`;
-        const grid = document.getElementById('calendarGrid'); grid.innerHTML = '';
+        const displayElem = document.getElementById('monthDisplay');
         
-        const firstDay = new Date(y, m, 1).getDay();
-        const daysInM = new Date(y, m+1, 0).getDate();
-        let cEfek = 0, cLibur = 0;
-
-        for(let i=0; i<firstDay; i++) grid.appendChild(createCell('', 'empty'));
-        for(let i=1; i<=daysInM; i++) {
-            const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-            const events = eventsData.filter(e => {
-                const s = new Date(e.startDate), end = new Date(e.endDate||e.startDate), c = new Date(dStr);
-                return c >= s && c <= end;
-            });
+        if(!isSemesterView) {
+            if(displayElem) displayElem.innerText = `${monthNames[m]} ${y}`;
             
-            const dayIdx = new Date(y, m, i).getDay();
-            const isWk = dayIdx===0||dayIdx===6;
-            if(isWk || events.some(e=>e.type.includes('libur'))) cLibur++; else cEfek++;
-
-            const cell = createCell(i, 'day-cell ' + (isWk?'red':''));
-            const today = new Date();
-            if(i===today.getDate() && m===today.getMonth() && y===today.getFullYear()) cell.classList.add('today');
+            const mvContainer = document.getElementById('monthViewContainer');
+            if(mvContainer) mvContainer.style.display = 'block';
             
-            let dots = '';
-            events.forEach(e => dots += `<span class="event-dot ${e.type}">${e.title}</span>`);
-            cell.innerHTML = `<div class="date-num ${isWk?'red':''}">${i}</div>${dots}`;
-            cell.onclick = () => openModal(i, m, y, events);
-            grid.appendChild(cell);
+            const svGrid = document.getElementById('semesterViewGrid');
+            if(svGrid) svGrid.style.display = 'none';
+            
+            const grid = document.getElementById('calendarGrid'); 
+            if(!grid) return; // Safety check
+
+            grid.innerHTML = '';
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInM = new Date(y, m+1, 0).getDate();
+            let cEfek = 0, cLibur = 0;
+
+            for(let i=0; i<firstDay; i++) grid.appendChild(create('div', 'day-cell empty', ''));
+            
+            for(let i=1; i<=daysInM; i++) {
+                const dStr = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
+                // Safety filter
+                const evs = (eventsData || []).filter(e => { 
+                    try {
+                        const s=new Date(e.startDate), en=new Date(e.endDate||e.startDate), c=new Date(dStr); 
+                        return c>=s && c<=en; 
+                    } catch(err) { return false; }
+                });
+                
+                const isWk = new Date(y,m,i).getDay()%6===0;
+                if(isWk || evs.some(e=>e.type && e.type.includes('libur'))) cLibur++; else cEfek++;
+
+                const cell = create('div', `day-cell ${isWk?'weekend':''}`, '');
+                
+                // Cek hari ini
+                const today = new Date();
+                if(i===today.getDate() && m===today.getMonth() && y===today.getFullYear()) cell.classList.add('today');
+                
+                let pills = ''; 
+                evs.forEach(e => pills += `<span class="event-pill ${e.type}">${e.title}</span>`);
+                
+                cell.innerHTML = `<div class="date-num ${isWk?'red':''}">${i}</div>${pills}`;
+                cell.ondblclick = () => openModal(i, m, y, evs);
+                
+                // Fallback touch event untuk mobile yang susah dblclick
+                let touchTimer = null;
+                cell.addEventListener('touchstart', () => {
+                    touchTimer = setTimeout(() => openModal(i, m, y, evs), 800); // Long press
+                }, {passive:true});
+                cell.addEventListener('touchend', () => {
+                    if(touchTimer) clearTimeout(touchTimer);
+                }, {passive:true});
+
+                grid.appendChild(cell);
+            }
+            
+            const elEfek = document.getElementById('statEfektif');
+            if(elEfek) elEfek.innerText = cEfek;
+            
+            const elLibur = document.getElementById('statLibur');
+            if(elLibur) elLibur.innerText = cLibur;
+            
+            renderAgenda(m);
+        } else {
+            renderSemester();
         }
-        document.getElementById('statEfektif').innerText = cEfek;
-        document.getElementById('statLibur').innerText = cLibur;
-        renderAgendaList(m);
     }
 
-    function createCell(content, cls) {
-        const d = document.createElement('div'); d.className = cls; 
-        if(content) d.innerText = content; return d;
-    }
-
-    function renderAgendaList(m) {
-        const l = document.getElementById('agendaList'); l.innerHTML = '';
-        const start = new Date(currentDate.getFullYear(), m, 1);
-        const end = new Date(currentDate.getFullYear(), m+1, 0);
-        const evs = eventsData.filter(e => { const s = new Date(e.startDate); return s>=start && s<=end; })
-                      .sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
+    function renderAgenda(m) {
+        const l = document.getElementById('agendaList'); 
+        if(!l) return;
+        l.innerHTML = '';
         
-        if(evs.length===0) l.innerHTML = '<p style="text-align:center;color:#999">Kosong</p>';
-        evs.forEach(e => {
-            l.innerHTML += `<div class="agenda-item"><div class="agenda-date">${e.startDate.split('-')[2]}</div><div style="flex:1"><b>${e.title}</b><br><small>${e.startDate}</small></div></div>`;
+        const start = new Date(currentDate.getFullYear(), m, 1), end = new Date(currentDate.getFullYear(), m+1, 0);
+        const evs = (eventsData || []).filter(e => { 
+            try {
+                const s = new Date(e.startDate); return s >= start && s <= end; 
+            } catch(er) { return false; }
+        }).sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+        
+        if(evs.length === 0) l.innerHTML = '<p style="text-align:center; color:#999; font-size:0.9rem; margin-top:20px;">Tidak ada agenda bulan ini.</p>';
+        else evs.forEach(e => {
+            const d = new Date(e.startDate);
+            let mStr = "";
+            try { mStr = monthNames[d.getMonth()].substr(0,3); } catch(e){ mStr="-"; }
+            
+            l.innerHTML += `
+            <div class="agenda-card ${e.type}">
+                <div class="ac-date">
+                    <span class="ac-d-m">${mStr}</span>
+                    <span class="ac-d-d">${d.getDate()}</span>
+                </div>
+                <div class="ac-info">
+                    <h5>${e.title}</h5>
+                    <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${e.startDate}</span>
+                </div>
+            </div>`;
         });
     }
 
-    function renderSemesterView() {
-        const g = document.getElementById('semesterViewGrid'); g.innerHTML = '';
-        const startM = currentDate.getMonth() >= 6 ? 6 : 0;
-        const yr = currentDate.getFullYear();
-        document.getElementById('monthDisplay').innerText = `Semester ${startM===6?'Ganjil':'Genap'} ${yr}`;
-
+    function renderSemester() {
+        const mv = document.getElementById('monthViewContainer'); if(mv) mv.style.display = 'none';
+        const sg = document.getElementById('semesterViewGrid'); if(!sg) return;
+        
+        sg.style.display = 'grid'; sg.innerHTML = '';
+        
+        const startM = currentDate.getMonth() >= 6 ? 6 : 0; 
+        const displayYear = startM === 6 ? `${currentDate.getFullYear()} (Sem. 1)` : `${currentDate.getFullYear()} (Sem. 2)`;
+        
+        const md = document.getElementById('monthDisplay');
+        if(md) md.innerText = displayYear;
+        
         for(let i=0; i<6; i++) {
-            const m = startM + i;
-            const y = yr + (m>11?1:0);
-            const rm = m%12;
-            const wrap = document.createElement('div'); wrap.className = 'mini-month';
-            wrap.onclick = () => { currentDate.setMonth(rm); toggleSemesterView(); };
+            let m = (startM+i)%12, y = currentDate.getFullYear() + (startM+i>=12?1:0);
+            let box = create('div', 'widget', `<h5 style="text-align:center; margin:0 0 10px;">${monthNames[m]}</h5>`);
+            box.style.padding = "15px"; box.style.cursor = "pointer";
+            box.onclick = () => { 
+                currentDate.setMonth(m); currentDate.setFullYear(y); 
+                toggleSemesterView(); 
+            };
             
-            let h = `<h4>${monthNames[rm]}</h4><div class="mini-grid">`;
-            const dim = new Date(y, rm+1, 0).getDate();
-            const fd = new Date(y, rm, 1).getDay();
-            for(let k=0; k<fd; k++) h+='<div></div>';
+            let miniG = create('div', '', ''); miniG.style.cssText = "display:grid; grid-template-columns:repeat(7,1fr); gap:2px; font-size:0.6rem; text-align:center;";
+            let dim = new Date(y, m+1, 0).getDate(), fd = new Date(y, m, 1).getDay();
+            for(let k=0; k<fd; k++) miniG.innerHTML += '<div></div>';
             for(let d=1; d<=dim; d++) {
-                const ds = `${y}-${String(rm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const has = eventsData.some(e => { const s=new Date(e.startDate), en=new Date(e.endDate||e.startDate), c=new Date(ds); return c>=s && c<=en; });
-                h += `<div class="mini-cell ${has?'has-event':''}">${d}</div>`;
+                let has = (eventsData||[]).some(e => { 
+                    try { const s=new Date(e.startDate), c=new Date(y,m,d); return c>=s && c<=new Date(e.endDate||e.startDate); }
+                    catch(x){ return false; }
+                });
+                miniG.innerHTML += `<div style="background:${has?'var(--brand-accent)':'#eee'}; color:${has?'white':'#333'}; border-radius:2px; padding:2px;">${d}</div>`;
             }
-            wrap.innerHTML = h + '</div>'; g.appendChild(wrap);
+            box.appendChild(miniG); sg.appendChild(box);
         }
     }
 
-    function toggleSemesterView() {
-        isSemesterView = !isSemesterView;
-        const btn = document.getElementById('btnSemesterToggle');
-        document.getElementById('monthViewContainer').style.display = isSemesterView ? 'none' : 'block';
-        document.getElementById('semesterViewGrid').style.display = isSemesterView ? 'grid' : 'none';
-        btn.innerText = isSemesterView ? "Lihat Bulan" : "Lihat Semester";
-        render();
-    }
-    
-    function changeMonth(s) { currentDate.setMonth(currentDate.getMonth()+s); render(); }
-    
     function openModal(d, m, y, evs) {
-        resetForm();
+        const modal = document.getElementById('dateModal');
+        if(!modal) return;
+        
         const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         document.getElementById('modalDateNum').innerText = d;
-        document.getElementById('modalDateFull').innerText = ds;
-        document.getElementById('inpStart').value = ds;
-        document.getElementById('inpEnd').value = ds;
+        document.getElementById('modalDateFull').innerText = `${monthNames[m].toUpperCase()} ${y}`;
+        document.getElementById('inpStart').value = ds; document.getElementById('inpEnd').value = ds;
+        resetForm();
 
         let h = '';
-        if(evs.length === 0) h = '<p style="text-align:center;color:#999">Tidak ada kegiatan</p>';
-        else {
-            evs.forEach(e => {
-                let btns = '';
-                if(isAdminMode) btns = `<div><button class="btn-action-small" style="background:#2980b9" onclick="prepareEdit('${e.title}','${e.startDate}','${e.endDate}','${e.type}')">Edit</button><button class="btn-action-small" style="background:#c0392b" onclick="deleteEvent('${e.title}','${e.startDate}')">Hapus</button></div>`;
-                h += `<div class="event-item-admin"><div><b>${e.title}</b><br><small>${e.startDate}</small></div>${btns}</div>`;
-            });
-        }
+        if(evs.length === 0) h = '<div style="text-align:center; color:#aaa; padding:20px;">Belum ada kegiatan</div>';
+        else evs.forEach(e => {
+            let btns = isAdminMode ? `<div style="margin-left:auto"><button onclick="prepareEdit('${e.title}','${e.startDate}','${e.endDate}','${e.type}')" style="background:none; border:none; color:blue; cursor:pointer; margin-right:10px;">Edit</button><button onclick="deleteEvent('${e.title}','${e.startDate}')" style="background:none; border:none; color:red; cursor:pointer;">Hapus</button></div>` : '';
+            
+            // --- SHARE WA BUTTON ---
+            const waText = `*Agenda SDN Kakatua*%0A?? Tanggal: ${e.startDate}%0A?? Kegiatan: ${e.title}`;
+            const waBtn = `<a href="https://wa.me/?text=${waText}" target="_blank" class="btn-wa">${ICON_WA} Share</a>`;
+            
+            h += `<div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #eee;">
+                <div style="width:10px; height:10px; border-radius:50%; background:${getComputedStyle(document.body).getPropertyValue('--tag-'+e.type.split('-')[1]+'-text')}; margin-right:10px;"></div>
+                <div style="flex:1"><div style="font-weight:600">${e.title}</div><small style="color:#888">${e.startDate}</small></div>
+                ${!isAdminMode ? waBtn : btns} 
+            </div>`;
+        });
         document.getElementById('modalContent').innerHTML = h;
-        document.getElementById('adminPanel').classList.toggle('show', isAdminMode);
-        document.getElementById('dateModal').classList.add('active');
+        document.getElementById('adminPanel').style.display = isAdminMode ? 'block' : 'none';
+        modal.classList.add('active');
     }
-    function closeModal() { document.getElementById('dateModal').classList.remove('active'); }
 
+    function create(tag, cls, html) { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; return e; }
+    
+    // --- NAVIGASI & STATE SAVING ---
+    function changeMonth(v) { 
+        currentDate.setMonth(currentDate.getMonth()+v); 
+        saveDatePreference(); 
+        render(); 
+    }
+    
+    function toggleSemesterView() { 
+        isSemesterView = !isSemesterView; 
+        const btn = document.getElementById('btnSemesterToggle');
+        if(btn) btn.innerText = isSemesterView ? "Lihat Bulan" : "Lihat Semester"; 
+        localStorage.setItem('kaldik_pref_view', isSemesterView ? '1' : '0');
+        saveDatePreference();
+        render(); 
+    }
+    
+    function closeModal() { document.getElementById('dateModal').classList.remove('active'); }
+    
+    // --- ADMIN & LOGOUT LOGIC ---
+    function toggleAdminMode() { 
+        if(!isAdminMode) {
+            document.getElementById('loginModal').classList.add('active'); 
+        } else { 
+            isAdminMode = false;
+            localStorage.removeItem('kaldik_is_admin'); 
+            renderAdminButton(); 
+            showToast("Info", "Berhasil Logout", "success"); 
+            if(document.getElementById('dateModal').classList.contains('active')) closeModal();
+        } 
+    }
+    
+    // Form & Actions
+    function resetForm() { 
+        document.getElementById('inpTitle').value=""; 
+        document.getElementById('oldTitleVal').value=""; 
+        const btnC = document.getElementById('btnCancelEdit');
+        if(btnC) btnC.style.display='none'; 
+    }
+    
+    function prepareEdit(t,s,e,ty) { 
+        document.getElementById('inpTitle').value=t; 
+        document.getElementById('inpStart').value=s; 
+        document.getElementById('inpEnd').value=e; 
+        document.getElementById('inpType').value=ty; 
+        document.getElementById('oldTitleVal').value=t; 
+        document.getElementById('oldStartVal').value=s; 
+        document.getElementById('btnCancelEdit').style.display='block'; 
+    }
+    
+    function saveEvent() { 
+        const t=document.getElementById('inpTitle').value, s=document.getElementById('inpStart').value; 
+        if(!t||!s) return; 
+        const oldT = document.getElementById('oldTitleVal').value;
+        const payload = oldT ? { action:"edit", oldTitle:oldT, oldStart:document.getElementById('oldStartVal').value, newTitle:t, newStart:s, newEnd:document.getElementById('inpEnd').value, newType:document.getElementById('inpType').value } 
+                             : { action:"add", title:t, start:s, end:document.getElementById('inpEnd').value||s, type:document.getElementById('inpType').value };
+        addToSyncQueue(payload);
+    }
+    
+    async function deleteEvent(t, s) { 
+        const mod = document.getElementById('confirmModal');
+        mod.classList.add('active');
+        document.getElementById('confirmMsg').innerText = `Hapus "${t}"?`;
+        document.getElementById('btnConfYes').onclick = () => { addToSyncQueue({action:"delete", oldTitle:t, oldStart:s}); mod.classList.remove('active'); };
+        document.getElementById('btnConfNo').onclick = () => mod.classList.remove('active');
+    }
+    
+    // LOGIN SUBMIT
+    async function submitLogin() {
+        const u=document.getElementById('userIn').value, p=document.getElementById('passIn').value;
+        const btn = document.querySelector('#loginModal .btn-primary');
+        const originalText = btn.innerText;
+        btn.innerText = "Memeriksa...";
+        
+        try {
+            const r = await fetch(APP_SCRIPT_URL, { method:"POST", body:JSON.stringify({action:'login', u, p}) });
+            const d = await r.json();
+            if(d.status==="success") { 
+                isAdminMode=true; 
+                localStorage.setItem('kaldik_is_admin', '1'); 
+                renderAdminButton(); 
+                closeLogin('force'); 
+                showToast("Welcome","Mode Admin Aktif","success"); 
+            }
+            else showToast("Gagal","Username/Password Salah","error");
+        } catch(e){ showToast("Error","Koneksi Gagal","error"); }
+        
+        btn.innerText = originalText;
+    }
+    
+    function closeLogin(e) { if(e==='force'||e.target.id==='loginModal') document.getElementById('loginModal').classList.remove('active'); }
+    
+    function showToast(t,m,s) { 
+        const c = document.getElementById('toastContainer');
+        if(!c) return;
+        const d=create('div',`agenda-card bg-${s==='success'?'mpls':'libur'}`,`<div class="ac-info" style="width:100%; padding:10px;"><h5>${t}</h5><span>${m}</span></div>`); 
+        d.style.background="white"; 
+        c.appendChild(d); 
+        setTimeout(()=>d.remove(),3000); 
+    }
+    
+    function kirimKeWA() {
+        const nama = document.getElementById('waName').value;
+        const kontak = document.getElementById('waContact').value;
+        const pesan = document.getElementById('waMessage').value;
+        
+        if(nama === "" || pesan === "") {
+            alert("Mohon lengkapi Nama dan Pesan sebelum mengirim.");
+            return;
+        }
+
+        const nomorTujuan = "6282395223314";
+        const textIsi = `Halo Admin SDN Kakatua,%0A%0A` +
+                        `Perkenalkan saya:*%0A` +
+                        `Nama: *${nama}*%0A` +
+                        `Kontak: ${kontak}%0A%0A` +
+                        `*Isi Pesan:*%0A${pesan}`;
+
+        const url = `https://wa.me/${nomorTujuan}?text=${textIsi}`;
+        window.open(url, '_blank');
+    }
 </script>
+
+
 </body>
 </html>
