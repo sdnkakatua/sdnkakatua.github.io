@@ -696,7 +696,7 @@
                     <div class="quote-box">
                         <strong><a href="https://ihsantawang022.github.io/pip" target="_blank">DAFTAR PENERIMA PIP</a></strong>
                     </div>
-                    <button onclick="toggleBerita()" id="btn-baca" class="read-more-btn">Baca Selengkapnya Ã¢ÂÂ</button>
+                    <button onclick="toggleBerita()" id="btn-baca" class="read-more-btn">Baca Selengkapnya ÃÂ¢ÃÂÃÂ</button>
                     <div id="berita-lengkap" style="display: none;">
                         <p>Kepala SDN Kakatua, membenarkan bahwa sebanyak 43 peserta didiknya telah menerima dana tersebut. Ia menjelaskan bahwa proses validasi data telah dilakukan secara ketat agar bantuan benar-benar tepat sasaran.</p>
                         <div class="quote-box">"Alhamdulillah, tahun ini ada 43 siswa kami yang mendapatkan beasiswa PIP. Bantuan ini sangat berarti untuk menunjang kebutuhan operasional siswa dalam kegiatan belajar mengajar,"</div>
@@ -714,7 +714,7 @@
             </h3>
             <div style="color:var(--text-secondary); line-height:1.6; text-align:justify;">
                 <p>Waktu berlalu begitu cepat, tak terasa kita telah sampai di penghujung semester ganjil. SDN Kakatua menjadwalkan pelaksanaan <strong>Sumatif Akhir Semester (SAS) Semester 1</strong> yang akan digelar mulai tanggal <strong>8 s.d. 12 Desember 2025</strong>.</p>
-                <button onclick="toggleBeritaSAS()" id="btn-baca-sas" class="read-more-btn">Baca Selengkapnya Ã¢ÂÂ</button>
+                <button onclick="toggleBeritaSAS()" id="btn-baca-sas" class="read-more-btn">Baca Selengkapnya ÃÂ¢ÃÂÃÂ</button>
                 <div id="berita-sas-lengkap" style="display: none;">
                     <p>Kepada Bapak/Ibu Orang Tua/Wali Murid, kami memohon dukungannya untuk mendampingi putra-putrinya belajar di rumah.</p>
                     <div class="quote-box">
@@ -736,7 +736,7 @@
             </h3>
             <div style="color:var(--text-secondary); line-height:1.6; text-align:justify;">
                 <p>Kabar bahagia datang untuk keluarga besar SDN Kakatua! Sekolah kita telah menerima paket bantuan TIK berupa perangkat Interactive Flat Panel (IFP).</p>
-                <button onclick="toggleBeritaIFP()" id="btn-baca-ifp" class="read-more-btn">Baca Selengkapnya Ã¢ÂÂ</button>
+                <button onclick="toggleBeritaIFP()" id="btn-baca-ifp" class="read-more-btn">Baca Selengkapnya ÃÂ¢ÃÂÃÂ</button>
                 <div id="berita-ifp-lengkap" style="display: none;">
                     <p>Perangkat ini berfungsi sebagai papan tulis pintar yang memungkinkan guru menampilkan video resolusi tinggi dan kuis interaktif.</p>
                     <div class="quote-box">
@@ -752,7 +752,7 @@
 
     </div> <div style="text-align: center; margin: 20px 0;">
         <button id="btn-load-more" onclick="showAllNews()" style="background-color: var(--primary-color, #2563eb); color: white; border: none; padding: 12px 24px; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;">
-            Lihat Semua Berita Ã¢ÂÂ
+            Lihat Semua Berita ÃÂ¢ÃÂÃÂ
         </button>
     </div>
 
@@ -860,10 +860,10 @@ function toggleBerita() {
     var btnText = document.getElementById("btn-baca");
     if (moreText.style.display === "none") {
         moreText.style.display = "block";
-        btnText.innerHTML = "Tutup Berita Ã¢ÂÂ";
+        btnText.innerHTML = "Tutup Berita ÃÂ¢ÃÂÃÂ";
     } else {
         moreText.style.display = "none";
-        btnText.innerHTML = "Baca Selengkapnya Ã¢ÂÂ";
+        btnText.innerHTML = "Baca Selengkapnya ÃÂ¢ÃÂÃÂ";
     }
 }
 
@@ -872,10 +872,10 @@ function toggleBeritaSAS() {
     var btnText = document.getElementById("btn-baca-sas");
     if (moreText.style.display === "none") {
         moreText.style.display = "block";
-        btnText.innerHTML = "Tutup Berita Ã¢ÂÂ";
+        btnText.innerHTML = "Tutup Berita ÃÂ¢ÃÂÃÂ";
     } else {
         moreText.style.display = "none";
-        btnText.innerHTML = "Baca Selengkapnya Ã¢ÂÂ";
+        btnText.innerHTML = "Baca Selengkapnya ÃÂ¢ÃÂÃÂ";
     }
 }
 
@@ -884,10 +884,10 @@ function toggleBeritaIFP() {
     var btnText = document.getElementById("btn-baca-ifp");
     if (moreText.style.display === "none") {
         moreText.style.display = "block";
-        btnText.innerHTML = "Tutup Berita Ã¢ÂÂ";
+        btnText.innerHTML = "Tutup Berita ÃÂ¢ÃÂÃÂ";
     } else {
         moreText.style.display = "none";
-        btnText.innerHTML = "Baca Selengkapnya Ã¢ÂÂ";
+        btnText.innerHTML = "Baca Selengkapnya ÃÂ¢ÃÂÃÂ";
     }
 }
 </script>
@@ -1178,6 +1178,28 @@ function toggleBeritaIFP() {
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         const activeNav = document.getElementById('nav-' + pageName);
         if(activeNav) activeNav.classList.add('active');
+
+        // TAMBAHAN: Update URL Hash tanpa reload
+        // Kita cari hash key berdasarkan pageName (membalikkan logika mapping tadi)
+        const reverseMap = {
+            'profile': 'profil',
+            'berita': 'berita',
+            'ppdb': 'ppdb',
+            'akademik': 'akad',
+            'fasilitas': 'fasil',
+            'galeri': 'galeri',
+            'kontak': 'kontak',
+            'home': ''
+        };
+        
+        if(reverseMap[pageName] !== undefined) {
+             // Ubah URL browser tanpa reload halaman
+             if(pageName === 'home') {
+                 history.pushState(null, null, ' '); // Bersihkan hash kalau ke home
+             } else {
+                 history.pushState(null, null, '#' + reverseMap[pageName]); 
+             }
+        }
 
         // Logic Display
         if (pageName === 'home') {
@@ -1658,6 +1680,40 @@ function toggleBeritaIFP() {
         btnText.innerHTML = "Baca Selengkapnya &darr;"; // Reset teks tombol
     }
 }
+
+// ==========================================
+// KODE TAMBAHAN: Buka Halaman Sesuai URL Link
+// ==========================================
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Cek apakah ada hash di URL (contoh: #berita) saat website dimuat
+    const hash = window.location.hash;
+
+    if (hash) {
+        // 2. Daftar pemetaan antara Hash URL dan nama fungsi switchPage
+        // Format: '#hash_di_url': 'nama_halaman_di_switchPage'
+        const pageMap = {
+            '#profil': 'profile',     // Karena di menu href="#profil" tapi function switchPage('profile')
+            '#berita': 'berita',
+            '#ppdb': 'ppdb',
+            '#akad': 'akademik',      // Karena di menu href="#akad"
+            '#fasil': 'fasilitas',    // Karena di menu href="#fasil"
+            '#galeri': 'galeri',
+            '#kontak': 'kontak'
+        };
+
+        // 3. Ambil target halaman
+        const targetPage = pageMap[hash];
+
+        // 4. Jika ada target yang cocok, jalankan switchPage
+        if (targetPage) {
+            // Beri sedikit delay agar rendering awal selesai dulu
+            setTimeout(() => {
+                switchPage(targetPage);
+            }, 100);
+        }
+    }
+});
+
 
 </script>
 
