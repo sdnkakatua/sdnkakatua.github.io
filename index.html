@@ -1627,7 +1627,7 @@ function toggleBeritaIFP() {
             let btns = isAdminMode ? `<div style="margin-left:auto"><button onclick="prepareEdit('${e.title}','${e.startDate}','${e.endDate}','${e.type}')" style="background:none; border:none; color:blue; cursor:pointer; margin-right:10px;">Edit</button><button onclick="deleteEvent('${e.title}','${e.startDate}')" style="background:none; border:none; color:red; cursor:pointer;">Hapus</button></div>` : '';
             
             // --- SHARE WA BUTTON ---
-            const waText = `*Agenda SDN Kakatua*%0A?? Tanggal: ${e.startDate}%0A?? Kegiatan: ${e.title}`;
+            const waText = `*Agenda SDN Kakatua*%0A- Tanggal: ${e.startDate}%0A- Kegiatan: ${e.title}`;
             const waBtn = `<a href="https://wa.me/?text=${waText}" target="_blank" class="btn-wa">${ICON_WA} Share</a>`;
             
             h += `<div style="display:flex; align-items:center; padding:12px; border-bottom:1px solid #eee;">
