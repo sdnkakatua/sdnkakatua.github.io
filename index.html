@@ -1847,6 +1847,110 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </script>
 
+<style>
+    .aesthetic-alert-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px);
+        z-index: 99999; display: flex; align-items: center; justify-content: center;
+        opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+    .aesthetic-alert-overlay.active { opacity: 1; visibility: visible; }
 
+    .aesthetic-alert-box {
+        background: var(--bg-surface, #ffffff); width: 85%; max-width: 360px;
+        padding: 30px; border-radius: 24px; text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        transform: scale(0.8) translateY(20px);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .aesthetic-alert-overlay.active .aesthetic-alert-box { transform: scale(1) translateY(0); }
+
+    .aesthetic-alert-icon {
+        width: 70px; height: 70px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Varian Warna Icon */
+    .icon-warning { background: #fff7ed; color: #ea580c; border: 2px solid #ea580c; }
+    .icon-success { background: #f0fdf4; color: #16a34a; border: 2px solid #16a34a; }
+    .icon-info    { background: #eff6ff; color: #2563eb; border: 2px solid #2563eb; }
+
+    .aesthetic-alert-title {
+        font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+        color: var(--brand-primary, #7f1d1d); margin: 0 0 10px 0;
+    }
+    .aesthetic-alert-message {
+        font-family: 'Inter', sans-serif; font-size: 0.95rem;
+        color: var(--text-secondary, #64748b); line-height: 1.6; margin-bottom: 25px;
+    }
+    .aesthetic-alert-btn {
+        background: var(--brand-primary, #7f1d1d); color: white; border: none;
+        padding: 12px 35px; border-radius: 50px; font-size: 1rem; font-weight: 600;
+        cursor: pointer; transition: all 0.2s; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .aesthetic-alert-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+</style>
+
+<div id="custom-alert-overlay" class="aesthetic-alert-overlay">
+    <div class="aesthetic-alert-box">
+        <div id="custom-alert-icon" class="aesthetic-alert-icon icon-info">
+            </div>
+        <h3 id="custom-alert-title" class="aesthetic-alert-title">Notifikasi</h3>
+        <p id="custom-alert-msg" class="aesthetic-alert-message"></p>
+        <button class="aesthetic-alert-btn" onclick="closeAestheticAlert()">OK</button>
+    </div>
+</div>
+
+<script>
+    function closeAestheticAlert() {
+        document.getElementById('custom-alert-overlay').classList.remove('active');
+    }
+
+    // OVERRIDE: Ganti alert bawaan browser dengan Custom Alert
+    window.alert = function(message) {
+        const overlay = document.getElementById('custom-alert-overlay');
+        const titleEl = document.getElementById('custom-alert-title');
+        const msgEl = document.getElementById('custom-alert-msg');
+        const iconEl = document.getElementById('custom-alert-icon');
+        
+        // 1. Deteksi jenis pesan (Warning vs Success)
+        const msgLower = message.toLowerCase();
+        let iconHtml = '';
+        
+        // LOGIKA PINTAR:
+        // Jika ada kata 'mohon', 'lengkapi', 'gagal', 'error' -> Tampilkan Warning (Orange)
+        if (msgLower.includes('mohon') || msgLower.includes('lengkapi') || msgLower.includes('gagal') || msgLower.includes('kosong')) {
+            iconEl.className = 'aesthetic-alert-icon icon-warning';
+            titleEl.innerText = "Perhatian";
+            // Icon Tanda Seru
+            iconHtml = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="19"></line><line x1="12" y1="5" x2="12" y2="15"></line></svg>';
+        
+        // Jika ada kata 'berhasil', 'sukses', 'terkirim' -> Tampilkan Success (Hijau)
+        } else if (msgLower.includes('berhasil') || msgLower.includes('terkirim') || msgLower.includes('sukses')) {
+            iconEl.className = 'aesthetic-alert-icon icon-success';
+            titleEl.innerText = "Berhasil";
+            // Icon Centang
+            iconHtml = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        
+        // Default -> Info (Biru)
+        } else {
+            iconEl.className = 'aesthetic-alert-icon icon-info';
+            titleEl.innerText = "Informasi";
+            // Icon Info
+            iconHtml = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        }
+
+        iconEl.innerHTML = iconHtml;
+        msgEl.innerHTML = message.replace(/\n/g, "<br>");
+        overlay.classList.add('active');
+
+        if (navigator.vibrate) navigator.vibrate(50); // Getar di HP
+    };
+</script>
 </body>
 </html>
