@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetix | Secure Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --modal-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --card-bg: rgba(30, 41, 59, 0.7);
+                --modal-bg: #1e293b;
+                --text-main: #f1f5f9;
+                --text-sub: #94a3b8;
+                --border: #334155;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
+
+        /* --- CONTAINER UTAMA --- */
+        .app-container { width: 100%; max-width: 480px; margin-top: 40px; position: relative; height: 100%; }
+
+        /* GLASS CARD STYLE */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 24px;
+            padding: 30px; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; color: var(--text-main); }
+        p { color: var(--text-sub); font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+
+        /* --- INPUT & BUTTONS --- */
+        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
+        .input-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input {
+            width: 100%; padding: 14px 16px; border-radius: 14px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05);
+            color: var(--text-main); outline: none; font-size: 15px;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 14px;
+            background: var(--primary); color: white; font-weight: 700; font-size: 15px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3); }
+
+        /* --- VAULT LIST --- */
+        #vaultView { display: none; text-align: left; padding-bottom: 100px; }
+        
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-row h2 { font-size: 22px; font-weight: 800; color: var(--text-main); }
+        
+        .search-bar { position: relative; margin-bottom: 20px; }
+        .search-bar svg { position: absolute; left: 14px; top: 14px; color: var(--text-sub); width: 18px; height: 18px;}
+        .search-bar input { padding-left: 45px; background: var(--card-bg); }
+
+        .vault-item {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .vault-item:hover { border-color: var(--primary); transform: translateX(4px); }
+        
+        .vault-info h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .vault-info span { font-size: 12px; color: var(--text-sub); display: block; }
+
+        .actions { display: flex; gap: 8px; }
+        .icon-btn {
+            width: 36px; height: 36px; border-radius: 10px; border: none;
+            background: transparent; color: var(--text-sub); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .icon-btn.delete:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* --- FLOATING ACTION BUTTON (FAB) --- */
+        .fab {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--primary); color: white; border: none;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            z-index: 100; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
+        .fab:active { transform: scale(0.9); }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            z-index: 200; display: none; align-items: center; justify-content: center; opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-box { 
+            width: 90%; max-width: 400px; padding: 30px; 
+            background: var(--modal-bg); border-radius: 24px;
+            border: 1px solid var(--border);
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        
+        .close-modal { 
+            position: absolute; top: 20px; right: 20px; cursor: pointer; 
+            background: none; border: none; color: var(--text-sub); 
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .close-modal:hover { background: var(--border); color: var(--text-main); }
+
+        /* --- TOAST --- */
+        #toast-box { position: fixed; top: 20px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: var(--modal-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--border); padding: 12px 16px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-size: 14px; font-weight: 600;
+            color: var(--text-main); display: flex; align-items: center; gap: 12px;
+            transform: translateX(100%); opacity: 0; 
+            animation: slideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .toast-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+        .toast-success .toast-icon { background: var(--success); }
+        .toast-error .toast-icon { background: var(--danger); }
+        .toast-warning .toast-icon { background: var(--warning); }
+        
+        @keyframes slideIn { to { transform: translateX(0); opacity: 1; } }
+
+        /* HELPERS */
+        .hidden { display: none !important; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    </style>
+</head>
+<body>
+
+<div id="toast-box"></div>
+
+<div class="app-container" id="loginScreen">
+    <div class="glass-card">
+        <div style="margin-bottom: 20px; color: var(--primary); display: flex; justify-content: center;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h1 id="welcomeTitle">Secure Vault</h1>
+        <p id="welcomeText">Data Anda dienkripsi secara lokal. Masukkan kunci utama untuk melanjutkan.</p>
+        
+        <div class="input-group">
+            <input type="password" id="masterPassInput" placeholder="Master Password...">
+        </div>
+        
+        <button class="btn" onclick="handleLogin()">
+            Buka Brankas
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M10 14L21 3"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+        <p style="font-size: 11px; margin-top: 20px; color: var(--text-sub); opacity: 0.7;">
+            AES-256 Client-Side Encryption
+        </p>
+    </div>
+</div>
+
+<div class="app-container hidden" id="vaultView">
+    <div class="header-row">
+        <h2>Brankas Saya</h2>
+        <button class="icon-btn delete" onclick="lockVault()" title="Kunci Brankas" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); width: 42px; height: 42px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+    </div>
+
+    <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Cari akun (cth: Netflix)..." onkeyup="renderVault()">
+    </div>
+
+    <div id="vaultList">
+        </div>
+    
+    <button class="fab" onclick="openModal()" title="Tambah Password">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+</div>
+
+<div class="modal-overlay" id="entryModal">
+    <div class="modal-box">
+        <button class="close-modal" onclick="closeModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+        <h2 style="margin-bottom: 20px; color: var(--text-main);">Simpan Akun</h2>
+        
+        <div class="input-group">
+            <span class="input-label">Nama Website / Aplikasi</span>
+            <input type="text" id="siteInput" placeholder="Contoh: Instagram">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Username</span>
+            <input type="text" id="userInput" placeholder="user@email.com">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Password</span>
+            <div style="display: flex; gap: 8px;">
+                <input type="password" id="passInput" placeholder="Rahasia...">
+                <button class="icon-btn" onclick="togglePassVisibility()" style="border: 1px solid var(--border); background: var(--bg);">
+                    <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+            </div>
+            <button onclick="generatePass()" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer; margin-top:10px; text-align:right; width:100%; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 
+                Generate Random
+            </button>
+        </div>
+
+        <button class="btn" onclick="saveEntry()">Simpan & Enkripsi</button>
+    </div>
+</div>
+
+<script>
+    // --- ICONS SVG LIBRARY (String format for JS Injection if needed) ---
+    const SVG = {
+        check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        warn: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+        empty: `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3; margin-bottom:10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`
+    };
+
+    // --- VARIABLES ---
+    let masterKey = null; 
+    let vaultData = [];
+    const STORAGE_KEY = 'aesthetix_vault_v2';
+
+    // --- SETUP ---
+    window.onload = () => {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+            document.getElementById('welcomeTitle').innerText = "Buat Brankas Baru";
+            document.getElementById('welcomeText').innerText = "Buat Master Password baru untuk mulai mengamankan data Anda.";
+        }
+        document.getElementById('masterPassInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+    };
+
+    // --- AES ENCRYPTION ---
+    function encryptData(data, key) {
+        return CryptoJS.AES.encrypt(JSON.stringify(data), key).toString();
+    }
+
+    function decryptData(ciphertext, key) {
+        try {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, key);
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // --- APP LOGIC ---
+    function handleLogin() {
+        const inputKey = document.getElementById('masterPassInput').value;
+        if (!inputKey) return showToast('Password tidak boleh kosong', 'warning');
+
+        const encryptedStorage = localStorage.getItem(STORAGE_KEY);
+
+        if (!encryptedStorage) {
+            masterKey = inputKey;
+            vaultData = [];
+            saveVault();
+            enterVault();
+            showToast('Brankas berhasil dibuat', 'success');
+        } else {
+            const decrypted = decryptData(encryptedStorage, inputKey);
+            if (decrypted) {
+                masterKey = inputKey;
+                vaultData = decrypted;
+                enterVault();
+                showToast('Akses diterima', 'success');
+            } else {
+                const card = document.querySelector('#loginScreen .glass-card');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
+                showToast('Password Salah', 'error');
+            }
+        }
+    }
+
+    function enterVault() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('vaultView').classList.remove('hidden');
+        document.getElementById('masterPassInput').value = '';
+        renderVault();
+    }
+
+    function lockVault() {
+        masterKey = null;
+        vaultData = [];
+        document.getElementById('vaultView').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+        showToast('Brankas terkunci', 'success');
+    }
+
+    function renderVault() {
+        const list = document.getElementById('vaultList');
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        list.innerHTML = '';
+
+        const filtered = vaultData.filter(item => 
+            item.site.toLowerCase().includes(term) || item.user.toLowerCase().includes(term)
+        );
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div style="text-align:center; color:var(--text-sub); margin-top:60px;">
+                ${SVG.empty}
+                <p>Tidak ada data</p>
+            </div>`;
+            return;
+        }
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'vault-item';
+            div.innerHTML = `
+                <div class="vault-info">
+                    <h3>${item.site}</h3>
+                    <span>${item.user}</span>
+                </div>
+                <div class="actions">
+                    <button class="icon-btn" onclick="copyToClip('${item.pass}')" title="Salin">
+                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    <button class="icon-btn delete" onclick="deleteEntry('${item.id}')" title="Hapus">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function saveEntry() {
+        const site = document.getElementById('siteInput').value;
+        const user = document.getElementById('userInput').value;
+        const pass = document.getElementById('passInput').value;
+
+        if (!site || !pass) return showToast('Isi data dengan lengkap', 'warning');
+
+        vaultData.push({
+            id: Date.now().toString(),
+            site, user, pass,
+            timestamp: new Date().toISOString()
+        });
+        
+        saveVault();
+        closeModal();
+        renderVault();
+        showToast('Password diamankan', 'success');
+    }
+
+    function deleteEntry(id) {
+        if(confirm('Hapus permanen?')){
+            vaultData = vaultData.filter(i => i.id !== id);
+            saveVault();
+            renderVault();
+            showToast('Item dihapus', 'success');
+        }
+    }
+
+    function saveVault() {
+        const encrypted = encryptData(vaultData, masterKey);
+        localStorage.setItem(STORAGE_KEY, encrypted);
+    }
+
+    // --- UI TOOLS ---
+    function copyToClip(text) {
+        navigator.clipboard.writeText(text);
+        showToast('Disalin ke clipboard', 'success');
+    }
+
+    function generatePass() {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+        let pass = "";
+        for (let i = 0; i < 16; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('passInput').value = pass;
+    }
+
+    function showToast(msg, type = 'success') {
+        const box = document.getElementById('toast-box');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        
+        // Pilih icon SVG berdasarkan tipe
+        let iconHtml = type === 'success' ? SVG.check : (type === 'error' ? SVG.x : SVG.warn);
+
+        el.innerHTML = `
+            <div class="toast-icon">${iconHtml}</div>
+            <span>${msg}</span>
+        `;
+        box.appendChild(el);
+        
+        setTimeout(() => { 
+            el.style.transform = 'translateX(100%)'; 
+            el.style.opacity = '0';
+        }, 3000);
+        setTimeout(() => el.remove(), 3400);
+    }
+
+    // Modal & Toggle Visibility Logic
+    const modalOverlay = document.getElementById('entryModal');
+    function openModal() {
+        document.getElementById('siteInput').value = '';
+        document.getElementById('userInput').value = '';
+        document.getElementById('passInput').value = '';
+        modalOverlay.classList.add('active');
+        document.getElementById('siteInput').focus();
+    }
+    function closeModal() { modalOverlay.classList.remove('active'); }
+    
+    function togglePassVisibility() {
+        const input = document.getElementById('passInput');
+        const btn = document.getElementById('eyeIcon');
+        const isPass = input.type === 'password';
+        input.type = isPass ? 'text' : 'password';
+        // Toggle SVG Path for eye
+        if (isPass) {
+             btn.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+        } else {
+             btn.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        }
+    }
+</script>
+
+</body>
+</html>
