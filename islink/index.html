@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i.s. Unlimited Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --radius: 24px;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+            color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 40px 20px;
+        }
+
+        /* Brand */
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+        .brand-icon { background: var(--primary); padding: 10px; border-radius: 14px; box-shadow: 0 0 20px var(--primary-glow); }
+        .brand-text { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        .brand-text span { color: var(--primary); }
+
+        /* Main Card */
+        .main-card {
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px; width: 100%; max-width: 500px;
+            border-radius: var(--radius); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 40px; text-align: center;
+        }
+
+        input {
+            width: 100%; padding: 20px 24px; background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 18px;
+            color: white; font-size: 16px; outline: none; transition: 0.3s; margin-bottom: 20px;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+
+        .btn-main {
+            width: 100%; padding: 18px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white; border: none; border-radius: 18px; font-size: 16px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s;
+        }
+
+        /* History */
+        .history-container { width: 100%; max-width: 500px; }
+        .history-title { font-size: 14px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+        .history-item {
+            background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 18px; border-radius: 20px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .h-short { color: var(--text-main); font-weight: 700; text-decoration: none; font-size: 15px; display: block; margin-bottom: 4px; }
+        .h-orig { color: var(--text-dim); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 220px; }
+
+        .btn-group { display: flex; gap: 8px; }
+        .action-btn {
+            background: rgba(255,255,255,0.05); border: none; width: 38px; height: 38px;
+            border-radius: 10px; cursor: pointer; color: var(--text-dim);
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .action-btn:hover { background: var(--primary); color: white; }
+        .action-btn.btn-del:hover { background: var(--danger); color: white; }
+
+        /* Custom Modal */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px); display: none; align-items: center;
+            justify-content: center; z-index: 1000;
+        }
+        .modal-card {
+            background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed; top: 30px; right: 20px; padding: 14px 20px;
+            border-radius: 16px; background: white; color: var(--bg);
+            font-weight: 700; display: none; z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideIn 0.4s ease forwards;
+        }
+        .toast-content { display: flex; align-items: center; gap: 10px; }
+
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body onload="init()">
+
+<div id="toast"></div>
+
+<div class="overlay" id="passcodeOverlay">
+    <div class="modal-card">
+        <div style="background: rgba(239, 68, 68, 0.1); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L22 2m-5 3h4m-4 3h2"></path></svg>
+        </div>
+        <h3 style="margin-bottom: 10px;">Akses Terbatas</h3>
+        <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px;">Masukkan Passcode untuk menghapus data ini.</p>
+        <input type="password" id="passcodeInput" placeholder="Ketik Passcode..." style="text-align: center;">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="closeModal()" style="flex:1; padding:14px; border-radius:12px; border:none; background:rgba(255,255,255,0.05); color:white; cursor:pointer;">Batal</button>
+            <button id="confirmDeleteBtn" style="flex:1; padding:14px; border-radius:12px; border:none; background:var(--danger); color:white; font-weight:700; cursor:pointer;">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<div class="brand">
+    <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+    </div>
+    <h1 class="brand-text">i.s.<span>Pro</span></h1>
+</div>
+
+<div class="main-card">
+    <input type="url" id="longUrl" placeholder="Input URL panjang di sini..." autocomplete="off">
+    <button class="btn-main" onclick="handleShorten()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Shorten Link
+    </button>
+
+    <div id="success-box" style="margin-top: 25px; padding: 20px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 18px; display: none;">
+        <span id="resultUrl" style="font-size: 22px; font-weight: 800; color: #10b981; display: block; margin-bottom: 15px;"></span>
+        <button onclick="copy(document.getElementById('resultUrl').innerText)" style="background: var(--bg); color: white; border:none; padding:10px 20px; border-radius:12px; cursor:pointer; font-weight:700;">Salin Link</button>
+    </div>
+</div>
+
+<div class="history-container">
+    <div class="history-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Database Shortened Links
+    </div>
+    <div id="history-list"></div>
+</div>
+
+<script>
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwTNApf58eiWNb-6V3oaUC9lY8wIvcNf3PvMkLcCx99JzO-sz589ruuu64TUOGvkaWfQg/exec'; 
+    let currentHistory = [];
+    let pendingDeleteShort = '';
+
+    // Icon Library
+    const icons = {
+        success: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+        error: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`,
+        info: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="3"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+        trash: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`
+    };
+
+    function init() {
+        const cached = localStorage.getItem('is_pro_history');
+        if (cached) { currentHistory = JSON.parse(cached); renderUI(); }
+        sync();
+    }
+
+    async function handleShorten() {
+        const input = document.getElementById('longUrl');
+        if (!input.value) return showToast("error", "Masukkan URL dahulu");
+
+        const tempId = Date.now();
+        currentHistory.unshift({ id: tempId, original: input.value, short: 'Memproses...', isPending: true });
+        renderUI();
+        const urlValue = input.value;
+        input.value = '';
+
+        try {
+            const res = await fetch(BACKEND_URL, { method: 'POST', body: JSON.stringify({ url: urlValue }) });
+            const data = await res.json();
+            if (data.success) {
+                const idx = currentHistory.findIndex(i => i.id === tempId);
+                currentHistory[idx] = { original: urlValue, short: data.short, isPending: false };
+                document.getElementById('resultUrl').innerText = data.short;
+                document.getElementById('success-box').style.display = 'block';
+                saveAndRender();
+                showToast("success", "Link berhasil dibuat");
+            }
+        } catch (e) {
+            currentHistory.shift(); renderUI();
+            showToast("error", "Koneksi server gagal");
+        }
+    }
+
+    function openDeleteModal(shortUrl) {
+        pendingDeleteShort = shortUrl;
+        document.getElementById('passcodeOverlay').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('passcodeOverlay').style.display = 'none';
+        document.getElementById('passcodeInput').value = '';
+    }
+
+    document.getElementById('confirmDeleteBtn').onclick = async () => {
+        if (document.getElementById('passcodeInput').value === "aic123") {
+            const target = pendingDeleteShort;
+            closeModal();
+            currentHistory = currentHistory.filter(i => i.short !== target);
+            saveAndRender();
+            showToast("info", "Menghapus data...");
+            await fetch(BACKEND_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', shortUrl: target }) });
+            showToast("success", "Terhapus permanen");
+        } else {
+            showToast("error", "Passcode salah!");
+        }
+    };
+
+    async function sync() {
+        try {
+            const res = await fetch(`${BACKEND_URL}?action=list`);
+            const data = await res.json();
+            if (data.success) { currentHistory = data.history; saveAndRender(); }
+        } catch (e) {}
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('is_pro_history', JSON.stringify(currentHistory));
+        renderUI();
+    }
+
+    function renderUI() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = currentHistory.length ? currentHistory.map(item => `
+            <div class="history-item" style="${item.isPending ? 'opacity:0.5' : ''}">
+                <div class="h-info">
+                    <a href="${item.short}" target="_blank" class="h-short">${item.short.replace('https://','')}</a>
+                    <span class="h-orig">${item.original}</span>
+                </div>
+                <div class="btn-group">
+                    <button class="action-btn" onclick="copy('${item.short}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                    <button class="action-btn btn-del" onclick="openDeleteModal('${item.short}')">${icons.trash}</button>
+                </div>
+            </div>
+        `).join('') : '<div style="text-align:center; padding:40px; color:var(--text-dim);">Belum ada riwayat.</div>';
+    }
+
+    function showToast(type, msg) {
+        const t = document.getElementById('toast');
+        t.innerHTML = `<div class="toast-content">${icons[type]} <span>${msg}</span></div>`;
+        t.style.borderLeft = `5px solid ${type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--danger)' : 'var(--primary)'}`;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    function copy(text) {
+        navigator.clipboard.writeText(text);
+        showToast("success", "Tersalin ke clipboard");
+    }
+</script>
+</body>
+</html>
