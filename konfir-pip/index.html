@@ -47,7 +47,7 @@
                 <table class="w-full text-left">
                     <thead class="bg-gray-100 text-gray-600 text-xs uppercase font-bold tracking-wider">
                         <tr>
-                            <th class="p-4">Waktu</th>
+                            <th class="p-4 hidden">Waktu</th>
                             <th class="p-4">Nama Siswa</th>
                             <th class="p-4">Kelas</th>
                             <th class="p-4">Status</th>
@@ -55,7 +55,7 @@
                         </tr>
                     </thead>
                     <tbody id="table-body" class="text-sm divide-y divide-gray-100">
-                        <tr id="initial-loader"><td colspan="5" class="p-8 text-center"><div class="flex justify-center"><div class="loader"></div></div></td></tr>
+                        <tr id="initial-loader"><td colspan="4" class="p-8 text-center"><div class="flex justify-center"><div class="loader"></div></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -181,7 +181,7 @@
             initDropdown();
             checkUserSession();
             loadFromCache(); 
-            syncData();     
+            syncData();      
         });
 
         // --- CACHING & SYNC ---
@@ -240,7 +240,8 @@
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
             if(!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada data.</td></tr>'; return;
+                // Colspan disesuaikan jadi 4 karena kolom waktu di-hidden
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-gray-400">Belum ada data.</td></tr>'; return;
             }
             data.forEach(row => {
                 const tr = document.createElement('tr');
@@ -254,7 +255,7 @@
 
                 tr.className = "border-b border-gray-50 hover:bg-white bg-white/50";
                 tr.innerHTML = `
-                    <td class="p-4 text-xs text-gray-400 font-mono whitespace-nowrap">${row.timestamp}</td>
+                    <td class="p-4 text-xs text-gray-400 font-mono whitespace-nowrap hidden">${row.timestamp}</td>
                     <td class="p-4 font-semibold text-gray-700">${row.nama}</td>
                     <td class="p-4 text-gray-600">${row.kelas}</td>
                     <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${badgeClass}">${row.status}</span></td>
@@ -268,7 +269,7 @@
             });
         }
 
-        // --- VERIFY MODAL LOGIC (DIPERBAIKI) ---
+        // --- VERIFY MODAL LOGIC ---
         
         function openVerifyModal(dataString) {
             pendingEditData = JSON.parse(decodeURIComponent(dataString));
@@ -279,7 +280,6 @@
         }
 
         function closeVerifyModal() {
-            // Jangan hapus pendingEditData dulu disini, karena masih dipakai untuk membuka modal utama
             document.getElementById('modal-verify-content').classList.add('scale-95');
             setTimeout(() => document.getElementById('modal-verify').classList.add('hidden'), 200);
         }
@@ -291,8 +291,6 @@
                 Swal.fire({icon: 'warning', text: 'Masukkan tanggal lahir siswa'}); return;
             }
 
-            // PENCARIAN NAMA YANG LEBIH AMAN (Trim & Uppercase)
-            // Ini untuk mengatasi jika ada beda spasi di Google Sheet
             if(!pendingEditData || !pendingEditData.nama) {
                 Swal.fire({icon: 'error', text: 'Data baris error. Refresh halaman.'}); return;
             }
@@ -302,19 +300,15 @@
             );
 
             if (!siswaDB) {
-                // Debugging: Tampilkan nama yang dicari
                 console.log("Mencari:", pendingEditData.nama);
                 Swal.fire({icon: 'error', text: 'Nama siswa tidak ditemukan di sistem keamanan DB.'});
                 return;
             }
 
-            // CEK KECOCOKAN TANGGAL
             if (siswaDB.tgl === inputTgl) {
                 closeVerifyModal();
                 pendingEditData.tgl_verified = inputTgl; 
                 
-                // BERI JEDA SEDIKIT (300ms) agar modal lama tertutup sempurna dulu
-                // Ini mencegah konflik transisi CSS
                 setTimeout(() => {
                     openMainModal('edit', pendingEditData);
                 }, 300);
