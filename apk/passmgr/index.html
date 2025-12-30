@@ -77,8 +77,9 @@
         }
         .btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.3); }
 
-        /* --- VAULT LIST --- */
-        #vaultView { display: none; text-align: left; padding-bottom: 100px; }
+        /* --- VAULT LIST (FIXED) --- */
+        /* Hapus display:none dari sini agar class .hidden bekerja dg benar */
+        #vaultView { text-align: left; padding-bottom: 100px; }
         
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-row h2 { font-size: 22px; font-weight: 800; color: var(--text-main); }
@@ -246,7 +247,7 @@
 </div>
 
 <script>
-    // --- ICONS SVG LIBRARY (String format for JS Injection if needed) ---
+    // --- ICONS SVG LIBRARY ---
     const SVG = {
         check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
         x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
@@ -257,7 +258,7 @@
     // --- VARIABLES ---
     let masterKey = null; 
     let vaultData = [];
-    const STORAGE_KEY = 'aesthetix_vault_v2';
+    const STORAGE_KEY = 'aesthetix_vault_v3';
 
     // --- SETUP ---
     window.onload = () => {
@@ -315,7 +316,9 @@
 
     function enterVault() {
         document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('vaultView').classList.remove('hidden');
+        const vault = document.getElementById('vaultView');
+        vault.classList.remove('hidden');
+        
         document.getElementById('masterPassInput').value = '';
         renderVault();
     }
