@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal PIP - Secure Edit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.6); }
+        .loader { width: 18px; height: 18px; border: 2px solid #cbd5e1; border-top-color: #4f46e5; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col items-center bg-slate-100 text-slate-800">
+
+    <div class="w-full max-w-4xl space-y-6">
+        
+        <div class="text-center py-5">
+            <h1 class="text-2xl md:text-2xl font-bold text-slate-800">Portal Konfirmasi Penyaluran PIP</h1>
+            <div class="text-sm">UPT SPF SD Negeri Kakatua</div>
+            <div id="app-status" class="mt-2 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-slate-200 text-slate-500">
+                <i class="fas fa-circle text-[8px]"></i> <span>Memuat...</span>
+            </div>
+        </div>
+
+        <div id="input-control-area" class="flex justify-center">
+            <button id="btn-add-new" onclick="openMainModal('create')" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition transform hover:-translate-y-1 flex items-center gap-2">
+                <i class="fas fa-plus"></i> Konfirmasi Sekarang !
+            </button>
+            <div id="user-existing-msg" class="hidden bg-indigo-50 border border-indigo-100 text-indigo-800 px-6 py-3 rounded-full shadow-sm flex items-center gap-3">
+                <i class="fas fa-check-circle text-indigo-600"></i>
+                <div class="text-sm">Data Anda Terkonfirmasi. Terima Kasih</div>
+            </div>
+        </div>
+
+        <div class="glass rounded-xl shadow-sm overflow-hidden bg-white">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-gray-700 text-sm md:text-base"><i class="fas fa-list text-indigo-500 mr-2"></i>Data Terkini</h3>
+                <button onclick="syncData()" class="text-gray-400 hover:text-indigo-600 transition p-2"><i id="icon-refresh" class="fas fa-sync-alt"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-100 text-gray-600 text-xs uppercase font-bold tracking-wider">
+                        <tr>
+                            <th class="p-4">Waktu</th>
+                            <th class="p-4">Nama Siswa</th>
+                            <th class="p-4">Kelas</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm divide-y divide-gray-100">
+                        <tr id="initial-loader"><td colspan="5" class="p-8 text-center"><div class="flex justify-center"><div class="loader"></div></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-2 bg-gray-50 text-center text-[10px] text-gray-400" id="last-updated-text">Menunggu sinkronisasi...</div>
+        </div>
+    </div>
+
+    <div id="modal-verify" class="fixed inset-0 z-[60] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm transform scale-95 transition-all duration-300 overflow-hidden" id="modal-verify-content">
+            <div class="bg-amber-500 p-4 text-white text-center">
+                <i class="fas fa-lock text-3xl mb-2"></i>
+                <h3 class="font-bold text-lg">Verifikasi Akses</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-center text-sm text-gray-600">Masukkan <b>Tanggal Lahir Siswa</b> untuk membuka menu edit.</p>
+                <input type="date" id="verifyTgl" class="w-full p-3 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-amber-500 outline-none font-bold text-gray-700">
+                <div class="flex gap-2">
+                    <button onclick="closeVerifyModal()" class="flex-1 py-2 text-gray-500 hover:bg-gray-100 rounded-lg font-medium">Batal</button>
+                    <button onclick="checkPasscode()" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold shadow-md">Buka Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-main" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300 overflow-hidden" id="modal-main-content">
+            <div class="bg-indigo-600 p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold" id="modal-title">Form Data</h3>
+                <button onclick="closeMainModal()" class="hover:bg-white/20 p-1 rounded-full"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="editRowIndex">
+                
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nama Siswa</label>
+                    <div id="divSelectNama">
+                        <select id="inpNama" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50 text-sm"></select>
+                    </div>
+                    <input type="text" id="inpNamaReadonly" class="hidden w-full p-2 border rounded-lg bg-gray-100 text-gray-500 font-bold text-sm" readonly>
+                </div>
+
+                <input type="hidden" id="inpTglHidden"> 
+
+                <div id="divTglBaru" class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg">
+                    <label class="block text-xs font-bold text-indigo-800 uppercase mb-1">Tanggal Lahir (Passcode)</label>
+                    <input type="date" id="inpTglBaru" class="w-full p-2 border border-indigo-200 rounded outline-none text-sm bg-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kelas</label>
+                        <input type="text" id="inpKelas" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">No. WA</label>
+                        <input type="tel" id="inpWA" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status Pencairan</label>
+                    <select id="inpStatus" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-white text-sm">
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Belum masuk">Belum masuk</option>
+                        <option value="Masuk/Belum diambil">Masuk / Belum diambil</option>
+                        <option value="Masuk/Sudah diambil">Masuk / Sudah diambil</option>
+                    </select>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 flex justify-end gap-2 border-t">
+                <button onclick="closeMainModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-medium">Batal</button>
+                <button onclick="submitForm()" id="btn-submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-md">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIG ===
+        const API_URL = 'https://script.google.com/macros/s/AKfycbx7HMspmRaMDrtiHZxrE2psVNCOtosbTam-in3bahjTsItAEaGAU9J4lf2JM2Y2qwA_/exec'; 
+        const CACHE_KEY_DATA = 'pip_data_cache_v2';    
+        const CACHE_KEY_USER = 'pip_user_session_v1';  
+
+        // DB SISWA (Pastikan Tanggal format YYYY-MM-DD)
+        const DB_SISWA = [
+            { nama: "DEVAN APRILIO HERMANSYAH", kelas: "2", nisn: "3180873049", tempat: "MAKASSAR", tgl: "2018-03-20", cair: "26 Desember 2025" },
+            { nama: "ALMIRA AZZAHRA KHARISMA", kelas: "3", nisn: "3163567779", tempat: "MAKASSAR", tgl: "2016-07-23", cair: "16 Desember 2025" },
+            { nama: "MUHAMMAD KIAN AGUSTIANTO SAPUTRA", kelas: "4", nisn: "3152710696", tempat: "MAKASSAR", tgl: "2015-08-12", cair: "16 Desember 2025" },
+            { nama: "MUH. SYAWAL AL RASYID", kelas: "5", nisn: "3145144523", tempat: "MAKASSAR", tgl: "2014-08-15", cair: "16 Desember 2025" },
+            { nama: "NAUFAL DZAKWAAN MUAAFII", kelas: "5", nisn: "3154420908", tempat: "MAKASSAR", tgl: "2015-02-08", cair: "16 Desember 2025" },
+            { nama: "A. RAFAEYZA TSAQIF ANDRI TAUFIQ S", kelas: "1", nisn: "3197692362", tempat: "MAKASSAR", tgl: "2019-05-27", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD ABDUL SAPUTRA YADO", kelas: "1", nisn: "3199586174", tempat: "MAKASSAR", tgl: "2019-06-26", cair: "26 Desember 2025" },
+            { nama: "ANANDA RIBAS AL GAZALI", kelas: "1", nisn: "3188699381", tempat: "MAKASSAR", tgl: "2018-04-09", cair: "26 Desember 2025" },
+            { nama: "MUH. TAUFIQ HIDAYAT", kelas: "1", nisn: "3180963541", tempat: "MAKASSAR", tgl: "2018-08-08", cair: "26 Desember 2025" },
+            { nama: "AYRA KIRANA SYAM", kelas: "1", nisn: "3199102093", tempat: "MAKASSAR", tgl: "2019-05-30", cair: "26 Desember 2025" },
+            { nama: "SAHL UBAID", kelas: "1", nisn: "3196557506", tempat: "MAKASSAR", tgl: "2019-03-29", cair: "26 Desember 2025" },
+            { nama: "NUR IZZAH ISRAM", kelas: "2", nisn: "3179068501", tempat: "MAKASSAR", tgl: "2017-11-08", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD SUBHAN RUSTAM", kelas: "2", nisn: "3173474918", tempat: "MAKASSAR", tgl: "2017-08-06", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD UWAIS AL-FAHREZI", kelas: "2", nisn: "3180873049", tempat: "MAKASSAR", tgl: "2018-03-20", cair: "26 Desember 2025" },
+            { nama: "UFAHIRA QAMELA", kelas: "2", nisn: "3187652542", tempat: "CADIKA", tgl: "2018-05-04", cair: "26 Desember 2025" },
+            { nama: "TAUFIQ RISKY AKBAR", kelas: "2", nisn: "3173059833", tempat: "MAKASSAR", tgl: "2017-10-17", cair: "26 Desember 2025" },
+            { nama: "TASYA AZZAHRA ARFAN", kelas: "2", nisn: "3180408482", tempat: "MAKASSAR", tgl: "2018-02-28", cair: "26 Desember 2025" },
+            { nama: "SALVIA LARINDA PUTRI", kelas: "3", nisn: "3167383265", tempat: "MAKASSAR", tgl: "2016-09-09", cair: "26 Desember 2025" },
+            { nama: "MUH. ALTAF FAEYZA", kelas: "3", nisn: "3165859179", tempat: "NENGO", tgl: "2016-11-09", cair: "26 Desember 2025" },
+            { nama: "KHAYRA ARTA MALAYEKA", kelas: "3", nisn: "3176719019", tempat: "MAKASSAR", tgl: "2016-05-19", cair: "26 Desember 2025" },
+            { nama: "KHANZA MAULIDYA. F", kelas: "3", nisn: "3160972072", tempat: "MAKASSAR", tgl: "2016-12-08", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD YAZID", kelas: "4", nisn: "3169874125", tempat: "MAKASSAR", tgl: "2016-03-27", cair: "26 Desember 2025" },
+            { nama: "A MUH LUKMANUL HAKIM", kelas: "4", nisn: "3162383689", tempat: "MAKASSAR", tgl: "2015-03-03", cair: "26 Desember 2025" },
+            { nama: "RAISYA PRATIWI", kelas: "4", nisn: "3155715025", tempat: "MAKASSAR", tgl: "2015-05-17", cair: "26 Desember 2025" },
+            { nama: "ANINDITHA TRI ANGGRAINI", kelas: "4", nisn: "3156451034", tempat: "MAKASSAR", tgl: "2016-05-14", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD ALIF FEBIAN", kelas: "5", nisn: "3161027868", tempat: "SUKOHARJO", tgl: "2015-01-18", cair: "26 Desember 2025" },
+            { nama: "LATIFA KEMALA DEWI SINAGA", kelas: "5", nisn: "3153628039", tempat: "MAKASSAR", tgl: "2014-10-02", cair: "26 Desember 2025" },
+            { nama: "FAUZAN AL GHAZALI", kelas: "5", nisn: "3144603961", tempat: "MAKASSAR", tgl: "2015-01-17", cair: "26 Desember 2025" },
+            { nama: "MUH ZAINAL ABIDIN", kelas: "5", nisn: "3143609670", tempat: "MAKASSAR", tgl: "2014-05-23", cair: "26 Desember 2025" },
+            { nama: "NASARUDDIN", kelas: "5", nisn: "3144828330", tempat: "MAKASSAR", tgl: "2014-08-23", cair: "26 Desember 2025" },
+            { nama: "NUR AMINA QHOLBY", kelas: "6", nisn: "3130182837", tempat: "MAKASSAR", tgl: "2013-08-24", cair: "26 Desember 2025" },
+            { nama: "MUH.IQBAL ARDIANSYAH", kelas: "6", nisn: "0135248182", tempat: "MAKASSAR", tgl: "2013-05-28", cair: "26 Desember 2025" },
+            { nama: "MUHAMMAD FATHURRIZKY", kelas: "6", nisn: "0141084930", tempat: "MAKASSAR", tgl: "2014-03-05", cair: "26 Desember 2025" }
+        ];
+
+        let globalData = []; 
+        let pendingEditData = null; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDropdown();
+            checkUserSession();
+            loadFromCache(); 
+            syncData();     
+        });
+
+        // --- CACHING & SYNC ---
+        function loadFromCache() {
+            const cached = localStorage.getItem(CACHE_KEY_DATA);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    globalData = parsed.data;
+                    renderTable(globalData);
+                    updateStatus("cache", parsed.timestamp);
+                } catch (e) { console.error(e); }
+            }
+        }
+
+        async function syncData() {
+            updateStatus("loading");
+            document.getElementById('icon-refresh').classList.add('fa-spin');
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                globalData = data;
+                renderTable(globalData);
+                localStorage.setItem(CACHE_KEY_DATA, JSON.stringify({timestamp: new Date().getTime(), data: data}));
+                updateStatus("online");
+            } catch (err) {
+                updateStatus("offline");
+            } finally {
+                document.getElementById('icon-refresh').classList.remove('fa-spin');
+            }
+        }
+
+        function updateStatus(state, timeArg = null) {
+            const badge = document.getElementById('app-status');
+            const footerTime = document.getElementById('last-updated-text');
+            if (state === "loading") {
+                badge.className = "mt-2 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-600";
+                badge.innerHTML = `<div class="loader" style="width:12px;height:12px;border-width:2px"></div> Sinkronisasi...`;
+            } else if (state === "cache") {
+                badge.className = "mt-2 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-orange-100 text-orange-600";
+                badge.innerHTML = `<i class="fas fa-clock"></i> Data Cache`;
+                if(timeArg) footerTime.innerText = "Terakhir: " + new Date(timeArg).toLocaleString();
+            } else if (state === "online") {
+                badge.className = "mt-2 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-emerald-100 text-emerald-600";
+                badge.innerHTML = `<i class="fas fa-check-circle"></i> Live Data`;
+                footerTime.innerText = "Terupdate baru saja";
+            } else if (state === "offline") {
+                if(globalData.length > 0) {
+                    badge.className = "mt-2 inline-flex items-center gap-2 text-xs font-medium px-3 py-1 rounded-full bg-rose-100 text-rose-600";
+                    badge.innerHTML = `<i class="fas fa-wifi-slash"></i> Offline`;
+                } else { badge.innerText = "Gagal Koneksi"; }
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            if(!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Belum ada data.</td></tr>'; return;
+            }
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                let badgeClass = "bg-gray-100 text-gray-600";
+                const s = (row.status || "").toLowerCase();
+                if(s.includes("belum masuk")) badgeClass = "bg-rose-100 text-rose-700";
+                else if(s.includes("belum diambil")) badgeClass = "bg-amber-100 text-amber-700";
+                else if(s.includes("sudah")) badgeClass = "bg-emerald-100 text-emerald-700";
+
+                const dataString = encodeURIComponent(JSON.stringify(row));
+
+                tr.className = "border-b border-gray-50 hover:bg-white bg-white/50";
+                tr.innerHTML = `
+                    <td class="p-4 text-xs text-gray-400 font-mono whitespace-nowrap">${row.timestamp}</td>
+                    <td class="p-4 font-semibold text-gray-700">${row.nama}</td>
+                    <td class="p-4 text-gray-600">${row.kelas}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${badgeClass}">${row.status}</span></td>
+                    <td class="p-4 text-center">
+                        <button onclick="openVerifyModal('${dataString}')" class="text-indigo-500 hover:bg-indigo-50 p-2 rounded-full transition" title="Edit">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- VERIFY MODAL LOGIC (DIPERBAIKI) ---
+        
+        function openVerifyModal(dataString) {
+            pendingEditData = JSON.parse(decodeURIComponent(dataString));
+            document.getElementById('verifyTgl').value = ""; 
+            const modal = document.getElementById('modal-verify');
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('modal-verify-content').classList.remove('scale-95'), 10);
+        }
+
+        function closeVerifyModal() {
+            // Jangan hapus pendingEditData dulu disini, karena masih dipakai untuk membuka modal utama
+            document.getElementById('modal-verify-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById('modal-verify').classList.add('hidden'), 200);
+        }
+
+        function checkPasscode() {
+            const inputTgl = document.getElementById('verifyTgl').value;
+            
+            if(!inputTgl) {
+                Swal.fire({icon: 'warning', text: 'Masukkan tanggal lahir siswa'}); return;
+            }
+
+            // PENCARIAN NAMA YANG LEBIH AMAN (Trim & Uppercase)
+            // Ini untuk mengatasi jika ada beda spasi di Google Sheet
+            if(!pendingEditData || !pendingEditData.nama) {
+                Swal.fire({icon: 'error', text: 'Data baris error. Refresh halaman.'}); return;
+            }
+
+            const siswaDB = DB_SISWA.find(s => 
+                s.nama.trim().toUpperCase() === pendingEditData.nama.trim().toUpperCase()
+            );
+
+            if (!siswaDB) {
+                // Debugging: Tampilkan nama yang dicari
+                console.log("Mencari:", pendingEditData.nama);
+                Swal.fire({icon: 'error', text: 'Nama siswa tidak ditemukan di sistem keamanan DB.'});
+                return;
+            }
+
+            // CEK KECOCOKAN TANGGAL
+            if (siswaDB.tgl === inputTgl) {
+                closeVerifyModal();
+                pendingEditData.tgl_verified = inputTgl; 
+                
+                // BERI JEDA SEDIKIT (300ms) agar modal lama tertutup sempurna dulu
+                // Ini mencegah konflik transisi CSS
+                setTimeout(() => {
+                    openMainModal('edit', pendingEditData);
+                }, 300);
+
+            } else {
+                Swal.fire({icon: 'error', title: 'Akses Ditolak', text: 'Tanggal lahir tidak cocok.'});
+            }
+        }
+
+        // --- MAIN FORM LOGIC ---
+
+        function openMainModal(mode, data = null) {
+            const modal = document.getElementById('modal-main');
+            const content = document.getElementById('modal-main-content');
+            
+            document.getElementById('editRowIndex').value = "";
+            document.getElementById('inpNama').value = "";
+            document.getElementById('inpNamaReadonly').value = "";
+            document.getElementById('inpTglHidden').value = "";
+            document.getElementById('inpTglBaru').value = "";
+            document.getElementById('inpKelas').value = "";
+            document.getElementById('inpWA').value = "";
+            document.getElementById('inpStatus').value = "";
+
+            if(mode === 'edit' && data) {
+                document.getElementById('modal-title').innerText = "Edit Data";
+                document.getElementById('editRowIndex').value = data.rowIndex;
+                document.getElementById('divSelectNama').classList.add('hidden');
+                document.getElementById('inpNamaReadonly').classList.remove('hidden');
+                document.getElementById('divTglBaru').classList.add('hidden');
+
+                document.getElementById('inpNamaReadonly').value = data.nama;
+                document.getElementById('inpTglHidden').value = data.tgl_verified; 
+                document.getElementById('inpKelas').value = data.kelas;
+                document.getElementById('inpWA').value = data.wa; 
+                document.getElementById('inpStatus').value = data.status;
+            } else {
+                document.getElementById('modal-title').innerText = "Input Data Baru";
+                document.getElementById('divSelectNama').classList.remove('hidden');
+                document.getElementById('inpNamaReadonly').classList.add('hidden');
+                document.getElementById('divTglBaru').classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        }
+
+        function closeMainModal() {
+            document.getElementById('modal-main-content').classList.add('scale-95');
+            setTimeout(() => document.getElementById('modal-main').classList.add('hidden'), 200);
+        }
+
+        function submitForm() {
+            const rowIndex = document.getElementById('editRowIndex').value;
+            const isEdit = !!rowIndex;
+            let nama, tgl;
+
+            if (isEdit) {
+                nama = document.getElementById('inpNamaReadonly').value;
+                tgl = document.getElementById('inpTglHidden').value;
+            } else {
+                nama = document.getElementById('inpNama').value;
+                tgl = document.getElementById('inpTglBaru').value;
+            }
+
+            const kelas = document.getElementById('inpKelas').value;
+            const wa = document.getElementById('inpWA').value;
+            const status = document.getElementById('inpStatus').value;
+
+            if(!nama || !tgl || !kelas || !wa || !status) {
+                Swal.fire({icon: 'warning', text: 'Data belum lengkap'}); return;
+            }
+
+            const siswa = DB_SISWA.find(s => s.nama === nama);
+            if(!siswa || siswa.tgl !== tgl) {
+                Swal.fire({icon: 'error', text: 'Verifikasi Tanggal Lahir Salah.'}); return;
+            }
+
+            const newData = {
+                timestamp: isEdit ? "Updating..." : "Baru saja",
+                nama, kelas, status, wa, rowIndex: rowIndex
+            };
+
+            if(isEdit) {
+                const idx = globalData.findIndex(d => d.rowIndex == rowIndex);
+                if(idx !== -1) globalData[idx] = {...globalData[idx], ...newData};
+            } else {
+                globalData.unshift(newData);
+                localStorage.setItem(CACHE_KEY_USER, "true"); 
+                checkUserSession();
+            }
+
+            renderTable(globalData);
+            localStorage.setItem(CACHE_KEY_DATA, JSON.stringify({timestamp: new Date().getTime(), data: globalData}));
+            closeMainModal();
+            Swal.fire({icon: 'success', title: 'Tersimpan', timer: 1500, showConfirmButton: false});
+
+            const payload = {
+                action: isEdit ? "edit" : "create",
+                rowIndex: rowIndex ? parseInt(rowIndex) : null,
+                timestamp: isEdit ? undefined : new Date().toLocaleString(),
+                nama, kelas, wa, status
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => setTimeout(syncData, 2500));
+        }
+
+        function checkUserSession() {
+            const session = localStorage.getItem(CACHE_KEY_USER);
+            if (session) {
+                document.getElementById('btn-add-new').classList.add('hidden');
+                document.getElementById('user-existing-msg').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-add-new').classList.remove('hidden');
+                document.getElementById('user-existing-msg').classList.add('hidden');
+            }
+        }
+
+        function initDropdown() {
+            const select = document.getElementById('inpNama');
+            select.innerHTML = '<option value="">-- Pilih Nama --</option>';
+            [...DB_SISWA].sort((a,b) => a.nama.localeCompare(b.nama)).forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.nama;
+                opt.text = s.nama;
+                select.appendChild(opt);
+            });
+        }
+    </script>
+</body>
+</html>
