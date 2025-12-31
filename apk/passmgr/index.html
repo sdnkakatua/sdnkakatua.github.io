@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
+        /* --- STYLE TETAP SAMA --- */
         :root {
             --primary: #6366f1; --primary-hover: #4f46e5;
             --bg: #f8fafc; --card-bg: rgba(255, 255, 255, 0.75);
@@ -68,7 +69,6 @@
         .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--border); color: var(--text-main); }
 
-        /* HEADER ACTIONS */
         #vaultView { text-align: left; padding-bottom: 100px; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-row h2 { font-size: 22px; font-weight: 800; color: var(--text-main); }
@@ -155,8 +155,6 @@
 
 <div id="toast-box"></div>
 
-<input type="file" id="jsonInput" accept=".json" style="display: none;" onchange="processRestoreFile(this)">
-
 <div class="app-container" id="loginScreen">
     <div class="glass-card">
         <div style="margin-bottom: 20px; color: var(--primary); display: flex; justify-content: center;">
@@ -183,10 +181,10 @@
     <div class="header-row">
         <h2>Brankas Saya</h2>
         <div class="header-actions">
-            <button class="header-btn" onclick="exportData()" title="Backup ke JSON">
+            <button class="header-btn" onclick="exportEncryptedData()" title="Backup Aman (.txt)">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </button>
-            <button class="header-btn" onclick="triggerRestore()" title="Restore dari JSON">
+            <button class="header-btn" onclick="triggerRestore()" title="Restore Backup">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </button>
             <button class="header-btn" onclick="lockVault()" title="Kunci Brankas" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
@@ -366,83 +364,118 @@
         });
     }
 
-    // --- FITUR BACKUP & RESTORE ---
+    // --- FITUR UTAMA BARU: ENCRYPTED BACKUP & RESTORE ---
+    
+    // Fungsi untuk memicu input file (tanpa elemen HTML)
+    function triggerRestore() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        // Terima file text atau json
+        input.accept = '.txt,.aes,.json'; 
+        input.style.display = 'none';
+        
+        document.body.appendChild(input);
 
-    function exportData() {
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleEncryptedRestore(file);
+            }
+            document.body.removeChild(input);
+        };
+        
+        input.click();
+    }
+
+    // Fungsi Export: Mengenkripsi seluruh data JSON sebelum di-download
+    function exportEncryptedData() {
         if(vaultData.length === 0) return showToast("Brankas kosong", "warning");
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vaultData, null, 2));
+
+        // 1. Enkripsi data JSON menggunakan Master Key saat ini
+        const encryptedExport = CryptoJS.AES.encrypt(JSON.stringify(vaultData), masterKey).toString();
+        
+        // 2. Buat file .txt berisi cipher text
+        const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(encryptedExport);
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "vault_backup_" + new Date().toISOString().slice(0,10) + ".json");
+        // Nama file dibuat agar terlihat seperti file aman
+        downloadAnchorNode.setAttribute("download", "vault_secure_backup_" + new Date().toISOString().slice(0,10) + ".txt");
+        
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
-        showToast("Backup berhasil diunduh");
+        
+        showToast("Backup TERENKRIPSI berhasil diunduh");
     }
 
-    // Trigger klik input file
-    function triggerRestore() {
-        document.getElementById('jsonInput').click();
-    }
-
-    // Proses File Restore
-    function processRestoreFile(inputElement) {
-        const file = inputElement.files[0];
-        if (!file) return;
-
+    // Fungsi Import: Mencoba mendekripsi file menggunakan Master Key saat ini
+    function handleEncryptedRestore(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const importedData = JSON.parse(e.target.result);
-                
-                if(!Array.isArray(importedData)) {
-                    throw new Error("Format JSON tidak valid (harus array)");
+                const fileContent = e.target.result;
+                let restoredData = null;
+
+                // Tahap 1: Coba Decrypt (Asumsi file terenkripsi)
+                try {
+                    const bytes = CryptoJS.AES.decrypt(fileContent, masterKey);
+                    const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+                    
+                    if (decryptedString) {
+                        restoredData = JSON.parse(decryptedString);
+                    }
+                } catch(err) {
+                    // Jika gagal decrypt, mungkin file JSON biasa (Legacy support)
+                    console.log("Gagal decrypt, mencoba parse sebagai JSON biasa...");
                 }
 
-                // Cek Validitas Struktur Data
-                if(importedData.length > 0 && (!importedData[0].site || !importedData[0].pass)) {
-                    throw new Error("Struktur data tidak dikenali");
+                // Tahap 2: Jika Tahap 1 gagal, coba parse langsung (siapa tahu user upload file JSON lama)
+                if (!restoredData) {
+                    try {
+                        restoredData = JSON.parse(fileContent);
+                    } catch(jsonErr) {
+                        throw new Error("Gagal membaca file. Password salah atau file rusak.");
+                    }
+                }
+
+                // Validasi Data
+                if(!Array.isArray(restoredData)) {
+                    throw new Error("Format data di dalam file salah.");
                 }
                 
                 showConfirm(
-                    "Restore Data?", 
-                    `Ditemukan <b>${importedData.length}</b> akun dalam file. Data ini akan digabungkan ke brankas Anda.`, 
+                    "Restore Backup?", 
+                    `Ditemukan <b>${restoredData.length}</b> akun dalam file ini. Data akan digabungkan.`, 
                     () => {
-                        // Logika Merge: Hanya tambahkan jika ID belum ada
                         const existingIds = new Set(vaultData.map(v => v.id));
                         let addedCount = 0;
 
-                        importedData.forEach(item => {
-                            // Jika item punya ID dan ID belum ada di vaultData
-                            if(item.id && !existingIds.has(item.id)) {
-                                vaultData.push(item);
-                                addedCount++;
-                            } 
-                            // Jika item dari backup lama tidak punya ID, generate baru
-                            else if (!item.id) {
-                                item.id = Date.now().toString() + Math.random().toString().slice(2,5);
-                                vaultData.push(item);
-                                addedCount++;
+                        restoredData.forEach(item => {
+                            if(item.site && item.pass) {
+                                if(item.id && !existingIds.has(item.id)) {
+                                    vaultData.push(item);
+                                    addedCount++;
+                                } else if (!item.id) {
+                                    // Generate ID baru jika tidak ada
+                                    item.id = Date.now().toString() + Math.random().toString().slice(2,5);
+                                    vaultData.push(item);
+                                    addedCount++;
+                                }
                             }
                         });
 
                         saveVault();
                         renderVault();
                         
-                        if(addedCount > 0) {
-                            showToast(`${addedCount} data berhasil dipulihkan!`, "success");
-                        } else {
-                            showToast("Semua data sudah ada di brankas.", "warning");
-                        }
+                        if(addedCount > 0) showToast(`${addedCount} data dipulihkan!`, "success");
+                        else showToast("Semua data backup sudah ada di brankas.", "warning");
                     }
                 );
 
             } catch(err) {
                 console.error(err);
-                showToast("Gagal membaca file JSON", "error");
+                showToast("File rusak atau Password Master berbeda!", "error");
             }
-            // Reset input agar bisa pilih file yang sama lagi
-            inputElement.value = ''; 
         };
         reader.readAsText(file);
     }
@@ -470,9 +503,9 @@
         confirmCallback = callback;
         document.getElementById('alertModal').classList.add('active');
         const btn = document.getElementById('alertConfirmBtn');
-        const newBtn = btn.cloneNode(true); // Hapus listener lama
+        const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.innerText = "Lanjutkan";
+        newBtn.innerText = "Ya, Lanjutkan";
         newBtn.addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeAlert(); });
     }
 
