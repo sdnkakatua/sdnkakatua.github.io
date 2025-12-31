@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile & Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. GLOBAL VARIABLES & RESET --- */
+        :root {
+            /* Shared Colors */
+            --bg-color: #f3f4f6;
+            --bg-gradient: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), 
+                           radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.8);
+            --card-hover: rgba(255, 255, 255, 0.95);
+            --accent: #6366f1; /* Violet */
+            --accent-pink: #ec4899; /* Pink */
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            --overlay-bg: rgba(0,0,0,0.3);
+            --modal-bg: #ffffff;
+            
+            /* Portfolio Specific */
+            --chip-bg: rgba(0,0,0,0.05);
+            --chip-active: #1e293b;
+            --chip-text-active: #fff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --bg-gradient: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.2) 0px, transparent 50%), 
+                               radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.2) 0px, transparent 50%);
+                --text-primary: #f9fafb;
+                --text-secondary: #94a3b8;
+                --card-bg: rgba(30, 41, 59, 0.6);
+                --card-border: rgba(255, 255, 255, 0.1);
+                --card-hover: rgba(30, 41, 59, 0.9);
+                --accent: #818cf8;
+                --shadow: 0 4px 30px -2px rgba(0, 0, 0, 0.4);
+                --overlay-bg: rgba(0,0,0,0.7);
+                --modal-bg: #1e293b;
+                
+                --chip-bg: rgba(255,255,255,0.05);
+                --chip-active: #f1f5f9;
+                --chip-text-active: #0f172a;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: background 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. LAYOUT UTILITIES --- */
+        .page-section {
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .hidden-section {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- 3. BIO PAGE STYLES --- */
+        .profile-container { text-align: center; margin-bottom: 35px; animation: fadeInDown 0.8s ease; }
+        
+        .avatar-frame {
+            width: 100px; height: 100px; margin: 0 auto 15px;
+            border-radius: 50%; padding: 3px;
+            background: linear-gradient(45deg, var(--accent), var(--accent-pink));
+            box-shadow: var(--shadow);
+        }
+        
+        .avatar-img {
+            width: 100%; height: 100%; border-radius: 50%;
+            background-color: var(--card-bg);
+            object-fit: cover; border: 3px solid var(--bg-color);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+        .verified-badge { color: #3b82f6; width: 18px; height: 18px; }
+        .bio { font-size: 14px; color: var(--text-secondary); max-width: 320px; line-height: 1.5; margin: 0 auto; }
+
+        .links-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 14px; animation: fadeInUp 0.8s ease 0.2s backwards; }
+
+        .link-card {
+            position: relative;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            text-decoration: none; color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: var(--shadow);
+            cursor: pointer; overflow: hidden;
+        }
+        .link-card:hover { transform: translateY(-3px) scale(1.01); background: var(--card-hover); border-color: var(--accent); }
+        .link-card:active { transform: scale(0.98); }
+        .link-content { display: flex; align-items: center; gap: 14px; z-index: 1; }
+        
+        /* Icon adjustments */
+        .link-icon { width: 24px; height: 24px; color: var(--text-primary); transition: color 0.3s; flex-shrink: 0; }
+        .link-card:hover .link-icon { color: var(--accent); }
+        
+        .link-text { display: flex; flex-direction: column; text-align: left; }
+        .link-title { font-size: 15px; font-weight: 600; }
+        .link-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .link-arrow { color: var(--text-secondary); opacity: 0.5; transition: 0.3s; }
+        .link-card:hover .link-arrow { opacity: 1; transform: translateX(3px); color: var(--accent); }
+
+        /* --- 4. PORTFOLIO PAGE STYLES --- */
+        .portfolio-wrapper { width: 100%; max-width: 1000px; }
+        
+        .nav-header { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 20px; }
+        .btn-back {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            padding: 10px 20px; border-radius: 30px;
+            display: flex; align-items: center; gap: 8px;
+            color: var(--text-primary); font-weight: 600; cursor: pointer;
+            backdrop-filter: blur(10px); transition: 0.2s;
+        }
+        .btn-back:hover { transform: translateX(-5px); border-color: var(--accent); }
+
+        .pf-header { text-align: center; margin-bottom: 40px; animation: slideDown 0.6s ease; }
+        .pf-title { font-size: 32px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; }
+        .search-box { position: relative; width: 100%; max-width: 400px; }
+        .search-box input {
+            width: 100%; padding: 14px 45px; border-radius: 50px;
+            border: 1px solid var(--card-border); background: var(--card-bg);
+            backdrop-filter: blur(10px); color: var(--text-primary); outline: none;
+            box-shadow: var(--shadow);
+        }
+        .search-box input:focus { border-color: var(--accent); }
+        .search-icon { position: absolute; left: 15px; top: 14px; color: var(--text-secondary); }
+
+        .filter-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .chip {
+            padding: 8px 20px; border-radius: 30px; font-size: 13px; font-weight: 600;
+            background: var(--chip-bg); color: var(--text-secondary); cursor: pointer; border: 1px solid transparent;
+        }
+        .chip.active { background: var(--chip-active); color: var(--chip-text-active); }
+
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;
+            animation: fadeIn 0.8s ease 0.2s backwards; width: 100%;
+        }
+
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 24px; padding: 24px;
+            display: flex; flex-direction: column; gap: 15px;
+            transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow); }
+        .card-icon-box {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+            color: var(--accent); display: flex; align-items: center; justify-content: center;
+        }
+        .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+        .card p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+        .card-actions { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; }
+        
+        .btn-action {
+            flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none;
+        }
+        .btn-visit { background: var(--text-primary); color: var(--bg-color); }
+        .btn-copy { background: transparent; color: var(--text-secondary); border: 1px solid var(--card-border); }
+        .btn-copy:hover { border-color: var(--text-primary); color: var(--text-primary); }
+        
+        /* --- 5. MODALS & TOAST --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: var(--overlay-bg);
+            backdrop-filter: blur(8px); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-box {
+            background: var(--modal-bg); width: 90%; max-width: 380px;
+            padding: 25px; border-radius: 24px;
+            border: 1px solid var(--card-border); text-align: center;
+            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.3);
+        }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+
+        .modal-input {
+            width: 100%; padding: 12px; margin-top: 15px; margin-bottom: 5px;
+            border-radius: 12px; border: 1px solid var(--card-border);
+            background: var(--bg-color); color: var(--text-primary); font-size: 16px; outline: none;
+            text-align: center; letter-spacing: 2px;
+        }
+        .modal-input:focus { border-color: var(--accent); }
+        
+        .modal-btn {
+            margin-top: 15px; width: 100%; padding: 12px; border-radius: 12px; border: none;
+            background: var(--text-primary); color: var(--bg-color);
+            font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .modal-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .shake { animation: shake 0.3s ease-in-out; }
+
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
+        .toast {
+            background: var(--modal-bg); border: 1px solid var(--card-border);
+            padding: 12px 16px; border-radius: 12px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            animation: slideDown 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutUp { to { opacity: 0; transform: translateY(-100%); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        footer { margin-top: auto; padding-top: 50px; text-align: center; opacity: 0.5; font-size: 12px; color: var(--text-secondary); }
+		
+		/* --- NEW: CRUD STYLES --- */
+.fab-add {
+    position: fixed; bottom: 30px; right: 30px;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent); color: white;
+    border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 90; transition: transform 0.2s;
+}
+.fab-add:hover { transform: scale(1.1); }
+
+.card-relative { position: relative; }
+.btn-edit-card {
+    position: absolute; top: 15px; right: 15px;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(255,255,255,0.8); border: none;
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: 0.2s; backdrop-filter: blur(4px);
+}
+.card:hover .btn-edit-card { opacity: 1; }
+.btn-edit-card:hover { background: var(--text-primary); color: var(--bg-color); }
+
+/* Form Helper */
+.input-group { margin-bottom: 12px; text-align: left; }
+.input-label { font-size: 12px; font-weight: 600; margin-left: 4px; color: var(--text-secondary); }
+.crud-actions { display: flex; gap: 10px; margin-top: 20px; }
+.btn-delete { background: #fee2e2; color: #ef4444; }
+.btn-delete:hover { background: #fecaca; }		
+		
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toastArea"></div>
+
+    <div id="bioPage" class="page-section">
+        <div class="profile-container">
+            <div class="avatar-frame">
+                <div class="avatar-img">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-primary)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+            </div>
+            <h1>
+                i.s. Dg. Mattawang
+                <svg class="verified-badge" viewBox="0 0 24 24" fill="currentColor"><path d="M9 11.3l3.71 2.7-1.42-4.36L15 7h-4.55L9 2.5 7.55 7H3l3.71 2.64L5.29 14z"/><path fill="none" d="M0 0h24v24H0z"/></svg>
+            </h1>
+            <p class="bio">Digital Creator | Web Enthusiast<br>Berbagi hal menarik seputar teknologi.</p>
+        </div>
+
+        <div class="links-container">
+            
+            <a href="https://instagram.com" target="_blank" class="link-card">
+                <div class="link-content">
+                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    <div class="link-text">
+                        <span class="link-title">Instagram</span>
+                        <span class="link-sub">Follow my daily updates</span>
+                    </div>
+                </div>
+                <svg class="link-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            </a>
+
+            <div class="link-card" onclick="openPasswordModal()">
+                <div class="link-content">
+                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+                    <div class="link-text">
+                        <span class="link-title">My Portfolio</span>
+                        <span class="link-sub">Project Showcase (Protected)</span>
+                    </div>
+                </div>
+                <svg class="link-arrow" style="opacity: 1; color: var(--text-secondary);" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+
+            <div class="link-card" onclick="copyEmail()">
+                <div class="link-content">
+                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <div class="link-text">
+                        <span class="link-title">Email Me</span>
+                        <span class="link-sub">Business inquiries only</span>
+                    </div>
+                </div>
+                <svg class="link-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </div>
+
+            <a href="https://wa.me/6282395223314?text=Halo,%20i.s. Dg. Mattawang !" target="blank" class="link-card">
+                <div class="link-content">
+                    <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                    <div class="link-text">
+                        <span class="link-title" >WhatsApp</span>
+                        <span class="link-sub">Chat me directly</span>
+                    </div>
+                </div>
+                <svg class="link-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            </a>
+
+        </div>
+
+        <footer>
+            &copy; 2025 | i.s. Dg. Mattawang. All Rights Reserved.
+        </footer>
+    </div>
+
+    <div id="portfolioPage" class="page-section hidden-section">
+        <div class="portfolio-wrapper">
+            <div class="nav-header">
+                <button class="btn-back" onclick="switchPage('bio')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Kembali
+                </button>
+            </div>
+
+<header class="pf-header">
+    <div style="margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="sparkleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#6366f1" />
+                    <stop offset="100%" style="stop-color:#ec4899" />
+                </linearGradient>
+            </defs>
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#sparkleGrad)"/>
+            <path d="M19 2L20 5L23 6L20 7L19 10L18 7L15 6L18 5L19 2Z" fill="url(#sparkleGrad)" opacity="0.7"/>
+        </svg>
+    </div>
+    <h1 class="pf-title">Koleksi Link</h1>
+    <p class="bio" style="max-width: 500px;">Kumpulan sumber daya, alat, dan inspirasi terbaik yang telah saya buat.</p>
+</header>
+
+            <div class="controls">
+                <div class="filter-chips">
+                    <div class="chip active" onclick="filterLinks('all', this)">Semua</div>
+                    <div class="chip" onclick="filterLinks('design', this)">Design</div>
+                    <div class="chip" onclick="filterLinks('dev', this)">APK</div>
+                    <div class="chip" onclick="filterLinks('productivity', this)">Web Page</div>
+                </div>
+
+                <div class="search-box">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="searchInput" placeholder="Cari portfolio..." onkeyup="searchLinks()">
+                </div>
+            </div>
+
+            <div class="grid" id="linkGrid">
+                
+                <div class="card" data-category="design">
+                    <div class="card-icon-box" style="color:#000;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12C12 10.3431 10.6569 9 9 9C7.34315 9 6 10.3431 6 12C6 13.6569 7.34315 15 9 15C10.6569 15 12 13.6569 12 12Z" fill="currentColor"/><path d="M12 6C12 4.34315 10.6569 3 9 3C7.34315 3 6 4.34315 6 6C6 7.65685 7.34315 9 9 9C10.6569 9 12 7.65685 12 6Z" fill="currentColor"/><path d="M12 12C12 10.3431 13.3431 9 15 9C16.6569 9 18 10.3431 18 12C18 13.6569 16.6569 15 15 15C13.3431 15 12 13.6569 12 12Z" fill="currentColor"/><path d="M18 6C18 4.34315 16.6569 3 15 3C13.3431 3 12 4.34315 12 6C12 7.65685 13.3431 9 15 9C16.6569 9 18 7.65685 18 6Z" fill="currentColor"/><path d="M9 15C7.34315 15 6 16.3431 6 18C6 19.6569 7.34315 21 9 21C10.6569 21 12 19.6569 12 18V15H9Z" fill="currentColor"/></svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Figma Community</h3>
+                        <p>Sumber daya plugin dan template desain gratis terbesar.</p>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://www.figma.com/community" target="_blank" class="btn-action btn-visit">Buka Link</a>
+                        <button class="btn-action btn-copy" onclick="copyText('https://www.figma.com/community')">Salin</button>
+                    </div>
+                </div>
+
+                <div class="card" data-category="dev">
+                    <div class="card-icon-box" style="color:#10b981; background:rgba(16, 185, 129, 0.1)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>GitHub</h3>
+                        <p>Platform hosting kode untuk kontrol versi dan kolaborasi.</p>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://github.com" target="_blank" class="btn-action btn-visit">Buka Link</a>
+                        <button class="btn-action btn-copy" onclick="copyText('https://github.com')">Salin</button>
+                    </div>
+                </div>
+
+                <div class="card" data-category="productivity">
+                    <div class="card-icon-box" style="color:#f59e0b; background:rgba(245, 158, 11, 0.1)">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M4.459 4.208c.746.606 1.026.56 2.426.466l10.359-.653c1.4-.093 1.773-.606 1.773-2.333h1.866v17.265c0 1.12-.513 1.633-2.146 1.633-.653 0-1.026-.046-2.52-.326l-9.145-1.726c-1.866-.373-2.426-1.166-2.426-2.986V4.208zm3.733 3.033v10.592l8.212 1.54V6.261L8.192 7.241z"/></svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Notion</h3>
+                        <p>Workspace all-in-one untuk catatan dan manajemen tugas.</p>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://notion.so" target="_blank" class="btn-action btn-visit">Buka Link</a>
+                        <button class="btn-action btn-copy" onclick="copyText('https://notion.so')">Salin</button>
+                    </div>
+                </div>
+
+                <div class="card" data-category="design">
+                    <div class="card-icon-box" style="color:#ec4899; background:rgba(236, 72, 153, 0.1);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-5.38c-3.72-3.8-10.64-3.64-18.27-2.9m10.87-9.52c-.83 2.5-1.57 6.66-1.12 10.7m-8.1-1.35c3.55-1.87 8.52-1.72 12.1.25"></path></svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Dribbble</h3>
+                        <p>Komunitas desainer untuk pamer karya dan cari inspirasi.</p>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://dribbble.com" target="_blank" class="btn-action btn-visit">Buka Link</a>
+                        <button class="btn-action btn-copy" onclick="copyText('https://dribbble.com')">Salin</button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <footer>
+                &copy; 2025 | i.s. Dg. Mattawang. All Rights Reserved.
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-box">
+            <div style="width:50px; height:50px; background:rgba(99,102,241,0.1); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; color:var(--accent);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h3 style="font-size:18px; margin-bottom:5px;">Akses Terbatas</h3>
+            <p style="font-size:13px; color:var(--text-secondary);">Masukkan kode akses untuk membuka portfolio.</p>
+            
+            <input type="password" id="passInput" class="modal-input" placeholder="Masukkan passcode" onkeypress="handleEnter(event)">
+            <div id="passError" style="color:#ef4444; font-size:12px; margin-top:5px; height:18px;"></div>
+
+            <button class="modal-btn" onclick="checkPassword()">Buka Akses</button>
+            <button onclick="closePasswordModal()" style="background:none; border:none; color:var(--text-secondary); margin-top:15px; font-size:12px; cursor:pointer;">Batal</button>
+        </div>
+    </div>
+
+<button class="fab-add hidden-section" id="fabAdd" onclick="openCrudModal()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+</button>
+
+<div class="modal-overlay" id="crudModal">
+    <div class="modal-box">
+        <h3 id="crudTitle" style="margin-bottom: 20px;">Tambah Item</h3>
+        <input type="hidden" id="crudId">
+        
+        <div class="input-group">
+            <label class="input-label">Judul</label>
+            <input type="text" id="crudTitleInput" class="modal-input" placeholder="Nama Portfolio" style="margin-top:5px; text-align:left;">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Deskripsi</label>
+            <input type="text" id="crudDescInput" class="modal-input" placeholder="Deskripsi singkat" style="margin-top:5px; text-align:left;">
+        </div>
+        <div class="input-group">
+            <label class="input-label">URL Link</label>
+            <input type="text" id="crudUrlInput" class="modal-input" placeholder="https://" style="margin-top:5px; text-align:left;">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Kategori</label>
+            <select id="crudCategoryInput" class="modal-input" style="margin-top:5px; text-align:left;">
+                <option value="design">Design</option>
+                <option value="dev">APK</option>
+                <option value="productivity">Web Page</option>
+            </select>
+        </div>
+
+        <div class="crud-actions">
+            <button class="modal-btn" onclick="saveItem()">Simpan</button>
+            <button class="modal-btn btn-delete" id="btnDelete" onclick="deleteItem()" style="display:none;">Hapus</button>
+        </div>
+        <button onclick="closeCrudModal()" style="background:none; border:none; color:var(--text-secondary); margin-top:15px; font-size:12px; cursor:pointer;">Batal</button>
+    </div>
+</div>
+
+    <script>
+	// --- KONFIGURASI ---
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKBjpjg_d0NxVLueX1Q5Coa1EglKZUyCrG8Qc1HRjzf0sXX_47npvuQpK3XPIxQSzJdw/exec'; // Pastikan URL ini benar
+    const CACHE_KEY = 'portfolio_data_v1'; // [BARU] Kunci penyimpanan di browser
+
+    // --- STATE MANAGEMENT ---
+    let localData = []; 
+
+    // --- 1. INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // [BARU] Cek Cache dulu sebelum request ke internet
+        loadFromCache(); 
+        
+        // Lalu ambil data segar dari Google Sheet
+        fetchData(); 
+    });
+
+    // --- [BARU] FUNGSI CACHE ---
+    function loadFromCache() {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            console.log("Memuat dari Cache...");
+            localData = JSON.parse(cached);
+            renderGrid(localData);
+        } else {
+            // Jika tidak ada cache, tampilkan loading
+            document.getElementById('linkGrid').innerHTML = '<p style="text-align:center; width:100%; opacity:0.6;">Memuat data...</p>';
+        }
+    }
+
+    function saveToCache(data) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    }
+
+    // --- 2. DATA SYNC (BACKEND) ---
+    async function fetchData() {
+        try {
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            
+            // Update State
+            localData = data;
+            
+            // [BARU] Simpan data terbaru ke Cache agar kunjungan berikutnya instan
+            saveToCache(localData);
+            
+            // Render ulang dengan data terbaru (bila ada perubahan di sheet)
+            renderGrid(localData);
+            console.log("Data terbaru dimuat dari Sheet");
+            
+        } catch (err) {
+            console.error("Gagal ambil data online, menggunakan data cache (jika ada)", err);
+            if (localData.length > 0) {
+                showToast('Mode Offline: Menampilkan data terakhir', 'error');
+            }
+        }
+    }
+
+    function syncToSheet(action, payload) {
+        const params = {
+            method: "POST",
+            body: JSON.stringify({ action: action, data: payload })
+        };
+
+        fetch(SCRIPT_URL, params)
+            .then(() => console.log("Sync background berhasil"))
+            .catch(err => console.error("Sync error:", err));
+    }
+
+    // --- 3. RENDERING (FRONTEND) ---
+    function renderGrid(data) {
+        const grid = document.getElementById('linkGrid');
+        grid.innerHTML = '';
+        
+        if(!data || data.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; width:100%;">Belum ada data.</p>';
+            return;
+        }
+
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card card-relative';
+            card.dataset.category = item.category;
+            
+            let iconSvg = '';
+            let iconStyle = '';
+            
+            if (item.category === 'dev') {
+                iconStyle = 'color:#10b981; background:rgba(16, 185, 129, 0.1)';
+                iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>';
+            } else if (item.category === 'productivity') {
+                iconStyle = 'color:#f59e0b; background:rgba(245, 158, 11, 0.1)';
+                iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4.459 4.208c.746.606 1.026.56 2.426.466l10.359-.653c1.4-.093 1.773-.606 1.773-2.333h1.866v17.265c0 1.12-.513 1.633-2.146 1.633-.653 0-1.026-.046-2.52-.326l-9.145-1.726c-1.866-.373-2.426-1.166-2.426-2.986V4.208zm3.733 3.033v10.592l8.212 1.54V6.261L8.192 7.241z"/></svg>';
+            } else {
+                iconStyle = 'color:#ec4899; background:rgba(236, 72, 153, 0.1)';
+                iconSvg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-5.38c-3.72-3.8-10.64-3.64-18.27-2.9m10.87-9.52c-.83 2.5-1.57 6.66-1.12 10.7m-8.1-1.35c3.55-1.87 8.52-1.72 12.1.25"></path></svg>';
+            }
+
+            card.innerHTML = `
+                <button class="btn-edit-card" onclick="editItem('${item.id}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <div class="card-icon-box" style="${iconStyle}">
+                    ${iconSvg}
+                </div>
+                <div class="card-content">
+                    <h3>${item.title}</h3>
+                    <p>${item.desc}</p>
+                </div>
+                <div class="card-actions">
+                    <a href="${item.url}" target="_blank" class="btn-action btn-visit">Buka</a>
+                    <button class="btn-action btn-copy" onclick="copyText('${item.url}')">Salin</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        
+        // Apply active filter
+        const activeChip = document.querySelector('.chip.active');
+        if(activeChip) filterLinks(activeChip.dataset.filterKey || 'all', activeChip);
+    }
+
+    // --- 4. CRUD OPERATIONS ---
+
+    function openCrudModal(id = null) {
+        const modal = document.getElementById('crudModal');
+        const btnDelete = document.getElementById('btnDelete');
+        
+        if (id) {
+            const item = localData.find(x => x.id == id);
+            document.getElementById('crudId').value = item.id;
+            document.getElementById('crudTitle').innerText = "Edit Item";
+            document.getElementById('crudTitleInput').value = item.title;
+            document.getElementById('crudDescInput').value = item.desc;
+            document.getElementById('crudUrlInput').value = item.url;
+            document.getElementById('crudCategoryInput').value = item.category;
+            btnDelete.style.display = 'inline-block';
+        } else {
+            document.getElementById('crudId').value = '';
+            document.getElementById('crudTitle').innerText = "Tambah Baru";
+            document.getElementById('crudTitleInput').value = '';
+            document.getElementById('crudDescInput').value = '';
+            document.getElementById('crudUrlInput').value = '';
+            document.getElementById('crudCategoryInput').value = 'design';
+            btnDelete.style.display = 'none';
+        }
+        modal.classList.add('active');
+    }
+
+    function closeCrudModal() {
+        document.getElementById('crudModal').classList.remove('active');
+    }
+
+    function saveItem() {
+        const id = document.getElementById('crudId').value;
+        const title = document.getElementById('crudTitleInput').value;
+        const desc = document.getElementById('crudDescInput').value;
+        const url = document.getElementById('crudUrlInput').value;
+        const category = document.getElementById('crudCategoryInput').value;
+
+        if (!title || !url) {
+            showToast('Judul dan URL wajib diisi!', 'error');
+            return;
+        }
+
+        const payload = {
+            id: id || 'id-' + Date.now(),
+            title, desc, url, category
+        };
+
+        if (id) {
+            // Update Local
+            const index = localData.findIndex(x => x.id == id);
+            if (index !== -1) localData[index] = payload;
+            syncToSheet('edit', payload);
+            showToast('Item diperbarui!', 'success');
+        } else {
+            // Add Local
+            localData.push(payload);
+            syncToSheet('create', payload);
+            showToast('Item ditambahkan!', 'success');
+        }
+
+        // [BARU] Update Cache juga setiap kali kita simpan/edit
+        saveToCache(localData);
+
+        renderGrid(localData);
+        closeCrudModal();
+    }
+
+    function deleteItem() {
+        if(!confirm("Yakin ingin menghapus item ini?")) return;
+        const id = document.getElementById('crudId').value;
+        
+        localData = localData.filter(x => x.id != id);
+        
+        // [BARU] Update Cache setelah hapus
+        saveToCache(localData);
+        
+        renderGrid(localData);
+        syncToSheet('delete', {id: id});
+        
+        closeCrudModal();
+        showToast('Item dihapus', 'success');
+    }
+
+    function editItem(id) { openCrudModal(id); }
+
+    // --- 5. UTILITIES (Nav, Filter, etc) ---
+
+    const bioPage = document.getElementById('bioPage');
+    const portfolioPage = document.getElementById('portfolioPage');
+    const passwordModal = document.getElementById('passwordModal');
+    const passInput = document.getElementById('passInput');
+    const passError = document.getElementById('passError');
+    const fabAdd = document.getElementById('fabAdd');
+
+    function switchPage(page) {
+        window.scrollTo(0,0);
+        if(page === 'portfolio') {
+            bioPage.classList.add('hidden-section');
+            portfolioPage.classList.remove('hidden-section');
+            fabAdd.classList.remove('hidden-section');
+            
+            // Re-trigger anim
+            const grid = document.querySelector('.grid');
+            if(grid) {
+                grid.style.animation = 'none';
+                setTimeout(() => grid.style.animation = 'fadeIn 0.8s ease 0.2s backwards', 10);
+            }
+        } else {
+            bioPage.classList.remove('hidden-section');
+            portfolioPage.classList.add('hidden-section');
+            fabAdd.classList.add('hidden-section');
+        }
+    }
+
+    function openPasswordModal() {
+        passwordModal.classList.add('active');
+        passInput.value = '';
+        passError.innerText = '';
+        setTimeout(() => passInput.focus(), 100);
+    }
+
+    function closePasswordModal() {
+        passwordModal.classList.remove('active');
+    }
+
+    function checkPassword() {
+        const val = passInput.value;
+        if (val === 'aic') {
+            showToast('Akses Diberikan', 'success');
+            closePasswordModal();
+            setTimeout(() => switchPage('portfolio'), 300);
+        } else {
+            passError.innerText = 'Password salah.';
+            document.querySelector('.modal-box').classList.add('shake');
+            setTimeout(() => document.querySelector('.modal-box').classList.remove('shake'), 300);
+        }
+    }
+    
+    // Chips Filter
+    document.querySelectorAll('.chip').forEach(chip => {
+        const onclickAttr = chip.getAttribute('onclick');
+        if(onclickAttr.includes("'all'")) chip.dataset.filterKey = 'all';
+        if(onclickAttr.includes("'design'")) chip.dataset.filterKey = 'design';
+        if(onclickAttr.includes("'dev'")) chip.dataset.filterKey = 'dev';
+        if(onclickAttr.includes("'productivity'")) chip.dataset.filterKey = 'productivity';
+    });
+
+    function filterLinks(category, element) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        element.classList.add('active');
+        
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            if (category === 'all' || card.dataset.category === category) {
+                card.style.display = 'flex';
+                card.style.animation = 'fadeIn 0.5s ease forwards';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function searchLinks() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const title = card.querySelector('h3').innerText.toLowerCase();
+            const desc = card.querySelector('p').innerText.toLowerCase();
+            if (title.includes(input) || desc.includes(input)) card.style.display = 'flex';
+            else card.style.display = 'none';
+        });
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text)
+            .then(() => showToast('Berhasil disalin!', 'success'))
+            .catch(() => showToast('Gagal menyalin', 'error'));
+    }
+
+    function copyEmail() { copyText("ihsansyah@live.com"); }
+
+    function handleEnter(e) { if(e.key === 'Enter') checkPassword(); }
+
+    function showToast(message, type) {
+        const container = document.getElementById('toastArea');
+        const toast = document.createElement('div');
+        const color = type === 'success' ? '#10b981' : '#ef4444';
+        
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <svg width="20" height="20" color="${color}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r=\"10\"></circle></svg>
+            <span style="font-size:14px; font-weight:500;">${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'fadeOutUp 0.4s forwards';
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+	
+    </script>
+</body>
+</html>
