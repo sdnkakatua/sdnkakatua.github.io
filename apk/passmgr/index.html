@@ -264,6 +264,7 @@
     let masterKey = null; 
     let vaultData = [];
     let confirmCallback = null; 
+    let editingId = null; // Variabel baru untuk melacak ID yang sedang diedit
     const STORAGE_KEY = 'aesthetix_vault_v3';
 
     window.onload = () => {
@@ -355,6 +356,9 @@
                     <button class="icon-btn" onclick="copyToClip('${item.pass}')" title="Salin">
                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </button>
+                    <button class="icon-btn" onclick="openModal('${item.id}')" title="Edit">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
                     <button class="icon-btn delete" onclick="confirmDelete('${item.id}', '${item.site}')" title="Hapus">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
@@ -364,130 +368,99 @@
         });
     }
 
-    // --- FITUR UTAMA BARU: ENCRYPTED BACKUP & RESTORE ---
-    
-    // Fungsi untuk memicu input file (tanpa elemen HTML)
+    // --- FITUR BACKUP & RESTORE ---
     function triggerRestore() {
         const input = document.createElement('input');
         input.type = 'file';
-        // Terima file text atau json
         input.accept = '.txt,.aes,.json'; 
         input.style.display = 'none';
-        
         document.body.appendChild(input);
-
         input.onchange = function(e) {
             const file = e.target.files[0];
-            if (file) {
-                handleEncryptedRestore(file);
-            }
+            if (file) handleEncryptedRestore(file);
             document.body.removeChild(input);
         };
-        
         input.click();
     }
 
-    // Fungsi Export: Mengenkripsi seluruh data JSON sebelum di-download
     function exportEncryptedData() {
         if(vaultData.length === 0) return showToast("Brankas kosong", "warning");
-
-        // 1. Enkripsi data JSON menggunakan Master Key saat ini
         const encryptedExport = CryptoJS.AES.encrypt(JSON.stringify(vaultData), masterKey).toString();
-        
-        // 2. Buat file .txt berisi cipher text
         const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(encryptedExport);
         const downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
-        // Nama file dibuat agar terlihat seperti file aman
         downloadAnchorNode.setAttribute("download", "vault_secure_backup_" + new Date().toISOString().slice(0,10) + ".txt");
-        
         document.body.appendChild(downloadAnchorNode);
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
-        
         showToast("Backup TERENKRIPSI berhasil diunduh");
     }
 
-    // Fungsi Import: Mencoba mendekripsi file menggunakan Master Key saat ini
     function handleEncryptedRestore(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const fileContent = e.target.result;
                 let restoredData = null;
-
-                // Tahap 1: Coba Decrypt (Asumsi file terenkripsi)
                 try {
                     const bytes = CryptoJS.AES.decrypt(fileContent, masterKey);
                     const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-                    
-                    if (decryptedString) {
-                        restoredData = JSON.parse(decryptedString);
-                    }
-                } catch(err) {
-                    // Jika gagal decrypt, mungkin file JSON biasa (Legacy support)
-                    console.log("Gagal decrypt, mencoba parse sebagai JSON biasa...");
-                }
+                    if (decryptedString) restoredData = JSON.parse(decryptedString);
+                } catch(err) { console.log("Mencoba JSON biasa..."); }
 
-                // Tahap 2: Jika Tahap 1 gagal, coba parse langsung (siapa tahu user upload file JSON lama)
                 if (!restoredData) {
-                    try {
-                        restoredData = JSON.parse(fileContent);
-                    } catch(jsonErr) {
-                        throw new Error("Gagal membaca file. Password salah atau file rusak.");
-                    }
+                    try { restoredData = JSON.parse(fileContent); } 
+                    catch(jsonErr) { throw new Error("Gagal membaca file."); }
                 }
 
-                // Validasi Data
-                if(!Array.isArray(restoredData)) {
-                    throw new Error("Format data di dalam file salah.");
-                }
+                if(!Array.isArray(restoredData)) throw new Error("Format salah.");
                 
-                showConfirm(
-                    "Restore Backup?", 
-                    `Ditemukan <b>${restoredData.length}</b> akun dalam file ini. Data akan digabungkan.`, 
-                    () => {
-                        const existingIds = new Set(vaultData.map(v => v.id));
-                        let addedCount = 0;
-
-                        restoredData.forEach(item => {
-                            if(item.site && item.pass) {
-                                if(item.id && !existingIds.has(item.id)) {
-                                    vaultData.push(item);
-                                    addedCount++;
-                                } else if (!item.id) {
-                                    // Generate ID baru jika tidak ada
-                                    item.id = Date.now().toString() + Math.random().toString().slice(2,5);
-                                    vaultData.push(item);
-                                    addedCount++;
-                                }
+                showConfirm("Restore Backup?", `Ditemukan <b>${restoredData.length}</b> akun.`, () => {
+                    const existingIds = new Set(vaultData.map(v => v.id));
+                    let addedCount = 0;
+                    restoredData.forEach(item => {
+                        if(item.site && item.pass) {
+                            if(item.id && !existingIds.has(item.id)) {
+                                vaultData.push(item);
+                                addedCount++;
+                            } else if (!item.id) {
+                                item.id = Date.now().toString() + Math.random().toString().slice(2,5);
+                                vaultData.push(item);
+                                addedCount++;
                             }
-                        });
-
-                        saveVault();
-                        renderVault();
-                        
-                        if(addedCount > 0) showToast(`${addedCount} data dipulihkan!`, "success");
-                        else showToast("Semua data backup sudah ada di brankas.", "warning");
-                    }
-                );
-
-            } catch(err) {
-                console.error(err);
-                showToast("File rusak atau Password Master berbeda!", "error");
-            }
+                        }
+                    });
+                    saveVault(); renderVault();
+                    showToast(addedCount > 0 ? `${addedCount} data dipulihkan!` : "Data sudah ada.", addedCount > 0 ? "success" : "warning");
+                });
+            } catch(err) { showToast("File rusak atau Password salah!", "error"); }
         };
         reader.readAsText(file);
     }
 
+    // --- FUNGSI SIMPAN/UPDATE TERBARU ---
     function saveEntry() {
         const site = document.getElementById('siteInput').value;
         const user = document.getElementById('userInput').value;
         const pass = document.getElementById('passInput').value;
         if (!site || !pass) return showToast('Isi data dengan lengkap', 'warning');
 
-        vaultData.push({ id: Date.now().toString(), site, user, pass, timestamp: new Date().toISOString() });
-        saveVault(); closeModal(); renderVault(); showToast('Password diamankan', 'success');
+        if (editingId) {
+            // LOGIKA UPDATE (EDIT)
+            const index = vaultData.findIndex(item => item.id === editingId);
+            if (index !== -1) {
+                vaultData[index] = { ...vaultData[index], site, user, pass, timestamp: new Date().toISOString() };
+                showToast('Data berhasil diperbarui', 'success');
+            }
+        } else {
+            // LOGIKA SIMPAN BARU
+            vaultData.push({ id: Date.now().toString(), site, user, pass, timestamp: new Date().toISOString() });
+            showToast('Password diamankan', 'success');
+        }
+
+        saveVault(); 
+        closeModal(); 
+        renderVault(); 
     }
 
     function confirmDelete(id, siteName) {
@@ -531,11 +504,41 @@
     }
 
     const modalOverlay = document.getElementById('entryModal');
-    function openModal() {
-        document.getElementById('siteInput').value = ''; document.getElementById('userInput').value = '';
-        document.getElementById('passInput').value = ''; modalOverlay.classList.add('active');
+    
+    // --- FUNGSI MODAL TERBARU (MENDUKUNG EDIT) ---
+    function openModal(id = null) {
+        const titleEl = document.querySelector('#entryModal h2');
+        const btnEl = document.querySelector('#entryModal .btn');
+
+        if (id) {
+            // MODE EDIT
+            editingId = id;
+            const item = vaultData.find(i => i.id === id);
+            
+            // Isi form dengan data yang ada
+            document.getElementById('siteInput').value = item.site; 
+            document.getElementById('userInput').value = item.user;
+            document.getElementById('passInput').value = item.pass;
+            
+            // Ubah teks UI
+            titleEl.innerText = "Edit Akun";
+            btnEl.innerText = "Simpan Perubahan";
+        } else {
+            // MODE TAMBAH BARU
+            editingId = null;
+            document.getElementById('siteInput').value = ''; 
+            document.getElementById('userInput').value = '';
+            document.getElementById('passInput').value = '';
+            
+            // Reset teks UI
+            titleEl.innerText = "Simpan Akun";
+            btnEl.innerText = "Simpan & Enkripsi";
+        }
+
+        modalOverlay.classList.add('active');
         document.getElementById('siteInput').focus();
     }
+
     function closeModal() { modalOverlay.classList.remove('active'); }
     
     function togglePassVisibility() {
@@ -548,6 +551,7 @@
             `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
     }
 </script>
+
 
 </body>
 </html>
