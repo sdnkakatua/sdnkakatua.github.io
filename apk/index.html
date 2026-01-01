@@ -748,25 +748,32 @@
         fetchData(); 
     });
 
+    // --- UPDATE BAGIAN INI ---
+
     function loadFromCache() {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
             localData = JSON.parse(cached);
+            
+            // TAMBAHAN: Urutkan A-Z saat load dari cache
+            localData.sort((a, b) => a.title.localeCompare(b.title));
+            
             renderGrid(localData);
         } else {
             document.getElementById('linkGrid').innerHTML = '<p style="text-align:center; width:100%; opacity:0.6;">Memuat data...</p>';
         }
     }
 
-    function saveToCache(data) {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-    }
-
     async function fetchData() {
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
+            
             localData = data;
+
+            // TAMBAHAN: Urutkan A-Z setelah ambil dari internet
+            localData.sort((a, b) => a.title.localeCompare(b.title));
+
             saveToCache(localData);
             renderGrid(localData);
         } catch (err) {
@@ -776,6 +783,12 @@
             }
         }
     }
+
+
+    function saveToCache(data) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    }
+
 
     function syncToSheet(action, payload) {
         const params = {
@@ -865,6 +878,8 @@
         document.getElementById('crudModal').classList.remove('active');
     }
 
+     // --- UPDATE BAGIAN INI ---
+
     function saveItem() {
         const id = document.getElementById('crudId').value;
         const title = document.getElementById('crudTitleInput').value;
@@ -893,10 +908,14 @@
             showToast('Item ditambahkan!', 'success');
         }
 
+        // TAMBAHAN: Urutkan ulang A-Z setelah menambah/edit data
+        localData.sort((a, b) => a.title.localeCompare(b.title));
+
         saveToCache(localData);
         renderGrid(localData);
         closeCrudModal();
     }
+
 
     function deleteItem() {
         if(!confirm("Yakin ingin menghapus item ini?")) return;
