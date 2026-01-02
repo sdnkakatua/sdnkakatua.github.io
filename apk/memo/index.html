@@ -8,245 +8,254 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#f0f2f5">
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- 1. THEME VARIABLES --- */
+        /* --- 1. DESIGN SYSTEM (AESTHETIC PALETTE) --- */
         :root {
             /* Light Mode */
-            --bg-color: #f0f2f5;
-            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            --bg-body: #f8fafc;
+            --bg-gradient: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.08) 0%, transparent 50%), 
+                           radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
             
-            /* Header Specific */
-            --header-bg: rgba(255, 255, 255, 0.85);
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --header-border: rgba(255, 255, 255, 0.6);
             
-            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-bg: rgba(255, 255, 255, 0.7);
             --card-border: rgba(255, 255, 255, 0.8);
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.3);
+            
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            
+            --accent: #6366f1; /* Indigo */
+            --accent-soft: rgba(99, 102, 241, 0.1);
             --danger: #ef4444;
-            --modal-bg: rgba(255, 255, 255, 0.95);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --danger-soft: rgba(239, 68, 68, 0.1);
+            
+            --modal-bg: #ffffff;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Dark Mode */
+        /* Dark Mode Automatic */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #0f172a;
-                --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+                --bg-body: #0f172a;
+                --bg-gradient: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%), 
+                               radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
                 
-                /* Header Specific Dark */
                 --header-bg: rgba(30, 41, 59, 0.7);
+                --header-border: rgba(255, 255, 255, 0.05);
                 
-                --card-bg: rgba(30, 41, 59, 0.6);
-                --card-border: rgba(255, 255, 255, 0.1);
-                --text-primary: #f8fafc;
-                --text-secondary: #94a3b8;
+                --card-bg: rgba(30, 41, 59, 0.5);
+                --card-border: rgba(255, 255, 255, 0.08);
+                
+                --text-main: #f1f5f9;
+                --text-sub: #94a3b8;
+                
                 --accent: #818cf8;
-                --accent-glow: rgba(129, 140, 248, 0.3);
+                --accent-soft: rgba(129, 140, 248, 0.15);
                 --modal-bg: #1e293b;
-                --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+                --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+                --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+                --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background: var(--bg-gradient);
+            background-color: var(--bg-body);
+            background-image: var(--bg-gradient);
             background-attachment: fixed;
             min-height: 100vh;
+            color: var(--text-main);
             padding: 20px;
-            color: var(--text-primary);
+            padding-top: 100px; /* Space for fixed header */
+            transition: background 0.3s ease;
+        }
+
+        /* --- 2. AESTHETIC HEADER --- */
+        header {
+            position: fixed; top: 20px; left: 20px; right: 20px;
+            height: 70px; z-index: 50;
+            background: var(--header-bg);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--header-border);
+            border-radius: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px;
+            box-shadow: var(--shadow-md);
             transition: all 0.3s ease;
         }
 
-        /* --- 2. HEADER & MENU (UPDATED) --- */
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 35px; /* Jarak lebih lega ke body */
-            padding: 15px 20px; /* Padding dalam agar teks tidak mepet */
-            position: relative;
-            
-            /* Background Estetis */
-            background: var(--header-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 20px; /* Membulat seperti kapsul */
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow);
-        }
-
-        /* LINE ESTETIS (Separator) */
+        /* The Aesthetic Line (Separator) */
         header::after {
-            content: '';
-            position: absolute;
-            bottom: -15px; /* Posisi di bawah header */
-            left: 15%; /* Mulai agak ke tengah */
-            width: 70%; /* Panjang 70% dari lebar layar */
-            height: 2px;
-            /* Gradasi: Transparan -> Aksen -> Transparan */
-            background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
-            opacity: 0.6;
-            border-radius: 10px;
+            content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
         }
 
-        h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 2px; }
-        .date-display { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
+        .date-display { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
+        /* Menu Button */
         .menu-btn {
-            width: 40px; height: 40px; 
-            background: transparent; /* Transparan agar menyatu dengan header */
-            border: 1px solid var(--card-border);
-            border-radius: 12px; /* Lebih kotak sedikit (squircle) */
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; color: var(--text-primary);
-            transition: 0.2s;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: transparent; border: none;
+            color: var(--text-main); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
         }
-        .menu-btn:active { transform: scale(0.95); background: var(--card-bg); }
-        
+        .menu-btn:active { background: var(--accent-soft); transform: scale(0.95); }
+
+        /* Dropdown Menu */
         .menu-dropdown {
-            position: absolute; top: 60px; right: 0;
+            position: absolute; top: 75px; right: 0;
             background: var(--modal-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 180px; padding: 8px;
-            display: none; z-index: 100;
-            backdrop-filter: blur(10px);
-            animation: slideDown 0.2s ease;
+            width: 160px; padding: 6px;
+            box-shadow: var(--shadow-lg);
+            display: none; transform-origin: top right;
+            animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .menu-dropdown.show { display: block; }
-        
+
         .menu-item {
-            padding: 12px; font-size: 14px; font-weight: 600;
-            color: var(--text-primary); display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; font-size: 13px; font-weight: 600;
+            color: var(--text-main); display: flex; align-items: center; gap: 10px;
             border-radius: 10px; cursor: pointer; transition: 0.2s;
         }
-        .menu-item:active { background: rgba(0,0,0,0.05); }
-        .menu-item svg { width: 16px; height: 16px; }
-
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .menu-item:active { background: var(--accent-soft); color: var(--accent); }
+        .menu-item svg { width: 16px; height: 16px; opacity: 0.7; }
 
         /* --- 3. MEMO GRID --- */
         #memo-container {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
             padding-bottom: 100px;
         }
 
         .memo-card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 18px;
-            box-shadow: var(--shadow);
+            border-radius: 24px; padding: 20px;
+            min-height: 150px;
             display: flex; flex-direction: column; justify-content: space-between;
-            min-height: 140px;
-            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative; overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+            cursor: default; position: relative; overflow: hidden;
         }
-        .memo-card:active { transform: scale(0.96); }
+        
+        .memo-card:active { transform: scale(0.97); }
 
         .memo-content {
-            font-size: 14px; line-height: 1.5; color: var(--text-primary);
+            font-size: 14px; line-height: 1.6; color: var(--text-main);
             white-space: pre-wrap;
-            display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+            display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
             cursor: pointer;
         }
 
         .memo-footer {
-            margin-top: 15px; display: flex; justify-content: space-between; align-items: center;
+            margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end;
         }
-        .memo-time { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+        .memo-time { font-size: 10px; font-weight: 700; color: var(--text-sub); background: var(--accent-soft); padding: 4px 8px; border-radius: 20px; }
 
-        .action-buttons { display: flex; gap: 8px; }
-
+        .action-buttons { display: flex; gap: 6px; }
         .btn-icon {
-            border: none; width: 28px; height: 28px; border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 10px; border: none;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: 0.2s;
         }
-        .btn-edit { background: rgba(99, 102, 241, 0.1); color: var(--accent); }
+        .btn-edit { background: transparent; color: var(--accent); border: 1px solid transparent; }
         .btn-edit:active { background: var(--accent); color: white; }
-        .btn-trash { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        
+        .btn-trash { background: transparent; color: var(--danger); border: 1px solid transparent; }
         .btn-trash:active { background: var(--danger); color: white; }
 
-        /* --- 4. FAB --- */
+        /* --- 4. FLOATING ACTION BUTTON --- */
         .fab {
-            position: fixed; bottom: 25px; right: 25px;
-            width: 60px; height: 60px; border-radius: 20px;
-            background: var(--accent); color: white;
-            border: none; box-shadow: 0 10px 25px var(--accent-glow);
-            font-size: 30px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 50; transition: transform 0.2s;
+            position: fixed; bottom: 30px; right: 25px;
+            width: 64px; height: 64px; border-radius: 24px;
+            background: var(--text-main); color: var(--bg-body);
+            border: none; box-shadow: var(--shadow-lg);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 40; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .fab:active { transform: scale(0.9) rotate(90deg); }
+        .fab svg { width: 28px; height: 28px; }
 
-        /* --- 5. MODAL & OVERLAY --- */
+        /* --- 5. MODAL & OVERLAY (MODERN) --- */
         .overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(5px); z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: 0.3s;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s ease;
         }
         .overlay.active { opacity: 1; pointer-events: auto; }
 
         .modal-box {
             background: var(--modal-bg);
-            width: 85%; max-width: 350px;
-            padding: 25px; border-radius: 24px;
+            width: 90%; max-width: 360px;
+            padding: 24px; border-radius: 32px;
             border: 1px solid var(--card-border);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            transform: scale(0.9); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9) translateY(20px);
+            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex; flex-direction: column;
         }
-        .overlay.active .modal-box { transform: scale(1); }
+        .overlay.active .modal-box { transform: scale(1) translateY(0); }
 
-        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 800; color: var(--text-main); }
         
         textarea {
-            width: 100%; height: 120px;
-            background: var(--bg-color); border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 15px;
-            color: var(--text-primary); font-size: 15px; outline: none; resize: none;
+            width: 100%; height: 140px;
+            background: var(--bg-body); border: 2px solid transparent;
+            border-radius: 20px; padding: 16px;
+            color: var(--text-main); font-size: 15px; line-height: 1.6;
+            outline: none; resize: none; transition: 0.2s;
         }
-        textarea:focus { border-color: var(--accent); }
+        textarea:focus { border-color: var(--accent); background: var(--card-bg); }
 
-        /* Styling Detail View */
         .detail-scroll {
-            width: 100%; max-height: 60vh; overflow-y: auto;
-            font-size: 15px; line-height: 1.6; color: var(--text-primary);
-            white-space: pre-wrap; margin-bottom: 20px; text-align: left; padding-right: 5px;
+            max-height: 50vh; overflow-y: auto;
+            font-size: 15px; line-height: 1.7; color: var(--text-main);
+            white-space: pre-wrap; margin-bottom: 20px;
         }
-        .detail-scroll::-webkit-scrollbar { width: 4px; }
-        .detail-scroll::-webkit-scrollbar-thumb { background-color: var(--text-secondary); border-radius: 10px; }
+        
+        /* Buttons in Modal */
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+        .btn { flex: 1; padding: 14px; border-radius: 16px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-cancel { background: var(--bg-body); color: var(--text-sub); }
+        .btn-primary { background: var(--text-main); color: var(--bg-body); }
+        .btn-danger { background: var(--danger-soft); color: var(--danger); }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border-radius: 14px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .btn-cancel { background: transparent; border: 1px solid var(--card-border); color: var(--text-secondary); }
-        .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
-        .btn-danger { background: var(--danger); color: white; }
-
-        /* --- 6. TOAST --- */
-        .toast-container { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 200; pointer-events: none; }
+        /* --- 6. TOAST NOTIFICATION (CAPSULE) --- */
+        .toast-container { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); z-index: 200; pointer-events: none; }
         .toast {
             background: var(--modal-bg); border: 1px solid var(--card-border);
-            padding: 10px 20px; border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px;
-            opacity: 0; transform: translateY(-20px); transition: 0.3s;
+            padding: 10px 20px; border-radius: 50px;
+            box-shadow: var(--shadow-md);
+            font-size: 13px; font-weight: 700; color: var(--text-main);
+            display: flex; align-items: center; gap: 10px;
+            opacity: 0; transform: translateY(-10px) scale(0.9);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast svg { width: 16px; height: 16px; }
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .toast svg { color: #10b981; }
 
-        @keyframes popIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .empty-state { grid-column: span 2; text-align: center; margin-top: 50px; opacity: 0.5; font-size: 14px; }
+        /* Animations */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        
+        .empty-state { grid-column: span 2; text-align: center; margin-top: 60px; opacity: 0.4; }
     </style>
 </head>
 <body>
@@ -264,11 +273,11 @@
             <div id="menuDropdown" class="menu-dropdown">
                 <div class="menu-item" onclick="backupData()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Backup
+                    Backup Data
                 </div>
                 <div class="menu-item" onclick="triggerRestore()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    Restore
+                    Restore Data
                 </div>
             </div>
         </div>
@@ -279,13 +288,15 @@
     <div id="memo-container"></div>
 
     <button class="fab" onclick="openInputModal('create')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </button>
 
     <div class="overlay" id="inputModal">
         <div class="modal-box">
-            <div class="modal-title" id="modalTitle">Catatan Baru</div>
-            <textarea id="noteInput" placeholder="Ketik '1. ' atau 'a. ' lalu spasi untuk list otomatis..."></textarea>
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Catatan Baru</div>
+            </div>
+            <textarea id="noteInput" placeholder="Ketik '1. ' atau 'a. ' untuk list otomatis..."></textarea>
             <div class="btn-group">
                 <button class="btn btn-cancel" onclick="closeModal('inputModal')">Batal</button>
                 <button class="btn btn-primary" onclick="saveNote()">Simpan</button>
@@ -295,9 +306,9 @@
 
     <div class="overlay" id="detailModal">
         <div class="modal-box">
-            <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center;">
-                <span>Detail Memo</span>
-                <span id="detailTime" style="font-size:12px; color:var(--text-secondary); font-weight:500;"></span>
+            <div class="modal-header">
+                <div class="modal-title">Detail Memo</div>
+                <div id="detailTime" style="font-size:11px; font-weight:600; color:var(--text-sub); background:var(--bg-body); padding:4px 8px; border-radius:8px;"></div>
             </div>
             <div id="detailContent" class="detail-scroll"></div>
             <div class="btn-group">
@@ -307,13 +318,13 @@
     </div>
 
     <div class="overlay" id="confirmModal">
-        <div class="modal-box" style="text-align:center;">
-            <div style="width:50px; height:50px; background:rgba(239,68,68,0.1); border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; color:var(--danger);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        <div class="modal-box" style="text-align:center; align-items:center;">
+            <div style="width:60px; height:60px; background:var(--danger-soft); border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:15px; color:var(--danger);">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </div>
             <div class="modal-title">Hapus Memo?</div>
-            <p style="font-size:14px; color:var(--text-secondary); margin-bottom:20px;">Tindakan ini tidak dapat dibatalkan.</p>
-            <div class="btn-group">
+            <p style="font-size:14px; color:var(--text-sub); margin-top:5px; margin-bottom:10px;">Memo yang dihapus tidak bisa dikembalikan.</p>
+            <div class="btn-group" style="width:100%;">
                 <button class="btn btn-cancel" onclick="closeModal('confirmModal')">Batal</button>
                 <button class="btn btn-danger" id="confirmDeleteBtn">Ya, Hapus</button>
             </div>
@@ -322,13 +333,13 @@
 
     <div class="toast-container">
         <div class="toast" id="toast">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
             <span id="toastMsg">Berhasil disimpan</span>
         </div>
     </div>
 
     <script>
-        // --- LOGIKA UTAMA ---
+        // --- LOGIC ---
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         
@@ -341,16 +352,16 @@
 
         renderMemos();
 
-        // --- BACKUP & RESTORE ---
+        // --- UI FUNCTIONS ---
         function toggleMenu() { document.getElementById('menuDropdown').classList.toggle('show'); }
-        window.addEventListener('click', function(e) { if (!e.target.closest('.menu-btn')) document.getElementById('menuDropdown').classList.remove('show'); });
+        window.onclick = function(e) { if (!e.target.closest('.menu-btn')) document.getElementById('menuDropdown').classList.remove('show'); }
 
+        // --- BACKUP & RESTORE ---
         function backupData() {
             if (memos.length === 0) { showToast("Tidak ada data"); return; }
-            const dataStr = JSON.stringify(memos, null, 2);
-            const blob = new Blob([dataStr], { type: 'text/plain' });
+            const blob = new Blob([JSON.stringify(memos, null, 2)], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `backup_memo_${new Date().toISOString().slice(0,10)}.txt`;
+            const a = document.createElement('a'); a.href = url; a.download = `backup_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
             showToast("Backup berhasil");
         }
@@ -361,69 +372,73 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (Array.isArray(parsedData) && confirm("Timpa data saat ini dengan backup?")) {
-                        memos = parsedData;
-                        localStorage.setItem('aestheticMemos', JSON.stringify(memos));
-                        renderMemos();
-                        showToast("Restore berhasil!");
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed) && confirm("Timpa data saat ini dengan backup?")) {
+                        memos = parsed; localStorage.setItem('aestheticMemos', JSON.stringify(memos));
+                        renderMemos(); showToast("Data dipulihkan");
                     }
-                } catch { alert("File rusak/invalid."); }
+                } catch { alert("File rusak"); }
             };
             reader.readAsText(file); input.value = '';
         }
 
-        // --- AUTO LIST ---
+        // --- SMART LIST ---
         const textarea = document.getElementById('noteInput');
         textarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                const cursorPosition = this.selectionStart;
-                const value = this.value;
-                const previousLineEnd = value.lastIndexOf('\n', cursorPosition - 1);
-                const currentLine = value.substring(previousLineEnd + 1, cursorPosition);
+                const cursor = this.selectionStart;
+                const val = this.value;
+                const prevLineStart = val.lastIndexOf('\n', cursor - 1) + 1;
+                const currentLine = val.substring(prevLineStart, cursor);
                 
-                const matchNumber = currentLine.match(/^(\d+)\.\s/);
-                if (matchNumber) {
-                    const currentNumber = parseInt(matchNumber[1]);
-                    if (currentLine.trim() === `${currentNumber}.`) {
+                // Numbers
+                const matchNum = currentLine.match(/^(\d+)\.\s/);
+                if (matchNum) {
+                    const num = parseInt(matchNum[1]);
+                    if (currentLine.trim() === `${num}.`) {
                         e.preventDefault();
-                        this.value = value.substring(0, previousLineEnd + 1) + value.substring(cursorPosition);
-                        this.selectionStart = this.selectionEnd = previousLineEnd + 1;
-                        return;
+                        this.value = val.slice(0, prevLineStart) + val.slice(cursor);
+                        this.selectionStart = this.selectionEnd = prevLineStart;
+                    } else {
+                        e.preventDefault();
+                        insertText(this, `\n${num + 1}. `);
                     }
-                    e.preventDefault();
-                    insertTextAtCursor(this, `\n${currentNumber + 1}. `);
                     return;
                 }
-                const matchLetter = currentLine.match(/^([a-zA-Z])\.\s/);
-                if (matchLetter) {
-                    const currentChar = matchLetter[1];
-                    if (currentLine.trim() === `${currentChar}.`) {
+                
+                // Letters
+                const matchLet = currentLine.match(/^([a-zA-Z])\.\s/);
+                if (matchLet) {
+                    const charCode = matchLet[1].charCodeAt(0);
+                    if (currentLine.trim() === `${matchLet[1]}.`) {
                         e.preventDefault();
-                        this.value = value.substring(0, previousLineEnd + 1) + value.substring(cursorPosition);
-                        this.selectionStart = this.selectionEnd = previousLineEnd + 1;
-                        return;
+                        this.value = val.slice(0, prevLineStart) + val.slice(cursor);
+                        this.selectionStart = this.selectionEnd = prevLineStart;
+                    } else {
+                        e.preventDefault();
+                        insertText(this, `\n${String.fromCharCode(charCode + 1)}. `);
                     }
-                    e.preventDefault();
-                    insertTextAtCursor(this, `\n${String.fromCharCode(currentChar.charCodeAt(0) + 1)}. `);
-                    return;
                 }
             }
         });
 
-        function insertTextAtCursor(el, text) {
-            const val = el.value; const endIndex = el.selectionEnd;
-            el.value = val.slice(0, endIndex) + text + val.slice(endIndex);
-            el.selectionStart = el.selectionEnd = endIndex + text.length;
+        function insertText(el, text) {
+            const start = el.selectionStart;
+            el.value = el.value.slice(0, start) + text + el.value.slice(el.selectionEnd);
+            el.selectionStart = el.selectionEnd = start + text.length;
             el.scrollTop = el.scrollHeight;
         }
 
-        // --- RENDER ---
+        // --- CRUD ---
         function renderMemos() {
             const container = document.getElementById('memo-container');
             container.innerHTML = '';
             if (memos.length === 0) {
-                container.innerHTML = `<div class="empty-state"><p>Belum ada catatan</p></div>`; return;
+                container.innerHTML = `<div class="empty-state" style="grid-column: span 2; display: flex; flex-direction: column; align-items: center;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.3; margin-bottom:10px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                    <p>Mulai tulis catatan...</p>
+                </div>`;
+                return;
             }
 
             memos.slice().reverse().forEach((memo, index) => {
@@ -436,10 +451,10 @@
                         <span class="memo-time">${memo.time}</span>
                         <div class="action-buttons">
                             <button class="btn-icon btn-edit" onclick="openInputModal('edit', ${originalIndex})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             </button>
                             <button class="btn-icon btn-trash" onclick="askDelete(${originalIndex})">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -448,35 +463,32 @@
             });
         }
 
-        // --- MODAL ACTIONS ---
         function openInputModal(mode, index = null) {
-            const modalTitle = document.getElementById('modalTitle');
-            const noteInput = document.getElementById('noteInput');
-            if (mode === 'edit' && index !== null) {
-                editTargetIndex = index; modalTitle.innerText = "Edit Catatan"; noteInput.value = memos[index].text;
+            const title = document.getElementById('modalTitle');
+            const input = document.getElementById('noteInput');
+            if (mode === 'edit') {
+                editTargetIndex = index; title.innerText = "Edit Catatan"; input.value = memos[index].text;
             } else {
-                editTargetIndex = null; modalTitle.innerText = "Catatan Baru"; noteInput.value = '';
+                editTargetIndex = null; title.innerText = "Catatan Baru"; input.value = '';
             }
             document.getElementById('inputModal').classList.add('active');
-            setTimeout(() => noteInput.focus(), 100);
+            setTimeout(() => input.focus(), 100);
         }
 
         function openDetailModal(index) {
-            const memo = memos[index];
-            document.getElementById('detailContent').innerText = memo.text;
-            document.getElementById('detailTime').innerText = memo.time;
+            document.getElementById('detailContent').innerText = memos[index].text;
+            document.getElementById('detailTime').innerText = memos[index].time;
             document.getElementById('detailModal').classList.add('active');
         }
 
         function saveNote() {
             const text = document.getElementById('noteInput').value.trim();
             if (text) {
-                const now = new Date();
-                const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} ? ${now.getDate()} ${months[now.getMonth()]}`;
+                const timeStr = `${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2,'0')} • ${new Date().getDate()} ${months[new Date().getMonth()]}`;
                 if (editTargetIndex !== null) {
-                    memos[editTargetIndex].text = text; memos[editTargetIndex].time = timeStr; showToast('Perubahan disimpan');
+                    memos[editTargetIndex] = { text, time: timeStr }; showToast('Diperbarui');
                 } else {
-                    memos.push({ text: text, time: timeStr }); showToast('Catatan dibuat');
+                    memos.push({ text, time: timeStr }); showToast('Disimpan');
                 }
                 localStorage.setItem('aestheticMemos', JSON.stringify(memos));
                 renderMemos(); closeModal('inputModal');
@@ -491,27 +503,23 @@
             if (deleteTargetIndex !== null) {
                 memos.splice(deleteTargetIndex, 1);
                 localStorage.setItem('aestheticMemos', JSON.stringify(memos));
-                renderMemos(); closeModal('confirmModal'); showToast('Catatan dihapus');
+                renderMemos(); closeModal('confirmModal'); showToast('Dihapus');
             }
         };
 
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        
         function showToast(msg) {
-            const toast = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg;
-            toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500);
         }
+
         function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-        // --- CLICK OUTSIDE TO CLOSE MODAL ---
-        const overlays = document.querySelectorAll('.overlay');
-        overlays.forEach(overlay => {
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                }
-            });
+        document.querySelectorAll('.overlay').forEach(ov => {
+            ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('active'); });
         });
-
     </script>
 </body>
 </html>
