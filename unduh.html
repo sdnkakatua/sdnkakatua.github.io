@@ -11,14 +11,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 
     <style>
-        /* --- VARIABLES & RESET --- */
+        /* --- CSS VARIABLES & RESET --- */
         :root {
             --bg-body: #f0f2f5; 
             --bg-surface: #ffffff; 
             --text-primary: #1e293b; 
             --text-secondary: #64748b; 
-            --brand-primary: #7f1d1d; /* Maroon */
-            --brand-accent: #d97706;  /* Gold */
+            --brand-primary: #7f1d1d; 
+            --brand-accent: #d97706;  
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
             --radius-lg: 20px;
             --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
         }
@@ -31,177 +34,102 @@
             display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        /* --- NAVIGATION --- */
+        /* --- COMPONENTS --- */
+        
+        
+       
+        /* --- TOP NAVIGATION BAR --- */
         .top-nav {
-            background-color: #2a0a0a; color: white; position: sticky; top: 0; z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background-color: #2a0a0a;
+            color: white;
+            position: sticky; top: 0; z-index: 110;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
+        body.dark-mode .top-nav { background-color: #020617; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
         .nav-container {
             max-width: 1400px; margin: 0 auto; padding: 0 20px;
-            display: flex; align-items: center; gap: 20px; overflow-x: auto; 
-            white-space: nowrap; height: 60px; scrollbar-width: none;
+            display: flex; align-items: center; gap: 30px;
+            overflow-x: auto; white-space: nowrap;
+            -ms-overflow-style: none; scrollbar-width: none;
         }
         .nav-container::-webkit-scrollbar { display: none; }
-        
+
         .nav-link {
-            padding: 10px 8px; color: rgba(255,255,255,0.75); text-decoration: none;
-            font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-            display: flex; align-items: center; border-bottom: 3px solid transparent; transition: all 0.3s;
+            display: inline-flex; align-items: center; padding: 12px 0;
+            color: rgba(255,255,255,0.7); text-decoration: none;
+            font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 2px solid transparent; transition: all 0.3s; cursor: pointer;
         }
-        .nav-link:hover, .nav-link.active { color: var(--brand-accent); border-bottom-color: var(--brand-accent); }
-        .nav-icon-home { width: 22px; height: 22px; stroke-width: 2px; }
+        .nav-link:hover, .nav-link.active {
+            color: var(--brand-accent); border-bottom-color: var(--brand-accent);
+        }
+ 
+        .nav-icon-home svg { width: 20px; height: 20px; }
 
-        /* --- HEADER --- */
-        header {
-            background: linear-gradient(135deg, var(--brand-primary), #450a0a);
-            color: white; padding: 70px 20px 90px; text-align: center;
-            position: relative; overflow: hidden;
-        }
-        header::after { /* Lengkungan Bawah Header */
-            content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 40px;
-            background: var(--bg-body); border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform: scaleX(1.5);
-        }
-        header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; font-weight: 700; line-height: 1.2; }
-        header p { margin-top: 15px; opacity: 0.9; font-weight: 300; font-size: 1.1rem; max-width: 600px; margin-left: auto; margin-right: auto; }
-
-        /* --- MAIN CONTAINER --- */
-        .download-container {
-            max-width: 800px; width: 100%; margin: -60px auto 0; 
-            padding: 0 20px 60px; display: flex; flex-direction: column; gap: 25px; z-index: 10;
-        }
-
-        /* --- CARDS --- */
-        .card {
-            background: var(--bg-surface); border-radius: var(--radius-lg);
-            padding: 35px; box-shadow: var(--shadow-soft); border: 1px solid rgba(255,255,255,0.5);
-            transition: transform 0.3s ease; position: relative;
-        }
-        .card-title {
-            font-family: 'Playfair Display', serif; color: var(--brand-primary);
-            font-size: 1.75rem; margin: 0 0 20px 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;
-        }
-
-        /* --- TOMBOL AKSES DRIVE (CUSTOM STYLE) --- */
-        .btn-download-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 20px; background: #f8fafc; border-radius: 16px; margin-bottom: 15px;
-            text-decoration: none; color: var(--text-primary); border: 1px solid #e2e8f0; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
-        }
-        .btn-download-item:hover {
-            border-color: var(--brand-accent); background: white;
-            box-shadow: 0 10px 20px -5px rgba(217, 119, 6, 0.15); transform: translateY(-3px);
-        }
-
-        /* Icon SVG Styling */
-        .dl-icon { 
-            background: rgba(217, 119, 6, 0.1); color: var(--brand-accent);
-            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; transition: all 0.3s ease;
-        }
-        .dl-icon svg { width: 24px; height: 24px; stroke-width: 2px; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        header { background: linear-gradient(135deg, var(--brand-primary), #450a0a); color: white; padding: 70px 20px 90px; text-align: center; position: relative; overflow: hidden; }
+        header::after { content: ''; position: absolute; bottom: -20px; left: 0; width: 100%; height: 40px; background: var(--bg-body); border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform: scaleX(1.5); }
+        header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin: 0; font-weight: 700; }
         
-        .btn-download-item:hover .dl-icon {
-            background: var(--brand-accent); color: white;
-            transform: scale(1.1) rotate(-5deg); /* Efek goyang dikit */
-            box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
-        }
+        .download-container { max-width: 800px; width: 100%; margin: -60px auto 0; padding: 0 20px 60px; display: flex; flex-direction: column; gap: 25px; z-index: 10; }
+        .card { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 35px; box-shadow: var(--shadow-soft); border: 1px solid rgba(255,255,255,0.5); }
+        .card-title { font-family: 'Playfair Display', serif; color: var(--brand-primary); font-size: 1.75rem; margin: 0 0 20px 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; }
 
-        /* --- FORM ELEMENTS --- */
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 10px; color: var(--text-primary); font-weight: 600; font-size: 0.95rem; }
-        .modern-input {
-            width: 100%; padding: 16px 18px; border-radius: 14px;
-            border: 2px solid #e2e8f0; background: #f8fafc; color: var(--text-primary);
-            font-family: inherit; font-size: 1rem; box-sizing: border-box; transition: 0.3s;
-        }
-        .modern-input:focus {
-            border-color: var(--brand-accent); background: #fff;
-            box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1); outline: none;
-        }
+        /* BUTTONS & INPUTS */
+        .btn-download-item { display: flex; align-items: center; justify-content: space-between; padding: 20px; background: #f8fafc; border-radius: 16px; text-decoration: none; color: var(--text-primary); border: 1px solid #e2e8f0; transition: all 0.2s; cursor: pointer; }
+        .btn-download-item:hover { border-color: var(--brand-accent); transform: translateY(-3px); background: white; box-shadow: var(--shadow-soft); }
+        .btn-download-item:hover .dl-icon { background: var(--brand-accent); color: white; }
+        
+        .dl-icon { background: rgba(217, 119, 6, 0.1); color: var(--brand-accent); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s ease; }
+        .dl-icon svg { width: 24px; height: 24px; }
 
-        /* --- BUTTON PRIMARY --- */
-        .btn-primary {
-            width: 100%; padding: 18px; border-radius: 14px;
-            background: linear-gradient(135deg, var(--brand-primary), #991b1b); 
-            color: white; border: none; font-weight: 700; font-size: 1rem; cursor: pointer; 
-            transition: 0.3s; box-shadow: 0 8px 20px -5px rgba(127, 29, 29, 0.4); 
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 25px -5px rgba(127, 29, 29, 0.5); }
+        .btn-primary { width: 100%; padding: 18px; border-radius: 14px; background: linear-gradient(135deg, var(--brand-primary), #991b1b); color: white; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(127, 29, 29, 0.5); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        /* --- HASIL PENCARIAN --- */
-        #result-area { margin-top: 30px; display: none; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .modern-input { width: 100%; padding: 16px; border-radius: 14px; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 1rem; transition: all 0.3s; font-family: inherit; }
+        .modern-input:focus { border-color: var(--brand-accent); background: white; outline: none; }
 
-        .success-box { 
-            background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 16px; padding: 20px; 
-            text-align: center; color: #15803d; margin-bottom: 20px;
-        }
-        .result-buttons { display: flex; gap: 12px; }
-        .btn-result {
-            flex: 1; padding: 16px; border-radius: 12px; text-align: center; text-decoration: none;
-            font-weight: 600; color: white; transition: 0.3s; font-size: 0.95rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .btn-ijazah { background-color: #059669; }
-        .btn-ijazah:hover { background-color: #047857; transform: translateY(-2px); }
-        .btn-skl { background-color: #0284c7; }
-        .btn-skl:hover { background-color: #0369a1; transform: translateY(-2px); }
-
-        /* --- TOAST NOTIFICATION --- */
-        #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 2000; width: 90%; max-width: 400px;
-        }
-        .toast {
-            background: #333; color: white; padding: 16px 20px; border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 10px;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            font-size: 0.95rem; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            animation: toastIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .toast.show { opacity: 1; }
-        .toast.error { background: #ef4444; }
-        .toast.success { background: #10b981; }
-        @keyframes toastIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* --- MODAL LOGIN --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 1500;
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s;
-        }
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.active { opacity: 1; }
-        .modal-box {
-            background: white; width: 90%; max-width: 400px; padding: 35px 30px; 
-            border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            position: relative; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        .modal-box { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 24px; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); max-height: 90vh; overflow-y: auto; }
         .modal-overlay.active .modal-box { transform: scale(1); }
-        .close-modal {
-            position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none;
-            width: 32px; height: 32px; border-radius: 50%; cursor: pointer; color: #64748b;
-            font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .close-modal:hover { background: #e2e8f0; color: #000; }
         
-        /* Spinner Loader */
-        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.4); border-bottom-color: white; border-radius: 50%; display: none; animation: rotation 1s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .close-modal-btn { position:absolute; right:20px; top:20px; border:none; background:#f1f5f9; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor:pointer; transition: all 0.2s; }
+        .close-modal-btn:hover { background: #e2e8f0; color: var(--text-primary); }
 
-        /* --- RESPONSIVE MOBILE --- */
-        @media (max-width: 768px) {
-            header h1 { font-size: 2rem; }
-            .card { padding: 25px 20px; }
-            .result-buttons { flex-direction: column; } /* Tombol Ijazah & SKL menumpuk di HP */
-            .btn-download-item { padding: 15px; }
-            .dl-icon { width: 40px; height: 40px; }
-            .dl-icon svg { width: 20px; height: 20px; }
-        }
+        /* RESULT STYLES (New) */
+        .result-header { text-align: center; margin-bottom: 20px; }
+        .result-details { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
+        .detail-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .detail-label { color: var(--text-secondary); }
+        .detail-value { font-weight: 600; color: var(--text-primary); text-align: right; }
+        
+        .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; font-weight: 600; text-decoration: none; color: white; transition: 0.2s; }
+        .btn-action:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-ijazah { background-color: var(--success-color); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-skl { background-color: var(--info-color); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-other { background-color: var(--text-secondary); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3); }
+
+        /* TOAST */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; color: var(--text-primary); padding: 16px 20px; border-radius: 12px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px; min-width: 300px; border-left: 4px solid transparent; font-weight: 500; font-size: 0.95rem; animation: toastSlideIn 0.3s cubic-bezier(0.21, 1.02, 0.73, 1) forwards; }
+        @keyframes toastSlideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        .toast.success { border-left-color: var(--success-color); }
+        .toast.error { border-left-color: var(--error-color); }
+        .toast-icon svg { width: 24px; height: 24px; }
+        .toast.success .toast-icon { color: var(--success-color); }
+        .toast.error .toast-icon { color: var(--error-color); }
+
+        @media (max-width: 480px) { #toast-container { right: 10px; left: 10px; top: 10px; } .toast { min-width: auto; width: 100%; } }
+        
+        /* Loading Spinner */
+        .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -210,242 +138,266 @@
 
     <nav class="top-nav">
         <div class="nav-container">
-            <a href="https://sdnkakatua.github.io" class="nav-link" aria-label="Beranda">
-                <svg class="nav-icon-home" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                </svg>
+            <a href="https://sdnkakatua.github.io/" class="nav-link">
+                <div class="nav-icon-home"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
             </a>
-            <a href="#" class="nav-link active">Unduhan</a>
+            <a href="https://sdnkakatua.github.io/#profil" class="nav-link">Profil</a>
+            <a href="https://sdnkakatua.github.io/#berita" class="nav-link">Berita</a>
+            <a href="https://sdnkakatua.github.io/#ppdb" class="nav-link">PPDB</a>
+            <a href="https://sdnkakatua.github.io/#akad" class="nav-link">Akademik</a>
+            <a href="https://sdnkakatua.github.io/#fasil" class="nav-link">Fasilitas</a>
+            <a href="https://sdnkakatua.github.io/#galeri" class="nav-link">Galeri</a>
+            <a href="https://sdnkakatua.github.io/#kontak" class="nav-link">Kontak</a>
+            <a href="#unduh" class="nav-link active">Unduh</a>
         </div>
     </nav>
 
     <header>
         <h1>Pusat Unduhan</h1>
-        <p>Akses cepat berkas akademik, SKL & Ijazah Digital SDN Kakatua</p>
+        <p>Akses berkas guru, SKL & Ijazah SDN Kakatua</p>
     </header>
 
     <div class="download-container">
-        
         <div class="card">
-            <h2 class="card-title">Berkas Sekolah</h2>
-            
-            <div onclick="openLoginModal()" class="btn-download-item">
+            <h2 class="card-title">Berkas Guru & Tendik</h2>
+            <div onclick="openModal('loginModal')" class="btn-download-item">
                 <div>
-                    <div style="font-weight:700; font-size:1.1rem; margin-bottom: 5px;">Akses Download Berkas
-                    </div>
-                    <div style="font-size:0.9rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Khusus Guru & Admin
-                    </div>
+                    <div style="font-weight:700; font-size:1.1rem; margin-bottom: 5px;">Akses Folder Personal</div>
+                    <div style="font-size:0.9rem; color:var(--text-secondary);">Masukkan Passcode Anda</div>
                 </div>
-                
-                <div class="dl-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
-                    </svg>
-                </div>
+                <div class="dl-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
             </div>
         </div>
 
         <div class="card">
             <h2 class="card-title">Cari Ijazah & SKL</h2>
-            <p style="color:var(--text-secondary); margin-bottom:25px; line-height:1.6; font-size: 0.95rem;">
-                Silakan masukkan <strong>NISN</strong> dan <strong>Tanggal Lahir</strong> siswa untuk mencari dokumen kelulusan.
-            </p>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Lengkapi data di bawah ini untuk mencari dokumen kelulusan.</p>
+            
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap Siswa</label>
+                <input type="text" id="cariNama" class="modern-input" placeholder="Sesuai Data Dapodik">
+            </div>
 
             <div class="form-group">
-                <label class="form-label">NISN Siswa</label>
-                <input type="number" id="inputNisn" class="modern-input" placeholder="Masukkan 10 digit NISN">
+                <label class="form-label">NISN</label>
+                <input type="number" id="cariNisn" class="modern-input" placeholder="10 Digit NISN">
             </div>
 
             <div class="form-group">
                 <label class="form-label">Tanggal Lahir</label>
-                <input type="date" id="inputTglLahir" class="modern-input">
+                <input type="date" id="cariTgl" class="modern-input">
             </div>
 
-            <button class="btn-primary" onclick="cariData()">
-                <span class="loader" id="loadingIcon"></span>
-                <span id="btnText">Cari Dokumen</span>
+            <button id="btnCari" class="btn-primary" onclick="cariDokumen()">
+                <div class="spinner" id="loadingSpinner"></div>
+                <span id="btnCariText" style="display: flex; align-items: center; gap: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Cari Dokumen
+                </span>
             </button>
-
-            <div id="result-area">
-                <div class="success-box">
-                    <div style="font-size:0.9rem; margin-bottom:5px;">Data Ditemukan:</div>
-                    <strong style="font-size:1.3rem; display:block; color: #166534;" id="namaSiswa">Nama Siswa</strong>
-                </div>
-                
-                <div class="result-buttons">
-                    <a href="#" id="linkIjazah" target="_blank" class="btn-result btn-ijazah">
-                        Unduh Ijazah
-                    </a>
-                    
-                    <a href="#" id="linkSKL" target="_blank" class="btn-result btn-skl">
-                        Unduh SKL
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 
     <div id="loginModal" class="modal-overlay">
         <div class="modal-box">
-            <button class="close-modal" onclick="closeLoginModal()">×</button>
+            <button class="close-modal-btn" onclick="closeModal('loginModal')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             
-            <div style="text-align: center; margin-bottom: 25px;">
-                <h3 style="margin:0; color:var(--brand-primary); font-family:'Playfair Display', serif; font-size:1.8rem;">Admin Access</h3>
-                <p style="color:#64748b; margin-top:8px;">Masukkan kredensial sekolah</p>
-            </div>
+            <h3 style="font-family:'Playfair Display', serif; color:var(--brand-primary); font-size:1.6rem; margin-bottom:10px; text-align:center;">Akses Pendidik</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:25px; text-align:center;">Silakan masukkan 6-digit passcode personal Anda.</p>
             
-            <div class="form-group">
-                <input type="text" id="loginUser" class="modern-input" placeholder="Username">
+            <div id="input-section">
+                <input type="password" id="passcodeGuru" class="modern-input" placeholder="? ? ? ? ? ?" maxlength="6" style="text-align: center; letter-spacing: 8px; font-weight: 700; font-size: 1.2rem;">
+                <button class="btn-primary" onclick="cekPasscode()">Verifikasi Kode</button>
             </div>
-            <div class="form-group">
-                <input type="password" id="loginPass" class="modern-input" placeholder="Password">
+
+            <div id="guru-result" style="display:none; margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;">
+                <div style="background:#fffbeb; border:2px solid #fde68a; padding:20px; border-radius:12px; text-align:center;">
+                    <strong id="namaGuruDisplay" style="font-size:1.2rem; color:var(--brand-primary); display:block; margin-bottom:15px;">Nama Guru</strong>
+                    <a href="#" id="driveLinkGuru" target="_blank" class="btn-action btn-ijazah" style="background:#059669;">Buka Google Drive</a>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal-box">
+            <button class="close-modal-btn" onclick="closeModal('resultModal')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             
-            <button class="btn-primary" onclick="prosesLogin()">
-                <span class="loader" id="loginLoader"></span>
-                <span id="btnLoginText">Buka Folder</span>
-            </button>
+            <div class="result-header">
+                <div style="width: 50px; height: 50px; background: #d1fae5; color: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <h3 style="font-family:'Playfair Display', serif; color:var(--brand-primary); font-size:1.5rem; margin:0;">Data Ditemukan</h3>
+            </div>
+
+            <div class="result-details">
+                <div class="detail-row">
+                    <span class="detail-label">Nama</span>
+                    <span class="detail-value" id="resNama">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">NISN</span>
+                    <span class="detail-value" id="resNisn">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tgl Lahir</span>
+                    <span class="detail-value" id="resTgl">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Tahun Lulus</span>
+                    <span class="detail-value" id="resTahun">-</span>
+                </div>
+            </div>
+
+            <div id="actionButtons">
+                <a href="#" id="btnDownloadIjazah" target="_blank" class="btn-action btn-ijazah">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Download Ijazah
+                </a>
+                <a href="#" id="btnDownloadSkl" target="_blank" class="btn-action btn-skl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Download SKL
+                </a>
+                <a href="#" id="btnDownloadLain" target="_blank" class="btn-action btn-other">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><folder></folder><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    Berkas Lainnya
+                </a>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURASI (WAJIB DIISI) ---
-        // Ganti URL di bawah ini dengan URL Web App Anda setelah Deploy
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwt0BkxvVI4srjzAaoGYpVzv5kLyYf4cRbBQHkkbiAhboBss6do2yo2CVPSjpkxfxg7/exec";
+        // --- KONFIGURASI (WAJIB DIGANTI) ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUorZqStIEU18OAChn0sZYEF06AlIcJV4EiJl4yT-FUFwCNIjdAZmWCp30lpaFDgQi/exec"; 
 
-        // --- SISTEM TOAST (NOTIFIKASI) ---
-        function showToast(message, type = 'error') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            // Icon simple
-            let icon = type === 'error' ? '??' : '?';
-            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-            
-            container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.add('show'));
+        // --- DATA GURU (Lokal) ---
+        const DATA_GURU = {
+            "123456": { nama: "Ahmad Subarjo, S.Pd", link: "https://drive.google.com/drive/folders/ID_FOLDER_AHMAD" },
+            "223344": { nama: "Siti Aminah, M.Pd", link: "https://drive.google.com/drive/folders/ID_FOLDER_SITI" }
+        };
 
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // --- LOGIKA MODAL ---
-        function openLoginModal() {
-            const modal = document.getElementById('loginModal');
+        // --- MANAJEMEN MODAL ---
+        function openModal(id) {
+            const modal = document.getElementById(id);
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('active'), 10);
-            
-            // Reset input
-            document.getElementById('loginUser').value = '';
-            document.getElementById('loginPass').value = '';
         }
 
-        function closeLoginModal() {
-            const modal = document.getElementById('loginModal');
+        function closeModal(id) {
+            const modal = document.getElementById(id);
             modal.classList.remove('active');
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
-        document.getElementById('loginModal').addEventListener('click', function(e) {
-            if (e.target === this) closeLoginModal();
-        });
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+                setTimeout(() => event.target.style.display = 'none', 300);
+            }
+        }
 
-        // --- PROSES LOGIN (Ke Backend) ---
-        function prosesLogin() {
-            const u = document.getElementById('loginUser').value;
-            const p = document.getElementById('loginPass').value;
-            const btnText = document.getElementById('btnLoginText');
-            const loader = document.getElementById('loginLoader');
+        // --- LOGIKA GURU ---
+        function cekPasscode() {
+            const code = document.getElementById('passcodeGuru').value;
+            const resArea = document.getElementById('guru-result');
+            const inputArea = document.getElementById('input-section');
+            
+            if (DATA_GURU[code]) {
+                document.getElementById('namaGuruDisplay').innerText = DATA_GURU[code].nama;
+                document.getElementById('driveLinkGuru').href = DATA_GURU[code].link;
+                
+                inputArea.style.display = 'none';
+                resArea.style.display = 'block';
+                showToast("Kode diterima. Selamat datang!", "success");
+            } else {
+                showToast("Passcode salah.", "error");
+            }
+        }
 
-            if(!u || !p) { showToast("Username dan Password wajib diisi!", 'error'); return; }
+        // --- LOGIKA PENCARIAN SISWA (FETCH KE GOOGLE SHEET) ---
+        function cariDokumen() {
+            const nama = document.getElementById('cariNama').value;
+            const nisn = document.getElementById('cariNisn').value;
+            const tgl = document.getElementById('cariTgl').value;
+            
+            if(!nama || !nisn || !tgl) {
+                showToast("Harap lengkapi semua data (Nama, NISN, Tgl Lahir)", "error");
+                return;
+            }
 
-            btnText.innerText = "Memverifikasi...";
-            loader.style.display = "inline-block";
+            // UI Loading State
+            const btn = document.getElementById('btnCari');
+            const spinner = document.getElementById('loadingSpinner');
+            const btnText = document.getElementById('btnCariText');
+            
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.style.display = 'none';
 
-            fetch(`${SCRIPT_URL}?action=login&u=${u}&p=${p}`)
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ nama: nama, nisn: nisn, tgl: tgl })
+            })
             .then(res => res.json())
-            .then(data => {
-                btnText.innerText = "Buka Folder";
-                loader.style.display = "none";
+            .then(resp => {
+                if(resp.status === 'success') {
+                    // Isi Data ke Modal
+                    document.getElementById('resNama').innerText = resp.data.nama;
+                    document.getElementById('resNisn').innerText = resp.data.nisn;
+                    document.getElementById('resTgl').innerText = resp.data.tgl_lahir;
+                    document.getElementById('resTahun').innerText = resp.data.tahun;
 
-                if(data.status === 'success') {
-                    showToast("Login Berhasil! Mengalihkan...", 'success');
-                    closeLoginModal();
-                    setTimeout(() => window.open(data.url, '_blank'), 1000);
+                    // Atur Tombol Download
+                    setupButton('btnDownloadIjazah', resp.data.link_ijazah);
+                    setupButton('btnDownloadSkl', resp.data.link_skl);
+                    setupButton('btnDownloadLain', resp.data.link_lain);
+
+                    openModal('resultModal');
+                    showToast("Data ditemukan!", "success");
                 } else {
-                    showToast("Username atau Password salah!", 'error');
+                    showToast("Data tidak ditemukan. Cek kembali input Anda.", "error");
                 }
             })
             .catch(err => {
                 console.error(err);
-                btnText.innerText = "Buka Folder";
-                loader.style.display = "none";
-                showToast("Gagal terhubung ke server.", 'error');
+                showToast("Gagal terhubung ke server.", "error");
+            })
+            .finally(() => {
+                // Reset UI
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.style.display = 'flex';
             });
         }
 
-        // --- PROSES CARI DATA (Ke Backend) ---
-        function cariData() {
-            const nisn = document.getElementById('inputNisn').value;
-            const tgl = document.getElementById('inputTglLahir').value;
+        function setupButton(elementId, link) {
+            const btn = document.getElementById(elementId);
+            if (link && link.trim() !== "") {
+                btn.href = link;
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
             
-            const btnText = document.getElementById('btnText');
-            const loader = document.getElementById('loadingIcon');
-            const resultArea = document.getElementById('result-area');
+            const iconSvg = type === 'success' 
+                ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' 
+                : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
 
-            if(!nisn || !tgl) { showToast("Lengkapi NISN dan Tanggal Lahir", 'error'); return; }
-
-            btnText.innerText = "Sedang Mencari...";
-            loader.style.display = "inline-block";
-            resultArea.style.display = "none";
-
-            fetch(`${SCRIPT_URL}?nisn=${nisn}&tgl=${tgl}`)
-            .then(res => res.json())
-            .then(data => {
-                btnText.innerText = "Cari Dokumen";
-                loader.style.display = "none";
-
-                if (data.status === 'success') {
-                    document.getElementById('namaSiswa').innerText = data.nama;
-                    
-                    const btnIjazah = document.getElementById('linkIjazah');
-                    const btnSKL = document.getElementById('linkSKL');
-
-                    // Cek ketersediaan link Ijazah
-                    if(data.link_ijazah) {
-                        btnIjazah.href = data.link_ijazah;
-                        btnIjazah.style.display = 'flex';
-                    } else {
-                        btnIjazah.style.display = 'none';
-                    }
-
-                    // Cek ketersediaan link SKL
-                    if(data.link_skl) {
-                        btnSKL.href = data.link_skl;
-                        btnSKL.style.display = 'flex';
-                    } else {
-                        btnSKL.style.display = 'none';
-                    }
-
-                    resultArea.style.display = "block";
-                    showToast("Data siswa ditemukan!", 'success');
-                } else {
-                    showToast("Data tidak ditemukan.", 'error');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                btnText.innerText = "Cari Dokumen";
-                loader.style.display = "none";
-                showToast("Gagal koneksi internet.", 'error');
-            });
+            toast.innerHTML = `<div class="toast-icon">${iconSvg}</div><span>${msg}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
     </script>
 </body>
