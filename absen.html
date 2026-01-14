@@ -66,6 +66,16 @@
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.5);
         }
+        
+        /* Date Input Styling Override */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            filter: invert(0.3);
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="text-slate-600 antialiased selection:bg-brand-500 selection:text-white pb-24">
@@ -84,11 +94,24 @@
                 </div>
 
                 <div class="absolute left-1/2 transform -translate-x-1/2 top-3 sm:top-auto">
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-600">
-                            <i class="far fa-calendar-check"></i>
+                    <div class="flex items-center gap-1 bg-slate-100/80 backdrop-blur-md rounded-full p-1 shadow-inner border border-white/50">
+                        
+                        <button onclick="changeDate(-1)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-brand-600 hover:bg-white hover:shadow-sm transition-all active:scale-95" title="Hari Sebelumnya">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
+
+                        <div class="relative group px-1">
+                            <input type="date" id="input-date" class="bg-transparent border-none text-slate-700 text-sm font-bold focus:ring-0 cursor-pointer text-center w-[130px] font-sans outline-none">
                         </div>
-                        <input type="date" id="input-date" class="bg-slate-100/80 border-0 text-slate-700 text-sm rounded-full focus:ring-2 focus:ring-brand-500 block w-full pl-10 p-2.5 font-medium shadow-inner cursor-pointer hover:bg-white transition-colors">
+
+                        <button onclick="changeDate(1)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-brand-600 hover:bg-white hover:shadow-sm transition-all active:scale-95" title="Hari Selanjutnya">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
+                        
                     </div>
                 </div>
 
@@ -239,6 +262,8 @@
             // Setup Date Picker
             const dateInput = document.getElementById('input-date');
             dateInput.value = currentDate;
+            
+            // Event listener saat user memilih manual di kalender
             dateInput.addEventListener('change', (e) => {
                 currentDate = e.target.value;
                 renderTable();
@@ -261,6 +286,22 @@
         function saveData() {
             localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
             updateStats();
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function changeDate(days) {
+            const dateInput = document.getElementById('input-date');
+            const current = new Date(currentDate);
+            current.setDate(current.getDate() + days);
+            
+            // Adjust timezone offset to prevent date jumping
+            const offset = current.getTimezoneOffset();
+            const adjustedDate = new Date(current.getTime() - (offset*60*1000));
+            const newDateStr = adjustedDate.toISOString().split('T')[0];
+            
+            currentDate = newDateStr;
+            dateInput.value = newDateStr;
+            renderTable();
         }
 
         // --- UI RENDERING ---
