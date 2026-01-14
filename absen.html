@@ -253,7 +253,13 @@
         
         let students = []; // [{id, nis, name}]
         let records = {};  // {'YYYY-MM-DD': { studentId: 'H'}}
-        let currentDate = new Date().toISOString().split('T')[0];
+        
+        // --- FIXED DATE INITIALIZATION (LOCAL TIME) ---
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        let currentDate = `${year}-${month}-${day}`; // Format YYYY-MM-DD sesuai zona waktu user
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -261,7 +267,7 @@
             
             // Setup Date Picker
             const dateInput = document.getElementById('input-date');
-            dateInput.value = currentDate;
+            dateInput.value = currentDate; // Set nilai awal ke tanggal hari ini
             
             // Event listener saat user memilih manual di kalender
             dateInput.addEventListener('change', (e) => {
@@ -291,13 +297,20 @@
         // --- NAVIGATION LOGIC ---
         function changeDate(days) {
             const dateInput = document.getElementById('input-date');
-            const current = new Date(currentDate);
+            
+            // Konversi string YYYY-MM-DD kembali ke Date Object
+            const currentParts = currentDate.split('-');
+            const current = new Date(currentParts[0], currentParts[1] - 1, currentParts[2]);
+            
+            // Tambah/Kurang hari
             current.setDate(current.getDate() + days);
             
-            // Adjust timezone offset to prevent date jumping
-            const offset = current.getTimezoneOffset();
-            const adjustedDate = new Date(current.getTime() - (offset*60*1000));
-            const newDateStr = adjustedDate.toISOString().split('T')[0];
+            // Format ulang ke YYYY-MM-DD
+            const y = current.getFullYear();
+            const m = String(current.getMonth() + 1).padStart(2, '0');
+            const d = String(current.getDate()).padStart(2, '0');
+            
+            const newDateStr = `${y}-${m}-${d}`;
             
             currentDate = newDateStr;
             dateInput.value = newDateStr;
