@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi-SDN Kakatua</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981', // Emerald
+                            600: '#059669',
+                            900: '#064e3b',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(16, 185, 129, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        /* Hide Default Radio */
+        .att-radio { display: none; }
+
+        /* Custom Button Logic */
+        .att-label {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* States colors */
+        .att-radio:checked + .att-label.lbl-h { background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
+        .att-radio:checked + .att-label.lbl-s { background-color: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); transform: translateY(-2px); }
+        .att-radio:checked + .att-label.lbl-i { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+        .att-radio:checked + .att-label.lbl-a { background-color: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); transform: translateY(-2px); }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-600 antialiased selection:bg-brand-500 selection:text-white pb-20">
+
+    <nav class="glass sticky top-0 z-40 w-full transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                        <i class="fas fa-feather-alt text-lg"></i>
+                    </div>
+                    <div class="hidden md:block">
+                        <h1 class="text-xl font-bold text-slate-800 tracking-tight leading-none">SDN Kakatua</h1>
+                        <p class="text-[10px] font-semibold text-brand-600 uppercase tracking-widest">E-Absensi Semester 2</p>
+                    </div>
+                </div>
+
+                <div class="absolute left-1/2 transform -translate-x-1/2 top-3 sm:top-auto">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-brand-600">
+                            <i class="far fa-calendar-check"></i>
+                        </div>
+                        <input type="date" id="input-date" class="bg-slate-100/80 border-0 text-slate-700 text-sm rounded-full focus:ring-2 focus:ring-brand-500 block w-full pl-10 p-2.5 font-medium shadow-inner cursor-pointer hover:bg-white transition-colors">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="resetData()" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-all" title="Reset Data">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
+                <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-check-circle text-6xl text-emerald-500"></i>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 text-xl shadow-sm">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hadir</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="count-h">0</h3>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
+                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-procedures text-6xl text-amber-500"></i>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 text-xl shadow-sm">
+                    <i class="fas fa-thermometer-three-quarters"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sakit</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="count-s">0</h3>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
+                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-envelope-open-text text-6xl text-blue-500"></i>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 text-xl shadow-sm">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Izin</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="count-i">0</h3>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
+                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-times-circle text-6xl text-red-500"></i>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-xl shadow-sm">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alpha</p>
+                    <h3 class="text-2xl font-bold text-slate-800" id="count-a">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+            <div class="relative w-full md:w-1/3">
+                <input type="text" id="search-box" onkeyup="filterStudents()" placeholder="Cari nama siswa..." class="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-soft focus:ring-2 focus:ring-brand-500 bg-white text-sm transition-shadow">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div class="flex gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                <input type="file" id="file-upload" class="hidden" accept=".xlsx, .xls">
+                
+                <button onclick="document.getElementById('file-upload').click()" class="flex items-center gap-2 bg-white text-slate-600 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-soft hover:bg-slate-50 hover:shadow-md transition-all whitespace-nowrap group border border-slate-100">
+                    <i class="fas fa-file-import text-brand-500 group-hover:scale-110 transition-transform"></i> Import
+                </button>
+                
+                <button onclick="downloadTemplate()" class="flex items-center gap-2 bg-white text-slate-600 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-soft hover:bg-slate-50 hover:shadow-md transition-all whitespace-nowrap group border border-slate-100">
+                    <i class="fas fa-download text-blue-500 group-hover:scale-110 transition-transform"></i> Template
+                </button>
+
+                <button onclick="exportReport()" class="flex items-center gap-2 bg-brand-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-brand-500/30 hover:bg-brand-600 hover:shadow-brand-500/40 transition-all whitespace-nowrap transform hover:-translate-y-0.5">
+                    <i class="fas fa-file-excel mr-1"></i> Export Data
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden mb-10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="p-5 text-center w-16">#</th>
+                            <th class="p-5">Siswa</th>
+                            <th class="p-5 text-center">Status Kehadiran</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-list" class="divide-y divide-slate-50 text-sm">
+                        </tbody>
+                </table>
+            </div>
+            <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
+                <div class="bg-slate-50 p-6 rounded-full mb-4">
+                    <i class="fas fa-clipboard-list text-4xl text-slate-300"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700">Belum Ada Data Siswa</h3>
+                <p class="text-slate-400 text-sm max-w-xs mx-auto mb-6">Silakan download template excel lalu import data siswa untuk memulai absensi.</p>
+                <button onclick="downloadTemplate()" class="text-brand-600 font-semibold hover:underline">Download Template Disini</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400">
+        &copy; 2026 Ihsan Syah - SDN Kakatua Digital System.
+    </footer>
+
+    <script>
+        const STORAGE_KEY_STUDENTS = 'kakatua_pro_students';
+        const STORAGE_KEY_RECORDS = 'kakatua_pro_records';
+        
+        let students = [];
+        let records = {};
+        let currentDate = new Date().toISOString().split('T')[0];
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            document.getElementById('input-date').value = currentDate;
+            document.getElementById('input-date').addEventListener('change', (e) => {
+                currentDate = e.target.value;
+                renderTable();
+            });
+            document.getElementById('file-upload').addEventListener('change', handleImport);
+        });
+
+        function loadData() {
+            const s = localStorage.getItem(STORAGE_KEY_STUDENTS);
+            const r = localStorage.getItem(STORAGE_KEY_RECORDS);
+            if(s) students = JSON.parse(s);
+            if(r) records = JSON.parse(r);
+            renderTable();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+            updateStats();
+        }
+
+        // --- RENDER ---
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+        }
+
+        function getColorFromInitials(char) {
+            const colors = ['bg-red-100 text-red-600', 'bg-orange-100 text-orange-600', 'bg-amber-100 text-amber-600', 'bg-green-100 text-green-600', 'bg-teal-100 text-teal-600', 'bg-blue-100 text-blue-600', 'bg-indigo-100 text-indigo-600', 'bg-violet-100 text-violet-600', 'bg-fuchsia-100 text-fuchsia-600', 'bg-pink-100 text-pink-600'];
+            const index = char.charCodeAt(0) % colors.length;
+            return colors[index];
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('attendance-list');
+            const emptyState = document.getElementById('empty-state');
+            const searchVal = document.getElementById('search-box').value.toLowerCase();
+            
+            tbody.innerHTML = '';
+
+            // Filter Students based on search
+            const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchVal));
+
+            if (filteredStudents.length === 0) {
+                if(students.length === 0) emptyState.classList.remove('hidden');
+                else tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400">Tidak ditemukan siswa dengan nama tersebut.</td></tr>`;
+                updateStats();
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            if (!records[currentDate]) records[currentDate] = {};
+
+            filteredStudents.forEach((student, index) => {
+                const status = records[currentDate][student.id] || '';
+                const initial = getInitials(student.name);
+                const colorClass = getColorFromInitials(initial);
+
+                const row = document.createElement('tr');
+                row.className = "group hover:bg-slate-50 transition-colors duration-200";
+                
+                row.innerHTML = `
+                    <td class="p-5 text-center font-mono text-slate-400 text-xs">${index + 1}</td>
+                    <td class="p-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${colorClass} shadow-sm">
+                                ${initial}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-700 text-sm group-hover:text-brand-600 transition-colors">${student.name}</div>
+                                <div class="text-xs text-slate-400 font-mono">NIS: ${student.nis}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-5">
+                        <div class="flex justify-center bg-slate-100 rounded-xl p-1.5 w-max mx-auto gap-1">
+                            ${generateButton(student.id, 'H', 'Hadir', status, 'lbl-h')}
+                            ${generateButton(student.id, 'S', 'Sakit', status, 'lbl-s')}
+                            ${generateButton(student.id, 'I', 'Izin', status, 'lbl-i')}
+                            ${generateButton(student.id, 'A', 'Alpha', status, 'lbl-a')}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateStats();
+        }
+
+        function generateButton(id, val, text, currentStatus, cssClass) {
+            const checked = currentStatus === val ? 'checked' : '';
+            return `
+                <div class="relative">
+                    <input type="radio" id="${id}_${val}" name="att_${id}" value="${val}" class="att-radio" onchange="updateAttendance('${id}', '${val}')" ${checked}>
+                    <label for="${id}_${val}" class="att-label ${cssClass} block w-10 h-8 sm:w-16 sm:h-9 rounded-lg border border-transparent flex items-center justify-center text-xs font-bold text-slate-500 cursor-pointer hover:bg-white hover:shadow-sm">
+                        <span class="sm:hidden">${val}</span>
+                        <span class="hidden sm:inline">${text}</span>
+                    </label>
+                </div>
+            `;
+        }
+
+        function updateAttendance(id, val) {
+            if (!records[currentDate]) records[currentDate] = {};
+            records[currentDate][id] = val;
+            saveData();
+        }
+
+        function filterStudents() {
+            renderTable();
+        }
+
+        function updateStats() {
+            if (!records[currentDate]) {
+                ['h','s','i','a'].forEach(k => document.getElementById(`count-${k}`).innerText = '0');
+                return;
+            }
+            
+            const currentRec = records[currentDate];
+            let counts = { H: 0, S: 0, I: 0, A: 0 };
+            
+            // Hitung hanya untuk siswa yang ada (jaga-jaga jika siswa dihapus tapi record masih ada)
+            // Atau hitung semua record di tanggal tsb
+            Object.values(currentRec).forEach(val => { if (counts[val] !== undefined) counts[val]++; });
+
+            // Animasi Angka (Simple)
+            ['H','S','I','A'].forEach(k => {
+                document.getElementById(`count-${k.toLowerCase()}`).innerText = counts[k];
+            });
+        }
+
+        // --- IMPORT & EXPORT (Logic Sama, Styling beda di Alert) ---
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+                    if (jsonData.length === 0) throw new Error("File kosong");
+
+                    const newStudents = jsonData.map((row, idx) => ({
+                        id: 'S' + (Date.now() + idx),
+                        nis: row['NIS'] || row['nis'] || '-',
+                        name: row['Nama'] || row['Nama Siswa'] || 'Tanpa Nama'
+                    }));
+
+                    Swal.fire({
+                        title: 'Import Data?',
+                        text: `Ditemukan ${newStudents.length} siswa. Data lama akan tertimpa.`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'Ya, Lanjutkan'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            students = newStudents;
+                            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
+                            renderTable();
+                            Swal.fire({icon: 'success', title: 'Berhasil', timer: 1500, showConfirmButton: false});
+                        }
+                    });
+
+                } catch (err) {
+                    Swal.fire('Error', 'Format Excel salah.', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = ''; 
+        }
+
+        function downloadTemplate() {
+            const ws = XLSX.utils.json_to_sheet([{ "NIS": "1001", "Nama": "Contoh Siswa" }]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "Template_Siswa.xlsx");
+        }
+
+        function exportReport() {
+            if(students.length === 0) return Swal.fire('Oops', 'Data siswa kosong', 'warning');
+            
+            const allDates = Object.keys(records).sort();
+            if(allDates.length === 0) return Swal.fire('Oops', 'Belum ada data absensi', 'info');
+
+            let exportData = [];
+            students.forEach((student, index) => {
+                let row = { "No": index + 1, "NIS": student.nis, "Nama": student.name };
+                let stats = { H:0, S:0, I:0, A:0 };
+
+                allDates.forEach(date => {
+                    const status = (records[date] && records[date][student.id]) ? records[date][student.id] : '-';
+                    row[date] = status;
+                    if(stats[status] !== undefined) stats[status]++;
+                });
+
+                row["Total H"] = stats.H; row["Total S"] = stats.S; row["Total I"] = stats.I; row["Total A"] = stats.A;
+                exportData.push(row);
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+            XLSX.writeFile(wb, `Rekap_Absensi_Kakatua_${currentDate}.xlsx`);
+            
+            Swal.fire({
+                icon: 'success', 
+                title: 'Export Selesai', 
+                text: 'File rekap telah diunduh.',
+                confirmButtonColor: '#10b981'
+            });
+        }
+
+        function resetData() {
+            Swal.fire({
+                title: 'Reset Aplikasi?',
+                text: "Semua data siswa dan riwayat akan hilang permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Ya, Reset Semua'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem(STORAGE_KEY_STUDENTS);
+                    localStorage.removeItem(STORAGE_KEY_RECORDS);
+                    students = []; records = {};
+                    renderTable();
+                    Swal.fire({icon:'success', title:'Aplikasi Bersih', timer: 1000, showConfirmButton: false});
+                }
+            });
+        }
+    </script>
+</body>
+</html>
