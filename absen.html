@@ -6,7 +6,6 @@
     <title>Absensi Pro - SDN Kakatua</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,22 +15,8 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981', // Emerald Primary
-                            600: '#059669',
-                            900: '#064e3b',
-                        }
-                    },
-                    boxShadow: {
-                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                        'glow': '0 0 15px rgba(16, 185, 129, 0.3)'
-                    }
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] },
+                    colors: { brand: { 50: '#ecfdf5', 500: '#10b981', 600: '#059669' } }
                 }
             }
         }
@@ -39,248 +24,172 @@
 
     <style>
         body { background-color: #f8fafc; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-
-        /* Hide Default Radio */
         .att-radio { display: none; }
-
-        /* Custom Button Logic */
-        .att-label {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .att-label { transition: all 0.2s; }
         
-        /* States colors with shadows */
-        .att-radio:checked + .att-label.lbl-h { background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
-        .att-radio:checked + .att-label.lbl-s { background-color: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); transform: translateY(-2px); }
-        .att-radio:checked + .att-label.lbl-i { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
-        .att-radio:checked + .att-label.lbl-a { background-color: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); transform: translateY(-2px); }
+        /* Warna Status */
+        .att-radio:checked + .lbl-h { background: #10b981; color: white; border-color: #10b981; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); }
+        .att-radio:checked + .lbl-s { background: #f59e0b; color: white; border-color: #f59e0b; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3); }
+        .att-radio:checked + .lbl-i { background: #3b82f6; color: white; border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); }
+        .att-radio:checked + .lbl-a { background: #ef4444; color: white; border-color: #ef4444; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3); }
 
-        /* Glassmorphism Navbar */
-        .glass {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-        }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid #e2e8f0; }
         
-        /* Date Input Styling Override */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            opacity: 0.6;
-            filter: invert(0.3);
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
+        /* Tooltip sederhana */
+        [data-title]:hover::after {
+            content: attr(data-title);
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #334155;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            z-index: 50;
         }
     </style>
 </head>
-<body class="text-slate-600 antialiased selection:bg-brand-500 selection:text-white pb-24">
+<body class="text-slate-600 antialiased pb-24">
 
-    <nav class="glass sticky top-0 z-40 w-full transition-all duration-300">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                        <i class="fas fa-feather-alt text-lg"></i>
-                    </div>
-                    <div class="hidden md:block">
-                        <h1 class="text-xl font-bold text-slate-800 tracking-tight leading-none">SDN Kakatua</h1>
-                        <p class="text-[10px] font-semibold text-brand-600 uppercase tracking-widest">E-Absensi Pro</p>
-                    </div>
+    <nav class="glass sticky top-0 z-40 w-full shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+            
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                    <i class="fas fa-feather-alt"></i>
                 </div>
-
-                <div class="absolute left-1/2 transform -translate-x-1/2 top-3 sm:top-auto">
-                    <div class="flex items-center gap-1 bg-slate-100/80 backdrop-blur-md rounded-full p-1 shadow-inner border border-white/50">
-                        
-                        <button onclick="changeDate(-1)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-brand-600 hover:bg-white hover:shadow-sm transition-all active:scale-95" title="Hari Sebelumnya">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                            </svg>
-                        </button>
-
-                        <div class="relative group px-1">
-                            <input type="date" id="input-date" class="bg-transparent border-none text-slate-700 text-sm font-bold focus:ring-0 cursor-pointer text-center w-[130px] font-sans outline-none">
-                        </div>
-
-                        <button onclick="changeDate(1)" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-brand-600 hover:bg-white hover:shadow-sm transition-all active:scale-95" title="Hari Selanjutnya">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                            </svg>
-                        </button>
-                        
-                    </div>
+                <div class="hidden sm:block leading-none">
+                    <h1 class="font-bold text-slate-800">SDN Kakatua</h1>
                 </div>
+            </div>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="resetData()" class="text-red-400 hover:text-red-600 hover:bg-red-50 p-2 rounded-full transition-all" title="Reset Semua Data">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center bg-slate-100 rounded-full p-1 shadow-inner">
+                <button onclick="changeDate(-1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-left"></i></button>
+                <input type="date" id="input-date" class="bg-transparent border-none text-xs font-bold w-24 text-center focus:ring-0 outline-none cursor-pointer">
+                <button onclick="changeDate(1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div id="sync-indicator" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                    <i class="fas fa-cloud"></i> <span id="sync-text">Offline</span>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-check-circle text-6xl text-emerald-500"></i>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 text-xl shadow-sm">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hadir</p>
-                    <h3 class="text-2xl font-bold text-slate-800" id="count-h">0</h3>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
-                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-procedures text-6xl text-amber-500"></i>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 text-xl shadow-sm">
-                    <i class="fas fa-thermometer-three-quarters"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sakit</p>
-                    <h3 class="text-2xl font-bold text-slate-800" id="count-s">0</h3>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
-                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-envelope-open-text text-6xl text-blue-500"></i>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 text-xl shadow-sm">
-                    <i class="fas fa-paper-plane"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Izin</p>
-                    <h3 class="text-2xl font-bold text-slate-800" id="count-i">0</h3>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl p-4 shadow-soft border border-slate-100 flex items-center gap-4 relative overflow-hidden group">
-                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-times-circle text-6xl text-red-500"></i>
-                </div>
-                <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-xl shadow-sm">
-                    <i class="fas fa-user-times"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alpha</p>
-                    <h3 class="text-2xl font-bold text-slate-800" id="count-a">0</h3>
-                </div>
-            </div>
-        </div>
+    <main class="max-w-6xl mx-auto px-4 mt-6">
 
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-            <div class="relative w-full md:w-1/3">
-                <input type="text" id="search-box" onkeyup="filterStudents()" placeholder="Cari nama siswa..." class="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-soft focus:ring-2 focus:ring-brand-500 bg-white text-sm transition-shadow">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                    <i class="fas fa-search"></i>
-                </div>
+            
+            <div class="relative w-full md:w-1/3 group">
+                <input type="text" id="search-box" onkeyup="filterStudents()" placeholder="Cari siswa..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-sm transition-all shadow-sm">
+                <i class="fas fa-search absolute left-3 top-3 text-slate-400 group-focus-within:text-brand-500"></i>
             </div>
 
-            <div class="flex gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+            <div class="flex gap-2">
                 <input type="file" id="file-upload" class="hidden" accept=".xlsx, .xls">
                 <input type="file" id="file-restore" class="hidden" accept=".xlsx, .xls">
-                
-                <button onclick="document.getElementById('file-upload').click()" class="flex items-center gap-2 bg-white text-slate-600 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-soft hover:bg-slate-50 hover:shadow-md transition-all whitespace-nowrap group border border-slate-100">
-                    <i class="fas fa-file-import text-emerald-500 group-hover:scale-110 transition-transform"></i> 
-                    <span class="hidden sm:inline">Import</span>
-                </button>
 
-                 <button onclick="document.getElementById('file-restore').click()" class="flex items-center gap-2 bg-white text-slate-600 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-soft hover:bg-violet-50 hover:shadow-md transition-all whitespace-nowrap group border border-slate-100" title="Kembalikan data dari file Excel Rekap">
-                    <i class="fas fa-history text-violet-500 group-hover:scale-110 transition-transform"></i> 
-                    <span class="hidden sm:inline">Restore</span>
+                <button onclick="setApiUrl()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-blue-500 hover:border-blue-200 hover:bg-blue-50 shadow-sm transition relative" data-title="Hubungkan Server">
+                    <i class="fas fa-link"></i>
                 </button>
                 
-                <button onclick="downloadTemplate()" class="flex items-center gap-2 bg-white text-slate-600 px-4 py-2.5 rounded-xl text-sm font-semibold shadow-soft hover:bg-blue-50 hover:shadow-md transition-all whitespace-nowrap group border border-slate-100">
-                    <i class="fas fa-download text-blue-500 group-hover:scale-110 transition-transform"></i> 
-                    <span class="hidden sm:inline">Template</span>
+                <div class="w-px h-10 bg-slate-300 mx-1"></div>
+
+                <button onclick="document.getElementById('file-upload').click()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-emerald-500 hover:border-emerald-200 hover:bg-emerald-50 shadow-sm transition relative" data-title="Import Siswa Baru">
+                    <i class="fas fa-file-import"></i>
                 </button>
 
-                <div class="w-px bg-slate-200 h-8 mx-1"></div>
+                <button onclick="document.getElementById('file-restore').click()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-violet-500 hover:border-violet-200 hover:bg-violet-50 shadow-sm transition relative" data-title="Restore Backup">
+                    <i class="fas fa-history"></i>
+                </button>
 
-                <button onclick="exportReport()" class="flex items-center gap-2 bg-brand-500 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-brand-500/30 hover:bg-brand-600 hover:shadow-brand-500/40 transition-all whitespace-nowrap transform hover:-translate-y-0.5">
-                    <i class="fas fa-file-excel mr-1"></i> Export
+                <button onclick="downloadTemplate()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 shadow-sm transition relative" data-title="Download Template">
+                    <i class="fas fa-download"></i>
+                </button>
+
+                <button onclick="exportReport()" class="w-10 h-10 rounded-xl bg-brand-500 border border-brand-600 text-white hover:bg-brand-600 shadow-md shadow-brand-500/30 transition relative" data-title="Export Excel">
+                    <i class="fas fa-file-excel"></i>
+                </button>
+
+                <div class="w-px h-10 bg-slate-300 mx-1"></div>
+
+                <button onclick="resetData()" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-red-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 shadow-sm transition relative" data-title="Reset Aplikasi">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden mb-10 min-h-[400px]">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                            <th class="p-5 text-center w-16">#</th>
-                            <th class="p-5">Siswa</th>
-                            <th class="p-5 text-center">Status Kehadiran</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendance-list" class="divide-y divide-slate-50 text-sm">
-                        </tbody>
-                </table>
+        <div class="grid grid-cols-4 gap-3 mb-6">
+            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hadir</span>
+                <span class="text-xl font-bold text-emerald-500" id="count-h">0</span>
             </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sakit</span>
+                <span class="text-xl font-bold text-amber-500" id="count-s">0</span>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Izin</span>
+                <span class="text-xl font-bold text-blue-500" id="count-i">0</span>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alpha</span>
+                <span class="text-xl font-bold text-red-500" id="count-a">0</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase">
+                        <th class="p-4 text-center w-12">#</th>
+                        <th class="p-4">Siswa</th>
+                        <th class="p-4 text-center">Kehadiran</th>
+                    </tr>
+                </thead>
+                <tbody id="attendance-list" class="divide-y divide-slate-100 text-sm"></tbody>
+            </table>
             
-            <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center">
-                <div class="bg-slate-50 p-6 rounded-full mb-4">
-                    <i class="fas fa-clipboard-list text-4xl text-slate-300"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-700">Belum Ada Data Siswa</h3>
-                <p class="text-slate-400 text-sm max-w-xs mx-auto mb-6">Import data siswa baru atau Restore data dari file Excel lama.</p>
-                <div class="flex gap-2">
-                    <button onclick="downloadTemplate()" class="text-brand-600 font-semibold text-xs hover:underline">Download Template</button>
-                    <span class="text-slate-300">|</span>
-                    <button onclick="document.getElementById('file-restore').click()" class="text-violet-500 font-semibold text-xs hover:underline">Restore File</button>
-                </div>
+            <div id="empty-state" class="hidden py-16 text-center">
+                <div class="inline-block p-4 rounded-full bg-slate-50 mb-3"><i class="fas fa-inbox text-3xl text-slate-300"></i></div>
+                <p class="text-slate-500 text-sm">Data Kosong</p>
             </div>
         </div>
+
     </main>
 
-    <footer class="text-center py-6 text-xs text-slate-400">
-        &copy; 2026 SDN Kakatua Digital System.
-    </footer>
-
     <script>
-        // --- CONSTANTS & STATE ---
-        const STORAGE_KEY_STUDENTS = 'kakatua_pro_students';
-        const STORAGE_KEY_RECORDS = 'kakatua_pro_records';
+        const STORAGE_KEY_STUDENTS = 'kakatua_std';
+        const STORAGE_KEY_RECORDS = 'kakatua_rec';
+        const STORAGE_KEY_API = 'kakatua_api';
         
-        let students = []; // [{id, nis, name}]
-        let records = {};  // {'YYYY-MM-DD': { studentId: 'H'}}
-        
-        // --- FIXED DATE INITIALIZATION (LOCAL TIME) ---
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        let currentDate = `${year}-${month}-${day}`; // Format YYYY-MM-DD sesuai zona waktu user
+        let students = [];
+        let records = {}; // { '2023-10-01': { 'ID_1': 'H' } }
+        let GAS_API_URL = localStorage.getItem(STORAGE_KEY_API) || '';
 
-        // --- INITIALIZATION ---
+        // Tanggal Hari Ini
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2,'0');
+        const d = String(now.getDate()).padStart(2,'0');
+        let currentDate = `${y}-${m}-${d}`;
+
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
-            
-            // Setup Date Picker
-            const dateInput = document.getElementById('input-date');
-            dateInput.value = currentDate; // Set nilai awal ke tanggal hari ini
-            
-            // Event listener saat user memilih manual di kalender
-            dateInput.addEventListener('change', (e) => {
-                currentDate = e.target.value;
-                renderTable();
+            document.getElementById('input-date').value = currentDate;
+            document.getElementById('input-date').addEventListener('change', (e) => {
+                currentDate = e.target.value; renderTable();
             });
-
-            // Setup File Listeners
             document.getElementById('file-upload').addEventListener('change', handleImport);
             document.getElementById('file-restore').addEventListener('change', handleRestore);
+            
+            if(GAS_API_URL) updateSyncStatus('Ready', 'text-emerald-500');
         });
 
-        // --- DATA MANAGEMENT ---
         function loadData() {
             const s = localStorage.getItem(STORAGE_KEY_STUDENTS);
             const r = localStorage.getItem(STORAGE_KEY_RECORDS);
@@ -294,340 +203,235 @@
             updateStats();
         }
 
-        // --- NAVIGATION LOGIC ---
-        function changeDate(days) {
-            const dateInput = document.getElementById('input-date');
-            
-            // Konversi string YYYY-MM-DD kembali ke Date Object
-            const currentParts = currentDate.split('-');
-            const current = new Date(currentParts[0], currentParts[1] - 1, currentParts[2]);
-            
-            // Tambah/Kurang hari
-            current.setDate(current.getDate() + days);
-            
-            // Format ulang ke YYYY-MM-DD
-            const y = current.getFullYear();
-            const m = String(current.getMonth() + 1).padStart(2, '0');
-            const d = String(current.getDate()).padStart(2, '0');
-            
-            const newDateStr = `${y}-${m}-${d}`;
-            
-            currentDate = newDateStr;
-            dateInput.value = newDateStr;
-            renderTable();
-        }
-
-        // --- UI RENDERING ---
-        function getInitials(name) {
-            return name ? name.split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() : '??';
-        }
-
-        function getColorFromInitials(char) {
-            const colors = [
-                'bg-red-100 text-red-600', 'bg-orange-100 text-orange-600', 
-                'bg-amber-100 text-amber-600', 'bg-green-100 text-green-600', 
-                'bg-teal-100 text-teal-600', 'bg-blue-100 text-blue-600', 
-                'bg-indigo-100 text-indigo-600', 'bg-violet-100 text-violet-600', 
-                'bg-fuchsia-100 text-fuchsia-600', 'bg-pink-100 text-pink-600'
-            ];
-            const index = (char.charCodeAt(0) || 0) % colors.length;
-            return colors[index];
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('attendance-list');
-            const emptyState = document.getElementById('empty-state');
-            const searchVal = document.getElementById('search-box').value.toLowerCase();
-            
-            tbody.innerHTML = '';
-
-            // Filter Students
-            const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchVal));
-
-            // Handle Empty States
-            if (students.length === 0) {
-                emptyState.classList.remove('hidden');
-                updateStats();
-                return;
-            }
-            
-            if (filteredStudents.length === 0) {
-                emptyState.classList.add('hidden');
-                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-400 italic">Tidak ditemukan siswa dengan nama "${searchVal}".</td></tr>`;
-                updateStats();
-                return;
-            }
-            
-            emptyState.classList.add('hidden');
-
-            // Init Record for Date
-            if (!records[currentDate]) records[currentDate] = {};
-
-            // Render Rows
-            filteredStudents.forEach((student, index) => {
-                const status = records[currentDate][student.id] || '';
-                const initial = getInitials(student.name);
-                const colorClass = getColorFromInitials(initial);
-
-                const row = document.createElement('tr');
-                row.className = "group hover:bg-slate-50 transition-colors duration-200";
-                
-                row.innerHTML = `
-                    <td class="p-5 text-center font-mono text-slate-400 text-xs">${index + 1}</td>
-                    <td class="p-5">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${colorClass} shadow-sm shrink-0">
-                                ${initial}
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-700 text-sm group-hover:text-brand-600 transition-colors">${student.name}</div>
-                                <div class="text-xs text-slate-400 font-mono">NIS: ${student.nis}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="p-5">
-                        <div class="flex justify-center bg-slate-100 rounded-xl p-1.5 w-max mx-auto gap-1 shadow-inner">
-                            ${generateButton(student.id, 'H', 'Hadir', status, 'lbl-h')}
-                            ${generateButton(student.id, 'S', 'Sakit', status, 'lbl-s')}
-                            ${generateButton(student.id, 'I', 'Izin', status, 'lbl-i')}
-                            ${generateButton(student.id, 'A', 'Alpha', status, 'lbl-a')}
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            updateStats();
-        }
-
-        function generateButton(id, val, text, currentStatus, cssClass) {
-            const checked = currentStatus === val ? 'checked' : '';
-            return `
-                <div class="relative">
-                    <input type="radio" id="${id}_${val}" name="att_${id}" value="${val}" class="att-radio" onchange="updateAttendance('${id}', '${val}')" ${checked}>
-                    <label for="${id}_${val}" class="att-label ${cssClass} block w-10 h-8 sm:w-16 sm:h-9 rounded-lg border border-transparent flex items-center justify-center text-xs font-bold text-slate-500 cursor-pointer hover:bg-white hover:shadow-sm">
-                        <span class="sm:hidden">${val}</span>
-                        <span class="hidden sm:inline">${text}</span>
-                    </label>
-                </div>
-            `;
-        }
-
         function updateAttendance(id, val) {
             if (!records[currentDate]) records[currentDate] = {};
             records[currentDate][id] = val;
             saveData();
+            sendToGoogleSheet(id, val, currentDate);
         }
 
-        function filterStudents() {
-            renderTable();
+        function sendToGoogleSheet(id, val, dateStr) {
+            if (!GAS_API_URL) return;
+
+            const s = students.find(x => x.id === id);
+            if(!s) return;
+
+            updateSyncStatus('Syncing', 'text-amber-500 animate-pulse');
+
+            const payload = {
+                id: s.id, nis: s.nis, name: s.name,
+                date: dateStr, status: val
+            };
+
+            fetch(GAS_API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting untuk bypass CORS
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                updateSyncStatus('Saved', 'text-emerald-500');
+                setTimeout(() => updateSyncStatus('Ready', 'text-emerald-600'), 2000);
+            })
+            .catch(e => {
+                console.error(e);
+                updateSyncStatus('Error', 'text-red-500');
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('attendance-list');
+            const empty = document.getElementById('empty-state');
+            const search = document.getElementById('search-box').value.toLowerCase();
+            
+            tbody.innerHTML = '';
+            const filtered = students.filter(s => s.name.toLowerCase().includes(search));
+
+            if(students.length === 0 || filtered.length === 0) {
+                empty.classList.remove('hidden');
+            } else {
+                empty.classList.add('hidden');
+                
+                if (!records[currentDate]) records[currentDate] = {};
+
+                filtered.forEach((student, i) => {
+                    const status = records[currentDate][student.id] || '';
+                    const init = student.name.substring(0,2).toUpperCase();
+                    
+                    const row = `
+                    <tr class="group hover:bg-slate-50 transition">
+                        <td class="p-4 text-center text-xs text-slate-400 font-mono">${i+1}</td>
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500">${init}</div>
+                                <div>
+                                    <div class="font-bold text-slate-700 text-sm">${student.name}</div>
+                                    <div class="text-[10px] text-slate-400">NIS: ${student.nis}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <div class="flex justify-center bg-slate-100 rounded-lg p-1 w-max mx-auto gap-1">
+                                ${radioBtn(student.id, 'H', 'H', status, 'lbl-h')}
+                                ${radioBtn(student.id, 'S', 'S', status, 'lbl-s')}
+                                ${radioBtn(student.id, 'I', 'I', status, 'lbl-i')}
+                                ${radioBtn(student.id, 'A', 'A', status, 'lbl-a')}
+                            </div>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }
+            updateStats();
+        }
+
+        function radioBtn(id, val, label, curr, css) {
+            const chk = curr === val ? 'checked' : '';
+            return `
+            <div class="relative">
+                <input type="radio" id="${id}_${val}" name="att_${id}" value="${val}" class="att-radio" onchange="updateAttendance('${id}', '${val}')" ${chk}>
+                <label for="${id}_${val}" class="att-label ${css} block w-8 h-7 rounded flex items-center justify-center text-xs font-bold text-slate-400 cursor-pointer hover:bg-white border border-transparent">
+                    ${label}
+                </label>
+            </div>`;
         }
 
         function updateStats() {
-            let counts = { H: 0, S: 0, I: 0, A: 0 };
-            
-            if (records[currentDate]) {
-                const currentRec = records[currentDate];
-                Object.values(currentRec).forEach(val => { 
-                    if (counts[val] !== undefined) counts[val]++; 
-                });
+            let c = {H:0, S:0, I:0, A:0};
+            if(records[currentDate]) {
+                Object.values(records[currentDate]).forEach(v => { if(c[v]!==undefined) c[v]++ });
             }
-
-            // Animate Numbers
-            ['H','S','I','A'].forEach(k => {
-                document.getElementById(`count-${k.toLowerCase()}`).innerText = counts[k];
-            });
+            ['H','S','I','A'].forEach(k => document.getElementById(`count-${k.toLowerCase()}`).innerText = c[k]);
         }
 
-        // --- IMPORT LOGIC (NEW DATA) ---
         function handleImport(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-                    if (jsonData.length === 0) throw new Error("File kosong");
-
-                    const newStudents = jsonData.map((row, idx) => ({
-                        id: 'S' + (Date.now() + idx),
-                        nis: row['NIS'] || row['nis'] || '-',
-                        name: row['Nama'] || row['Nama Siswa'] || 'Tanpa Nama'
-                    }));
-
-                    Swal.fire({
-                        title: 'Import Data Baru?',
-                        text: `Ditemukan ${newStudents.length} siswa. Data siswa & riwayat lama akan DIHAPUS.`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#10b981',
-                        confirmButtonText: 'Ya, Ganti Data'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            students = newStudents;
-                            records = {}; // Reset history on new import
-                            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
-                            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
-                            renderTable();
-                            Swal.fire({icon: 'success', title: 'Berhasil', timer: 1500, showConfirmButton: false});
-                        }
-                    });
-
-                } catch (err) {
-                    Swal.fire('Error', 'Format Excel salah.', 'error');
-                }
+            const f = e.target.files[0];
+            if(!f) return;
+            const r = new FileReader();
+            r.onload = (evt) => {
+                const wb = XLSX.read(evt.target.result, {type:'array'});
+                const js = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const newS = js.map((x,i) => ({ id:'S'+(Date.now()+i), nis:x['NIS']||x['nis']||'-', name:x['Nama']||x['nama']||'Siswa Baru' }));
+                
+                Swal.fire({title:'Import Data?', text:'Data lama akan dihapus!', showCancelButton:true}).then(res=>{
+                    if(res.isConfirmed){ students=newS; records={}; localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students)); localStorage.removeItem(STORAGE_KEY_RECORDS); renderTable(); }
+                });
             };
-            reader.readAsArrayBuffer(file);
-            e.target.value = ''; 
-        }
-
-        // --- RESTORE LOGIC (RECOVERY FROM BACKUP) ---
-        function handleRestore(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-                    if (jsonData.length === 0) throw new Error("File kosong");
-
-                    Swal.fire({
-                        title: 'Restore Data Backup?',
-                        text: "Data saat ini akan ditimpa dengan data dari file backup.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#8b5cf6',
-                        confirmButtonText: 'Ya, Restore'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            processRestore(jsonData);
-                        }
-                    });
-
-                } catch (err) {
-                    Swal.fire('Error', 'Gagal restore: ' + err.message, 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
+            r.readAsArrayBuffer(f);
             e.target.value = '';
         }
 
-        function processRestore(data) {
-            let restoredStudents = [];
-            let restoredRecords = {};
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-            data.forEach((row, index) => {
-                const studentId = 'S_RES_' + (Date.now() + index);
-
-                // 1. Restore Siswa
-                restoredStudents.push({
-                    id: studentId,
-                    nis: row['NIS'] || row['nis'] || '-',
-                    name: row['Nama'] || row['nama'] || 'Tanpa Nama'
-                });
-
-                // 2. Restore Riwayat (Scan kolom tanggal)
-                Object.keys(row).forEach(key => {
-                    if (dateRegex.test(key)) { // Jika header adalah tanggal (2024-01-01)
-                        const status = row[key];
-                        if (status && ['H','S','I','A'].includes(status)) {
-                            if (!restoredRecords[key]) restoredRecords[key] = {};
-                            restoredRecords[key][studentId] = status;
-                        }
-                    }
-                });
-            });
-
-            // Update State
-            students = restoredStudents;
-            records = restoredRecords;
-            localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
-            localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
-            renderTable();
+        // --- FITUR RESTORE YANG SUDAH DIPERBAIKI ---
+        function handleRestore(e) {
+            const f = e.target.files[0];
+            if(!f) return;
+            const r = new FileReader();
             
-            Swal.fire({
-                icon: 'success',
-                title: 'Restore Berhasil!',
-                text: `${students.length} siswa dan riwayat absensi dipulihkan.`,
-                timer: 2000,
-                showConfirmButton: false
-            });
+            r.onload = (evt) => {
+                try {
+                    const wb = XLSX.read(evt.target.result, {type:'array'});
+                    const rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                    
+                    if(rawData.length === 0) throw new Error("File Kosong");
+
+                    let restoredStudents = [];
+                    let restoredRecords = {};
+                    // Regex format YYYY-MM-DD
+                    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+                    rawData.forEach((row, idx) => {
+                        const sId = 'RES_' + idx + '_' + Date.now();
+                        
+                        // 1. Ambil Data Siswa
+                        restoredStudents.push({
+                            id: sId,
+                            nis: row['NIS'] || row['nis'] || '-',
+                            name: row['Nama'] || row['nama'] || 'Tanpa Nama'
+                        });
+
+                        // 2. Ambil Riwayat Tanggal (Loop semua key di row)
+                        Object.keys(row).forEach(key => {
+                            // Jika key adalah tanggal (misal: "2024-01-01")
+                            if (dateRegex.test(key)) {
+                                const val = row[key];
+                                if (['H','S','I','A'].includes(val)) {
+                                    if (!restoredRecords[key]) restoredRecords[key] = {};
+                                    restoredRecords[key][sId] = val;
+                                }
+                            }
+                        });
+                    });
+
+                    Swal.fire({
+                        title: 'Restore Berhasil',
+                        text: `Dipulihkan: ${restoredStudents.length} siswa & history absen.`,
+                        icon: 'success'
+                    }).then(() => {
+                        students = restoredStudents;
+                        records = restoredRecords;
+                        localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
+                        localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
+                        renderTable();
+                    });
+
+                } catch(err) {
+                    Swal.fire('Gagal', 'Format file salah atau bukan file rekap valid.', 'error');
+                }
+            };
+            r.readAsArrayBuffer(f);
+            e.target.value = '';
         }
 
-        // --- EXPORT & UTILS ---
         function downloadTemplate() {
-            const ws = XLSX.utils.json_to_sheet([{ "NIS": "1001", "Nama": "Contoh Siswa" }]);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Template_Siswa.xlsx");
+            const ws = XLSX.utils.json_to_sheet([{NIS:"123", Nama:"Siswa A"}]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Siswa");
+            XLSX.writeFile(wb, "Template.xlsx");
         }
 
         function exportReport() {
-            if(students.length === 0) return Swal.fire('Oops', 'Data siswa kosong', 'warning');
-            
-            const allDates = Object.keys(records).sort();
-            
-            // Konfirmasi jika belum ada absen sama sekali
-            if(allDates.length === 0) {
-                 // Tetap export daftar siswa saja
-            }
-
-            let exportData = [];
-            students.forEach((student, index) => {
-                let row = { "No": index + 1, "NIS": student.nis, "Nama": student.name };
-                let stats = { H:0, S:0, I:0, A:0 };
-
-                allDates.forEach(date => {
-                    const status = (records[date] && records[date][student.id]) ? records[date][student.id] : '';
-                    row[date] = status; // Kolom tanggal dinamis
-                    if(status && stats[status] !== undefined) stats[status]++;
+            if(students.length===0) return;
+            const data = students.map((s,i) => {
+                let row = {No:i+1, NIS:s.nis, Nama:s.name};
+                let tot = {H:0, S:0, I:0, A:0};
+                
+                // Urutkan tanggal
+                Object.keys(records).sort().forEach(date => {
+                    const st = records[date][s.id];
+                    if(st) { row[date] = st; tot[st]++; }
                 });
-
-                row["Total H"] = stats.H; row["Total S"] = stats.S; 
-                row["Total I"] = stats.I; row["Total A"] = stats.A;
-                exportData.push(row);
+                
+                row['Total H'] = tot.H; row['Total S'] = tot.S;
+                row['Total I'] = tot.I; row['Total A'] = tot.A;
+                return row;
             });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Rekap");
+            XLSX.writeFile(wb, "Rekap_Absensi.xlsx");
+        }
 
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-            XLSX.writeFile(wb, `Rekap_Absensi_Kakatua_${currentDate}.xlsx`);
-            
-            Swal.fire({
-                icon: 'success', 
-                title: 'Export Selesai', 
-                text: 'File rekap telah diunduh. Simpan file ini sebagai BACKUP.',
-                confirmButtonColor: '#10b981'
+        function setApiUrl() {
+            Swal.fire({title:'Link Google Sheet', input:'text', inputValue:GAS_API_URL}).then(r=>{
+                if(r.value){ GAS_API_URL=r.value; localStorage.setItem(STORAGE_KEY_API,GAS_API_URL); updateSyncStatus('Ready','text-emerald-500'); }
             });
         }
 
         function resetData() {
-            Swal.fire({
-                title: 'Reset Aplikasi?',
-                text: "Semua data siswa dan riwayat akan hilang permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Reset Semua'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.removeItem(STORAGE_KEY_STUDENTS);
-                    localStorage.removeItem(STORAGE_KEY_RECORDS);
-                    students = []; records = {};
-                    renderTable();
-                    Swal.fire({icon:'success', title:'Aplikasi Bersih', timer: 1000, showConfirmButton: false});
-                }
+            Swal.fire({title:'Reset Data?', showCancelButton:true, icon:'warning'}).then(r=>{
+                if(r.isConfirmed){ localStorage.clear(); location.reload(); }
             });
+        }
+
+        function changeDate(d) {
+            const dt = new Date(currentDate); dt.setDate(dt.getDate()+d);
+            currentDate = dt.toISOString().split('T')[0];
+            document.getElementById('input-date').value = currentDate;
+            renderTable();
+        }
+
+        function filterStudents() { renderTable(); }
+        function updateSyncStatus(txt, cls) {
+            document.getElementById('sync-text').innerText = txt;
+            document.getElementById('sync-indicator').className = `text-[10px] font-bold flex items-center gap-1 ${cls}`;
         }
     </script>
 </body>
