@@ -259,7 +259,7 @@
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
-        let currentDate = `${year}-${month}-${day}`; // Format YYYY-MM-DD sesuai zona waktu user
+        let currentDate = `${year}-${month}-${day}`; 
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -267,9 +267,8 @@
             
             // Setup Date Picker
             const dateInput = document.getElementById('input-date');
-            dateInput.value = currentDate; // Set nilai awal ke tanggal hari ini
+            dateInput.value = currentDate;
             
-            // Event listener saat user memilih manual di kalender
             dateInput.addEventListener('change', (e) => {
                 currentDate = e.target.value;
                 renderTable();
@@ -297,21 +296,15 @@
         // --- NAVIGATION LOGIC ---
         function changeDate(days) {
             const dateInput = document.getElementById('input-date');
-            
-            // Konversi string YYYY-MM-DD kembali ke Date Object
             const currentParts = currentDate.split('-');
             const current = new Date(currentParts[0], currentParts[1] - 1, currentParts[2]);
-            
-            // Tambah/Kurang hari
             current.setDate(current.getDate() + days);
             
-            // Format ulang ke YYYY-MM-DD
             const y = current.getFullYear();
             const m = String(current.getMonth() + 1).padStart(2, '0');
             const d = String(current.getDate()).padStart(2, '0');
             
             const newDateStr = `${y}-${m}-${d}`;
-            
             currentDate = newDateStr;
             dateInput.value = newDateStr;
             renderTable();
@@ -341,10 +334,8 @@
             
             tbody.innerHTML = '';
 
-            // Filter Students
             const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchVal));
 
-            // Handle Empty States
             if (students.length === 0) {
                 emptyState.classList.remove('hidden');
                 updateStats();
@@ -360,10 +351,8 @@
             
             emptyState.classList.add('hidden');
 
-            // Init Record for Date
             if (!records[currentDate]) records[currentDate] = {};
 
-            // Render Rows
             filteredStudents.forEach((student, index) => {
                 const status = records[currentDate][student.id] || '';
                 const initial = getInitials(student.name);
@@ -432,13 +421,12 @@
                 });
             }
 
-            // Animate Numbers
             ['H','S','I','A'].forEach(k => {
                 document.getElementById(`count-${k.toLowerCase()}`).innerText = counts[k];
             });
         }
 
-        // --- IMPORT LOGIC (NEW DATA) ---
+        // --- PERBAIKAN IMPORT (NEW DATA) ---
         function handleImport(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -469,7 +457,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             students = newStudents;
-                            records = {}; // Reset history on new import
+                            records = {}; 
                             localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
                             localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
                             renderTable();
@@ -485,7 +473,7 @@
             e.target.value = ''; 
         }
 
-        // --- RESTORE LOGIC (RECOVERY FROM BACKUP) ---
+        // --- PERBAIKAN RESTORE (RECOVERY FROM BACKUP) ---
         function handleRestore(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -529,16 +517,14 @@
             data.forEach((row, index) => {
                 const studentId = 'S_RES_' + (Date.now() + index);
 
-                // 1. Restore Siswa
                 restoredStudents.push({
                     id: studentId,
                     nis: row['NIS'] || row['nis'] || '-',
                     name: row['Nama'] || row['nama'] || 'Tanpa Nama'
                 });
 
-                // 2. Restore Riwayat (Scan kolom tanggal)
                 Object.keys(row).forEach(key => {
-                    if (dateRegex.test(key)) { // Jika header adalah tanggal (2024-01-01)
+                    if (dateRegex.test(key)) {
                         const status = row[key];
                         if (status && ['H','S','I','A'].includes(status)) {
                             if (!restoredRecords[key]) restoredRecords[key] = {};
@@ -548,7 +534,6 @@
                 });
             });
 
-            // Update State
             students = restoredStudents;
             records = restoredRecords;
             localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
@@ -564,12 +549,37 @@
             });
         }
 
-        // --- EXPORT & UTILS ---
+        // --- NEW HELPER: FORCE EXCEL DOWNLOAD ---
+        function saveExcelFile(wb, filename) {
+            // 1. Convert ke ArrayBuffer
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            
+            // 2. Buat Blob dengan MIME type yang benar
+            const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // 3. Buat link download manual
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            
+            // 4. Klik link tersebut
+            document.body.appendChild(a);
+            a.click();
+            
+            // 5. Bersihkan memory
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // --- EXPORT & UTILS (UPDATED) ---
         function downloadTemplate() {
             const ws = XLSX.utils.json_to_sheet([{ "NIS": "1001", "Nama": "Contoh Siswa" }]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Template_Siswa.xlsx");
+            
+            // MENGGUNAKAN FUNGSI BARU
+            saveExcelFile(wb, "Template_Siswa.xlsx");
         }
 
         function exportReport() {
@@ -577,11 +587,6 @@
             
             const allDates = Object.keys(records).sort();
             
-            // Konfirmasi jika belum ada absen sama sekali
-            if(allDates.length === 0) {
-                 // Tetap export daftar siswa saja
-            }
-
             let exportData = [];
             students.forEach((student, index) => {
                 let row = { "No": index + 1, "NIS": student.nis, "Nama": student.name };
@@ -589,7 +594,7 @@
 
                 allDates.forEach(date => {
                     const status = (records[date] && records[date][student.id]) ? records[date][student.id] : '';
-                    row[date] = status; // Kolom tanggal dinamis
+                    row[date] = status; 
                     if(status && stats[status] !== undefined) stats[status]++;
                 });
 
@@ -601,12 +606,14 @@
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Rekap");
-            XLSX.writeFile(wb, `Rekap_Absensi_Kakatua_${currentDate}.xlsx`);
+            
+            // MENGGUNAKAN FUNGSI BARU
+            saveExcelFile(wb, `Rekap_Absensi_Kakatua_${currentDate}.xlsx`);
             
             Swal.fire({
                 icon: 'success', 
                 title: 'Export Selesai', 
-                text: 'File rekap telah diunduh. Simpan file ini sebagai BACKUP.',
+                text: 'File rekap telah diunduh.',
                 confirmButtonColor: '#10b981'
             });
         }
