@@ -50,6 +50,16 @@
             white-space: nowrap;
             z-index: 50;
         }
+
+        /* Animasi Modal */
+        .modal-enter { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Scrollbar untuk Modal */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="text-slate-600 antialiased pb-24">
@@ -64,6 +74,11 @@
                 <div class="hidden sm:block leading-none">
                     <h1 class="font-bold text-slate-800">SDN Kakatua</h1>
                 </div>
+                
+                <button onclick="toggleSchedule()" class="ml-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 text-xs font-bold transition flex items-center gap-2 group">
+                    <i class="fas fa-calendar-alt text-brand-500 group-hover:scale-110 transition"></i> 
+                    <span class="hidden sm:inline">Jadwal</span>
+                </button>
             </div>
 
             <div class="absolute left-1/2 -translate-x-1/2 flex items-center bg-slate-100 rounded-full p-1 shadow-inner">
@@ -162,13 +177,113 @@
 
     </main>
 
+    <div id="schedule-modal" class="fixed inset-0 z-50 hidden transition-opacity duration-300">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="toggleSchedule()"></div>
+        
+        <div class="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4 h-full max-h-[85vh] flex flex-col">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden modal-enter flex flex-col h-full">
+                
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white z-10 sticky top-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">Jadwal Pelajaran</h3>
+                    </div>
+                    <button onclick="toggleSchedule()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition flex items-center justify-center"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <div class="p-4 overflow-y-auto custom-scroll space-y-4 bg-slate-50/50 flex-1">
+                    
+                    <div class="rounded-xl border border-rose-200 bg-rose-50 overflow-hidden shadow-sm">
+                        <div class="bg-rose-100/50 px-4 py-2 border-b border-rose-200 flex justify-between items-center">
+                            <h4 class="font-bold text-rose-700">SENIN</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-200 text-rose-700 font-semibold">Hari Pertama</span>
+                        </div>
+                        <div class="p-3 text-sm space-y-2">
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:00</span> <span class="font-semibold text-rose-600">Upacara Bendera</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:30</span> <span>Matematika</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:15</span> <span>Seni Budaya</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:15</span> <span>Bahasa Inggris</span></div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-orange-200 bg-orange-50 overflow-hidden shadow-sm">
+                        <div class="bg-orange-100/50 px-4 py-2 border-b border-orange-200 flex justify-between items-center">
+                            <h4 class="font-bold text-orange-700">SELASA</h4>
+                        </div>
+                        <div class="p-3 text-sm space-y-2">
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:00</span> <span class="font-semibold text-orange-600">Literasi</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:30</span> <span>Matematika</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:15</span> <span>Bahasa Indonesia</span></div>
+                                                        <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:15</span> <span>IPAS</span></div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-teal-200 bg-teal-50 overflow-hidden shadow-sm">
+                        <div class="bg-teal-100/50 px-4 py-2 border-b border-teal-200 flex justify-between items-center">
+                            <h4 class="font-bold text-teal-700">RABU</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-200 text-teal-700 font-semibold">Batik</span>
+                        </div>
+                        <div class="p-3 text-sm space-y-2">
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:00</span> <span class="font-semibold text-orange-600">Rabu Sehat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:30</span> <span>PJOK</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:15</span> <span>PJOK</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">10:00</span> <span>Pendidikan Agama Islam</span></div>
+                                                        <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:15</span> <span>Pendidikan Agama Islam</span></div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-sky-200 bg-sky-50 overflow-hidden shadow-sm">
+                        <div class="bg-sky-100/50 px-4 py-2 border-b border-sky-200 flex justify-between items-center">
+                            <h4 class="font-bold text-sky-700">KAMIS</h4>
+                        </div>
+                        <div class="p-3 text-sm space-y-2">
+                        	                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:00</span> <span class="font-semibold text-orange-600">Kamis Bakat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:30</span> <span>Bahasa Indonesia</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:15</span> <span>Bahasa Indonesia</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">10:00</span> <span>PKN</span></div>
+                           <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:15</span> <span>PKN</span></div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border border-violet-200 bg-violet-50 overflow-hidden shadow-sm">
+                        <div class="bg-violet-100/50 px-4 py-2 border-b border-violet-200 flex justify-between items-center">
+                            <h4 class="font-bold text-violet-700">JUMAT</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-200 text-violet-700 font-semibold">Pendek</span>
+                        </div>
+                        <div class="p-3 text-sm space-y-2">
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:00</span> <span class="font-semibold text-violet-600">Jumat Ibadah</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">07:30</span> <span>Bahasa Daerah</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:00</span> <span class="italic text-slate-400">Istirahat</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">09:15</span> <span>IPAS</span></div>
+                            <div class="flex justify-between text-slate-700"><span class="w-20 font-mono text-slate-400">11:00</span> <span class="text-xs text-slate-400">Pulang</span></div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="p-3 bg-slate-50 text-center text-xs text-slate-400 border-t border-slate-200">
+                    Jadwal Semester Genap 2024/2025
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const STORAGE_KEY_STUDENTS = 'kakatua_std';
         const STORAGE_KEY_RECORDS = 'kakatua_rec';
         const STORAGE_KEY_API = 'kakatua_api';
         
         let students = [];
-        let records = {}; // { '2023-10-01': { 'ID_1': 'H' } }
+        let records = {}; 
         let GAS_API_URL = localStorage.getItem(STORAGE_KEY_API) || '';
 
         // Tanggal Hari Ini
@@ -189,6 +304,16 @@
             
             if(GAS_API_URL) updateSyncStatus('Ready', 'text-emerald-500');
         });
+
+        // --- FUNGSI TOGGLE JADWAL ---
+        function toggleSchedule() {
+            const modal = document.getElementById('schedule-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
 
         function loadData() {
             const s = localStorage.getItem(STORAGE_KEY_STUDENTS);
@@ -225,7 +350,7 @@
 
             fetch(GAS_API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk bypass CORS
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
@@ -321,37 +446,28 @@
             e.target.value = '';
         }
 
-        // --- FITUR RESTORE YANG SUDAH DIPERBAIKI ---
         function handleRestore(e) {
             const f = e.target.files[0];
             if(!f) return;
             const r = new FileReader();
-            
             r.onload = (evt) => {
                 try {
                     const wb = XLSX.read(evt.target.result, {type:'array'});
                     const rawData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-                    
                     if(rawData.length === 0) throw new Error("File Kosong");
 
                     let restoredStudents = [];
                     let restoredRecords = {};
-                    // Regex format YYYY-MM-DD
                     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
                     rawData.forEach((row, idx) => {
                         const sId = 'RES_' + idx + '_' + Date.now();
-                        
-                        // 1. Ambil Data Siswa
                         restoredStudents.push({
                             id: sId,
                             nis: row['NIS'] || row['nis'] || '-',
                             name: row['Nama'] || row['nama'] || 'Tanpa Nama'
                         });
-
-                        // 2. Ambil Riwayat Tanggal (Loop semua key di row)
                         Object.keys(row).forEach(key => {
-                            // Jika key adalah tanggal (misal: "2024-01-01")
                             if (dateRegex.test(key)) {
                                 const val = row[key];
                                 if (['H','S','I','A'].includes(val)) {
@@ -362,21 +478,13 @@
                         });
                     });
 
-                    Swal.fire({
-                        title: 'Restore Berhasil',
-                        text: `Dipulihkan: ${restoredStudents.length} siswa & history absen.`,
-                        icon: 'success'
-                    }).then(() => {
-                        students = restoredStudents;
-                        records = restoredRecords;
+                    Swal.fire({title: 'Restore Berhasil', text: `Dipulihkan: ${restoredStudents.length} siswa`, icon: 'success'}).then(() => {
+                        students = restoredStudents; records = restoredRecords;
                         localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(students));
                         localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(records));
                         renderTable();
                     });
-
-                } catch(err) {
-                    Swal.fire('Gagal', 'Format file salah atau bukan file rekap valid.', 'error');
-                }
+                } catch(err) { Swal.fire('Gagal', 'Format salah', 'error'); }
             };
             r.readAsArrayBuffer(f);
             e.target.value = '';
@@ -393,13 +501,10 @@
             const data = students.map((s,i) => {
                 let row = {No:i+1, NIS:s.nis, Nama:s.name};
                 let tot = {H:0, S:0, I:0, A:0};
-                
-                // Urutkan tanggal
                 Object.keys(records).sort().forEach(date => {
                     const st = records[date][s.id];
                     if(st) { row[date] = st; tot[st]++; }
                 });
-                
                 row['Total H'] = tot.H; row['Total S'] = tot.S;
                 row['Total I'] = tot.I; row['Total A'] = tot.A;
                 return row;
