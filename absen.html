@@ -519,7 +519,7 @@
                 });
             }
 
-            const makeList = (arr) => arr.length > 0 ? arr.map(n => `- ${n}`).join('\n') : '- Nihil';
+            const makeList = (arr) => arr.length > 0 ? arr.map(n => `- ${n}`).join('\n') : '- ---';
 
             let message = `*Laporan Absensi Kelas*\n${dateStr}\n\n`;
             message += `*Sakit:*\n${makeList(sList)}\n\n`;
