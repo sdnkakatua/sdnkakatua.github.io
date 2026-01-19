@@ -92,7 +92,6 @@
             transition: all 0.3s ease;
         }
 
-        /* The Aesthetic Line (Separator) */
         header::after {
             content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%;
             height: 1px;
@@ -103,7 +102,6 @@
         h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.03em; }
         .date-display { font-size: 11px; color: var(--text-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
 
-        /* Menu Button */
         .menu-btn {
             width: 36px; height: 36px; border-radius: 12px;
             background: transparent; border: none;
@@ -113,7 +111,6 @@
         }
         .menu-btn:active { background: var(--accent-soft); transform: scale(0.95); }
 
-        /* Dropdown Menu */
         .menu-dropdown {
             position: absolute; top: 75px; right: 0;
             background: var(--modal-bg);
@@ -154,11 +151,41 @@
         
         .memo-card:active { transform: scale(0.97); }
 
+        /* TOMBOL SHARE WHATSAPP */
+        .btn-wa-share {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--card-border);
+            color: var(--text-sub);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-wa-share:hover {
+            background: #25D366; /* WA Green */
+            color: white;
+            border-color: #25D366;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+        
+        /* Dark mode adjustment for share button */
+        @media (prefers-color-scheme: dark) {
+            .btn-wa-share { background: rgba(30, 41, 59, 0.6); }
+        }
+
         .memo-content {
             font-size: 14px; line-height: 1.6; color: var(--text-main);
             white-space: pre-wrap;
             display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
             cursor: pointer;
+            margin-top: 15px; /* Sedikit jarak agar tidak tertutup tombol share */
         }
 
         .memo-footer {
@@ -229,7 +256,6 @@
             white-space: pre-wrap; margin-bottom: 20px;
         }
         
-        /* Buttons in Modal */
         .btn-group { display: flex; gap: 12px; margin-top: 24px; }
         .btn { flex: 1; padding: 14px; border-radius: 16px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .btn-cancel { background: var(--bg-body); color: var(--text-sub); }
@@ -237,7 +263,7 @@
         .btn-danger { background: var(--danger-soft); color: var(--danger); }
         .btn:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* --- 6. TOAST NOTIFICATION (CAPSULE) --- */
+        /* --- 6. TOAST NOTIFICATION --- */
         .toast-container { position: fixed; top: 110px; left: 50%; transform: translateX(-50%); z-index: 200; pointer-events: none; }
         .toast {
             background: var(--modal-bg); border: 1px solid var(--card-border);
@@ -313,6 +339,7 @@
             <div id="detailContent" class="detail-scroll"></div>
             <div class="btn-group">
                 <button class="btn btn-primary" onclick="closeModal('detailModal')">Tutup</button>
+                <button class="btn btn-primary" id="modalShareBtn" style="background:#25D366; color:white;">Share WA</button>
             </div>
         </div>
     </div>
@@ -391,7 +418,6 @@
                 const prevLineStart = val.lastIndexOf('\n', cursor - 1) + 1;
                 const currentLine = val.substring(prevLineStart, cursor);
                 
-                // Numbers
                 const matchNum = currentLine.match(/^(\d+)\.\s/);
                 if (matchNum) {
                     const num = parseInt(matchNum[1]);
@@ -406,7 +432,6 @@
                     return;
                 }
                 
-                // Letters
                 const matchLet = currentLine.match(/^([a-zA-Z])\.\s/);
                 if (matchLet) {
                     const charCode = matchLet[1].charCodeAt(0);
@@ -429,6 +454,17 @@
             el.scrollTop = el.scrollHeight;
         }
 
+        // --- WHATSAPP SHARE ---
+        function shareToWA(index) {
+            // Mencegah card onclick event (openDetail)
+            event.stopPropagation();
+            
+            const text = memos[index].text;
+            const encodedText = encodeURIComponent(text);
+            const url = `https://wa.me/?text=${encodedText}`;
+            window.open(url, '_blank');
+        }
+
         // --- CRUD ---
         function renderMemos() {
             const container = document.getElementById('memo-container');
@@ -446,6 +482,9 @@
                 const card = document.createElement('div');
                 card.className = 'memo-card';
                 card.innerHTML = `
+                    <button class="btn-wa-share" onclick="shareToWA(${originalIndex})" title="Bagikan ke WhatsApp">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                    </button>
                     <div class="memo-content" onclick="openDetailModal(${originalIndex})">${escapeHtml(memo.text)}</div>
                     <div class="memo-footer">
                         <span class="memo-time">${memo.time}</span>
@@ -478,6 +517,11 @@
         function openDetailModal(index) {
             document.getElementById('detailContent').innerText = memos[index].text;
             document.getElementById('detailTime').innerText = memos[index].time;
+            
+            // Tambahkan tombol share di modal detail juga
+            const shareBtn = document.getElementById('modalShareBtn');
+            shareBtn.onclick = function() { shareToWA(index); };
+            
             document.getElementById('detailModal').classList.add('active');
         }
 
