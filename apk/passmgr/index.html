@@ -68,6 +68,13 @@
         .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
         .btn-ghost:hover { background: var(--border); color: var(--text-main); }
 
+        .login-footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .btn-reset-link {
+            background: transparent; border: none; color: var(--danger); font-size: 13px; font-weight: 600; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; opacity: 0.7; 
+        }
+        .btn-reset-link:hover { opacity: 1; text-decoration: underline; }
+
         #vaultView { text-align: left; padding-bottom: 100px; }
         .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-row h2 { font-size: 22px; font-weight: 800; color: var(--text-main); }
@@ -126,10 +133,9 @@
         }
         .modal-overlay.active .modal-box { transform: scale(1); }
         
-        /* -- NEW: Layout Tombol Modal -- */
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions .btn { margin-top: 0; width: 100%; }
-        .modal-actions .btn-danger { width: 50px; flex-shrink: 0; } /* Tombol hapus kecil */
+        .modal-actions .btn-danger { width: 50px; flex-shrink: 0; }
         
         .alert-icon-wrapper { width: 64px; height: 64px; border-radius: 50%; background: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; }
         .alert-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
@@ -177,6 +183,13 @@
         <p style="font-size: 11px; margin-top: 20px; color: var(--text-sub); opacity: 0.7;">
             AES-256 Client-Side Encryption
         </p>
+
+        <div class="login-footer">
+            <button class="btn-reset-link" onclick="handleForgotPass()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                Lupa Password? Hapus Data & Reset
+            </button>
+        </div>
     </div>
 </div>
 
@@ -190,7 +203,10 @@
             <button class="header-btn" onclick="triggerRestore()" title="Restore Backup">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             </button>
-            <button class="header-btn" onclick="lockVault()" title="Kunci Brankas" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
+            <button class="header-btn" onclick="resetVault()" title="Hapus Semua Data" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+            <button class="header-btn" onclick="lockVault()" title="Kunci Brankas" style="background:var(--text-main); color: var(--bg);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             </button>
         </div>
@@ -274,9 +290,8 @@
     let confirmCallback = null; 
     let editingId = null; 
     const STORAGE_KEY = 'aesthetix_vault_v3';
-    const modalOverlay = document.getElementById('entryModal'); // Cache element
+    const modalOverlay = document.getElementById('entryModal');
 
-    // --- INISIALISASI SAAT LOAD ---
     window.onload = () => {
         if (!localStorage.getItem(STORAGE_KEY)) {
             document.getElementById('welcomeTitle').innerText = "Buat Brankas Baru";
@@ -287,7 +302,6 @@
         });
     };
 
-    // --- ENKRIPSI & DEKRIPSI ---
     function encryptData(data, key) { return CryptoJS.AES.encrypt(JSON.stringify(data), key).toString(); }
     function decryptData(ciphertext, key) {
         try {
@@ -296,7 +310,6 @@
         } catch (e) { return null; }
     }
 
-    // --- LOGIN ---
     function handleLogin() {
         const inputKey = document.getElementById('masterPassInput').value;
         if (!inputKey) return showToast('Password tidak boleh kosong', 'warning');
@@ -324,6 +337,17 @@
         }
     }
 
+    function handleForgotPass() {
+        showConfirm(
+            "Lupa Password?",
+            "Karena enkripsi lokal, password yang hilang <b>TIDAK BISA</b> dipulihkan.<br><br>Reset akan menghapus seluruh data.<br><br><b>Reset sekarang?</b>",
+            () => {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload(); 
+            }
+        );
+    }
+
     function enterVault() {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('vaultView').classList.remove('hidden');
@@ -339,7 +363,24 @@
         showToast('Brankas terkunci', 'success');
     }
 
-    // --- RENDER DAFTAR PASSWORD ---
+    function resetVault() {
+        showConfirm(
+            "Hapus SEMUA Data?", 
+            "Tindakan ini akan <b>MENGHAPUS PERMANEN</b> seluruh isi brankas.<br><br>Apakah Anda yakin?", 
+            () => {
+                localStorage.removeItem(STORAGE_KEY);
+                vaultData = [];
+                masterKey = null;
+                document.getElementById('vaultView').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('welcomeTitle').innerText = "Buat Brankas Baru";
+                document.getElementById('welcomeText').innerText = "Brankas telah di-reset.";
+                document.getElementById('masterPassInput').value = '';
+                showToast('Reset berhasil', 'success');
+            }
+        );
+    }
+
     function renderVault() {
         const list = document.getElementById('vaultList');
         const term = document.getElementById('searchInput').value.toLowerCase();
@@ -349,7 +390,6 @@
             item.site.toLowerCase().includes(term) || item.user.toLowerCase().includes(term)
         );
 
-        // Sort A-Z
         filtered.sort((a, b) => a.site.localeCompare(b.site, 'en', { sensitivity: 'base' }));
 
         if (filtered.length === 0) {
@@ -360,17 +400,19 @@
         filtered.forEach(item => {
             const div = document.createElement('div');
             div.className = 'vault-item';
-            // PENTING: ID dipastikan string di sini agar tidak error saat dikirim ke fungsi
             const safeId = String(item.id);
-            
+            // Added Share Button Here
             div.innerHTML = `
                 <div class="vault-info">
                     <h3>${item.site}</h3>
                     <span>${item.user}</span>
                 </div>
                 <div class="actions">
-                    <button class="icon-btn" onclick="copyToClip('${item.pass}')" title="Salin">
+                    <button class="icon-btn" onclick="copyToClip('${item.pass}')" title="Salin Password">
                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    </button>
+                    <button class="icon-btn" onclick="shareAccount('${safeId}')" title="Share Akun">
+                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                     </button>
                     <button class="icon-btn" onclick="openModal('${safeId}')" title="Edit">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
@@ -381,55 +423,60 @@
         });
     }
 
-    // --- LOGIKA MODAL (POPUP) UTAMA ---
+    // --- FITUR BARU: SHARE AKUN ---
+    function shareAccount(id) {
+        const item = vaultData.find(i => String(i.id) === String(id));
+        if(!item) return;
+
+        const shareText = `🔐 *Akses Akun: ${item.site}*\n👤 User: ${item.user}\n🔑 Pass: ${item.pass}`;
+        
+        // Cek jika browser mendukung Web Share API (Mobile biasanya support)
+        if (navigator.share) {
+            navigator.share({
+                title: 'Share Akun Vault',
+                text: shareText
+            }).catch(console.error);
+        } else {
+            // Fallback untuk Desktop: Salin seluruh detail ke clipboard
+            navigator.clipboard.writeText(shareText);
+            showToast('Detail akun disalin (Full)', 'success');
+        }
+    }
+
     function openModal(id = null) {
         const titleEl = document.querySelector('#entryModal h2');
         const btnSave = document.getElementById('btnSaveModal');
         const btnDelete = document.getElementById('btnDeleteModal');
 
-        // Reset Form
         document.getElementById('siteInput').value = ''; 
         document.getElementById('userInput').value = '';
         document.getElementById('passInput').value = '';
 
         if (id) {
-            // --- MODE EDIT ---
-            editingId = String(id); // Pastikan jadi String
-            
-            // Cari item dengan konversi String agar tipe data cocok
+            editingId = String(id);
             const item = vaultData.find(i => String(i.id) === editingId);
+            if (!item) { showToast("Error: Data tidak ditemukan", "error"); return; }
             
-            if (!item) {
-                showToast("Error: Data tidak ditemukan", "error");
-                return;
-            }
-            
-            // Isi form dengan data lama
             document.getElementById('siteInput').value = item.site; 
             document.getElementById('userInput').value = item.user;
             document.getElementById('passInput').value = item.pass;
             
             titleEl.innerText = "Edit Akun";
             btnSave.innerText = "Simpan Perubahan";
-            btnDelete.classList.remove('hidden'); // Munculkan tombol hapus
+            btnDelete.classList.remove('hidden');
         } else {
-            // --- MODE TAMBAH BARU ---
             editingId = null;
             titleEl.innerText = "Simpan Akun";
             btnSave.innerText = "Simpan & Enkripsi";
-            btnDelete.classList.add('hidden'); // Sembunyikan tombol hapus
+            btnDelete.classList.add('hidden');
         }
 
         modalOverlay.classList.add('active');
-        // Fokus otomatis ke input pertama
         setTimeout(() => document.getElementById('siteInput').focus(), 100);
     }
 
-    function closeModal() { 
-        modalOverlay.classList.remove('active'); 
-    }
+    function closeModal() { modalOverlay.classList.remove('active'); }
 
-    // --- SIMPAN DATA (CREATE / UPDATE) ---
     function saveEntry() {
         const site = document.getElementById('siteInput').value;
         const user = document.getElementById('userInput').value;
@@ -438,34 +485,18 @@
         if (!site || !pass) return showToast('Isi data dengan lengkap', 'warning');
 
         if (editingId) {
-            // UPDATE DATA LAMA
             const index = vaultData.findIndex(item => String(item.id) === editingId);
             if (index !== -1) {
-                vaultData[index] = { 
-                    ...vaultData[index], 
-                    site, user, pass, 
-                    timestamp: new Date().toISOString() 
-                };
+                vaultData[index] = { ...vaultData[index], site, user, pass, timestamp: new Date().toISOString() };
                 showToast('Data berhasil diperbarui', 'success');
-            } else {
-                showToast('Gagal update: ID tidak ditemukan', 'error');
             }
         } else {
-            // SIMPAN DATA BARU
-            vaultData.push({ 
-                id: Date.now().toString(), // Gunakan timestamp sebagai ID unik string
-                site, user, pass, 
-                timestamp: new Date().toISOString() 
-            });
+            vaultData.push({ id: Date.now().toString(), site, user, pass, timestamp: new Date().toISOString() });
             showToast('Password diamankan', 'success');
         }
-
-        saveVault(); 
-        closeModal(); 
-        renderVault(); 
+        saveVault(); closeModal(); renderVault(); 
     }
 
-    // --- HAPUS DATA ---
     function handleDeleteFromModal() {
         if (!editingId) return;
         const item = vaultData.find(i => String(i.id) === editingId);
@@ -474,18 +505,13 @@
     }
 
     function confirmDelete(id, siteName) {
-        // Tutup modal edit dulu agar tidak tumpang tindih
         closeModal();
-        
         showConfirm("Hapus Password?", `Anda akan menghapus data untuk <b>${siteName}</b>.`, () => {
             vaultData = vaultData.filter(i => String(i.id) !== String(id));
-            saveVault(); 
-            renderVault(); 
-            showToast('Item berhasil dihapus', 'success');
+            saveVault(); renderVault(); showToast('Item berhasil dihapus', 'success');
         });
     }
 
-    // --- FITUR PENDUKUNG (Confirm, Generate Pass, Copy, Backup) ---
     function showConfirm(title, msg, callback) {
         document.getElementById('alertTitle').innerText = title;
         document.getElementById('alertMsg').innerHTML = msg;
@@ -497,28 +523,16 @@
         btn.parentNode.replaceChild(newBtn, btn);
         
         newBtn.innerText = "Ya, Lanjutkan";
-        newBtn.addEventListener('click', () => { 
-            if(confirmCallback) confirmCallback(); 
-            closeAlert(); 
-        });
+        newBtn.addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeAlert(); });
     }
 
     function closeAlert() { 
         document.getElementById('alertModal').classList.remove('active'); 
         confirmCallback = null; 
-        
-        // Jika sedang mode edit, buka kembali modal edit jika pembatalan terjadi? 
-        // Untuk saat ini kita biarkan tertutup agar rapi.
     }
 
-    function saveVault() { 
-        localStorage.setItem(STORAGE_KEY, encryptData(vaultData, masterKey)); 
-    }
-    
-    function copyToClip(text) { 
-        navigator.clipboard.writeText(text); 
-        showToast('Disalin ke clipboard', 'success'); 
-    }
+    function saveVault() { localStorage.setItem(STORAGE_KEY, encryptData(vaultData, masterKey)); }
+    function copyToClip(text) { navigator.clipboard.writeText(text); showToast('Password disalin', 'success'); }
     
     function generatePass() {
         const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
@@ -590,7 +604,7 @@
                         if(item.site && item.pass) {
                             let itemId = item.id ? String(item.id) : null;
                             if(itemId && !existingIds.has(itemId)) {
-                                item.id = itemId; // Pastikan string
+                                item.id = itemId;
                                 vaultData.push(item);
                                 addedCount++;
                             } else if (!itemId) {
@@ -618,7 +632,6 @@
         setTimeout(() => el.remove(), 3400);
     }
 </script>
-
 
 </body>
 </html>
