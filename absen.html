@@ -65,36 +65,42 @@
 </head>
 <body class="text-slate-600 antialiased pb-24">
 
-    <nav class="glass sticky top-0 z-40 w-full shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+<nav class="glass sticky top-0 z-40 w-full shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+        
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                <i class="fas fa-feather-alt"></i>
+            </div>
+            <div class="hidden sm:block leading-none">
+                <h1 class="font-bold text-slate-800">SDN Kakatua</h1>
+            </div>
             
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-brand-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
-                    <i class="fas fa-feather-alt"></i>
-                </div>
-                <div class="hidden sm:block leading-none">
-                    <h1 class="font-bold text-slate-800">SDN Kakatua</h1>
-                </div>
-                
-                <button onclick="toggleSchedule()" class="ml-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 text-xs font-bold transition flex items-center gap-2 group">
-                    <i class="fas fa-calendar-alt text-brand-500 group-hover:scale-110 transition"></i> 
-                    <span class="hidden sm:inline">Jadwal</span>
-                </button>
-            </div>
+            <button onclick="toggleSchedule()" class="ml-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-brand-50 hover:text-brand-600 border border-slate-200 text-xs font-bold transition flex items-center gap-2 group">
+                <i class="fas fa-calendar-alt text-brand-500 group-hover:scale-110 transition"></i> 
+                <span class="hidden sm:inline">Jadwal</span>
+            </button>
+        </div>
 
-            <div class="absolute left-1/2 -translate-x-1/2 flex items-center bg-slate-100 rounded-full p-1 shadow-inner">
-                <button onclick="changeDate(-1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-left"></i></button>
-                <input type="date" id="input-date" class="bg-transparent border-none text-xs font-bold w-28 text-center focus:ring-0 outline-none cursor-pointer">
-                <button onclick="changeDate(1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-right"></i></button>
-            </div>
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center bg-slate-100 rounded-full p-1 shadow-inner">
+            <button onclick="changeDate(-1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-left"></i></button>
+            <input type="date" id="input-date" class="bg-transparent border-none text-xs font-bold w-28 text-center focus:ring-0 outline-none cursor-pointer">
+            <button onclick="changeDate(1)" class="w-8 h-8 rounded-full hover:bg-white hover:text-brand-600 transition"><i class="fas fa-chevron-right"></i></button>
+        </div>
 
-            <div class="flex items-center gap-3">
-                <div id="sync-indicator" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                    <i class="fas fa-cloud"></i> <span id="sync-text">Offline</span>
-                </div>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleImageModal()" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-blue-50 hover:text-blue-600 border border-slate-200 text-xs font-bold transition flex items-center gap-2 group">
+                <i class="fas fa-image text-blue-500 group-hover:scale-110 transition"></i> 
+                <span class="hidden sm:inline">Struktur</span>
+            </button>
+
+            <div id="sync-indicator" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                <i class="fas fa-cloud"></i> <span id="sync-text">Offline</span>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
+
 
     <main class="max-w-6xl mx-auto px-4 mt-6">
 
@@ -568,6 +574,52 @@
             document.getElementById('sync-text').innerText = txt;
             document.getElementById('sync-indicator').className = `text-[10px] font-bold flex items-center gap-1 ${cls}`;
         }
+        
+        // Fungsi untuk buka/tutup modal gambar
+function toggleImageModal() {
+    const modal = document.getElementById('image-modal');
+    if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
     </script>
+    
+    
+    
+    <div id="image-modal" class="fixed inset-0 z-50 hidden transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleImageModal()"></div>
+    
+    <div class="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden modal-enter flex flex-col">
+            
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-700">Jadwal Mapel Printable</h3>
+                </div>
+                <button onclick="toggleImageModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 transition flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-2 bg-slate-50 flex justify-center">
+                <img src="https://sdnkakatua.github.io/img/abc.jpg" 
+                     alt="Struktur Kelas" 
+                     class="w-full h-auto rounded-xl shadow-inner border border-slate-200 object-cover">
+            </div>
+
+            <div class="p-3 bg-white text-center text-[10px] text-slate-400 italic">
+                *Klik di luar area atau tombol silang untuk menutup
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </body>
 </html>
