@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i.s. Modul Ajar - SDN Kakatua</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
+        
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6366f1; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .prose-custom ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .prose-custom ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        .prose-custom b, .prose-custom strong { font-weight: 700; color: #1e293b; }
+        .prose-custom i, .prose-custom em { font-style: italic; }
+        .prose-custom br { margin-bottom: 0.5rem; display: block; content: ""; }
+        .swal2-popup { border-radius: 1rem !important; font-family: 'Poppins', sans-serif !important; }
+        
+        /* Indikator Sync Halus */
+        #sync-indicator { transition: opacity 0.5s ease; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen relative pb-24">
+
+    <nav class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3 text-indigo-700">
+                <div class="bg-indigo-50 p-2 rounded-lg"><i class="fas fa-shapes text-xl"></i></div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none">Modul Ajar</h1>
+                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">SDN Kakatua</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div id="sync-indicator" class="opacity-0 text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full flex items-center gap-1">
+                    <i class="fas fa-sync fa-spin"></i> Sinkronisasi...
+                </div>
+
+                <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+                    <input type="date" id="dateInput" onchange="fetchModules()" class="bg-transparent text-sm font-semibold px-2 py-1 outline-none text-slate-600 cursor-pointer">
+                    <button onclick="fetchModules(true)" class="bg-indigo-600 hover:bg-indigo-700 text-white w-8 h-8 rounded flex items-center justify-center transition shadow-sm" title="Refresh Paksa">
+                        <i class="fas fa-sync-alt text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-6 gap-2">
+            <div>
+                <h6 id="dateDisplay" class="text-slate-500 text-sm font-medium"></h6>
+            </div>
+        </div>
+
+        <div id="loader" class="hidden py-20 text-center">
+            <div class="loader"></div>
+            <p class="text-slate-400 text-sm mt-3 animate-pulse">Mengambil data baru...</p>
+        </div>
+
+        <div id="emptyState" class="hidden py-20 flex flex-col items-center justify-center opacity-70">
+            <div class="bg-slate-100 p-6 rounded-full mb-4">
+                <i class="fas fa-calendar-plus text-4xl text-slate-300"></i>
+            </div>
+            <h3 class="font-bold text-slate-600">Belum ada modul</h3>
+            <p class="text-sm text-slate-400">Klik tombol + di bawah untuk membuat baru.</p>
+        </div>
+
+        <div id="cardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    </main>
+
+    <button onclick="openModal('add')" class="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 hover:rotate-90 z-40 group border-4 border-indigo-100">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div id="viewModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative flex-shrink-0">
+                <button onclick="closeViewModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/40 rounded-full w-8 h-8 flex items-center justify-center transition backdrop-blur-md text-white"><i class="fas fa-times"></i></button>
+                <span id="viewMapel" class="bg-white/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-2 inline-block">LOADING...</span>
+                <h2 id="viewTopik" class="text-2xl md:text-3xl font-bold leading-tight mt-1">Loading...</h2>
+                <div class="flex items-center gap-2 mt-3 text-indigo-100 text-sm font-medium"><i class="far fa-calendar-alt"></i> <span id="viewDate">-</span></div>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 text-slate-700 leading-relaxed bg-white">
+                <div><h4 class="text-xs font-bold text-indigo-500 uppercase mb-2"><i class="fas fa-book-open"></i> Ringkasan Materi</h4><div id="viewMateri" class="prose-custom bg-slate-50 p-5 rounded-xl border border-slate-100 text-justify text-sm"></div></div>
+                <div><h4 class="text-xs font-bold text-indigo-500 uppercase mb-2"><i class="fas fa-list-ol"></i> Langkah Pembelajaran</h4><div id="viewLangkah" class="prose-custom bg-indigo-50 p-5 rounded-xl border border-indigo-100 text-justify text-sm"></div></div>
+                <div><h4 class="text-xs font-bold text-indigo-500 uppercase mb-2"><i class="fas fa-lightbulb"></i> Metode</h4><span id="viewMetode" class="px-4 py-2 bg-amber-50 text-amber-700 rounded-lg font-semibold border border-amber-100 text-sm">-</span></div>
+            </div>
+            <div class="p-5 border-t bg-slate-50 flex flex-wrap justify-end gap-3 flex-shrink-0">
+                <button onclick="closeViewModal()" class="px-5 py-2.5 rounded-lg text-slate-500 font-semibold hover:bg-slate-200 text-sm">Tutup</button>
+                <button id="viewCopyBtn" class="px-5 py-2.5 rounded-lg bg-cyan-100 text-cyan-700 font-bold hover:bg-cyan-200 flex items-center gap-2 text-sm"><i class="fas fa-clipboard-list"></i> Salin Teks</button>
+                <a id="viewLinkBtn" href="#" target="_blank" class="px-5 py-2.5 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 flex items-center gap-2 text-sm"><i class="fas fa-download"></i> Download LKPD</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="crudModal" class="fixed inset-0 bg-black/50 z-[70] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-fade-in-up">
+            <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 id="modalTitle" class="font-bold text-lg text-slate-800">Tambah Modul</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto no-scrollbar">
+                <input type="hidden" id="formMode"><input type="hidden" id="oldDate"><input type="hidden" id="oldMapel"><input type="hidden" id="oldTopik">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal</label><input type="date" id="inpDate" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Mapel</label><input type="text" id="inpMapel" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"></div>
+                </div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Topik</label><input type="text" id="inpTopik" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Materi (HTML)</label>
+                    <div class="flex gap-2 mb-2"><button type="button" onclick="insertTag('<b>','</b>','inpMateri')" class="bg-slate-100 px-2 py-1 rounded text-xs font-bold">B</button><button type="button" onclick="insertTag('<ul>\n<li>','</li>\n</ul>','inpMateri')" class="bg-slate-100 px-2 py-1 rounded text-xs"><i class="fas fa-list-ul"></i></button></div>
+                    <textarea id="inpMateri" rows="4" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none font-mono"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-indigo-600 uppercase mb-1">Langkah</label>
+                    <div class="flex gap-2 mb-2"><button type="button" onclick="insertTag('<b>','</b>','inpLangkah')" class="bg-indigo-50 px-2 py-1 rounded text-xs font-bold text-indigo-700">B</button><button type="button" onclick="insertTag('<ol>\n<li>','</li>\n</ol>', 'inpLangkah')" class="bg-indigo-50 px-2 py-1 rounded text-xs text-indigo-700"><i class="fas fa-list-ol"></i></button></div>
+                    <textarea id="inpLangkah" rows="5" class="w-full border border-indigo-200 bg-indigo-50/30 rounded-lg p-2.5 text-sm outline-none font-mono"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Metode</label><select id="inpMetode" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"><option>Ceramah</option><option>Diskusi Kelompok</option><option>PBL</option><option>PjBL</option><option>Demonstrasi</option><option>Tanya Jawab</option></select></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Link LKPD</label><input type="text" id="inpLink" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none"></div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+                <button onclick="closeModal()" class="px-5 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">Batal</button>
+                <button onclick="submitForm()" id="btnSave" class="px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-md flex items-center gap-2"><i class="fas fa-save"></i> Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ GANTI URL INI
+        const API_URL = "https://script.google.com/macros/s/AKfycbzFmFVQDUOkJQomT57UwkpTwdlkRU5xCCP-7V2bJ5Ws2Ov06N2nulFVGpuEuH_ntylb/exec"; 
+        const CACHE_KEY_PREFIX = "modul_ajar_data_";
+
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+            didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+            fetchModules();
+        });
+
+        // --- CORE: LOGIC CACHE & SYNC ---
+        
+        function getCache(date) {
+            const data = localStorage.getItem(CACHE_KEY_PREFIX + date);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function setCache(date, data) {
+            localStorage.setItem(CACHE_KEY_PREFIX + date, JSON.stringify(data));
+        }
+
+        function showSyncStatus(show) {
+            document.getElementById('sync-indicator').style.opacity = show ? '1' : '0';
+        }
+
+        function fetchModules(forceRefresh = false) {
+            const dateVal = document.getElementById('dateInput').value;
+            if(!dateVal) return Swal.fire({ icon: 'warning', title: 'Pilih Tanggal' });
+            
+            // Update Teks Tanggal Header
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('dateDisplay').innerText = new Date(dateVal).toLocaleDateString('id-ID', options);
+
+            // 1. CEK CACHE LOKAL (Instant Load)
+            const cachedData = getCache(dateVal);
+            const container = document.getElementById('cardGrid');
+            const loader = document.getElementById('loader');
+            const emptyState = document.getElementById('emptyState');
+
+            if (cachedData && !forceRefresh) {
+                // Jika ada cache, render langsung! (0 Detik)
+                renderCards(cachedData);
+                loader.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                
+                // Nyalakan indikator "Syncing..." kecil
+                showSyncStatus(true);
+            } else {
+                // Jika tidak ada cache, tampilkan loader besar
+                container.innerHTML = '';
+                loader.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            }
+
+            // 2. BACKGROUND SYNC (Diam-diam ambil data terbaru)
+            fetch(`${API_URL}?date=${dateVal}`)
+                .then(res => res.json())
+                .then(res => {
+                    showSyncStatus(false);
+                    loader.classList.add('hidden');
+
+                    if (res.status === 'success') {
+                        // Cek apakah data berubah dibanding cache?
+                        const currentCacheStr = JSON.stringify(cachedData);
+                        const newDataStr = JSON.stringify(res.data);
+
+                        if (currentCacheStr !== newDataStr) {
+                            // Data berbeda/baru -> Update UI & Cache
+                            renderCards(res.data);
+                            setCache(dateVal, res.data);
+                            if(cachedData) console.log("Data diperbarui dari server (silent sync)");
+                        }
+                    } else {
+                        // Data kosong di server
+                        setCache(dateVal, []); // Kosongkan cache
+                        renderCards([]); // Kosongkan UI
+                        emptyState.classList.remove('hidden');
+                    }
+                })
+                .catch(e => {
+                    showSyncStatus(false);
+                    loader.classList.add('hidden');
+                    // Jika offline dan punya cache, biarkan user melihat cache
+                    if(!cachedData) {
+                        Swal.fire({ icon: 'error', title: 'Offline', text: 'Gagal mengambil data server.' });
+                    }
+                });
+        }
+
+        function renderCards(data) {
+            const container = document.getElementById('cardGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            container.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+
+            data.forEach((item, index) => {
+                const itemStr = encodeURIComponent(JSON.stringify(item));
+                const colors = ['border-indigo-500', 'border-emerald-500', 'border-rose-500', 'border-amber-500'];
+                const badges = ['bg-indigo-100 text-indigo-700', 'bg-emerald-100 text-emerald-700', 'bg-rose-100 text-rose-700'];
+                const accent = colors[index % colors.length];
+                const badge = badges[index % badges.length];
+                const plainMateri = item.materi ? item.materi.replace(/<[^>]*>?/gm, '') : '';
+
+                const html = `
+                <div id="card-${index}" onclick="openViewModal('${itemStr}')" class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group cursor-pointer border-t-4 ${accent} flex flex-col h-full animate-fade-in-up" style="animation-delay: ${index * 0.1}s">
+                    <div class="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button onclick="event.stopPropagation(); copyItem('${itemStr}')" class="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 hover:bg-cyan-500 hover:text-white flex items-center justify-center transition shadow-sm border border-cyan-100" title="Salin"><i class="fas fa-clipboard-list text-xs"></i></button>
+                        <button onclick="event.stopPropagation(); prepareEdit('${itemStr}')" class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white flex items-center justify-center transition shadow-sm border border-amber-100" title="Edit"><i class="fas fa-pen text-xs"></i></button>
+                        <button onclick="event.stopPropagation(); deleteItem('${itemStr}', 'card-${index}')" class="w-8 h-8 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white flex items-center justify-center transition shadow-sm border border-rose-100" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                    <div class="mb-3"><span class="${badge} text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide border border-white/50">${item.mapel}</span></div>
+                    <h3 class="font-bold text-lg text-slate-800 leading-snug mb-2 line-clamp-2">${item.topik}</h3>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-4 flex-grow">
+                        <p class="text-xs text-slate-400 font-bold mb-1 uppercase"><i class="fas fa-align-left mr-1"></i> Preview</p>
+                        <p class="text-sm text-slate-600 line-clamp-3">${plainMateri}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
+                        <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded"><i class="fas fa-tag mr-1 text-slate-400"></i> ${item.metode}</span>
+                        <div class="text-indigo-600 text-xs font-bold flex items-center gap-1 group-hover:underline">Detail <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        // --- OPTIMISTIC DELETE ---
+        function deleteItem(itemEncoded, cardId) {
+            const item = JSON.parse(decodeURIComponent(itemEncoded));
+            
+            Swal.fire({
+                title: 'Hapus Modul?', text: `Yakin hapus "${item.topik}"?`, icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Ya, Hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 1. OPTIMISTIC UI: Hapus dari layar dulu!
+                    const cardEl = document.getElementById(cardId);
+                    if(cardEl) cardEl.style.display = 'none';
+
+                    // 2. Kirim Request
+                    const payload = { action: 'delete', oldDate: item.tanggal, oldMapel: item.mapel, oldTopik: item.topik };
+                    
+                    fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+                    .then(res => res.json())
+                    .then(res => {
+                        if(res.status === 'success') {
+                            // Hapus permanen dari Cache
+                            const dateVal = item.tanggal;
+                            let cache = getCache(dateVal) || [];
+                            // Filter item yang dihapus dari cache
+                            cache = cache.filter(c => !(c.mapel === item.mapel && c.topik === item.topik));
+                            setCache(dateVal, cache);
+                            
+                            Toast.fire({ icon: 'success', title: 'Data Terhapus' });
+                            fetchModules(true); // Sync ulang untuk memastikan
+                        } else {
+                            // Gagal? Balikin Kartu
+                            if(cardEl) cardEl.style.display = 'flex';
+                            Swal.fire('Gagal!', res.message, 'error');
+                        }
+                    })
+                    .catch(e => {
+                        if(cardEl) cardEl.style.display = 'flex';
+                        Swal.fire('Error!', 'Gagal terhubung server.', 'error');
+                    });
+                }
+            });
+        }
+
+        // --- STANDARD CRUD (Tetap pakai loading spinner agar data valid) ---
+        function submitForm() {
+            const mode = document.getElementById('formMode').value;
+            const btn = document.getElementById('btnSave');
+            const originalBtn = btn.innerHTML;
+            const payload = {
+                action: mode,
+                date: document.getElementById('inpDate').value,
+                mapel: document.getElementById('inpMapel').value,
+                topik: document.getElementById('inpTopik').value,
+                materi: document.getElementById('inpMateri').value,
+                langkah: document.getElementById('inpLangkah').value, 
+                metode: document.getElementById('inpMetode').value,
+                link: document.getElementById('inpLink').value
+            };
+
+            if(!payload.date || !payload.mapel || !payload.topik) return Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap' });
+
+            if (mode === 'edit') {
+                payload.oldDate = document.getElementById('oldDate').value;
+                payload.oldMapel = document.getElementById('oldMapel').value;
+                payload.oldTopik = document.getElementById('oldTopik').value;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Proses...';
+
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(res => {
+                if(res.status === 'success') {
+                    closeModal();
+                    // Force refresh & update cache
+                    fetchModules(true); 
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.message, timer: 1500, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: res.message });
+                }
+            })
+            .catch(e => Swal.fire({ icon: 'error', title: 'Error Koneksi' }))
+            .finally(() => { btn.disabled = false; btn.innerHTML = originalBtn; });
+        }
+
+        // --- HELPER FUNCTIONS ---
+        function openViewModal(itemEncoded) {
+            const item = JSON.parse(decodeURIComponent(itemEncoded));
+            const modal = document.getElementById('viewModal');
+            document.getElementById('viewMapel').innerText = item.mapel;
+            document.getElementById('viewTopik').innerText = item.topik;
+            document.getElementById('viewMetode').innerText = item.metode;
+            document.getElementById('viewMateri').innerHTML = item.materi.replace(/\n/g, "<br>"); 
+            document.getElementById('viewLangkah').innerHTML = item.langkah ? item.langkah.replace(/\n/g, "<br>") : "<em>Tidak ada data.</em>";
+            const opt = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('viewDate').innerText = new Date(item.tanggal).toLocaleDateString('id-ID', opt);
+            const btnLink = document.getElementById('viewLinkBtn');
+            if (item.linkLkpd && item.linkLkpd.length > 5) { btnLink.href = item.linkLkpd; btnLink.classList.remove('hidden'); } else { btnLink.classList.add('hidden'); }
+            document.getElementById('viewCopyBtn').setAttribute('onclick', `copyItem('${itemEncoded}')`);
+            modal.classList.remove('hidden');
+        }
+        function closeViewModal() { document.getElementById('viewModal').classList.add('hidden'); }
+        function copyItem(itemEncoded) {
+            const item = JSON.parse(decodeURIComponent(itemEncoded));
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const niceDate = new Date(item.tanggal).toLocaleDateString('id-ID', options);
+            let text = `📚 *MODUL AJAR*\n🗓️ ${niceDate}\n📘 ${item.mapel}\n🏷️ ${item.topik}\n💡 ${item.metode}\n\n📝 *MATERI:*\n${htmlToText(item.materi)}\n\n👣 *LANGKAH:*\n${htmlToText(item.langkah)}\n`;
+            if(item.linkLkpd) text += `\n🔗 Link: ${item.linkLkpd}`;
+            navigator.clipboard.writeText(text).then(() => Toast.fire({ icon: 'success', title: 'Disalin!' }));
+        }
+        function htmlToText(html) { if (!html) return "-"; return html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n\n').replace(/<p>/gi, '').replace(/<\/li>/gi, '\n').replace(/<li>/gi, '• ').replace(/<[^>]+>/g, '').trim(); }
+        function insertTag(s, e, id) { const el = document.getElementById(id); const val = el.value; const selS = el.selectionStart; el.value = val.slice(0, selS) + s + val.slice(selS, el.selectionEnd) + e + val.slice(el.selectionEnd); el.focus(); }
+        function openModal(mode) { document.getElementById('crudModal').classList.remove('hidden'); document.getElementById('formMode').value = mode; if (mode === 'add') { document.getElementById('modalTitle').innerText = 'Tambah Modul'; document.getElementById('inpDate').value = document.getElementById('dateInput').value; document.getElementById('inpMapel').value = ''; document.getElementById('inpTopik').value = ''; document.getElementById('inpMateri').value = ''; document.getElementById('inpLangkah').value = ''; document.getElementById('inpLink').value = ''; }}
+        function closeModal() { document.getElementById('crudModal').classList.add('hidden'); }
+        function prepareEdit(itemEncoded) { const item = JSON.parse(decodeURIComponent(itemEncoded)); openModal('edit'); document.getElementById('modalTitle').innerText = 'Edit Modul'; document.getElementById('inpDate').value = item.tanggal; document.getElementById('inpMapel').value = item.mapel; document.getElementById('inpTopik').value = item.topik; document.getElementById('inpMateri').value = item.materi; document.getElementById('inpLangkah').value = item.langkah || ""; document.getElementById('inpMetode').value = item.metode; document.getElementById('inpLink').value = item.linkLkpd; document.getElementById('oldDate').value = item.tanggal; document.getElementById('oldMapel').value = item.mapel; document.getElementById('oldTopik').value = item.topik; }
+    </script>
+</body>
+</html>
