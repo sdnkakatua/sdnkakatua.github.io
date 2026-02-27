@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Orang Tua Siswa</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f7f9fc;
+      color: #333;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    
+    /* Style untuk Kontainer Utama & Tabel */
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 700px;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #111827;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: #4b5563;
+    }
+    tr:hover {
+      background-color: #f3f4f6;
+    }
+    
+    /* Tombol-tombol */
+    .btn-action {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .btn-action:hover { background-color: #059669; }
+    
+    button[type="submit"] {
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s;
+    }
+    button[type="submit"]:hover { background-color: #1d4ed8; }
+    button:disabled {
+      background-color: #9ca3af !important;
+      cursor: not-allowed;
+    }
+
+    /* Style untuk Popup (Modal) */
+    .modal {
+      display: none; /* Disembunyikan secara default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(17, 24, 39, 0.6); /* Latar belakang gelap transparan */
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .modal-content {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #9ca3af;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .close:hover { color: #111827; }
+    
+    /* Style Form di dalam Modal */
+    .modal-title {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .student-highlight {
+      color: #2563eb;
+    }
+    .form-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #4b5563;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .message {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Pengisian Data Orang Tua/Wali<br>UPT SPF SDN Kakatua</h2>
+    <div id="statusMessage" class="message">Memuat data dari server...<br>MOHON TUNGGU</div>
+    
+    <table id="studentTable" style="display: none;">
+      <thead>
+        <tr>
+          <th>Nama Siswa</th>
+          <th>Kelas</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        </tbody>
+    </table>
+  </div>
+
+  <div id="dataModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3 class="modal-title">Isi Data Orang Tua<br><span id="displayStudentName" class="student-highlight"></span></h3>
+      
+      <form id="dataForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="studentName" name="studentName">
+
+        <div class="form-group">
+          <label for="parentName">Nama Orang Tua / Wali</label>
+          <input type="text" id="parentName" name="parentName" placeholder="Masukkan nama lengkap" required>
+        </div>
+
+        <div class="form-group">
+          <label for="waNumber">Nomor WhatsApp</label>
+          <input type="tel" id="waNumber" name="waNumber" placeholder="Contoh: 08123456789" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Alamat Email</label>
+          <input type="email" id="email" name="email" placeholder="contoh@email.com" required>
+        </div>
+
+        <button type="submit" id="submitBtn">Simpan Data</button>
+        <div id="modalMessage" class="message"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ GANTI STRING DI BAWAH DENGAN URL WEB APP APPS SCRIPT ANDA
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwI_yhx-bkpyijvboYg5_3ZX4vpQfNlE9uidmWfKyjzpPkLXO22xdKnCeOJWomnKZvxRw/exec';
+
+    // Memuat daftar siswa ke dalam tabel saat halaman dibuka
+    document.addEventListener("DOMContentLoaded", function() {
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(result => {
+          if (result.status === 'success') {
+            document.getElementById('statusMessage').style.display = 'none';
+            document.getElementById('studentTable').style.display = 'table';
+            populateTable(result.data);
+          } else {
+            throw new Error("Gagal mengambil data dari server.");
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          const statusMsg = document.getElementById('statusMessage');
+          statusMsg.innerText = "Gagal memuat data. Periksa koneksi atau URL API.";
+          statusMsg.className = "message error";
+        });
+    });
+
+    // Mengisi tabel dengan data
+    function populateTable(students) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = ''; // Kosongkan isi tabel sebelumnya
+      
+      students.forEach(student => {
+        const tr = document.createElement('tr');
+        
+        // Escape single quotes in names to prevent JS errors in onclick
+        const safeName = student.name.replace(/'/g, "\\'");
+
+        tr.innerHTML = `
+          <td>${student.name}</td>
+          <td>${student.grade}</td>
+          <td>
+            <button class="btn-action" onclick="openModal('${safeName}')">Isi Data</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Fungsi untuk membuka Popup
+    function openModal(studentName) {
+      const modal = document.getElementById('dataModal');
+      modal.style.display = 'flex'; // Tampilkan modal
+      
+      // Set nama siswa di judul popup dan di input tersembunyi
+      document.getElementById('displayStudentName').innerText = studentName;
+      document.getElementById('studentName').value = studentName;
+      
+      // Bersihkan pesan sebelumnya
+      document.getElementById('modalMessage').innerText = "";
+    }
+
+    // Fungsi untuk menutup Popup
+    function closeModal() {
+      const modal = document.getElementById('dataModal');
+      modal.style.display = 'none';
+      document.getElementById('dataForm').reset();
+    }
+
+    // Menutup popup jika user mengklik area di luar kotak form
+    window.onclick = function(event) {
+      const modal = document.getElementById('dataModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Mengirim data ke API (POST)
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      
+      const btn = document.getElementById('submitBtn');
+      const msg = document.getElementById('modalMessage');
+      
+      btn.disabled = true;
+      btn.innerText = "Menyimpan...";
+      msg.innerHTML = "";
+      
+      const payload = {
+        studentName: document.getElementById('studentName').value,
+        parentName: document.getElementById('parentName').value,
+        waNumber: document.getElementById('waNumber').value,
+        email: document.getElementById('email').value
+      };
+
+      fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === 'success') {
+          msg.className = "message success";
+          msg.innerText = result.message;
+          btn.innerText = "Tersimpan!";
+          
+          // Tutup popup secara otomatis setelah 2 detik
+          setTimeout(() => {
+            closeModal();
+            btn.disabled = false;
+            btn.innerText = "Simpan Data";
+            msg.innerText = "";
+          }, 2000);
+        } else {
+          throw new Error(result.message);
+        }
+      })
+      .catch(error => {
+        msg.className = "message error";
+        msg.innerText = "Terjadi kesalahan: " + error.message;
+        btn.disabled = false;
+        btn.innerText = "Simpan Data";
+      });
+    }
+  </script>
+</body>
+</html>
