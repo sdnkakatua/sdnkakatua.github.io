@@ -3,444 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Orang Tua Siswa</title>
+  <title>Batas Waktu Habis</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f7f9fc;
-      color: #333;
       margin: 0;
-      padding: 40px 20px;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
+      align-items: center;
+      /* Background gradien full color yang dinamis */
+      background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb, #f6d365, #fda085);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow: hidden;
     }
-    
-    /* Style untuk Kontainer Utama */
-    .container {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      width: 100%;
-      max-width: 700px;
+
+    /* Animasi background bergerak */
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    h2 {
-      margin-top: 0;
-      font-size: 22px;
-      color: #111827;
-      margin-bottom: 24px;
+
+    /* Style kotak kaca (Glassmorphism) */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 50px 40px;
+      border-radius: 24px;
       text-align: center;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+      max-width: 450px;
+      width: 85%;
+      margin: 20px;
     }
 
-    /* Style Kotak Pencarian */
-    .search-box {
-      margin-bottom: 20px;
-      display: none; /* Disembunyikan sampai data termuat */
-    }
-    .search-box input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-      box-sizing: border-box;
-      background-color: #f9fafb;
-      transition: all 0.2s;
-    }
-    .search-box input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      background-color: #ffffff;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    /* Animasi ikon melayang */
+    .icon {
+      font-size: 80px;
+      margin-bottom: 10px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
     }
 
-    /* Style Tabel */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-    th {
-      background-color: #f9fafb;
-      font-weight: 600;
-      color: #4b5563;
-    }
-    tr:hover {
-      background-color: #f3f4f6;
-    }
-    .empty-state {
-      text-align: center !important;
-      color: #6b7280;
-      font-style: italic;
-      padding: 20px !important;
-    }
-    
-    /* Badge Centang Selesai */
-    .badge-filled {
-      display: inline-flex;
-      align-items: center;
-      background-color: #d1fae5;
-      color: #065f46;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-left: 8px;
-      vertical-align: middle;
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
     }
 
-    /* Tombol Tabel */
-    .btn-action {
-      background-color: #10b981;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .btn-action:hover { background-color: #059669; }
-    
-    /* Tombol Edit jika data sudah terisi */
-    .btn-edit {
-      background-color: #6b7280;
-    }
-    .btn-edit:hover { background-color: #4b5563; }
-
-    /* Style Popup (Modal) */
-    .modal {
-      display: none; 
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(17, 24, 39, 0.6); 
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .modal-content {
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      position: relative;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    .close {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      color: #9ca3af;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .close:hover { color: #111827; }
-    
-    /* Form dalam Popup */
-    .modal-title {
-      margin-top: 0;
-      font-size: 18px;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e5e7eb;
-      line-height: 1.4;
-    }
-    .student-highlight {
-      color: #2563eb;
-      font-weight: 600;
-    }
-    .form-group { margin-bottom: 16px; }
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: #4b5563;
-    }
-    input[type="text"], input[type="tel"], input[type="email"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
-      font-family: inherit;
-      box-sizing: border-box;
-      transition: border-color 0.2s;
-    }
-    input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    /* Tombol Simpan Form */
-    button[type="submit"] {
-      width: 100%;
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background-color 0.2s;
-    }
-    button[type="submit"]:hover { background-color: #1d4ed8; }
-    button:disabled {
-      background-color: #9ca3af !important;
-      cursor: not-allowed;
+    h1 {
+      font-size: 32px;
+      margin: 0 0 10px 0;
+      color: #1f2937;
+      font-weight: 700;
     }
 
     .message {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 20px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 15px;
+      line-height: 1.4;
     }
-    .success { color: #10b981; }
-    .error { color: #ef4444; }
+
+    .sub-message {
+      font-size: 15px;
+      color: #4b5563;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* Elemen dekorasi lingkaran di belakang */
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: -1;
+      filter: blur(5px);
+    }
+    .circle-1 {
+      width: 200px;
+      height: 200px;
+      top: -50px;
+      left: -50px;
+    }
+    .circle-2 {
+      width: 300px;
+      height: 300px;
+      bottom: -80px;
+      right: -80px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Daftar Siswa</h2>
-    
-    <div id="searchContainer" class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Ketik nama siswa atau kelas..." oninput="filterStudents()">
+  <div class="circle circle-1"></div>
+  <div class="circle circle-2"></div>
+
+  <div class="glass-card">
+    <div class="icon">⏳</div>
+    <h1>Maaf.</h1>
+    <div class="message">
+      Pengisian Data Telah Melewati Batas Waktu.
     </div>
-
-    <div id="statusMessage" class="message">Memuat data dari server...<br>MOHON TUNGGU</div>
-    
-    <table id="studentTable" style="display: none;">
-      <thead>
-        <tr>
-          <th>Nama Siswa</th>
-          <th>Kelas</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        </tbody>
-    </table>
-  </div>
-
-  <div id="dataModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal()">&times;</span>
-      <h3 class="modal-title">Isi Data Orang Tua<br><span id="displayStudentName" class="student-highlight"></span></h3>
-      
-      <form id="dataForm" onsubmit="handleFormSubmit(event)">
-        <input type="hidden" id="studentName" name="studentName">
-
-        <div class="form-group">
-          <label for="parentName">Nama Orang Tua / Wali</label>
-          <input type="text" id="parentName" name="parentName" placeholder="Masukkan nama lengkap" required>
-        </div>
-
-        <div class="form-group">
-          <label for="waNumber">Nomor WhatsApp</label>
-          <input type="tel" id="waNumber" name="waNumber" placeholder="Contoh: 08123456789" required>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Alamat Email</label>
-          <input type="email" id="email" name="email" placeholder="contoh@email.com" required>
-        </div>
-
-        <button type="submit" id="submitBtn">Simpan Data</button>
-        <div id="modalMessage" class="message"></div>
-      </form>
+    <div class="sub-message">
+      Terima Kasih atas Partisipasi Anda.
     </div>
   </div>
 
-  <script>
-    // URL Web App Apps Script Anda
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyZ0qBn06qAvVmqN3TCCY_Y8HKirYxL_gufOqOxZJ79qc1KyIcsrCiDYxzKQBPvEb5W2A/exec';
-    
-    let allStudents = []; // Menyimpan data master untuk fitur pencarian
-
-    // Jalankan saat halaman web pertama kali dibuka
-    document.addEventListener("DOMContentLoaded", function() {
-      fetchData();
-    });
-
-    // Fungsi mengambil data dari Spreadsheet
-    function fetchData() {
-      const statusMsg = document.getElementById('statusMessage');
-      const table = document.getElementById('studentTable');
-      const searchBox = document.getElementById('searchContainer');
-      
-      statusMsg.style.display = 'block';
-      statusMsg.innerHTML = 'Memuat data dari server...<br>MOHON TUNGGU';
-      table.style.display = 'none';
-
-      fetch(API_URL)
-        .then(response => response.json())
-        .then(result => {
-          if (result.status === 'success') {
-            allStudents = result.data; // Simpan ke variabel global
-            
-            statusMsg.style.display = 'none';
-            searchBox.style.display = 'block';
-            table.style.display = 'table';
-            
-            filterStudents(); // Langsung filter (berguna jika data di-refresh saat kotak search masih terisi)
-          } else {
-            throw new Error("Gagal mengambil data dari server.");
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          statusMsg.innerHTML = "Gagal memuat data. Periksa koneksi internet Anda.";
-          statusMsg.className = "message error";
-        });
-    }
-
-    // Fungsi menyaring siswa saat mengetik di kotak pencarian
-    function filterStudents() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      
-      const filtered = allStudents.filter(student => 
-        student.name.toLowerCase().includes(query) || 
-        student.grade.toLowerCase().includes(query)
-      );
-      
-      populateTable(filtered);
-    }
-
-    // Fungsi menggambar ulang baris tabel
-    function populateTable(students) {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = ''; 
-      
-      if (students.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Siswa tidak ditemukan</td></tr>';
-        return;
-      }
-      
-      students.forEach(student => {
-        const tr = document.createElement('tr');
-        // Mencegah error JS jika nama anak mengandung tanda kutip (contoh: D'Arcy)
-        const safeName = student.name.replace(/'/g, "\\'");
-
-        // Logika untuk menampilkan centang & ubah tombol jika sudah diisi
-        const checkBadge = student.isFilled ? '<span class="badge-filled">✅ Selesai</span>' : '';
-        const btnClass = student.isFilled ? 'btn-action btn-edit' : 'btn-action';
-        const btnText = student.isFilled ? 'Edit Data' : 'Isi Data';
-
-        tr.innerHTML = `
-          <td>${student.name} ${checkBadge}</td>
-          <td>${student.grade}</td>
-          <td>
-            <button class="${btnClass}" onclick="openModal('${safeName}')">${btnText}</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Buka Modal (Popup)
-    function openModal(studentName) {
-      const modal = document.getElementById('dataModal');
-      modal.style.display = 'flex'; 
-      
-      document.getElementById('displayStudentName').innerText = studentName;
-      document.getElementById('studentName').value = studentName;
-      document.getElementById('modalMessage').innerText = "";
-    }
-
-    // Tutup Modal
-    function closeModal() {
-      const modal = document.getElementById('dataModal');
-      modal.style.display = 'none';
-      document.getElementById('dataForm').reset();
-    }
-
-    // Tutup Modal jika area di luar kotak putih diklik
-    window.onclick = function(event) {
-      const modal = document.getElementById('dataModal');
-      if (event.target === modal) {
-        closeModal();
-      }
-    }
-
-    // Fungsi saat tombol "Simpan Data" ditekan
-    function handleFormSubmit(event) {
-      event.preventDefault();
-      
-      const btn = document.getElementById('submitBtn');
-      const msg = document.getElementById('modalMessage');
-      
-      btn.disabled = true;
-      btn.innerText = "Menyimpan...";
-      msg.innerHTML = "";
-      
-      const payload = {
-        studentName: document.getElementById('studentName').value,
-        parentName: document.getElementById('parentName').value,
-        waNumber: document.getElementById('waNumber').value,
-        email: document.getElementById('email').value
-      };
-
-      fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(result => {
-        if (result.status === 'success') {
-          msg.className = "message success";
-          msg.innerText = result.message;
-          btn.innerText = "Tersimpan!";
-          
-          // Setelah berhasil, tunggu 1.5 detik lalu tutup popup dan refresh tabel
-          setTimeout(() => {
-            closeModal();
-            btn.disabled = false;
-            btn.innerText = "Simpan Data";
-            msg.innerText = "";
-            msg.className = "message";
-            
-            // Refresh data otomatis agar centang langsung muncul
-            fetchData(); 
-            
-          }, 1500);
-        } else {
-          throw new Error(result.message);
-        }
-      })
-      .catch(error => {
-        msg.className = "message error";
-        msg.innerText = "Terjadi kesalahan: " + error.message;
-        btn.disabled = false;
-        btn.innerText = "Simpan Data";
-      });
-    }
-  </script>
 </body>
 </html>
