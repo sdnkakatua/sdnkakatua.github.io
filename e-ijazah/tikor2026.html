@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verifikasi Titik Koordinat Siswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        #map { height: 260px; width: 100%; border-radius: 0.75rem; z-index: 10; }
+        .glass-effect { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
+        .verified { background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen p-4 pb-10">
+
+    <div class="max-w-md mx-auto pt-6 pb-4 text-center">
+        <h1 class="text-2xl font-bold text-blue-900">E-Zonasi SDN Kakatua</h1>
+        <p class="text-sm text-slate-500 mt-1">Verifikasi lokasi rumah untuk keperluan sekolah</p>
+    </div>
+
+    <div class="max-w-md mx-auto mb-4">
+        <div class="relative">
+            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Cari nama siswa..." 
+                class="w-full px-5 py-3 rounded-2xl border-none shadow-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700">
+            <div class="absolute right-4 top-3.5 text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-white">
+        <ul id="studentList" class="divide-y divide-gray-50">
+            <li class="py-10 text-center flex flex-col items-center">
+                <div class="animate-spin h-6 w-6 border-2 border-blue-600 border-t-transparent rounded-full mb-2"></div>
+                <span class="text-sm text-slate-400">Menghubungkan ke database...</span>
+            </li>
+        </ul>
+    </div>
+
+    <div id="passcodeModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-100 rounded-full text-blue-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Keamanan Data</h3>
+                </div>
+            </div>
+            
+            <p class="text-sm text-slate-500 mb-4">Masukkan NISN untuk memverifikasi <br><span id="passcodeStudentName" class="font-bold text-blue-700 text-base"></span></p>
+            
+            <input type="text" inputmode="numeric" id="nisnInput" placeholder="Ketik NISN..." 
+                class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition mb-2 font-mono">
+            <p id="passcodeError" class="text-[11px] text-red-500 hidden mb-2 font-medium">❌ NISN yang dimasukkan salah!</p>
+            
+            <div class="flex gap-3 mt-5">
+                <button onclick="closePasscodeModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-semibold hover:bg-slate-200 transition">Batal</button>
+                <button id="btnVerify" onclick="verifyPasscode()" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Lanjut</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="locationModal" class="fixed inset-0 z-50 hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="glass-effect w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b flex justify-between items-center bg-white">
+                <div>
+                    <p class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Verifikasi Lokasi</p>
+                    <h3 id="modalStudentName" class="text-lg font-bold text-slate-800 leading-tight">Nama Siswa</h3>
+                </div>
+                <button onclick="closeModal()" class="p-2 hover:bg-red-50 rounded-full text-slate-400 hover:text-red-500 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="p-5">
+                <div id="map" class="mb-4 bg-slate-200 shadow-inner rounded-xl flex items-center justify-center text-slate-400 text-sm">Memuat Peta...</div>
+                <div id="coordText" class="text-center text-[11px] font-mono text-slate-500 mb-4 bg-slate-100 py-1.5 rounded-lg hidden"></div>
+
+                <div class="grid grid-cols-1 gap-3">
+                    <button id="btnGetLocation" onclick="getLocation()" class="flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-2xl font-semibold hover:bg-blue-50 transition active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                        Lacak GPS
+                    </button>
+                    <button id="btnSubmit" onclick="submitData()" class="px-4 py-3 bg-blue-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-200 opacity-40 cursor-not-allowed transition" disabled>
+                        Simpan Verifikasi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // --- ⚠️ GANTI URL INI DENGAN URL APPS SCRIPT ANDA ⚠️ ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlep1GWJBw6-PPN3IIQits9agRSE7kqfFHj2SIl0xwuWzNJzCAIcVmceiWely06DjCmw/exec'; 
+        
+        let allStudents = [];
+        let targetStudent = null; 
+        let map = null;
+        let marker = null;
+        let currentStudent = "";
+        let currentLat = null;
+        let currentLng = null;
+
+        // 1. Ambil Data dari Spreadsheet
+        async function loadData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                allStudents = await response.json();
+                renderList(allStudents);
+            } catch (e) {
+                document.getElementById('studentList').innerHTML = `<li class="p-6 text-center text-red-500">Gagal memuat data. Periksa URL Apps Script.</li>`;
+            }
+        }
+
+        // 2. Tampilkan Daftar Siswa
+        function renderList(data) {
+            const list = document.getElementById('studentList');
+            list.innerHTML = '';
+            
+            if (data.length === 0) {
+                list.innerHTML = `<li class="p-8 text-center text-slate-400">Siswa tidak ditemukan</li>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const li = document.createElement('li');
+                const isVerified = item.sudahVerifikasi;
+                
+                li.className = `transition ${isVerified ? 'verified' : 'hover:bg-blue-50 cursor-pointer'}`;
+                
+                li.onclick = () => {
+                    if (isVerified) {
+                        alert("Anda sudah melakukan verifikasi tikor.");
+                    } else {
+                        openPasscodeModal(item);
+                    }
+                };
+
+                li.innerHTML = `
+                    <div class="px-6 py-4 flex justify-between items-center">
+                        <span class="font-medium ${isVerified ? 'line-through opacity-60' : 'text-slate-700'}">${item.nama}</span>
+                        ${isVerified ? 
+                            `<span class="bg-green-100 text-green-600 p-1.5 rounded-full"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"></path></svg></span>` : 
+                            `<svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>`
+                        }
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // 3. Pencarian
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allStudents.filter(s => s.nama.toLowerCase().includes(query));
+            renderList(filtered);
+        }
+
+        // 4. Logika Passcode (Modal 1)
+        function openPasscodeModal(studentData) {
+            targetStudent = studentData; 
+            document.getElementById('passcodeStudentName').innerText = studentData.nama;
+            document.getElementById('nisnInput').value = "";
+            document.getElementById('passcodeError').classList.add('hidden');
+            
+            // Tampilkan Modal Passcode
+            document.getElementById('passcodeModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('nisnInput').focus(), 100);
+        }
+
+        function closePasscodeModal() {
+            document.getElementById('passcodeModal').classList.add('hidden');
+        }
+
+        function verifyPasscode() {
+            const btnVerify = document.getElementById('btnVerify');
+            btnVerify.innerText = "Mengecek...";
+            
+            const input = String(document.getElementById('nisnInput').value).trim();
+            const validNisn = String(targetStudent.nisn).trim();
+
+            if (input === validNisn && input !== "") {
+                document.getElementById('passcodeError').classList.add('hidden');
+                
+                // Tutup modal passcode dulu secara paksa
+                closePasscodeModal();
+                btnVerify.innerText = "Lanjut";
+                
+                // Beri jeda 400ms agar DOM HTML sempat menutup elemen sepenuhnya
+                setTimeout(() => {
+                    openLocationModal(targetStudent.nama);
+                }, 400);
+
+            } else {
+                document.getElementById('passcodeError').classList.remove('hidden');
+                btnVerify.innerText = "Lanjut";
+            }
+        }
+
+        document.getElementById('nisnInput').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") verifyPasscode();
+        });
+
+        // 5. Logika Peta (Modal 2)
+        function openLocationModal(name) {
+            currentStudent = name;
+            document.getElementById('modalStudentName').innerText = name;
+            
+            // Tampilkan struktur Modal Peta
+            document.getElementById('locationModal').classList.remove('hidden');
+            
+            // Hapus isi map sebelumnya jika ada (Mencegah bug map abu-abu Leaflet)
+            if (map !== null) {
+                map.remove(); 
+                map = null;
+            }
+
+            // Inisialisasi Ulang Map secara utuh
+            setTimeout(() => {
+                map = L.map('map').setView([-2.5489, 118.0149], 5); // Default: Indonesia
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+                
+                // Force resize Leaflet
+                map.invalidateSize();
+            }, 300);
+
+            resetModalState();
+        }
+
+        function resetModalState() {
+            currentLat = null; currentLng = null;
+            marker = null;
+            document.getElementById('btnSubmit').disabled = true;
+            document.getElementById('btnSubmit').classList.add('opacity-40', 'cursor-not-allowed');
+            document.getElementById('coordText').classList.add('hidden');
+            document.getElementById('btnGetLocation').innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg> Lacak GPS`;
+        }
+
+        function closeModal() {
+            document.getElementById('locationModal').classList.add('hidden');
+        }
+
+        // 6. Ambil Geolocation
+        function getLocation() {
+            const btn = document.getElementById('btnGetLocation');
+            btn.innerHTML = "Mencari Satelit GPS...";
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    
+                    // Arahkan Peta ke Koordinat
+                    map.setView([currentLat, currentLng], 18);
+                    if (marker) map.removeLayer(marker);
+                    marker = L.marker([currentLat, currentLng]).addTo(map);
+                    
+                    // Tampilkan Teks
+                    document.getElementById('coordText').innerText = `Lat: ${currentLat.toFixed(6)} | Lng: ${currentLng.toFixed(6)}`;
+                    document.getElementById('coordText').classList.remove('hidden');
+                    
+                    // Nyalakan Tombol Submit
+                    const submit = document.getElementById('btnSubmit');
+                    submit.disabled = false;
+                    submit.classList.remove('opacity-40', 'cursor-not-allowed');
+                    
+                    btn.innerHTML = "Kunci GPS";
+                }, () => {
+                    alert("Izin GPS ditolak atau sinyal lemah. Pastikan GPS HP Anda menyala.");
+                    btn.innerHTML = "Lacak Ulang GPS";
+                }, {enableHighAccuracy: true});
+            } else {
+                alert("Browser tidak mendukung pencarian lokasi.");
+            }
+        }
+
+        // 7. Kirim Data
+        async function submitData() {
+            const btn = document.getElementById('btnSubmit');
+            btn.innerText = "Menyimpan Data...";
+            btn.disabled = true;
+
+            const body = new FormData();
+            body.append("nama", currentStudent);
+            body.append("lat", currentLat);
+            body.append("lng", currentLng);
+
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", body });
+                alert("Berhasil! Lokasi rumah telah diverifikasi.");
+                closeModal();
+                loadData(); // Refresh list otomatis
+            } catch (e) {
+                alert("Gagal mengirim data. Coba lagi.");
+                btn.innerText = "Simpan Verifikasi";
+                btn.disabled = false;
+            }
+        }
+
+        // Muat pertama kali
+        window.onload = loadData;
+    </script>
+	
+	<footer>
+	   <div class="max-w-md mx-auto pt-6 pb-4 text-center">
+       <p class="text-sm text-slate-500 mt-1">Info - Hubungi Operator - 0823 9522 3314</p>
+		<h1 class="text-2xl font-bold text-blue-900">E-Zonasi SDN Kakatua</h1>
+	</div>
+	</footer>
+
+</body>
+</html>
