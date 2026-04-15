@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Identitas Transkrip Nilai Siswa</title>
+    <style>
+        /* CSS SAMA SEPERTI SEBELUMNYA */
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        .student-name { color: #007bff; cursor: pointer; font-weight: bold; }
+        .student-name:hover { color: #0056b3; text-decoration: underline; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); }
+        .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; margin-top: -10px; }
+        .close-btn:hover { color: #333; }
+        .data-row { display: flex; flex-direction: column; background: #f9f9f9; padding: 12px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #eee; }
+        .data-label { margin-bottom: 8px; font-size: 15px; }
+        .radio-group { display: flex; gap: 15px; }
+        .radio-group label { cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .radio-benar { color: #28a745; }
+        .radio-salah { color: #dc3545; }
+        #catatanBox { display: none; margin-bottom: 15px; width: 100%; }
+        #catatanBox label { font-weight: bold; font-size: 14px; color: #dc3545; display: block; margin-bottom: 5px; }
+        #catatanBox textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; resize: vertical; }
+        .btn-submit { background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        .btn-submit:hover { background-color: #0056b3; }
+        .btn-submit:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .status-belum { color: #555; }
+        .status-sesuai { color: green; font-weight: bold; }
+        .status-salah { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sistem VerVal Identitas Transkrip Nilai Siswa<br>
+    Kelas 6 Tahun 2025 - SDN Kakatua</h2>
+    <p>Silakan klik pada <strong>Nama Siswa</strong> untuk melakukan verifikasi data identitas.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Siswa</th>
+                <th>Status Verifikasi</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr>
+                <td colspan="3" style="text-align: center; font-weight: bold;">Mencari data ke database... Harap tunggu sebentar ⏳</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="verifikasiModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h3>Verifikasi Identitas</h3>
+        <form id="verifikasiForm">
+            <div class="data-row">
+                <div class="data-label"><strong>Nama:</strong> <span id="modalNama"></span></div>
+                <div class="radio-group">
+                    <label class="radio-benar"><input type="radio" name="radioNama" value="benar" onchange="cekCatatan()"> Benar</label>
+                    <label class="radio-salah"><input type="radio" name="radioNama" value="salah" onchange="cekCatatan()"> Salah</label>
+                </div>
+            </div>
+            <div class="data-row">
+                <div class="data-label"><strong>NISN:</strong> <span id="modalNisn"></span></div>
+                <div class="radio-group">
+                    <label class="radio-benar"><input type="radio" name="radioNisn" value="benar" onchange="cekCatatan()"> Benar</label>
+                    <label class="radio-salah"><input type="radio" name="radioNisn" value="salah" onchange="cekCatatan()"> Salah</label>
+                </div>
+            </div>
+            <div class="data-row">
+                <div class="data-label"><strong>Tempat, Tgl Lahir:</strong> <span id="modalTtl"></span></div>
+                <div class="radio-group">
+                    <label class="radio-benar"><input type="radio" name="radioTtl" value="benar" onchange="cekCatatan()"> Benar</label>
+                    <label class="radio-salah"><input type="radio" name="radioTtl" value="salah" onchange="cekCatatan()"> Salah</label>
+                </div>
+            </div>
+            <div class="data-row">
+                <div class="data-label"><strong>Nomor Ijazah:</strong> <span id="modalIjazah"></span></div>
+                <div class="radio-group">
+                    <label class="radio-benar"><input type="radio" name="radioIjazah" value="benar" onchange="cekCatatan()"> Benar</label>
+                    <label class="radio-salah"><input type="radio" name="radioIjazah" value="salah" onchange="cekCatatan()"> Salah</label>
+                </div>
+            </div>
+
+            <div id="catatanBox">
+                <label for="inputCatatan">Tuliskan perbaikan data yang seharusnya:</label>
+                <textarea id="inputCatatan" rows="3"></textarea>
+            </div>
+            
+            <input type="hidden" id="currentNisn">
+            <button type="button" class="btn-submit" onclick="submitVerifikasi()">Simpan Verifikasi</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztYTwrGqPNqjMxEH3NmvzYwDpLmYfgV8XTyALlCECDuvXqO1ymCTzJZQVGZavD2DwQ/exec';
+    
+    const modal = document.getElementById("verifikasiModal");
+
+    // Fungsi otomatis berjalan saat halaman web dibuka
+    window.onload = function() {
+        loadDataFromSheet();
+    };
+
+    // Fungsi untuk memanggil (GET) data dari Sheet
+    function loadDataFromSheet() {
+        fetch(SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = ""; // Bersihkan pesan loading
+
+                if (data.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Belum ada data siswa di Spreadsheet.</td></tr>";
+                    return;
+                }
+
+                // Bangun tabel berulang sesuai data (Loop)
+                data.forEach((siswa, index) => {
+                    // Penentuan warna status
+                    let classStatus = "status-belum";
+                    if (siswa.status.includes("Sesuai")) classStatus = "status-sesuai";
+                    if (siswa.status.includes("Perbaikan")) classStatus = "status-salah";
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td class="student-name" 
+                            data-nama="${siswa.nama}" 
+                            data-nisn="${siswa.nisn}" 
+                            data-ttl="${siswa.ttl}" 
+                            data-ijazah="${siswa.ijazah}">
+                            ${siswa.nama}
+                        </td>
+                        <td id="status-${siswa.nisn}" class="${classStatus}">${siswa.status}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Pasang Event Listener ke elemen yang baru di-render
+                attachClickEvents();
+            })
+            .catch(error => {
+                document.getElementById('tableBody').innerHTML = "<tr><td colspan='3' style='text-align:center; color:red;'>Gagal memuat data. Periksa URL atau koneksi internet.</td></tr>";
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    function attachClickEvents() {
+        document.querySelectorAll('.student-name').forEach(item => {
+            item.addEventListener('click', function() {
+                document.getElementById('modalNama').textContent = this.getAttribute('data-nama');
+                document.getElementById('modalNisn').textContent = this.getAttribute('data-nisn');
+                document.getElementById('modalTtl').textContent = this.getAttribute('data-ttl');
+                document.getElementById('modalIjazah').textContent = this.getAttribute('data-ijazah');
+                document.getElementById('currentNisn').value = this.getAttribute('data-nisn');
+
+                document.getElementById('verifikasiForm').reset();
+                cekCatatan(); 
+
+                const submitBtn = document.querySelector('.btn-submit');
+                submitBtn.textContent = 'Simpan Verifikasi';
+                submitBtn.disabled = false;
+
+                modal.style.display = "block";
+            });
+        });
+    }
+
+    function closeModal() { modal.style.display = "none"; }
+    window.onclick = function(event) { if (event.target == modal) closeModal(); }
+
+    function cekCatatan() {
+        const salahNama = document.querySelector('input[name="radioNama"]:checked')?.value === 'salah';
+        const salahNisn = document.querySelector('input[name="radioNisn"]:checked')?.value === 'salah';
+        const salahTtl = document.querySelector('input[name="radioTtl"]:checked')?.value === 'salah';
+        const salahIjazah = document.querySelector('input[name="radioIjazah"]:checked')?.value === 'salah';
+
+        const catatanBox = document.getElementById('catatanBox');
+        if (salahNama || salahNisn || salahTtl || salahIjazah) {
+            catatanBox.style.display = "block";
+        } else {
+            catatanBox.style.display = "none";
+            document.getElementById('inputCatatan').value = ""; 
+        }
+    }
+
+    // Fungsi Submit (POST) kembali ke Sheet
+    function submitVerifikasi() {
+        const statusNama = document.querySelector('input[name="radioNama"]:checked');
+        const statusNisn = document.querySelector('input[name="radioNisn"]:checked');
+        const statusTtl = document.querySelector('input[name="radioTtl"]:checked');
+        const statusIjazah = document.querySelector('input[name="radioIjazah"]:checked');
+
+        if (!statusNama || !statusNisn || !statusTtl || !statusIjazah) {
+            alert("Mohon pilih 'Benar' atau 'Salah' untuk setiap data.");
+            return;
+        }
+
+        const catatan = document.getElementById('inputCatatan').value;
+        const isSemuaBenar = (statusNama.value === 'benar' && statusNisn.value === 'benar' && statusTtl.value === 'benar' && statusIjazah.value === 'benar');
+
+        if (!isSemuaBenar && catatan.trim() === "") {
+            alert("Mohon isi kolom catatan perbaikan.");
+            return; 
+        }
+
+        const submitBtn = document.querySelector('.btn-submit');
+        submitBtn.textContent = 'Memperbarui database... ⏳';
+        submitBtn.disabled = true;
+
+        const nisn = document.getElementById('currentNisn').value;
+        const statusAkhir = isSemuaBenar ? "Data Sesuai ✅" : "Perlu Perbaikan ❌";
+
+        // Kemas data untuk dikirim
+        const formData = new FormData();
+        formData.append('nisn', nisn);
+        formData.append('statusFinal', statusAkhir);
+        formData.append('catatan', catatan);
+
+        // Tembak data ke Google Script
+        fetch(SCRIPT_URL, { method: 'POST', body: formData })
+            .then(response => {
+                alert("Data berhasil diperbarui di server!");
+                
+                // Ubah tampilan di tabel web (tanpa perlu refresh halaman)
+                const statusElement = document.getElementById('status-' + nisn);
+                statusElement.textContent = statusAkhir;
+                statusElement.className = isSemuaBenar ? "status-sesuai" : "status-salah";
+                
+                closeModal();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert("Gagal menyimpan data.");
+                submitBtn.textContent = 'Simpan Verifikasi';
+                submitBtn.disabled = false;
+            });
+    }
+</script>
+</body>
+</html>
