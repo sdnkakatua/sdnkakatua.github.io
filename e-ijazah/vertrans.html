@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Identitas Transkrip Nilai Siswa</title>
     <style>
-        /* CSS SAMA SEPERTI SEBELUMNYA */
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         h2 { color: #333; text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
@@ -33,6 +32,15 @@
         .status-belum { color: #555; }
         .status-sesuai { color: green; font-weight: bold; }
         .status-salah { color: #dc3545; font-weight: bold; }
+
+        /* --- TAMBAHAN CSS UNTUK STATISTIK --- */
+        .footer-stats { display: flex; justify-content: space-between; max-width: 800px; margin: 20px auto 0; gap: 15px; }
+        .stat-box { background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex: 1; text-align: center; border-bottom: 4px solid #007bff; }
+        .stat-box.success { border-bottom-color: #28a745; }
+        .stat-box.warning { border-bottom-color: #ffc107; }
+        .stat-box h4 { margin: 0; font-size: 28px; color: #333; }
+        .stat-box p { margin: 5px 0 0; font-size: 14px; color: #666; font-weight: bold; }
+        /* ------------------------------------ */
     </style>
 </head>
 <body>
@@ -43,7 +51,6 @@
         <h3 style="color: #007bff; border-bottom: none;">📌 Informasi Penting</h3>
         <h4 style="color: #007bff; border-bottom: none;">BAGI SISWA YANG TELAH MELAKUKAN VERIFIKASI,<br>SILAHKAN HUBUNGI IBU ICA / IBU MIMI<br>UNTUK PENGAMBILAN TRANSKRIP NILAI</h4>
         <p style="text-align: left; line-height: 1.6; color: #333;">
-          
             <strong>Petunjuk Penggunaan:</strong><br>
             1. Klik pada nama siswa untuk memunculkan formulir.<br>
             2. Periksa kesesuaian Nama, NISN, Tempat/Tanggal Lahir, dan Nomor Ijazah.<br>
@@ -55,7 +62,6 @@
     </div>
 </div>
 
-    
 <div class="container">
     <h2>Sistem VerVal Identitas Transkrip Nilai Siswa<br>
     Kelas 6 Tahun 2025 - SDN Kakatua</h2>
@@ -77,6 +83,20 @@
     </table>
 </div>
 
+<div class="footer-stats">
+    <div class="stat-box">
+        <h4 id="stat-total">0</h4>
+        <p>Total Siswa</p>
+    </div>
+    <div class="stat-box success">
+        <h4 id="stat-sudah">0</h4>
+        <p>Sudah Verifikasi</p>
+    </div>
+    <div class="stat-box warning">
+        <h4 id="stat-belum">0</h4>
+        <p>Belum Verifikasi</p>
+    </div>
+</div>
 <div id="verifikasiModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -127,20 +147,17 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztYTwrGqPNqjMxEH3NmvzYwDpLmYfgV8XTyALlCECDuvXqO1ymCTzJZQVGZavD2DwQ/exec';
     
     const modal = document.getElementById("verifikasiModal");
-
-
     const infoModal = document.getElementById("infoModal");
 
-function closeInfoModal() {
-    infoModal.style.display = "none";
-}
+    function closeInfoModal() {
+        infoModal.style.display = "none";
+    }
     
-    
- // Fungsi otomatis berjalan saat halaman web dibuka
-window.onload = function() {
-    infoModal.style.display = "block"; // Munculkan popup informasi
-    loadDataFromSheet(); // Tetap jalankan load data di latar belakang
-};
+    // Fungsi otomatis berjalan saat halaman web dibuka
+    window.onload = function() {
+        infoModal.style.display = "block"; // Munculkan popup informasi
+        loadDataFromSheet(); // Tetap jalankan load data di latar belakang
+    };
 
     // Fungsi untuk memanggil (GET) data dari Sheet
     function loadDataFromSheet() {
@@ -155,10 +172,19 @@ window.onload = function() {
                     return;
                 }
 
-                // Bangun tabel berulang sesuai data (Loop)
+                // --- TAMBAHAN LOGIK STATISTIK ---
+                let totalSiswa = data.length;
+                let sudahVerifikasi = 0;
+
                 data.forEach((siswa, index) => {
                     // Penentuan warna status
                     let classStatus = "status-belum";
+                    
+                    // Cek jika siswa sudah verifikasi
+                    if (siswa.status.includes("Sesuai") || siswa.status.includes("Perbaikan") || siswa.status.includes("✅") || siswa.status.includes("❌")) {
+                        sudahVerifikasi++;
+                    }
+
                     if (siswa.status.includes("Sesuai")) classStatus = "status-sesuai";
                     if (siswa.status.includes("Perbaikan")) classStatus = "status-salah";
 
@@ -176,6 +202,12 @@ window.onload = function() {
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // Update angka pada kotak statistik di footer
+                document.getElementById('stat-total').innerText = totalSiswa;
+                document.getElementById('stat-sudah').innerText = sudahVerifikasi;
+                document.getElementById('stat-belum').innerText = totalSiswa - sudahVerifikasi;
+                // --------------------------------
 
                 // Pasang Event Listener ke elemen yang baru di-render
                 attachClickEvents();
@@ -208,10 +240,12 @@ window.onload = function() {
     }
 
     function closeModal() { modal.style.display = "none"; }
-   window.onclick = function(event) { 
-    if (event.target == modal) closeModal(); 
-    if (event.target == infoModal) closeInfoModal(); 
-}
+    
+    window.onclick = function(event) { 
+        if (event.target == modal) closeModal(); 
+        if (event.target == infoModal) closeInfoModal(); 
+    }
+
     function cekCatatan() {
         const salahNama = document.querySelector('input[name="radioNama"]:checked')?.value === 'salah';
         const salahNisn = document.querySelector('input[name="radioNisn"]:checked')?.value === 'salah';
@@ -260,13 +294,27 @@ window.onload = function() {
         formData.append('statusFinal', statusAkhir);
         formData.append('catatan', catatan);
 
+        // --- CEK STATUS SEBELUMNYA UNTUK UPDATE STATISTIK LIVE ---
+        const statusElement = document.getElementById('status-' + nisn);
+        const prevStatus = statusElement.textContent;
+        // ---------------------------------------------------------
+
         // Tembak data ke Google Script
         fetch(SCRIPT_URL, { method: 'POST', body: formData })
             .then(response => {
                 alert("Data berhasil diperbarui di server!");
                 
+                // --- UPDATE LIVE STATISTIK JIKA SEBELUMNYA BELUM VERIFIKASI ---
+                if (!prevStatus.includes("Sesuai") && !prevStatus.includes("Perbaikan") && !prevStatus.includes("✅") && !prevStatus.includes("❌")) {
+                    let statSudah = document.getElementById('stat-sudah');
+                    let statBelum = document.getElementById('stat-belum');
+                    
+                    statSudah.innerText = parseInt(statSudah.innerText) + 1;
+                    statBelum.innerText = parseInt(statBelum.innerText) - 1;
+                }
+                // --------------------------------------------------------------
+
                 // Ubah tampilan di tabel web (tanpa perlu refresh halaman)
-                const statusElement = document.getElementById('status-' + nisn);
                 statusElement.textContent = statusAkhir;
                 statusElement.className = isSemuaBenar ? "status-sesuai" : "status-salah";
                 
