@@ -93,6 +93,37 @@
         </div>
     </div>
 
+<div id="infoModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 transform transition-all text-left border border-white">
+        <div class="flex items-center gap-3 mb-4 border-b pb-4 border-slate-100">
+            <div class="p-2 bg-blue-100 rounded-full text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800">PENTING</h3>
+        </div>
+        
+        <div class="text-sm text-slate-600 mb-6 space-y-2">
+            <p>Batas waktu <strong>Minggu, 19 April 2026</strong>.<br>
+			Kami tidak bertanggung jawab atas Masalah SPMB SMP Ananda yang timbul akibat "tidak mengisi/kesalahan pengisian" yang dikarenakan Bapak/Ibu tidak mengikuti petunjuk.  
+				<br>Langkah-langkah:</p>
+            <ol class="list-decimal pl-5 space-y-1.5 mt-2">
+                <li>Pastikan Anda mengakses web ini saat berada di <strong>rumah siswa</strong>.</li>
+                <li>Aktifkan Lokasi/GPS HP Anda.</li>
+				<li>Pilih nama siswa pada daftar.</li>
+                <li>Masukkan <strong>NISN</strong> sebagai kode keamanan.</li>
+				<li>Jika muncul peringatan, tekan Allow/Izinkan/Yes/Ok.</li>
+                <li>Klik tombol <strong>Lacak GPS</strong> dan <em>Izinkan (Allow)</em> akses lokasi pada browser.</li>
+				<li>Klik tombol <strong>Kunci GPS</strong>.</li>
+                <li>Klik <strong>Simpan Verifikasi</strong> setelah lokasi ditemukan.</li>
+            </ol>
+        </div>
+        
+        <button onclick="closeInfoModal()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+            Saya Mengerti
+        </button>
+    </div>
+</div>
+	
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
@@ -248,6 +279,11 @@
             document.getElementById('locationModal').classList.add('hidden');
         }
 
+function closeInfoModal() {
+    document.getElementById('infoModal').classList.add('hidden');
+}
+
+		
         // 6. Ambil Geolocation
         function getLocation() {
             const btn = document.getElementById('btnGetLocation');
@@ -305,8 +341,14 @@
             }
         }
 
-        // Muat pertama kali
-        window.onload = loadData;
+        // Muat pertama kali dan tampilkan popup informasi
+window.onload = () => {
+    // Memunculkan modal informasi (hapus class hidden)
+    document.getElementById('infoModal').classList.remove('hidden');
+    
+    // Tetap memuat data siswa dari spreadsheet di latar belakang
+    loadData(); 
+};
     </script>
 	
 	<footer>
