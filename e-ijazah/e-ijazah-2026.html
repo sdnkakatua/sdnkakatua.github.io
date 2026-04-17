@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Identitas Transkrip Nilai Siswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-4 md:p-8 text-gray-800">
+
+<div id="infoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg relative text-center">
+        <button class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl font-bold" onclick="closeInfoModal()">&times;</button>
+        <h3 class="text-2xl font-bold text-blue-600 mb-2">📌 Informasi Penting</h3>
+        <h4 class="text-lg font-semibold text-blue-600 mb-4 leading-snug">
+            <strong>Verifikasi</strong> ini dilakukan untuk<br>Pemadanan Data <strong>E-Ijazah</strong> Tahun 2026
+        </h4>
+        <div class="text-left bg-blue-50 p-4 rounded-lg mb-6 text-sm text-gray-700 leading-relaxed">
+            <strong>Petunjuk Penggunaan:</strong>
+            <ol class="list-decimal list-inside mt-2 space-y-1">
+                <li>Siapkan <strong>Kartu Keluarga</strong> dan <strong>Akta Kelahiran</strong>
+				<li>Pastikan semua data<strong> SESUAI</strong> dengan KK & Akta.</li>
+                <li>Klik pada nama siswa untuk memunculkan formulir.</li>
+                <li>Masukkan Password <strong>(Menggunakan NISN Siswa)</strong>.</li>
+                <li>Periksa kesesuaian Nama, NISN, NIK, Nama Orang Tua, dan Alamat.</li>
+                <li>Pilih <strong class="text-green-600">Benar</strong> jika data sesuai, atau <strong class="text-red-600">Salah</strong> jika ada kesalahan.</li>
+                <li>Jika ada yang salah, <strong>wajib</strong> mengisi catatan perbaikan.</li>
+                <li>Klik "Simpan Verifikasi".</li>
+            </ol>
+        </div>
+        <button type="button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors" onclick="closeInfoModal()">Saya Mengerti</button>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Sistem Verval Identitas Siswa</h2>
+    <h3 class="text-lg text-center text-gray-600 mb-6 border-b pb-4">Kelas 6 Tahun 2026 - SDN Kakatua</h3>
+    
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="🔍 Cari nama siswa (ketik minimal 2 huruf)...">
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-blue-600 text-white">
+                    <th class="p-3 border border-gray-300 text-left w-12">No</th>
+                    <th class="p-3 border border-gray-300 text-left">Nama Siswa</th>
+                    <th class="p-3 border border-gray-300 text-left w-48">Status Verifikasi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="3" class="p-4 text-center font-bold text-gray-600">Mencari data ke database... Harap tunggu sebentar ⏳</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mt-6">
+    <div class="bg-white p-6 rounded-xl shadow text-center border-b-4 border-blue-600">
+        <h4 id="stat-total" class="text-3xl font-bold text-gray-800">0</h4>
+        <p class="text-sm font-semibold text-gray-500 mt-1 uppercase tracking-wide">Total Siswa</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow text-center border-b-4 border-green-500">
+        <h4 id="stat-sudah" class="text-3xl font-bold text-gray-800">0</h4>
+        <p class="text-sm font-semibold text-gray-500 mt-1 uppercase tracking-wide">Sudah Verifikasi</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow text-center border-b-4 border-yellow-400">
+        <h4 id="stat-belum" class="text-3xl font-bold text-gray-800">0</h4>
+        <p class="text-sm font-semibold text-gray-500 mt-1 uppercase tracking-wide">Belum Verifikasi</p>
+    </div>
+</div>
+
+<div id="passcodeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-11/12 max-w-sm relative text-center">
+        <button class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl font-bold" onclick="closePasscodeModal()">&times;</button>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Keamanan Data</h3>
+        <p class="text-sm text-gray-600 mb-4">Masukkan NISN siswa sebagai Password untuk memverifikasi data <strong id="namaPasscodeTarget" class="text-blue-600"></strong>.</p>
+        <input type="password" id="inputPasscode" class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan NISN">
+        <button type="button" onclick="cekPasscode()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">Verifikasi Password</button>
+    </div>
+</div>
+
+<div id="verifikasiModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-11/12 max-w-lg relative my-8">
+        <button class="absolute top-3 right-4 text-gray-400 hover:text-gray-800 text-2xl font-bold" onclick="closeModal()">&times;</button>
+        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Form Verifikasi Identitas</h3>
+        
+        <form id="verifikasiForm" class="space-y-4">
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>Nama: <u><span id="modalNama" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioNama" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioNama" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>NISN: <u><span id="modalNisn" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioNisn" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioNisn" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>NIK: <u><span id="modalNik" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioNik" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioNik" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>Nama Ayah Kandung: <u><span id="modalAyah" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioAyah" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioAyah" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>Nama Ibu Kandung: <u><span id="modalIbu" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioIbu" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioIbu" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                <div class="text-sm text-gray-600 mb-2"><strong>Alamat: <u><span id="modalAlamat" class="text-blue-600"></span></u></strong></div>
+                <div class="flex gap-4">
+                    <label class="cursor-pointer font-bold text-green-600 flex items-center gap-2"><input type="radio" name="radioAlamat" value="benar" onchange="cekCatatan()" class="accent-green-600"> Benar</label>
+                    <label class="cursor-pointer font-bold text-red-600 flex items-center gap-2"><input type="radio" name="radioAlamat" value="salah" onchange="cekCatatan()" class="accent-red-600"> Salah</label>
+                </div>
+            </div>
+
+            <div id="catatanBox" class="hidden mt-4">
+                <label for="inputCatatan" class="block text-red-600 font-bold text-sm mb-2">Tuliskan perbaikan data yang seharusnya:</label>
+                <textarea id="inputCatatan" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Contoh: Nama seharusnya Budi Santoso, NIK seharusnya 737..."></textarea>
+            </div>
+            
+            <input type="hidden" id="currentNisn">
+            
+            <button type="button" id="btnSubmitForm" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition-colors mt-6" onclick="submitVerifikasi()">Simpan Verifikasi</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_PaGZ_8JrVNzpQCgCQDCq9XUe0AzvS8bB7CCapqiOGiO1b5JCaz-d0cPOG4YagbV9/exec';
+    
+    const modal = document.getElementById("verifikasiModal");
+    const infoModal = document.getElementById("infoModal");
+    const passcodeModal = document.getElementById("passcodeModal");
+    const btnSubmitForm = document.getElementById("btnSubmitForm");
+    const searchInput = document.getElementById("searchInput");
+    
+    let activeStudentElement = null; // Menyimpan elemen siswa yang diklik
+
+    function closeInfoModal() {
+        infoModal.classList.add("hidden");
+    }
+
+    function closePasscodeModal() {
+        passcodeModal.classList.add("hidden");
+        document.getElementById("inputPasscode").value = ""; // Reset input
+    }
+    
+    // Fungsi otomatis berjalan saat halaman web dibuka
+    window.onload = function() {
+        infoModal.classList.remove("hidden"); // Munculkan popup informasi
+        loadDataFromSheet(); // Tetap jalankan load data di latar belakang
+    };
+
+    // FUNGSI PENCARIAN SISWA
+    searchInput.addEventListener("input", function() {
+        const filterText = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#tableBody tr");
+
+        rows.forEach(row => {
+            const nameCell = row.querySelector('.student-name');
+            if (nameCell) {
+                // Jika input >= 2 huruf, lakukan filter. Jika tidak, tampilkan semua.
+                if (filterText.length >= 2) {
+                    const studentName = nameCell.textContent.toLowerCase();
+                    if (studentName.includes(filterText)) {
+                        row.style.display = ""; // Tampilkan
+                    } else {
+                        row.style.display = "none"; // Sembunyikan
+                    }
+                } else {
+                    row.style.display = ""; // Tampilkan semua jika kurang dari 2 huruf
+                }
+            }
+        });
+    });
+
+    // Fungsi untuk memanggil (GET) data dari Sheet
+    function loadDataFromSheet() {
+        fetch(SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = ""; // Bersihkan pesan loading
+
+                if (data.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='3' class='p-4 text-center font-bold text-gray-500'>Belum ada data siswa di Spreadsheet.</td></tr>";
+                    return;
+                }
+
+                let totalSiswa = data.length;
+                let sudahVerifikasi = 0;
+
+                data.forEach((siswa, index) => {
+                    // Cek jika siswa sudah verifikasi
+                    if (siswa.status.includes("Sesuai") || siswa.status.includes("Perbaikan") || siswa.status.includes("✅") || siswa.status.includes("❌")) {
+                        sudahVerifikasi++;
+                    }
+
+                    // Tentukan style Tailwind berdasarkan status
+                    let classStatus = "text-gray-500 p-3 border border-gray-300";
+                    if (siswa.status.includes("Sesuai")) classStatus = "text-green-600 font-bold p-3 border border-gray-300";
+                    if (siswa.status.includes("Perbaikan")) classStatus = "text-red-600 font-bold p-3 border border-gray-300";
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-3 border border-gray-300 text-center">${index + 1}</td>
+                        <td class="p-3 border border-gray-300 font-semibold text-blue-600 cursor-pointer hover:text-blue-800 hover:underline student-name" 
+                            data-nama="${siswa.nama || ''}" 
+                            data-nisn="${siswa.nisn || ''}" 
+                            data-nik="${siswa.nik || ''}" 
+                            data-ayah="${siswa.ayah || ''}" 
+                            data-ibu="${siswa.ibu || ''}" 
+                            data-alamat="${siswa.alamat || ''}">
+                            ${siswa.nama}
+                        </td>
+                        <td id="status-${siswa.nisn}" class="${classStatus}">${siswa.status}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Update angka statistik
+                document.getElementById('stat-total').innerText = totalSiswa;
+                document.getElementById('stat-sudah').innerText = sudahVerifikasi;
+                document.getElementById('stat-belum').innerText = totalSiswa - sudahVerifikasi;
+
+                attachClickEvents();
+            })
+            .catch(error => {
+                document.getElementById('tableBody').innerHTML = "<tr><td colspan='3' class='p-4 text-center text-red-600 font-bold'>Gagal memuat data. Periksa URL atau koneksi internet.</td></tr>";
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    function attachClickEvents() {
+        document.querySelectorAll('.student-name').forEach(item => {
+            item.addEventListener('click', function() {
+                activeStudentElement = this; // Simpan elemen saat ini ke variabel global
+                
+                // Tampilkan nama di modal passcode
+                document.getElementById("namaPasscodeTarget").textContent = this.getAttribute('data-nama');
+                
+                // Tampilkan Modal Passcode
+                passcodeModal.classList.remove("hidden");
+                document.getElementById("inputPasscode").focus();
+            });
+        });
+    }
+
+    // Fungsi untuk memverifikasi Passcode
+    function cekPasscode() {
+        const inputVal = document.getElementById("inputPasscode").value.trim();
+        const correctNisn = activeStudentElement.getAttribute('data-nisn').trim();
+
+        if (inputVal === correctNisn) {
+            // Passcode Benar
+            closePasscodeModal();
+
+            // Isi form modal verifikasi dengan dataset dari HTML
+            document.getElementById('modalNama').textContent = activeStudentElement.getAttribute('data-nama');
+            document.getElementById('modalNisn').textContent = activeStudentElement.getAttribute('data-nisn');
+            document.getElementById('modalNik').textContent = activeStudentElement.getAttribute('data-nik');
+            document.getElementById('modalAyah').textContent = activeStudentElement.getAttribute('data-ayah');
+            document.getElementById('modalIbu').textContent = activeStudentElement.getAttribute('data-ibu');
+            document.getElementById('modalAlamat').textContent = activeStudentElement.getAttribute('data-alamat');
+            
+            document.getElementById('currentNisn').value = activeStudentElement.getAttribute('data-nisn');
+
+            // Reset form dan sembunyikan kotak catatan
+            document.getElementById('verifikasiForm').reset();
+            cekCatatan(); 
+
+            btnSubmitForm.textContent = 'Simpan Verifikasi';
+            btnSubmitForm.disabled = false;
+
+            // Tampilkan Modal Verifikasi
+            modal.classList.remove("hidden");
+        } else {
+            // Passcode Salah
+            alert("❌ Passcode salah! Silakan masukkan NISN siswa yang benar.");
+            document.getElementById("inputPasscode").value = "";
+            document.getElementById("inputPasscode").focus();
+        }
+    }
+
+    function closeModal() { 
+        modal.classList.add("hidden"); 
+    }
+    
+    // Tutup modal jika klik di luar area pop-up
+    window.onclick = function(event) { 
+        if (event.target == modal) closeModal(); 
+        if (event.target == infoModal) closeInfoModal(); 
+        if (event.target == passcodeModal) closePasscodeModal();
+    }
+
+    function cekCatatan() {
+        const salahNama = document.querySelector('input[name="radioNama"]:checked')?.value === 'salah';
+        const salahNisn = document.querySelector('input[name="radioNisn"]:checked')?.value === 'salah';
+        const salahNik = document.querySelector('input[name="radioNik"]:checked')?.value === 'salah';
+        const salahAyah = document.querySelector('input[name="radioAyah"]:checked')?.value === 'salah';
+        const salahIbu = document.querySelector('input[name="radioIbu"]:checked')?.value === 'salah';
+        const salahAlamat = document.querySelector('input[name="radioAlamat"]:checked')?.value === 'salah';
+
+        const catatanBox = document.getElementById('catatanBox');
+        if (salahNama || salahNisn || salahNik || salahAyah || salahIbu || salahAlamat) {
+            catatanBox.classList.remove("hidden");
+        } else {
+            catatanBox.classList.add("hidden");
+            document.getElementById('inputCatatan').value = ""; 
+        }
+    }
+
+    // Fungsi Submit (POST) kembali ke Sheet
+    function submitVerifikasi() {
+        const statusNama = document.querySelector('input[name="radioNama"]:checked');
+        const statusNisn = document.querySelector('input[name="radioNisn"]:checked');
+        const statusNik = document.querySelector('input[name="radioNik"]:checked');
+        const statusAyah = document.querySelector('input[name="radioAyah"]:checked');
+        const statusIbu = document.querySelector('input[name="radioIbu"]:checked');
+        const statusAlamat = document.querySelector('input[name="radioAlamat"]:checked');
+
+        if (!statusNama || !statusNisn || !statusNik || !statusAyah || !statusIbu || !statusAlamat) {
+            alert("Mohon pilih 'Benar' atau 'Salah' untuk seluruh data (6 Kolom).");
+            return;
+        }
+
+        const catatan = document.getElementById('inputCatatan').value;
+        const isSemuaBenar = (
+            statusNama.value === 'benar' && 
+            statusNisn.value === 'benar' && 
+            statusNik.value === 'benar' && 
+            statusAyah.value === 'benar' && 
+            statusIbu.value === 'benar' && 
+            statusAlamat.value === 'benar'
+        );
+
+        if (!isSemuaBenar && catatan.trim() === "") {
+            alert("Mohon isi kolom catatan perbaikan jika ada data yang salah.");
+            return; 
+        }
+
+        btnSubmitForm.textContent = 'Memperbarui database... ⏳';
+        btnSubmitForm.disabled = true;
+
+        const nisn = document.getElementById('currentNisn').value;
+        const statusAkhir = isSemuaBenar ? "Data Sesuai ✅" : "Perlu Perbaikan ❌";
+
+        // Kemas data untuk dikirim ke Google Apps Script
+        const formData = new FormData();
+        formData.append('nisn', nisn);
+        formData.append('statusFinal', statusAkhir);
+        formData.append('catatan', catatan);
+
+        // Cek status sebelumnya
+        const statusElement = document.getElementById('status-' + nisn);
+        const prevStatus = statusElement.textContent;
+
+        fetch(SCRIPT_URL, { method: 'POST', body: formData })
+            .then(response => {
+                alert("Data berhasil diperbarui di server!");
+                
+                // Update statistik live jika sebelumnya berstatus 'Belum'
+                if (!prevStatus.includes("Sesuai") && !prevStatus.includes("Perbaikan") && !prevStatus.includes("✅") && !prevStatus.includes("❌")) {
+                    let statSudah = document.getElementById('stat-sudah');
+                    let statBelum = document.getElementById('stat-belum');
+                    
+                    statSudah.innerText = parseInt(statSudah.innerText) + 1;
+                    statBelum.innerText = parseInt(statBelum.innerText) - 1;
+                }
+
+                // Ubah tampilan tabel
+                statusElement.textContent = statusAkhir;
+                if (isSemuaBenar) {
+                    statusElement.className = "text-green-600 font-bold p-3 border border-gray-300";
+                } else {
+                    statusElement.className = "text-red-600 font-bold p-3 border border-gray-300";
+                }
+                
+                closeModal();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert("Gagal menyimpan data.");
+                btnSubmitForm.textContent = 'Simpan Verifikasi';
+                btnSubmitForm.disabled = false;
+            });
+    }
+</script>
+</body>
+</html>
