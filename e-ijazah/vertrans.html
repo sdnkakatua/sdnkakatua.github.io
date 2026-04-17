@@ -37,6 +37,24 @@
 </head>
 <body>
 
+<div id="infoModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <span class="close-btn" onclick="closeInfoModal()">&times;</span>
+        <h3 style="color: #007bff; border-bottom: none;">📌 Informasi Penting</h3>
+        <p style="text-align: left; line-height: 1.6; color: #333;">
+            Selamat datang di <strong>Sistem VerVal Identitas Siswa</strong>.<br><br>
+            <strong>Petunjuk Penggunaan:</strong><br>
+            1. Klik pada nama siswa untuk memunculkan formulir.<br>
+            2. Periksa kesesuaian Nama, NISN, Tempat/Tanggal Lahir, dan Nomor Ijazah.<br>
+            3. Pilih <strong>Benar</strong> jika data sudah sesuai, atau <strong>Salah</strong> jika ada kesalahan.<br>
+            4. Jika ada yang salah, <strong>wajib</strong> mengisi catatan perbaikan.<br>
+            5. Klik "Simpan Verifikasi".
+        </p>
+        <button type="button" class="btn-submit" onclick="closeInfoModal()">Saya Mengerti</button>
+    </div>
+</div>
+
+    
 <div class="container">
     <h2>Sistem VerVal Identitas Transkrip Nilai Siswa<br>
     Kelas 6 Tahun 2025 - SDN Kakatua</h2>
@@ -109,10 +127,19 @@
     
     const modal = document.getElementById("verifikasiModal");
 
-    // Fungsi otomatis berjalan saat halaman web dibuka
-    window.onload = function() {
-        loadDataFromSheet();
-    };
+
+    const infoModal = document.getElementById("infoModal");
+
+function closeInfoModal() {
+    infoModal.style.display = "none";
+}
+    
+    
+ // Fungsi otomatis berjalan saat halaman web dibuka
+window.onload = function() {
+    infoModal.style.display = "block"; // Munculkan popup informasi
+    loadDataFromSheet(); // Tetap jalankan load data di latar belakang
+};
 
     // Fungsi untuk memanggil (GET) data dari Sheet
     function loadDataFromSheet() {
@@ -180,8 +207,10 @@
     }
 
     function closeModal() { modal.style.display = "none"; }
-    window.onclick = function(event) { if (event.target == modal) closeModal(); }
-
+   window.onclick = function(event) { 
+    if (event.target == modal) closeModal(); 
+    if (event.target == infoModal) closeInfoModal(); 
+}
     function cekCatatan() {
         const salahNama = document.querySelector('input[name="radioNama"]:checked')?.value === 'salah';
         const salahNisn = document.querySelector('input[name="radioNisn"]:checked')?.value === 'salah';
