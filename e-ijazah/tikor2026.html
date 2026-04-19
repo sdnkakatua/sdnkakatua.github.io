@@ -16,8 +16,8 @@
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen p-4 pb-10">
 
-    <div id="dinoGameModal" class="fixed inset-0 z-[110] hidden bg-slate-50 flex-col items-center justify-center px-4 transition-opacity">
-        <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-4 relative border-2 border-slate-200 text-center">
+    <div id="dinoGameModal" onclick="if(event.target === this) closeDinoGame()" class="fixed inset-0 z-[110] hidden bg-slate-900/80 backdrop-blur-md flex-col items-center justify-center px-4 transition-opacity cursor-pointer">
+        <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-4 relative border-2 border-slate-200 text-center cursor-default">
             <button onclick="closeDinoGame()" class="absolute -top-4 -right-4 p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -25,7 +25,7 @@
             <div class="w-full overflow-hidden rounded-xl border border-slate-200 bg-white" style="height: 300px;">
                 <iframe id="dinoIframe" src="" class="w-full h-full pointer-events-auto" frameborder="0" scrolling="no"></iframe>
             </div>
-            <p class="text-xs text-slate-500 mt-4 font-medium uppercase tracking-widest">Ketuk area game / Tekan Spasi untuk melompat</p>
+            <p class="text-xs text-slate-500 mt-4 font-medium uppercase tracking-widest">Hubungi Pak Ihsan jika ada kendala Verifikasi</p>
         </div>
     </div>
 
@@ -38,11 +38,11 @@
             </div>
             <h3 class="text-xl font-bold text-slate-800 mb-4">PERHATIAN</h3>
             <p class="text-sm text-slate-600 font-medium leading-relaxed">
-                BATAS WAKTU VERIFIKASI TELAH HABIS.<br>
+                BATAS WAKTU VERIFIKASI TELAH HABIS<br>
                 <span class="text-blue-600 font-bold">TERIMA KASIH ATAS KERJASAMANYA</span>
                 <p class="text-sm text-slate-500 mt-1">Operator - Ihsan Syah</p>
             </p>
-                    </div>
+        </div>
     </div>
     
     <div class="max-w-md mx-auto pt-6 pb-4 text-center">
@@ -63,7 +63,7 @@
     <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-white">
         <ul id="studentList" class="divide-y divide-gray-50">
             <li class="py-10 text-center flex flex-col items-center">
-                <span class="text-sm text-slate-400">Pendaftaran Telah Ditutup</span>
+                <span class="text-sm text-slate-400">Verifikasi Telah Ditutup</span>
             </li>
         </ul>
     </div>
