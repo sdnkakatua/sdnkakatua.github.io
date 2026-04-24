@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Verifikasi E-Ijazah - UPT SPF SDN Kakatua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        #map { height: 260px; width: 100%; border-radius: 0.75rem; z-index: 10; }
+        .glass-effect { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
+        .verified { background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen p-4 pb-10">
+
+    <div id="dinoGameModal" onclick="if(event.target === this) closeDinoGame()" class="fixed inset-0 z-[110] hidden bg-slate-900/80 backdrop-blur-md flex-col items-center justify-center px-4 transition-opacity cursor-pointer">
+        <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl p-4 relative border-2 border-slate-200 text-center cursor-default">
+            <button onclick="closeDinoGame()" class="absolute -top-4 -right-4 p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-lg font-bold text-slate-700 mb-2">🦖 Verifikasi telah selesai</h2>
+            <div class="w-full overflow-hidden rounded-xl border border-slate-200 bg-white" style="height: 300px;">
+                <iframe id="dinoIframe" src="" class="w-full h-full pointer-events-auto" frameborder="0" scrolling="no"></iframe>
+            </div>
+            <p class="text-xs text-slate-500 mt-4 font-medium uppercase tracking-widest">Hubungi Pak Ihsan jika ada kendala Verifikasi</p>
+        </div>
+    </div>
+
+    <div id="timeoutOverlay" onclick="playDinoGame()" class="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-slate-900/80 backdrop-blur-md cursor-pointer" title="Ketuk di mana saja untuk bermain!">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 transform transition-all text-center border-t-4 border-red-500">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6 border-4 border-red-50 animate-bounce">
+                <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-4">PERHATIAN</h3>
+            <p class="text-sm text-slate-600 font-medium leading-relaxed">
+                BATAS WAKTU VERIFIKASI TELAH HABIS<br>
+                <span class="text-blue-600 font-bold">TERIMA KASIH ATAS KERJASAMANYA</span>
+                <p class="text-sm text-slate-500 mt-1">Operator - Ihsan Syah</p>
+            </p>
+        </div>
+    </div>
+    
+    <div class="max-w-md mx-auto pt-6 pb-4 text-center">
+        <h1 class="text-2xl font-bold text-blue-900">E-IJAZAH SDN Kakatua</h1>
+        <p class="text-sm text-slate-500 mt-1">Verifikasi data E-Ijazah</p>
+    </div>
+
+    <div class="max-w-md mx-auto mb-4">
+        <div class="relative">
+            <input type="text" id="searchInput" onkeyup="handleSearch()" placeholder="Cari nama siswa..." 
+                class="w-full px-5 py-3 rounded-2xl border-none shadow-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 disabled:opacity-50" disabled>
+            <div class="absolute right-4 top-3.5 text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-white">
+        <ul id="studentList" class="divide-y divide-gray-50">
+            <li class="py-10 text-center flex flex-col items-center">
+                <span class="text-sm text-slate-400">Verifikasi Telah Ditutup</span>
+            </li>
+        </ul>
+    </div>
+
+    <div id="passcodeModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+    <div id="locationModal" class="fixed inset-0 z-50 hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm"></div>
+    <div id="infoModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center px-4 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        function handleSearch() {}
+        function loadData() {}
+        function renderList(data) {}
+        function updateStatistics(data) {}
+
+        // FUNGSI EASTER EGG DINO
+        function playDinoGame() {
+            document.getElementById('dinoGameModal').classList.remove('hidden');
+            document.getElementById('dinoGameModal').classList.add('flex');
+            document.getElementById('dinoIframe').src = "https://wayou.github.io/t-rex-runner/";
+        }
+
+        function closeDinoGame() {
+            document.getElementById('dinoGameModal').classList.add('hidden');
+            document.getElementById('dinoGameModal').classList.remove('flex');
+            document.getElementById('dinoIframe').src = "";
+        }
+
+        window.onload = () => {
+            document.getElementById('timeoutOverlay').classList.remove('hidden');
+        };
+    </script>
+    
+    <footer>
+        <div class="max-w-md mx-auto pt-6 pb-4 text-center">
+            
+            <div class="bg-white rounded-2xl shadow-lg p-5 mb-6 mx-2 border border-slate-100 flex justify-between items-center opacity-50">
+                <div class="flex-1 border-r border-slate-100">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total</p>
+                    <p id="statTotal" class="text-2xl font-bold text-slate-700">-</p>
+                </div>
+                <div class="flex-1 border-r border-slate-100">
+                    <p class="text-[10px] text-green-500 font-bold uppercase tracking-wider mb-1">Sudah</p>
+                    <p id="statVerified" class="text-2xl font-bold text-green-600">-</p>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] text-red-400 font-bold uppercase tracking-wider mb-1">Belum</p>
+                    <p id="statUnverified" class="text-2xl font-bold text-red-500">-</p>
+                </div>
+            </div>
+
+            <p class="text-sm text-slate-500 mt-1">Info - Hubungi Operator - 0823 9522 3314</p>
+            <h1 class="text-2xl font-bold text-blue-900">E-Zonasi SDN Kakatua</h1>
+        </div>
+    </footer>
+
+</body>
+</html>
