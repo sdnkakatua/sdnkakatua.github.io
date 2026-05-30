@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Pemberian PIP 2026 - UPT SPF SDN Kakatua</title>
+    <meta name="description" content="Pemberian Beasiswa (PIP) Tahun 2026 UPT SPF SD Negeri Kakatua. Cek data dan status aktivasinya di sini.">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Pengumuman Pemberian PIP 2026 - SDN Kakatua">
+    <meta property="og:description" content="Pemberian Beasiswa (PIP) Tahun 2026 UPT SPF SD Negeri Kakatua.">
+    <meta property="og:image" content="https://puslapdik.kemendikdasmen.go.id/wp-content/uploads/2023/05/desain-PIP.jpg"> 
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        .modal-active { overflow: hidden; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="antialiased text-gray-800 relative min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg py-8 px-4 sm:px-6 lg:px-8 mb-8 rounded-b-3xl">
+        <div class="max-w-5xl mx-auto text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 tracking-tight">SK Pemberian Beasiswa PIP</h1>
+            <p class="text-green-100 text-lg font-medium">UPT SPF SD NEGERI KAKATUA - TAHUN 2026</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow w-full">
+        
+        <div class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 mb-6 shadow-sm flex items-start space-x-3">
+            <svg class="w-6 h-6 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <h3 class="text-green-800 font-semibold text-base">Informasi Penting</h3>
+                <p class="text-green-700 text-sm mt-1">- Silakan <strong>klik pada baris nama siswa</strong> untuk melihat detail lengkap.<br>- Dana mulai bisa dicairkan <strong>PALING CEPAT Tanggal 9 Juni 2026</strong> (cek rekening secara berkala)<br>- Hubungi <strong>Operator (Pak Ihsan) </strong>untuk Informasi lebih lengkap.</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex items-center text-gray-600">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <span class="font-medium text-sm">Filter Berdasarkan Kelas:</span>
+            </div>
+            <select id="filterRombel" class="w-full sm:w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 font-medium outline-none transition-colors">
+                <option value="Semua">Semua Kelas</option>
+            </select>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap min-w-[600px]">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
+                            <th class="p-4 font-semibold text-sm text-green-800 w-16 text-center">No</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Nama Siswa</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Rombel</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Tempat, Tanggal Lahir</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="no-data" class="hidden py-8 text-center text-gray-500">
+                Data tidak ditemukan untuk kelas ini.
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <a href="https://wa.me/6282395223314" target="_blank" class="inline-flex items-center justify-center text-gray-500 hover:text-green-600 font-medium text-sm transition-colors group">
+                <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-green-500 transition-colors" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.365-1.739-.755-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.418-.099.823z"/></svg>
+                &copy; Operator - SDN Kakatua 2026
+            </a>
+            <p class="text-xs text-gray-400 mt-1">Klik untuk menghubungi via WhatsApp</p>
+        </div>
+    </footer>
+
+    <div id="student-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 backdrop-blur-sm fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden transform transition-all">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white text-lg font-bold">Detail Siswa</h3>
+                <button onclick="closeModal()" class="text-green-100 hover:text-white transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="text-center mb-4">
+                    <div id="modal-nama" class="text-xl font-bold text-gray-800 uppercase whitespace-normal"></div>
+                    <span id="modal-rombel" class="inline-block mt-1 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full"></span>
+                </div>
+                <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">NISN</span>
+                        <span id="modal-nisn" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Tempat, Tgl Lahir</span>
+                        <span id="modal-ttl" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Nama Ibu Kandung</span>
+                        <span id="modal-ibu" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">No. SK</span>
+                        <span id="modal-sk" class="text-gray-800 font-semibold text-right text-xs"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Status</span>
+                        <span id="modal-status" class="text-red-600 font-bold text-right bg-red-50 px-2 py-0.5 rounded"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between pt-1">
+                        <span class="text-gray-500 font-medium">Pengusul</span>
+                        <span id="modal-pengusul" class="text-gray-800 font-semibold text-right text-xs"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 text-right">
+                <button onclick="closeModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data derived from the provided document
+        let students = [
+            { nama: "SALVIA LARINDA PUTRI", rombel: "Kelas 3 B", ibu: "SITI KHOTIJAH", ttl: "MAKASSAR, 9 September 2016", nisn: "3167383265", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "AYRA KIRANA SYAM", rombel: "Kelas 1 A", ibu: "HETTI YUSMAWATI", ttl: "MAKASSAR, 30 Mei 2019", nisn: "3199102093", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "NAURA AZZAHRA IKSAN", rombel: "Kelas 2 A", ibu: "RATNA", ttl: "TERNATE, 1 Juli 2017", nisn: "3175036587", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "TAUFIQ RISKY AKBAR", rombel: "Kelas 2 A", ibu: "IRDHA YUSTRISNA", ttl: "MAKASSAR, 17 Oktober 2017", nisn: "3173059833", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD KIAN AGUSTIANTO SAPUTRA", rombel: "Kelas 4 A", ibu: "NUR INTAN AZ'ZAHRA", ttl: "MAKASSAR, 12 Agustus 2015", nisn: "3152710696", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "A MUH LUKMANUL HAKIM", rombel: "Kelas 4 A", ibu: "NELLY", ttl: "MAKASSAR, 3 Maret 2015", nisn: "3155715025", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUH ZAINAL ABIDIN", rombel: "Kelas 5 B", ibu: "SANTI", ttl: "MAKASSAR, 23 Mei 2014", nisn: "3143609670", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "LATIFA KEMALA DEWI SINAGA", rombel: "Kelas 5 B", ibu: "MANTANG", ttl: "MAKASSAR, 2 Oktober 2014", nisn: "3144603961", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "TASYA AZZAHRA ARFAN", rombel: "Kelas 2 A", ibu: "SYAMRIANI MANSYUR", ttl: "MAKASSAR, 28 Februari 2018", nisn: "3180408482", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD UWAIS AL-FAHREZI", rombel: "Kelas 2 B", ibu: "FITRA R.A", ttl: "MAKASSAR, 20 Maret 2018", nisn: "3180873049", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD RAMADHAN", rombel: "Kelas 3 B", ibu: "MASYITA", ttl: "MAKASSAR, 10 Februari 2016", nisn: "3166175355", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD SUBHAN RUSTAM", rombel: "Kelas 2 B", ibu: "HASRIATI", ttl: "MAKASSAR, 6 Agustus 2017", nisn: "3173474918", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD YAZID", rombel: "Kelas 4 B", ibu: "NAFSUL MUTMAINNAH", ttl: "MAKASSAR, 27 Maret 2016", nisn: "3162383689", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUH. TAUFIQ HIDAYAT", rombel: "Kelas 1 B", ibu: "Nita", ttl: "MAKASSAR, 8 Agustus 2018", nisn: "3180963541", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "ANINDITHA TRI ANGGRAINI", rombel: "Kelas 4 B", ibu: "SUYATNI", ttl: "SUKOHARJO, 14 Mei 2016", nisn: "3161027868", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD ALIF FEBIAN", rombel: "Kelas 5 A", ibu: "S MARDANI", ttl: "MAKASSAR, 18 Januari 2015", nisn: "3153628039", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "KHAYRA ARTA MALAYEKA", rombel: "Kelas 3 B", ibu: "HASNIATI", ttl: "MAKASSAR, 19 Mei 2016", nisn: "3176719019", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD ABDUL SAPUTRA YADO", rombel: "Kelas 1 A", ibu: "SUFIANI", ttl: "MAKASSAR, 26 Juni 2019", nisn: "3199586174", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "RAISYA PRATIWI", rombel: "Kelas 4 A", ibu: "SERLI", ttl: "MAKASSAR, 17 Mei 2015", nisn: "3156451034", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "NAUFAL DZAKWAAN MUAAFII", rombel: "Kelas 5 B", ibu: "ANNI", ttl: "MAKASSAR, 8 Februari 2015", nisn: "3154420908", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "KHANZA MAULIDYA. F", rombel: "Kelas 3 A", ibu: "Putri Yarlitha Sari Irwan", ttl: "MAKASSAR, 8 Desember 2016", nisn: "3160972072", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "DEVAN APRILIO HERMANSYAH", rombel: "Kelas 3 B", ibu: "ANDI TENRI GAZALI.", ttl: "MAKASSAR, 20 April 2016", nisn: "3169874125", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "JUAN FITRA", rombel: "Kelas 4 B", ibu: "SRI WAHYUNI", ttl: "LAKESSI, 3 Juni 2016", nisn: "3161944990", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "NUR IZZAH ISRAM", rombel: "Kelas 2 B", ibu: "FITRIANI", ttl: "MAKASSAR, 8 November 2017", nisn: "3179068501", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUH. ALTAF FAEYZA", rombel: "Kelas 3 B", ibu: "ERNAWATI", ttl: "NENGO, 9 November 2016", nisn: "3165859179", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "FAUZAN AL GHAZALI", rombel: "Kelas 5 B", ibu: "RASNI LISAN", ttl: "MAKASSAR, 17 Januari 2015", nisn: "3152185020", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "NASARUDDIN", rombel: "Kelas 5 B", ibu: "ERNAWATI", ttl: "MAKASSAR, 23 Agustus 2014", nisn: "3144828330", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "A. RAFAEYZA TSAQIF ANDRI TAUFIQ S", rombel: "Kelas 1 A", ibu: "SOFYANTI", ttl: "MAKASSAR, 27 Mei 2019", nisn: "3197692362", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "ANANDA RIBAS AL GAZALI", rombel: "Kelas 1 B", ibu: "RISNA", ttl: "MAKASSAR, 9 April 2018", nisn: "3188699381", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
+            { nama: "MUHAMMAD ADRIAN YADO", rombel: "Kelas 3 A", ibu: "SUFIANI", ttl: "TAKALAR, 13 Maret 2017", nisn: "3173983572", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" }
+        ];
+
+        // Assign unique IDs before sort so we can reference them safely for the modal
+        students.forEach((student, index) => {
+            student.id = index;
+        });
+
+        // Sort data based on Rombel first, then Alphabetically by Nama
+        students.sort((a, b) => {
+            const rombelCompare = a.rombel.localeCompare(b.rombel);
+            if (rombelCompare !== 0) {
+                return rombelCompare;
+            }
+            return a.nama.localeCompare(b.nama);
+        });
+
+        const tbody = document.getElementById('student-table-body');
+        const modal = document.getElementById('student-modal');
+        const filterSelect = document.getElementById('filterRombel');
+        const noDataText = document.getElementById('no-data');
+
+        // Extract unique 'rombel' values for the select dropdown
+        const uniqueRombel = [...new Set(students.map(s => s.rombel))].sort();
+        uniqueRombel.forEach(rombel => {
+            const option = document.createElement('option');
+            option.value = rombel;
+            option.textContent = rombel;
+            filterSelect.appendChild(option);
+        });
+
+        // Render Table Function based on filter
+        function renderTable(filterValue) {
+            tbody.innerHTML = '';
+            
+            let filteredStudents = students;
+            if (filterValue !== 'Semua') {
+                filteredStudents = students.filter(s => s.rombel === filterValue);
+            }
+
+            if (filteredStudents.length === 0) {
+                noDataText.classList.remove('hidden');
+            } else {
+                noDataText.classList.add('hidden');
+                
+                filteredStudents.forEach((student, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-gray-50 hover:bg-green-50/60 cursor-pointer transition-colors group";
+                    // Using student.id so the modal gets the exact correct data from original array
+                    tr.onclick = () => openModal(student);
+                    
+                    tr.innerHTML = `
+                        <td class="p-4 text-sm text-gray-500 text-center">${index + 1}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 group-hover:text-green-700 transition-colors">${student.nama}</td>
+                        <td class="p-4 text-sm text-gray-600">
+                            <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-medium">${student.rombel}</span>
+                        </td>
+                        <td class="p-4 text-sm text-gray-600">${student.ttl}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // Initialize table on first load
+        renderTable('Semua');
+
+        // Event listener for filter dropdown
+        filterSelect.addEventListener('change', function(e) {
+            renderTable(e.target.value);
+        });
+
+        // Modal Functions
+        function openModal(student) {
+            document.getElementById('modal-nama').textContent = student.nama;
+            document.getElementById('modal-rombel').textContent = student.rombel;
+            document.getElementById('modal-nisn').textContent = student.nisn;
+            document.getElementById('modal-ttl').textContent = student.ttl;
+            document.getElementById('modal-ibu').textContent = student.ibu;
+            document.getElementById('modal-sk').textContent = student.sk;
+            document.getElementById('modal-status').textContent = student.status;
+            document.getElementById('modal-pengusul').textContent = student.pengusul;
+            
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-active');
+        }
+
+        // Close modal when clicking outside the content
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
