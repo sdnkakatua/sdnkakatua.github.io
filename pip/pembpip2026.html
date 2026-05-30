@@ -73,20 +73,13 @@
 
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col items-center text-center">
+    <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+        <div class="max-w-5xl mx-auto px-4 text-center">
             <a href="https://wa.me/6282395223314" target="_blank" class="inline-flex items-center justify-center text-gray-500 hover:text-green-600 font-medium text-sm transition-colors group">
                 <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-green-500 transition-colors" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.365-1.739-.755-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.418-.099.823z"/></svg>
                 &copy; Operator - SDN Kakatua 2026
             </a>
-            <p class="text-xs text-gray-400 mt-1 mb-5">Klik untuk menghubungi via WhatsApp</p>
-            
-            <div class="flex items-center space-x-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100 shadow-sm">
-                <span class="text-xs font-medium text-gray-500">Total Pengunjung:</span>
-                <div class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded">
-                    <span id="visitor-count">Memuat...</span>
-                </div>
-            </div>
+            <p class="text-xs text-gray-400 mt-1">Klik untuk menghubungi via WhatsApp</p>
         </div>
     </footer>
 
@@ -137,28 +130,7 @@
     </div>
 
     <script>
-        // --- 1. SCRIPT MENGAMBIL DATA PENGUNJUNG (GAS) ---
-        // PENTING: Ganti tulisan GANTI_DENGAN_URL_WEB_APP_ANDA_DI_SINI dengan URL aslinya
-        const gasUrl = 'https://script.google.com/macros/s/AKfycbwfNbmBjUxsViu3S81R_yMkvjW338kCRjTm1D163Qe5rnoLIDpsMlwHvQBuQSYq5mlCCQ/exec'; 
-
-        if(gasUrl !== 'https://script.google.com/macros/s/AKfycbwfNbmBjUxsViu3S81R_yMkvjW338kCRjTm1D163Qe5rnoLIDpsMlwHvQBuQSYq5mlCCQ/exec'){
-            fetch(gasUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.count) {
-                        document.getElementById('visitor-count').textContent = data.count.toLocaleString('id-ID');
-                    } else {
-                        document.getElementById('visitor-count').textContent = '-';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error mengambil data pengunjung:', error);
-                    document.getElementById('visitor-count').textContent = 'Error';
-                });
-        }
-
-
-        // --- 2. SCRIPT DATA DAN LOGIKA TABEL ---
+        // Data derived from the provided document
         let students = [
             { nama: "SALVIA LARINDA PUTRI", rombel: "Kelas 3 B", ibu: "SITI KHOTIJAH", ttl: "MAKASSAR, 9 September 2016", nisn: "3167383265", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
             { nama: "AYRA KIRANA SYAM", rombel: "Kelas 1 A", ibu: "HETTI YUSMAWATI", ttl: "MAKASSAR, 30 Mei 2019", nisn: "3199102093", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" },
@@ -192,11 +164,17 @@
             { nama: "MUHAMMAD ADRIAN YADO", rombel: "Kelas 3 A", ibu: "SUFIANI", ttl: "TAKALAR, 13 Maret 2017", nisn: "3173983572", sk: "450000 66/PLPP.1.1/BP/SK.24/2026", status: "Belum Cair", pengusul: "Pemberian Usulan Dinas Pendidikan" }
         ];
 
-        // Assign ID dan Sort Data
-        students.forEach((student, index) => { student.id = index; });
+        // Assign unique IDs before sort so we can reference them safely for the modal
+        students.forEach((student, index) => {
+            student.id = index;
+        });
+
+        // Sort data based on Rombel first, then Alphabetically by Nama
         students.sort((a, b) => {
             const rombelCompare = a.rombel.localeCompare(b.rombel);
-            if (rombelCompare !== 0) return rombelCompare;
+            if (rombelCompare !== 0) {
+                return rombelCompare;
+            }
             return a.nama.localeCompare(b.nama);
         });
 
@@ -205,7 +183,7 @@
         const filterSelect = document.getElementById('filterRombel');
         const noDataText = document.getElementById('no-data');
 
-        // Setup Dropdown Filter Rombel
+        // Extract unique 'rombel' values for the select dropdown
         const uniqueRombel = [...new Set(students.map(s => s.rombel))].sort();
         uniqueRombel.forEach(rombel => {
             const option = document.createElement('option');
@@ -214,9 +192,10 @@
             filterSelect.appendChild(option);
         });
 
-        // Tampilkan Tabel
+        // Render Table Function based on filter
         function renderTable(filterValue) {
             tbody.innerHTML = '';
+            
             let filteredStudents = students;
             if (filterValue !== 'Semua') {
                 filteredStudents = students.filter(s => s.rombel === filterValue);
@@ -226,9 +205,11 @@
                 noDataText.classList.remove('hidden');
             } else {
                 noDataText.classList.add('hidden');
+                
                 filteredStudents.forEach((student, index) => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-gray-50 hover:bg-green-50/60 cursor-pointer transition-colors group";
+                    // Using student.id so the modal gets the exact correct data from original array
                     tr.onclick = () => openModal(student);
                     
                     tr.innerHTML = `
@@ -244,13 +225,15 @@
             }
         }
 
+        // Initialize table on first load
         renderTable('Semua');
 
+        // Event listener for filter dropdown
         filterSelect.addEventListener('change', function(e) {
             renderTable(e.target.value);
         });
 
-        // Logika Popup (Modal)
+        // Modal Functions
         function openModal(student) {
             document.getElementById('modal-nama').textContent = student.nama;
             document.getElementById('modal-rombel').textContent = student.rombel;
@@ -270,6 +253,7 @@
             document.body.classList.remove('modal-active');
         }
 
+        // Close modal when clicking outside the content
         modal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
