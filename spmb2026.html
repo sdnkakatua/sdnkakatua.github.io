@@ -7,30 +7,31 @@
     <title>SPMB 2026 | UPT SPF SD Negeri Kakatua</title>
 
     <meta property="og:title" content="SPMB 2026 | UPT SPF SD Negeri Kakatua">
-    <meta property="og:description" content="Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Pendaftaran Siswa Baru 2026.">
+    <meta property="og:description" content="Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Pendaftaran Murid Baru 2026.">
     <meta property="og:image" content="https://bidiknasional.id/wp-content/uploads/2025/05/Screenshot_20250521_162711_Gallery.jpg">
     <meta property="og:image:alt" content="Gedung SD Negeri Kakatua Makassar">
     <meta property="og:url" content="https://spmb.makassarkota.go.id/"> <meta property="og:type" content="website">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SPMB 2026 | UPT SPF SD Negeri Kakatua">
-    <meta name="twitter:description" content="Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Pendaftaran Siswa Baru 2026.">
+    <meta name="twitter:description" content="Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Pendaftaran Murid Baru 2026.">
     <meta name="twitter:image" content="https://bidiknasional.id/wp-content/uploads/2025/05/Screenshot_20250521_162711_Gallery.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- GAYA DASAR & VARIABEL WARNA TEMA SD --- */
+        /* --- GAYA DASAR & VARIABEL WARNA TEMA BARU (SLATE/FOOTER THEME) --- */
         :root {
-            --primary: #d32f2f; 
-            --primary-hover: #b71c1c; 
-            --primary-light: #fff0f0; 
+            --primary: #1e293b;        
+            --primary-hover: #0f172a;  
+            --primary-light: #f1f5f9;  
             --accent: #ffb300; 
             --accent-hover: #ffa000;
             --bg-color: #fdfdfd; 
             --text-dark: #2c3e50;
             --text-light: #64748b;
             --white: #ffffff;
-            --shadow-sm: 0 4px 15px rgba(211, 47, 47, 0.05);
-            --shadow-md: 0 10px 30px rgba(211, 47, 47, 0.15);
+            --shadow-sm: 0 4px 15px rgba(30, 41, 59, 0.05);
+            --shadow-md: 0 10px 30px rgba(30, 41, 59, 0.12);
+            --border-theme: #cbd5e1;
         }
 
         *, *::before, *::after {
@@ -53,77 +54,107 @@
             line-height: 1.3;
         }
 
-        /* --- HEADER --- */
+        /* --- HEADER NAVBAR (TRANSPARANSI WATERMARK DIUBAH JADI 50%) --- */
         header {
-            background: rgba(255, 255, 255, 0.9);
+            background: linear-gradient(135deg, #334155 0%, var(--primary) 100%);
             backdrop-filter: blur(12px);
-            padding: 15px 5%;
+            padding: 12px 5%;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 1000;
-            border-bottom: 2px solid var(--primary-light);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             gap: 15px;
+            overflow: hidden; 
         }
+
+        .navbar-watermark {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: clamp(14px, 1.6vw, 24px);
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.5); /* 50% Transparansi Putih */
+            letter-spacing: 2px;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 1;
+        }
+
+        .wm-left { left: 14%; }
+        .wm-right { right: 14%; }
+
         .header-logo {
-            height: clamp(40px, 5vw, 60px);
+            height: clamp(40px, 5vw, 55px);
             object-fit: contain;
             flex-shrink: 0;
+            position: relative;
+            z-index: 5;
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));
         }
-        .header-title {
-            text-align: center;
+
+        .header-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
             flex-grow: 1;
+            position: relative;
+            z-index: 5;
         }
-        .header-title h1 {
-            margin: 0;
-            font-size: clamp(16px, 2vw, 22px);
-            letter-spacing: 1px;
+
+        .nav-link {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: clamp(12px, 1.8vw, 15px);
+            padding: 8px 18px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-link.active {
+            background: var(--accent);
             color: var(--primary);
-            font-weight: 700;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.3);
         }
 
         /* --- HERO SECTION --- */
         .hero {
-            background: linear-gradient(135deg, #ef5350 0%, var(--primary) 100%);
-            padding: clamp(50px, 10vw, 90px) 20px;
+            background: linear-gradient(135deg, #334155 0%, var(--primary) 100%);
+            padding: clamp(25px, 5vw, 45px) 20px; 
             text-align: center;
-            border-bottom-left-radius: clamp(20px, 5vw, 40px);
-            border-bottom-right-radius: clamp(20px, 5vw, 40px);
-            margin-bottom: 50px;
+            border-bottom-left-radius: clamp(20px, 4vw, 30px);
+            border-bottom-right-radius: clamp(20px, 4vw, 30px);
+            margin-bottom: 30px; 
             box-shadow: var(--shadow-sm);
             color: var(--white);
+            scroll-margin-top: 100px; 
         }
         .hero h2 {
-            font-size: clamp(24px, 4vw, 38px);
+            font-size: clamp(20px, 3.5vw, 32px); 
             color: var(--white);
-            margin-bottom: 15px;
+            margin-top: 0;
+            margin-bottom: 10px;
         }
         .hero p {
-            font-size: clamp(14px, 2vw, 16px);
+            font-size: clamp(13px, 1.8vw, 15px);
             color: rgba(255, 255, 255, 0.9);
             max-width: 650px;
-            margin: 0 auto 30px auto;
-            line-height: 1.6;
-        }
-        .btn-hero {
-            display: inline-block;
-            background: var(--accent);
-            color: #5c4000; 
-            padding: 15px clamp(20px, 5vw, 40px);
-            font-size: clamp(14px, 2.5vw, 16px);
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(255, 179, 0, 0.4);
-        }
-        .btn-hero:hover {
-            background: var(--accent-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(255, 179, 0, 0.5);
+            margin: 0 auto;
+            line-height: 1.5;
         }
 
         .container {
@@ -139,6 +170,7 @@
             position: relative;
             font-size: clamp(20px, 3vw, 28px);
             color: var(--primary);
+            scroll-margin-top: 100px; 
         }
         .section-title::after {
             content: '';
@@ -150,7 +182,7 @@
             border-radius: 2px;
         }
 
-        /* --- CARDS JALUR PENDAFTARAN --- */
+        /* --- CARDS --- */
         .cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -193,7 +225,7 @@
             flex-grow: 1; 
         }
 
-        /* Styling Dropdown Syarat Berkas (Accordion) */
+        /* Accordion Syarat Berkas */
         details.syarat-dropdown {
             background: #fafafa;
             border: 1px solid #eeeeee;
@@ -204,7 +236,7 @@
         }
         details.syarat-dropdown[open] {
             background: var(--primary-light);
-            border-color: #ffcdd2;
+            border-color: var(--border-theme);
         }
         details.syarat-dropdown summary {
             font-weight: 600;
@@ -216,9 +248,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        details.syarat-dropdown summary::-webkit-details-marker {
-            display: none;
-        }
+        details.syarat-dropdown summary::-webkit-details-marker { display: none; }
         details.syarat-dropdown summary::after {
             content: '▼';
             font-size: 10px;
@@ -232,7 +262,7 @@
         details.syarat-dropdown ul {
             margin: 15px 0 0 0;
             padding-left: 20px;
-            border-top: 1px dashed #ffcdd2;
+            border-top: 1px dashed var(--border-theme);
             padding-top: 15px;
         }
         details.syarat-dropdown li {
@@ -242,11 +272,9 @@
             line-height: 1.5;
             position: relative;
         }
-        details.syarat-dropdown li strong {
-            color: var(--primary);
-        }
+        details.syarat-dropdown li strong { color: var(--primary); }
         .note-warning {
-            color: #d32f2f;
+            color: #dc2626;
             font-style: italic;
             font-size: 12px;
             margin-top: 10px;
@@ -286,8 +314,8 @@
             min-width: 48px;
             font-size: 10px;
             font-weight: 600;
-            border: 1px solid #ffcdd2;
-            box-shadow: inset 0 2px 4px rgba(211,47,47,0.05);
+            border: 1px solid var(--border-theme);
+            box-shadow: inset 0 2px 4px rgba(30,41,59,0.03);
         }
         .countdown-item span {
             display: block;
@@ -309,7 +337,6 @@
             display: none; 
         }
 
-        /* Tombol Pendaftaran per Jalur */
         .btn-card {
             width: 100%;
             background: var(--primary);
@@ -322,18 +349,16 @@
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(211, 47, 47, 0.2);
+            box-shadow: 0 4px 10px rgba(30, 41, 59, 0.15);
         }
         .btn-card:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(211, 47, 47, 0.3);
+            box-shadow: 0 6px 15px rgba(30, 41, 59, 0.25);
         }
 
         /* --- TABEL --- */
-        .table-wrapper {
-            margin-bottom: 30px;
-        }
+        .table-wrapper { margin-bottom: 30px; }
         .table-container {
             background: var(--white);
             border-radius: 20px;
@@ -363,11 +388,8 @@
             font-size: 13px;
             border-radius: 8px;
         }
-        tr:hover td {
-            background-color: #fafbfc;
-        }
+        tr:hover td { background-color: #fafbfc; }
 
-        /* Kotak Info Agenda */
         .agenda-box {
             background: var(--white);
             padding: 25px;
@@ -385,11 +407,7 @@
             font-size: 18px;
             margin-bottom: 15px;
         }
-        .agenda-box ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+        .agenda-box ul { list-style: none; padding: 0; margin: 0; }
         .agenda-box li {
             font-size: 14px;
             margin-bottom: 12px;
@@ -404,15 +422,15 @@
             min-width: 130px;
         }
 
-        /* --- CTA & LAINNYA --- */
+        /* --- CTA --- */
         .cta-section {
             text-align: center;
             margin: 60px 0;
             padding: clamp(30px, 6vw, 50px) 20px;
             background: var(--primary-light);
             border-radius: clamp(20px, 5vw, 30px);
-            box-shadow: inset 0 0 20px rgba(211, 47, 47, 0.05);
-            border: 1px dashed #ffcdd2;
+            box-shadow: inset 0 0 20px rgba(30, 41, 59, 0.02);
+            border: 1px dashed var(--border-theme);
         }
         .btn-daftar {
             display: inline-block;
@@ -426,13 +444,13 @@
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(211, 47, 47, 0.3);
+            box-shadow: 0 8px 20px rgba(30, 41, 59, 0.2);
             letter-spacing: 1px;
         }
         .btn-daftar:hover {
             background: var(--primary-hover);
             transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(211, 47, 47, 0.4);
+            box-shadow: 0 12px 25px rgba(30, 41, 59, 0.3);
         }
 
         .gallery {
@@ -455,6 +473,7 @@
             box-shadow: var(--shadow-md);
         }
 
+        /* --- FOOTER --- */
         footer {
             background: #1e293b; 
             color: #f1f5f9;
@@ -462,7 +481,7 @@
             padding: 50px 20px 30px;
             border-top-left-radius: clamp(20px, 5vw, 40px);
             border-top-right-radius: clamp(20px, 5vw, 40px);
-            border-top: 5px solid var(--primary);
+            border-top: 5px solid var(--accent); 
         }
         footer h3 {
             color: var(--accent);
@@ -473,15 +492,13 @@
             text-decoration: none;
             transition: color 0.3s;
         }
-        footer a:hover {
-            color: #fff;
-        }
+        footer a:hover { color: #fff; }
         .footer-content p {
             margin: 8px 0;
             font-size: clamp(13px, 2vw, 14px);
         }
 
-        /* --- POPUP --- */
+        /* --- POPUP / MODAL MOCK --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -505,7 +522,7 @@
             text-align: center;
             transform: translateY(30px) scale(0.95);
             transition: all 0.4s ease;
-            box-shadow: 0 25px 50px -12px rgba(211, 47, 47, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(30, 41, 59, 0.2);
             border-top: 6px solid var(--primary);
             max-height: 90vh;
             overflow-y: auto; 
@@ -533,191 +550,234 @@
         }
         .toast.show { bottom: 30px; }
 
+        /* --- RESPONSIVITAS --- */
+        @media (max-width: 1200px) { .wm-left { left: 13%; } .wm-right { right: 13%; } }
+        @media (max-width: 992px) { .wm-left { left: 11%; } .wm-right { right: 11%; } }
+        @media (max-width: 768px) { .navbar-watermark { display: none; } }
         @media (max-width: 576px) {
-            header { 
-                flex-direction: row; 
-                padding: 10px 10px; 
-                gap: 10px; 
-            }
-            .header-logo { 
-                height: 35px; 
-            }
-            .header-title h1 {
-                font-size: 13px; 
-            }
+            header { padding: 10px 10px; gap: 5px; }
+            .header-logo { height: 34px; }
+            .header-nav { gap: 4px; }
+            .nav-link { padding: 6px 11px; font-size: 11px; }
             .agenda-box li { flex-direction: column; gap: 2px; margin-bottom: 15px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- HEADER NAVBAR -->
     <header>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Coat_of_Arms_of_City_Makassar.png/960px-Coat_of_Arms_of_City_Makassar.png?_=20180118184015" alt="Logo Makassar" class="header-logo">
-        <div class="header-title">
-            <h1>SPMB SD NEGERI KAKATUA</h1>
-        </div>
+        <div class="navbar-watermark wm-left">@sdnkakatua</div>
+        <div class="navbar-watermark wm-right">@sdnkakatua</div>
+
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Coat_of_Arms_of_City_Makassar.png/960px-Coat_of_Arms_of_City_Makassar.png" alt="Logo Makassar" class="header-logo">
+        
+        <nav class="header-nav">
+            <a href="https://sdnkakatua.github.io/" class="nav-link">Beranda</a>
+            <a href="#spmb" id="nav-spmb" class="nav-link active" onclick="switchPage('spmb', event)">SPMB</a>
+            <a href="#pengumuman" id="nav-pengumuman" class="nav-link" onclick="switchPage('pengumuman', event)">Pengumuman</a>
+        </nav>
+        
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Logo_of_Ministry_of_Education_and_Culture_of_Republic_of_Indonesia.svg/960px-Logo_of_Ministry_of_Education_and_Culture_of_Republic_of_Indonesia.svg.png" alt="Logo Tut Wuri" class="header-logo">
     </header>
 
-    <div class="hero">
-        <h2>Selamat Datang Calon Generasi Hebat! 🏫</h2>
-        <p>Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Belajar ceria, meraih cita-cita!</p>
-        <a href="#kontak" class="btn-hero">Hubungi Kami</a>
-    </div>
 
-    <div class="container">
-        
-        <h2 class="section-title" id="jalur">Jalur & Syarat Pendaftaran</h2>
-        <div class="cards">
+    <!-- ================= HALAMAN 1: SPMB ================= -->
+    <div id="page-spmb">
+        <div class="hero">
+            <h2>Selamat Datang Calon Generasi Hebat! 🏫</h2>
+            <p>Mari ukir masa depan cerah, cerdas, dan berkarakter bersama UPT SPF SD Negeri Kakatua Makassar. Belajar ceria, meraih cita-cita!</p>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title" id="jalur">Jalur & Syarat Pendaftaran</h2>
+            <div class="cards">
+                
+                <!-- Card 1 -->
+                <div class="card">
+                    <h3>📍 1. Jalur Domisili</h3>
+                    <p class="desc">Bagi calon peserta didik yang berdomisili di dalam wilayah yang telah ditetapkan oleh Pemerintah Kota Makassar.</p>
+                    <details class="syarat-dropdown">
+                        <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
+                        <ul>
+                            <li><strong>Kartu Keluarga (KK)</strong> terbit min. 1 tahun sebelum pendaftaran
+                                <ul class="sub-list">
+                                    <li>Nama orangtua di KK sama dengan ijazah/rapor/akta</li>
+                                    <li>Jika beda nama: lampirkan akta meninggal atau akta cerai</li>
+                                </ul>
+                            </li>
+                            <li><strong>Akta Kelahiran</strong></li>
+                            <li><strong>Surat Keterangan Domisili</strong> (Jika KK tidak ada karena bencana) dan terbit min. 1 tahun sebelum pendaftaran.</li>
+                        </ul>
+                    </details>
+
+                    <div class="countdown-wrapper">
+                        <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
+                        <div class="countdown-container" data-target="2026-06-22T08:00:00+08:00">
+                            <div class="countdown-item"><span class="days">00</span>Hari</div>
+                            <div class="countdown-item"><span class="hours">00</span>Jam</div>
+                            <div class="countdown-item"><span class="mins">00</span>Mnt</div>
+                            <div class="countdown-item"><span class="secs">00</span>Dtk</div>
+                        </div>
+                        <div class="countdown-message">✅ Pendaftaran Dibuka</div>
+                        <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/domisili')">Daftar Jalur Ini</button>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="card">
+                    <h3>🤝 2. Jalur Afirmasi</h3>
+                    <p class="desc">Dukungan bagi calon murid dari keluarga ekonomi tidak mampu & penyandang disabilitas untuk mendapat pendidikan setara.</p>
+                    <details class="syarat-dropdown">
+                        <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
+                        <ul>
+                            <li>Dokumen utama (<strong>KK dan Akta Kelahiran</strong>)</li>
+                            <li><strong>Surat keterangan terdaftar DTSEN desil 1-3</strong> dari Dinas Sosial setempat.</li>
+                            <li><strong>Kartu disabilitas kemensos</strong> atau <strong>surat dokter/psikolog</strong>.</li>
+                        </ul>
+                        <span class="note-warning">* Tidak bisa menggunakan kartu JKN atau SKTM sebagai pengganti</span>
+                    </details>
+
+                    <div class="countdown-wrapper">
+                        <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
+                        <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
+                            <div class="countdown-item"><span class="days">00</span>Hari</div>
+                            <div class="countdown-item"><span class="hours">00</span>Jam</div>
+                            <div class="countdown-item"><span class="mins">00</span>Mnt</div>
+                            <div class="countdown-item"><span class="secs">00</span>Dtk</div>
+                        </div>
+                        <div class="countdown-message">✅ Pendaftaran Dibuka</div>
+                        <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/afirmasi')">Daftar Jalur Ini</button>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="card">
+                    <h3>🏢 3. Jalur Mutasi</h3>
+                    <p class="desc">Fasilitas khusus bagi anak yang mengikuti orang tua pindah tugas atau mutasi pekerjaan ke wilayah sekitar.</p>
+                    <details class="syarat-dropdown">
+                        <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
+                        <ul>
+                            <li>Dokumen utama (<strong>KK dan Akta Kelahiran</strong>)</li>
+                            <li><strong>Surat penugasan dari instansi/lembaga/perusahaan</strong> (maks. 6 bulan)</li>
+                            <li><strong>Surat keterangan pindah domisili</strong> dari pejabat berwenang (maks. 1 tahun)</li>
+                            <li><strong>Surat penugasan guru/tendik</strong> berlaku untuk anak mengikuti orangtua.</li>
+                        </ul>
+                        <span class="note-warning">* Tidak berlaku jika calon murid sudah tamat di wilayah kota Makassar</span>
+                    </details>
+
+                    <div class="countdown-wrapper">
+                        <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
+                        <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
+                            <div class="countdown-item"><span class="days">00</span>Hari</div>
+                            <div class="countdown-item"><span class="hours">00</span>Jam</div>
+                            <div class="countdown-item"><span class="mins">00</span>Mnt</div>
+                            <div class="countdown-item"><span class="secs">00</span>Dtk</div>
+                        </div>
+                        <div class="countdown-message">✅ Pendaftaran Dibuka</div>
+                        <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/afirmasi')">Daftar Jalur Ini</button>
+                    </div>
+                </div>
+
+            </div>
             
-            <div class="card">
-                <h3>📍 1. Jalur Domisili</h3>
-                <p class="desc">Bagi calon peserta didik yang berdomisili di dalam wilayah yang telah ditetapkan oleh Pemerintah Kota Makassar.</p>
-                <details class="syarat-dropdown">
-                    <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
-                    <ul>
-                        <li><strong>Kartu Keluarga (KK)</strong> terbit min. 1 tahun sebelum pendaftaran
-                            <ul class="sub-list">
-                                <li>Nama orangtua di KK sama dengan ijazah/rapor/akta</li>
-                                <li>Jika beda nama: lampirkan akta meninggal atau akta cerai</li>
-                            </ul>
-                        </li>
-                        <li><strong>Akta Kelahiran</strong></li>
-                        <li><strong>Surat Keterangan Domisili</strong> (Jika KK tidak ada karena bencana) dan terbit min. 1 tahun sebelum pendaftaran.</li>
-                    </ul>
-                </details>
+            <div class="agenda-box">
+                <h4><center>Pastikan semua berkas telah Anda simpan (SCAN) ke dalam file berbentuk JPG</center></h4>
+            </div>
 
-                <div class="countdown-wrapper">
-                    <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <!-- Target Waktu: 22 Juni 2026, 08:00 WITA (+08:00) -->
-                    <div class="countdown-container" data-target="2026-06-22T08:00:00+08:00">
-                        <div class="countdown-item"><span class="days">00</span>Hari</div>
-                        <div class="countdown-item"><span class="hours">00</span>Jam</div>
-                        <div class="countdown-item"><span class="mins">00</span>Mnt</div>
-                        <div class="countdown-item"><span class="secs">00</span>Dtk</div>
-                    </div>
-                    <div class="countdown-message">✅ Pendaftaran Dibuka</div>
-                    <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/domisili')">Daftar Jalur Ini</button>
+            <h2 class="section-title">Jadwal Pelaksanaan SPMB 📅</h2>
+            <div class="table-wrapper">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kategori Jalur</th>
+                                <th>Masa Pendaftaran</th>
+                                <th>Pengumuman</th>
+                                <th>Daftar Ulang & Verval</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Jalur Non Domisili</strong><br><span style="font-size: 12px; color: #64748b; font-weight: normal;">(Afirmasi & Mutasi)</span></td>
+                                <td><strong>15 - 17 Juni 2026</strong></td>
+                                <td>18 Juni 2026</td>
+                                <td>19 - 21 Juni 2026</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Jalur Domisili</strong></td>
+                                <td><strong>22 - 26 Juni 2026</strong></td>
+                                <td>27 Juni 2026</td>
+                                <td>28 - 30 Juni 2026</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="card">
-                <h3>🤝 2. Jalur Afirmasi</h3>
-                <p class="desc">Dukungan bagi calon murid dari keluarga ekonomi tidak mampu & penyandang disabilitas untuk mendapat pendidikan setara.</p>
-                <details class="syarat-dropdown">
-                    <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
-                    <ul>
-                        <li>Dokumen utama (<strong>KK dan Akta Kelahiran</strong>)</li>
-                        <li><strong>Surat keterangan terdaftar DTSEN desil 1-3</strong> dari Dinas Sosial setempat.</li>
-                        <li><strong>Kartu disabilitas kemensos</strong> atau <strong>surat dokter/psikolog</strong>.</li>
-                    </ul>
-                    <span class="note-warning">* Tidak bisa menggunakan kartu JKN atau SKTM sebagai pengganti</span>
-                </details>
-
-                <div class="countdown-wrapper">
-                    <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <!-- Target Waktu: 15 Juni 2026, 08:00 WITA (+08:00) -->
-                    <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
-                        <div class="countdown-item"><span class="days">00</span>Hari</div>
-                        <div class="countdown-item"><span class="hours">00</span>Jam</div>
-                        <div class="countdown-item"><span class="mins">00</span>Mnt</div>
-                        <div class="countdown-item"><span class="secs">00</span>Dtk</div>
-                    </div>
-                    <div class="countdown-message">✅ Pendaftaran Dibuka</div>
-                    <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/afirmasi')">Daftar Jalur Ini</button>
-                </div>
+            <div class="agenda-box">
+                <h4>📌 Agenda Penting Lainnya</h4>
+                <ul>
+                    <li><span>April - Mei 2026</span> - Sosialisasi SPMB</li>
+                    <li><span>12 - 21 Mei 2026</span> - Simulasi Pendaftaran TK, SD, SMP</li>
+                    <li><span>8 - 13 Juni 2026</span> - Pendaftaran Akun TK, SD, SMP</li>
+                    <li><span>13 - 17 Juli 2026</span> - Masa Perkenalan Lingkungan Sekolah (MPLS)</li>
+                    <li><span>20 Juli 2026</span> - Hari Pertama Masuk Sekolah</li>
+                </ul>
             </div>
 
-            <div class="card">
-                <h3>🏢 3. Jalur Mutasi</h3>
-                <p class="desc">Fasilitas khusus bagi anak yang mengikuti orang tua pindah tugas atau mutasi pekerjaan ke wilayah sekitar.</p>
-                <details class="syarat-dropdown">
-                    <summary>📁 Lihat Dokumen yang Harus Disiapkan</summary>
-                    <ul>
-                        <li>Dokumen utama (<strong>KK dan Akta Kelahiran</strong>)</li>
-                        <li><strong>Surat penugasan dari instansi/lembaga/perusahaan</strong> (maks. 6 bulan)</li>
-                        <li><strong>Surat keterangan pindah domisili</strong> dari pejabat berwenang (maks. 1 tahun)</li>
-                        <li><strong>Surat penugasan guru/tendik</strong> berlaku untuk anak mengikuti orangtua.</li>
-                    </ul>
-                    <span class="note-warning">* Tidak berlaku jika calon murid sudah tamat di wilayah kota Makassar</span>
-                </details>
-
-                <div class="countdown-wrapper">
-                    <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <!-- Target Waktu: 15 Juni 2026, 08:00 WITA (+08:00) -->
-                    <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
-                        <div class="countdown-item"><span class="days">00</span>Hari</div>
-                        <div class="countdown-item"><span class="hours">00</span>Jam</div>
-                        <div class="countdown-item"><span class="mins">00</span>Mnt</div>
-                        <div class="countdown-item"><span class="secs">00</span>Dtk</div>
-                    </div>
-                    <div class="countdown-message">✅ Pendaftaran Dibuka</div>
-                    <button class="btn-card" onclick="openModal('https://spmb.makassarkota.go.id/pendaftaran/sd/afirmasi')">Daftar Jalur Ini</button>
-                </div>
+            <div class="cta-section">
+                <h2 style="color: var(--primary);">Sudah Lengkap Berkasnya? 📝</h2>
+                <p style="color: var(--text-light); margin-bottom: 25px;">Pilih jalur yang sesuai dan pastikan Anda mendaftar sesuai tanggal jadwal di atas.</p>
+                <button class="btn-daftar" onclick="openModal('https://spmb.makassarkota.go.id/')">Daftar Sekarang</button>
             </div>
 
-        </div>
-        
-         <div class="agenda-box">
-            <h4><center>Pastikan semua berkas telah Anda simpan (SCAN) ke dalam file berbentuk JPG</center></h4>
-         </div>
-
-        <h2 class="section-title">Jadwal Pelaksanaan SPMB 📅</h2>
-        <div class="table-wrapper">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Kategori Jalur</th>
-                            <th>Masa Pendaftaran</th>
-                            <th>Pengumuman</th>
-                            <th>Daftar Ulang & Verval</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Jalur Non Domisili</strong><br><span style="font-size: 12px; color: #64748b; font-weight: normal;">(Afirmasi & Mutasi)</span></td>
-                            <td><strong>15 - 17 Juni 2026</strong></td>
-                            <td>18 Juni 2026</td>
-                            <td>19 - 21 Juni 2026</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Jalur Domisili</strong></td>
-                            <td><strong>22 - 26 Juni 2026</strong></td>
-                            <td>27 Juni 2026</td>
-                            <td>28 - 30 Juni 2026</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <h2 class="section-title">Lingkungan Sekolah 📸</h2>
+            <div class="gallery">
+                <img src="https://bidiknasional.id/wp-content/uploads/2025/05/Screenshot_20250521_162711_Gallery.jpg" alt="Gedung Sekolah">
+                <img src="https://lh3.googleusercontent.com/gps-cs-s/APNQkAHBtWxhiqfM52ZVfLLmSP6Rk3-eM02Zz2xvA7l54N_mzY1DT1H3Rqw_pftWFgcXwh9M92Z4NfZzE5CqtLIU31t1zMBaIrRFOdZx1ThDn08TsF8yowmRAzIMNajxMVaRmigt7bDbpQ=s1360-w1360-h1020-rw" alt="Kegiatan Belajar">
+                <img src="https://i.ytimg.com/vi/4s-wPm-yl10/hq720.jpg" alt="Ekstrakurikuler">
             </div>
         </div>
-
-        <div class="agenda-box">
-            <h4>📌 Agenda Penting Lainnya</h4>
-            <ul>
-                <li><span>April - Mei 2026</span> - Sosialisasi SPMB</li>
-                <li><span>12 - 21 Mei 2026</span> - Simulasi Pendaftaran TK, SD, SMP</li>
-                <li><span>8 - 13 Juni 2026</span> - Pendaftaran Akun TK, SD, SMP</li>
-                <li><span>13 - 17 Juli 2026</span> - Masa Perkenalan Lingkungan Sekolah (MPLS)</li>
-                <li><span>20 Juli 2026</span> - Hari Pertama Masuk Sekolah</li>
-            </ul>
-        </div>
-
-        <div class="cta-section">
-            <h2 style="color: var(--primary);">Sudah Lengkap Berkasnya? 📝</h2>
-            <p style="color: var(--text-light); margin-bottom: 25px;">Pilih jalur yang sesuai dan pastikan Anda mendaftar sesuai tanggal jadwal di atas.</p>
-            <button class="btn-daftar" onclick="openModal('https://spmb.makassarkota.go.id/')">Daftar Sekarang</button>
-        </div>
-
-        <h2 class="section-title">Lingkungan Sekolah 📸</h2>
-        <div class="gallery">
-            <img src="https://bidiknasional.id/wp-content/uploads/2025/05/Screenshot_20250521_162711_Gallery.jpg" alt="Gedung Sekolah">
-            <img src="https://lh3.googleusercontent.com/gps-cs-s/APNQkAHBtWxhiqfM52ZVfLLmSP6Rk3-eM02Zz2xvA7l54N_mzY1DT1H3Rqw_pftWFgcXwh9M92Z4NfZzE5CqtLIU31t1zMBaIrRFOdZx1ThDn08TsF8yowmRAzIMNajxMVaRmigt7bDbpQ=s1360-w1360-h1020-rw" alt="Kegiatan Belajar">
-            <img src="https://i.ytimg.com/vi/4s-wPm-yl10/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAWQLhaFm4jD8JoLYPH_FRUaHFzTQ" alt="Ekstrakurikuler">
-        </div>
-
     </div>
 
+
+    <!-- ================= HALAMAN 2: PAGE PENGUMUMAN ================= -->
+    <div id="page-pengumuman" style="display: none;">
+        <div class="hero">
+            <h2>Pengumuman Hasil Seleksi 📢</h2>
+            <p>Pantau hasil kelulusan berkas dan penempatan jalur pendaftaran murid baru secara transparan.</p>
+        </div>
+
+        <div class="container">
+            <h2 class="section-title">Hasil Seleksi PPDB 2026</h2>
+            
+            <div class="cards" style="margin-bottom: 80px;">
+                <!-- Box Pengumuman 1: Afirmasi -->
+                <div class="card" style="text-align: center; align-items: center; justify-content: center; padding: 35px 25px;">
+                    <span style="font-size: 45px; margin-bottom: 10px;">🤝</span>
+                    <h3 style="margin-bottom: 10px;">Pengumuman Jalur Afirmasi</h3>
+                    <p class="desc" style="text-align: center; max-width: 280px; margin-bottom: 25px;">
+                        Klik tombol di bawah untuk melihat daftar nama calon murid yang dinyatakan lulus melalui Jalur Afirmasi.
+                    </p>
+                    <button class="btn-card" onclick="openAnnouncementPopup('Jalur Afirmasi', '2026-06-18T08:00:00+08:00')">Lihat Pengumuman</button>
+                </div>
+
+                <!-- Box Pengumuman 2: Domisili -->
+                <div class="card" style="text-align: center; align-items: center; justify-content: center; padding: 35px 25px;">
+                    <span style="font-size: 45px; margin-bottom: 10px;">📍</span>
+                    <h3 style="margin-bottom: 10px;">Pengumuman Jalur Domisili</h3>
+                    <p class="desc" style="text-align: center; max-width: 280px; margin-bottom: 25px;">
+                        Klik tombol di bawah untuk melihat hasil kelulusan penempatan zonasi calon murid melalui Jalur Domisili.
+                    </p>
+                    <button class="btn-card" onclick="openAnnouncementPopup('Jalur Domisili', '2026-06-27T08:00:00+08:00')">Lihat Pengumuman</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- FOOTER -->
     <footer>
         <div class="footer-content" id="kontak">
             <h3>Pusat Layanan SPMB</h3>
@@ -728,28 +788,26 @@
         </div>
     </footer>
 
-    <!-- POPUP INFO UTAMA & AGENDA PENTING LAINNYA -->
+
+    <!-- POPUP UTAMA SAAT LOADING AWAL -->
     <div class="modal-overlay" id="infoLoadModal">
         <div class="modal-content">
             <div class="modal-icon">📢</div>
             <h3 class="modal-title">Informasi & Jadwal Penting</h3>
             <div class="modal-text" style="text-align: left;">
-                
-                <p style="margin-bottom: 5px; font-weight: 600; color: var(--primary);">🗓️ Jadwal Utama Pendaftaran SPMB 2026:</p>
+                <p style="margin-bottom: 5px; font-weight: 600; color: var(--primary);">📅 Jadwal Utama Pendaftaran SPMB 2026:</p>
                 <ul style="padding-left: 20px; margin-bottom: 15px; line-height: 1.6;">
                     <li><strong>8 - 13 Juni:</strong> Pendaftaran Akun TK, SD, SMP</li>
                     <li><strong>15 - 17 Juni:</strong> Pendaftaran Jalur Non Domisili</li>
                     <li><strong>22 - 26 Juni:</strong> Pendaftaran Jalur Domisili</li>
                 </ul>
-
                 <p style="margin-bottom: 5px; font-weight: 600; color: #2e7d32;">📌 Agenda Penting Lainnya:</p>
                 <ul style="padding-left: 20px; margin-bottom: 15px; line-height: 1.6; font-size: 13px;">
                     <li><strong>April - Mei 2026:</strong> Sosialisasi SPMB</li>
                     <li><strong>12 - 21 Mei 2026:</strong> Simulasi Pendaftaran TK, SD, SMP</li>
-                    <li><strong>13 - 17 Juli 2026:</strong> Masa Perkenalan Lingkungan Sekolah (MPLS)</li>
+                    <li><strong>13 - 17 Juli 2026:</strong> Masa Perkenalan Lingkolah Sekolah (MPLS)</li>
                     <li><strong>20 Juli 2026:</strong> Hari Pertama Masuk Sekolah</li>
                 </ul>
-
                 <div style="background: var(--primary-light); padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary); margin-top: 15px;">
                     <p style="margin: 0; color: var(--primary); font-weight: 600;">⚠️ PERHATIAN KHUSUS:</p>
                     <p style="margin: 5px 0 0 0; color: var(--text-dark); font-size: 12.5px;">Bagi calon murid yang <strong>belum memiliki NISN</strong>, diwajibkan untuk melakukan pembuatan akun pada tanggal <strong>8 Juni 2026</strong>.</p>
@@ -761,7 +819,8 @@
         </div>
     </div>
 
-    <!-- POPUP KONFIRMASI DAFTAR -->
+
+    <!-- POPUP KONFIRMASI PORTAL LINK DAFTAR -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
             <div class="modal-icon">👦👧</div>
@@ -774,18 +833,135 @@
         </div>
     </div>
 
+
+    <!-- POPUP SPESIFIK: PENGUMUMAN DENGAN COUNTDOWN -->
+    <div class="modal-overlay" id="announcementPopupModal">
+        <div class="modal-content">
+            <div class="modal-icon" id="popupIcon">⏳</div>
+            <h3 class="modal-title" id="popupJalurTitle" style="color: var(--text-dark); font-size: 16px; margin-bottom: 10px; font-weight: 500;">Hasil Kelulusan</h3>
+            
+            <div id="popupCountdownArea">
+                <h2 style="color: #1e293b; font-size: 18px; font-weight: 600; margin: 10px 0;">PENGUMUMAN DIBUKA DALAM:</h2>
+                
+                <!-- Kotak Countdown Modifikasi -->
+                <div class="countdown-container" id="popupCountdownContainer" style="margin: 20px 0;">
+                    <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-days" style="font-size: 20px;">00</span>Hari</div>
+                    <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-hours" style="font-size: 20px;">00</span>Jam</div>
+                    <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-mins" style="font-size: 20px;">00</span>Mnt</div>
+                    <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-secs" style="font-size: 20px;">00</span>Dtk</div>
+                </div>
+            </div>
+
+            <div id="popupMessageArea" style="display: none;">
+                <h2 style="color: #2e7d32; font-size: clamp(18px, 3.5vw, 22px); font-weight: 700; margin: 15px 0;">
+                    PENGUMUMAN TERSEDIA
+                </h2>
+                <p class="modal-text" style="color: var(--text-light); line-height: 1.5; font-size: 13.5px;">
+                    Hasil seleksi kelulusan berkas sudah diterbitkan secara resmi. Silakan klik tombol di bawah untuk melihat pengumuman.
+                </p>
+                <button class="btn-card" style="margin-bottom: 15px; background: #2e7d32;" onclick="window.open('https://spmb.makassarkota.go.id/', '_blank')">Buka Halaman Hasil</button>
+            </div>
+
+            <p class="modal-text" id="popupSubText" style="color: var(--text-light); line-height: 1.5; font-size: 13px; margin-top: 10px;">
+                Silakan cek kembali sistem secara berkala sesuai lini masa resmi dinas pendidikan.
+            </p>
+            
+            <div class="modal-buttons" style="margin-top: 20px;">
+                <button class="btn-confirm" onclick="closeAnnouncementPopup()" style="width: 100%; padding: 12px;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="toast" id="successToast">
         <span class="toast-icon">✨</span>
         <span>Membuka halaman portal pendaftaran...</span>
     </div>
 
+
+    <!-- JAVASCRIPT CONTROL -->
     <script>
-        /* --- SCRIPT MODAL / POPUP --- */
+        /* --- SPA SWITCHING PAGE ENGINE --- */
+        function switchPage(page, event) {
+            if(event) event.preventDefault();
+            
+            const spmbPage = document.getElementById('page-spmb');
+            const pengumumanPage = document.getElementById('page-pengumuman');
+            const navSpmb = document.getElementById('nav-spmb');
+            const navPengumuman = document.getElementById('nav-pengumuman');
+
+            navSpmb.classList.remove('active');
+            navPengumuman.classList.remove('active');
+
+            if (page === 'spmb') {
+                spmbPage.style.display = 'block';
+                pengumumanPage.style.display = 'none';
+                navSpmb.classList.add('active');
+            } else if (page === 'pengumuman') {
+                spmbPage.style.display = 'none';
+                pengumumanPage.style.display = 'block';
+                navPengumuman.classList.add('active');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* --- CONTROLLER TRIGGER POPUP MODAL --- */
         const modal = document.getElementById('confirmModal');
         const infoLoadModal = document.getElementById('infoLoadModal');
+        const announcementModal = document.getElementById('announcementPopupModal');
         const toast = document.getElementById('successToast');
         
         let currentTargetUrl = 'https://spmb.makassarkota.go.id/';
+        let popupInterval = null; 
+
+        function openAnnouncementPopup(namaJalur, targetDateStr) {
+            document.getElementById('popupJalurTitle').innerText = "Pengumuman Hasil Seleksi • " + namaJalur;
+            announcementModal.classList.add('active');
+
+            const countdownArea = document.getElementById('popupCountdownArea');
+            const messageArea = document.getElementById('popupMessageArea');
+            const subText = document.getElementById('popupSubText');
+            const icon = document.getElementById('popupIcon');
+
+            if (popupInterval) clearInterval(popupInterval);
+
+            function updatePopupCountdown() {
+                const now = new Date().getTime();
+                const targetDate = new Date(targetDateStr).getTime();
+                const distance = targetDate - now;
+
+                if (distance < 0) {
+                    clearInterval(popupInterval);
+                    countdownArea.style.display = 'none';
+                    subText.style.display = 'none';
+                    messageArea.style.display = 'block';
+                    icon.innerText = "📢";
+                } else {
+                    countdownArea.style.display = 'block';
+                    subText.style.display = 'block';
+                    messageArea.style.display = 'none';
+                    icon.innerText = "⏳";
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    document.getElementById('p-days').innerText = days < 10 ? '0' + days : days;
+                    document.getElementById('p-hours').innerText = hours < 10 ? '0' + hours : hours;
+                    document.getElementById('p-mins').innerText = minutes < 10 ? '0' + minutes : minutes;
+                    document.getElementById('p-secs').innerText = seconds < 10 ? '0' + seconds : seconds;
+                }
+            }
+
+            updatePopupCountdown();
+            popupInterval = setInterval(updatePopupCountdown, 1000);
+        }
+
+        function closeAnnouncementPopup() {
+            announcementModal.classList.remove('active');
+            if (popupInterval) clearInterval(popupInterval);
+        }
 
         function closeInfoLoadModal() {
             infoLoadModal.classList.remove('active');
@@ -809,7 +985,6 @@
         function processRegistration() {
             closeModal();
             toast.classList.add('show');
-            
             setTimeout(() => {
                 toast.classList.remove('show');
                 window.open(currentTargetUrl, '_blank');
@@ -817,17 +992,14 @@
         }
 
         window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-            if (event.target == infoLoadModal) {
-                closeInfoLoadModal();
-            }
+            if (event.target == modal) closeModal();
+            if (event.target == infoLoadModal) closeInfoLoadModal();
+            if (event.target == announcementModal) closeAnnouncementPopup();
         }
 
-        /* --- SCRIPT COUNTDOWN --- */
+        /* --- SCRIPT COUNTDOWN JALUR --- */
         function updateCountdowns() {
-            const countdownElements = document.querySelectorAll('.countdown-container');
+            const countdownElements = document.querySelectorAll('.countdown-wrapper .countdown-container');
             const now = new Date().getTime();
 
             countdownElements.forEach(el => {
@@ -840,12 +1012,10 @@
                 const messageEl = wrapper.querySelector('.countdown-message');
 
                 if (distance < 0) {
-                    // Waktu sudah lewat
                     el.style.display = 'none';
                     if (titleEl) titleEl.style.display = 'none';
                     if (messageEl) messageEl.style.display = 'block';
                 } else {
-                    // Masih menghitung mundur
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -859,9 +1029,8 @@
             });
         }
 
-        // Jalankan countdown setiap 1 detik
         setInterval(updateCountdowns, 1000);
-        updateCountdowns(); // Panggil segera saat halaman dimuat
+        updateCountdowns();
     </script>
 </body>
 </html>
