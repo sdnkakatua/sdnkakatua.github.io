@@ -382,7 +382,7 @@
     </a>
     <a href="#profil" class="nav-link" onclick="switchPage('profile')" id="nav-profile">Profil</a>
     <a href="#berita" class="nav-link" onclick="switchPage('berita')" id="nav-berita">berita</a>
-    <a href="#ppdb" class="nav-link" onclick="switchPage('ppdb')" id="nav-ppdb">PPDB</a>
+    <a href="#spmb" class="nav-link" onclick="switchPage('spmb')" id="nav-spmb">SPMB</a>
 	<a href="#akad" class="nav-link" onclick="switchPage('akademik')" id="nav-akademik">Akademik</a>
     <a href="#fasil" class="nav-link" onclick="switchPage('fasilitas')" id="nav-fasilitas">Fasilitas</a>
     <a href="#galeri" class="nav-link" onclick="switchPage('galeri')" id="nav-galeri">Galeri</a>
@@ -1023,40 +1023,23 @@ function toggleBeritaIFP() {
 </script>
 </section>
 
-    <section id="page-ppdb" class="page-section">
-<div id="ppdbPage" class="profile-container" style="display: none;">
+    <section id="page-spmb" class="page-section">
+<div id="spmbPage" class="profile-container" style="display: none;">
     <div class="profile-header-card">
-        <h2 class="ph-title">PPDB Online</h2>
-        <span class="ph-badge">Tahun Ajaran 2025/2026</span>
+        <h2 class="ph-title">SPMB Online</h2>
+        <span class="ph-badge">Tahun Ajaran 2026/2027</span>
         <p class="ph-subtitle">Bergabunglah Bersama Keluarga Besar SDN Kakatua</p>
     </div>
     <div class="profile-grid">
         <div class="data-card" style="grid-column: 1 / -1; text-align:center;">
             <h3>Informasi Pendaftaran</h3>
-            <p>Pendaftaran dibuka mulai <strong>1 Mei - 30 Juni 2025</strong>.</p>
+            <p>Proses Pendaftaran dibuka mulai <strong>8 Juni 2026</strong>.</p>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                <button class="btn-primary" style="max-width:200px;" onclick="alert('Maaf. Formulir belum dibuka!')">Daftar Sekarang</button>
+                <button class="btn-primary" style="max-width:200px;" onclick="onclick="window.location.href='https://sdnkakatua.github.io/spmb2026'">Daftar Sekarang</button>
                 <button class="logo-btn" style="width:auto; padding:0 20px; border-radius:12px; font-weight:600;" onclick="window.open('https://wa.me/6282395223314','_blank')">Hubungi Panitia</button>
             </div>
         </div>
-        <div class="data-card">
-            <h3>Persyaratan Umum</h3>
-            <ul class="misi-list">
-                <li>Usia minimal 6 tahun per 1 Juli.</li>
-                <li>Fotokopi Akta Kelahiran (3 lembar).</li>
-                <li>Fotokopi Kartu Keluarga (3 lembar).</li>
-                <li>Pas Foto 3x4 (4 lembar, latar merah).</li>
-            </ul>
-        </div>
-        <div class="data-card">
-            <h3>Alur Pendaftaran</h3>
-            <ol class="misi-list" style="padding-left:20px;">
-                <li>Mengisi Formulir Online/Offline.</li>
-                <li>Verifikasi Berkas Fisik di Sekolah.</li>
-                <li>Wawancara Orang Tua & Calon Siswa.</li>
-                <li>Pengumuman Hasil Seleksi.</li>
-            </ol>
-        </div>
+        
     </div>
 </div>
 </section>
@@ -1302,7 +1285,7 @@ function toggleBeritaIFP() {
     function switchPage(pageName) {
         const calendarContainer = document.querySelector('.main-container');
         const announcementBar = document.querySelector('.announcement-bar');
-        const allPages = ['profile', 'akademik', 'berita', 'ppdb', 'fasilitas', 'galeri', 'kontak'];
+        const allPages = ['profile', 'akademik', 'berita', 'spmb', 'fasilitas', 'galeri', 'kontak'];
         
         // Nav Styles
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
@@ -1314,7 +1297,7 @@ function toggleBeritaIFP() {
         const reverseMap = {
             'profile': 'profil',
             'berita': 'berita',
-            'ppdb': 'ppdb',
+            'spmb': 'spmb',
             'akademik': 'akad',
             'fasilitas': 'fasil',
             'galeri': 'galeri',
@@ -1824,7 +1807,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const pageMap = {
             '#profil': 'profile',     // Karena di menu href="#profil" tapi function switchPage('profile')
             '#berita': 'berita',
-            '#ppdb': 'ppdb',
+            '#spmb': 'spmb',
             '#akad': 'akademik',      // Karena di menu href="#akad"
             '#fasil': 'fasilitas',    // Karena di menu href="#fasil"
             '#galeri': 'galeri',
