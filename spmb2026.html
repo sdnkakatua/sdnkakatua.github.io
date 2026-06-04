@@ -260,7 +260,7 @@
 
         /* --- COUNTDOWN STYLING --- */
         .countdown-wrapper {
-            margin-top: auto; /* Memaksa kotak ini ke paling bawah card */
+            margin-top: auto;
         }
         .countdown-title {
             text-align: center;
@@ -306,7 +306,7 @@
             border-radius: 8px;
             border: 1px solid #c8e6c9;
             margin-bottom: 12px;
-            display: none; /* Disembunyikan awalnya */
+            display: none; 
         }
 
         /* Tombol Pendaftaran per Jalur */
@@ -589,7 +589,8 @@
 
                 <div class="countdown-wrapper">
                     <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <div class="countdown-container" data-target="2026-06-22T00:00:00+08:00">
+                    <!-- Target Waktu: 22 Juni 2026, 08:00 WITA (+08:00) -->
+                    <div class="countdown-container" data-target="2026-06-22T08:00:00+08:00">
                         <div class="countdown-item"><span class="days">00</span>Hari</div>
                         <div class="countdown-item"><span class="hours">00</span>Jam</div>
                         <div class="countdown-item"><span class="mins">00</span>Mnt</div>
@@ -615,7 +616,8 @@
 
                 <div class="countdown-wrapper">
                     <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <div class="countdown-container" data-target="2026-06-15T00:00:00+08:00">
+                    <!-- Target Waktu: 15 Juni 2026, 08:00 WITA (+08:00) -->
+                    <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
                         <div class="countdown-item"><span class="days">00</span>Hari</div>
                         <div class="countdown-item"><span class="hours">00</span>Jam</div>
                         <div class="countdown-item"><span class="mins">00</span>Mnt</div>
@@ -642,7 +644,8 @@
 
                 <div class="countdown-wrapper">
                     <div class="countdown-title">Pendaftaran Dibuka Dalam:</div>
-                    <div class="countdown-container" data-target="2026-06-15T00:00:00+08:00">
+                    <!-- Target Waktu: 15 Juni 2026, 08:00 WITA (+08:00) -->
+                    <div class="countdown-container" data-target="2026-06-15T08:00:00+08:00">
                         <div class="countdown-item"><span class="days">00</span>Hari</div>
                         <div class="countdown-item"><span class="hours">00</span>Jam</div>
                         <div class="countdown-item"><span class="mins">00</span>Mnt</div>
@@ -725,6 +728,7 @@
         </div>
     </footer>
 
+    <!-- POPUP INFO UTAMA & AGENDA PENTING LAINNYA -->
     <div class="modal-overlay" id="infoLoadModal">
         <div class="modal-content">
             <div class="modal-icon">📢</div>
@@ -757,6 +761,7 @@
         </div>
     </div>
 
+    <!-- POPUP KONFIRMASI DAFTAR -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
             <div class="modal-icon">👦👧</div>
