@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Ujian Seru Kelas 3 🌟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-indigo-100 via-purple-50 to-pink-100 min-h-screen text-slate-700 selection:bg-yellow-200 antialiased flex items-center justify-center">
+
+    <div class="container mx-auto px-4 py-6 sm:py-8 max-w-2xl w-full">
+        
+        <div id="home-screen" class="space-y-6 block">
+            <div class="text-center py-4">
+                <div class="flex justify-center items-center gap-3 text-5xl sm:text-6xl animate-bounce duration-1000 mb-2">
+                    <i class="ph-duotone ph-rocket-launch text-indigo-500"></i>
+                    <i class="ph-duotone ph-sparkle text-yellow-400"></i>
+                    <i class="ph-duotone ph-student text-purple-500"></i>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black text-indigo-600 drop-shadow-sm mt-2">Pusat Ujian Pintar</h1>
+                <p class="text-base sm:text-lg font-bold text-purple-500 mt-1">Kelas 3 - UPT SPF SDN Kakatua</p><br>
+                <p class="text-base sm:text-lg font-bold text-slate-500">Pilih Mata Pelajaran untuk Memulai!</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <button onclick="selectMapel('indonesia')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-blue-300 shadow-md hover:shadow-xl hover:border-blue-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-blue-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-blue-600 flex justify-center items-center">
+                        <i class="ph-duotone ph-flag-banner"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-blue-600">Bahasa Indonesia</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Seru</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('senirupa')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-pink-300 shadow-md hover:shadow-xl hover:border-pink-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-pink-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-pink-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-palette"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-pink-600">Seni Rupa</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Kreatif</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('matematika')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-amber-300 shadow-md hover:shadow-xl hover:border-amber-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-amber-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-amber-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-calculator"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-amber-600">Matematika</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Hebat</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('inggris')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-emerald-300 shadow-md hover:shadow-xl hover:border-emerald-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-emerald-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-emerald-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-translate"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-emerald-600">B. Inggris</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Keren</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('ipas')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-cyan-300 shadow-md hover:shadow-xl hover:border-cyan-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-cyan-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-cyan-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-plant"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-cyan-600">IPAS</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Alam</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('daerah')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-purple-300 shadow-md hover:shadow-xl hover:border-purple-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4">
+                    <div class="text-3xl sm:text-4xl bg-purple-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-purple-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-chat-teardrop-text"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-purple-600">B. Daerah</h3>
+                        <p class="text-xs font-bold text-slate-400">15 Soal Unik</p>
+                    </div>
+                </button>
+                <button onclick="selectMapel('pancasila')" class="group bg-white p-4 sm:p-5 rounded-3xl border-4 border-rose-300 shadow-md hover:shadow-xl hover:border-rose-500 transform hover:-translate-y-1 transition duration-300 text-left cursor-pointer flex items-center gap-3 sm:gap-4 sm:col-span-2">
+                    <div class="text-3xl sm:text-4xl bg-rose-100 p-2 sm:p-3 rounded-2xl group-hover:scale-110 transition text-rose-500 flex justify-center items-center">
+                        <i class="ph-duotone ph-shield-star"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-rose-600">Pendidikan Pancasila</h3>
+                        <p class="text-xs font-bold text-slate-400">25 Soal Bijak</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div id="welcome-screen" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-indigo-300 text-center sm:mt-10 mt-4">
+            <button onclick="goToHome()" class="flex items-center float-left text-sm font-bold text-slate-400 hover:text-slate-600 transition mb-4 sm:mb-0">
+                <i class="ph-bold ph-arrow-left mr-1"></i> Kembali
+            </button>
+            <div class="clear-both text-5xl sm:text-6xl mb-4 flex justify-center drop-shadow-sm" id="welcome-icon"></div>
+            <h2 class="text-xl sm:text-2xl font-black text-indigo-600" id="welcome-title">Persiapan Ujian</h2>
+            <p class="text-sm sm:text-md font-bold text-slate-400 mb-6" id="welcome-subtitle">Mata Pelajaran</p>
+            
+            <div class="bg-yellow-50 rounded-2xl p-4 mb-6 border-2 border-dashed border-yellow-300 text-left">
+                <h3 class="font-bold text-amber-700 mb-1 text-sm sm:text-base flex items-center">
+                    <i class="ph-bold ph-warning-circle mr-2 text-lg"></i> Petunjuk Penting:
+                </h3>
+                <ul class="text-xs sm:text-sm space-y-1 text-amber-900 list-disc list-inside">
+                    <li>Isi nama lengkapmu dengan benar.</li>
+                    <li>Jawab setiap soal dengan teliti dan percaya diri!</li>
+                    <li>Klik tombol "Lanjut" setelah memilih atau mengetik jawaban.</li>
+                </ul>
+            </div>
+
+            <div class="mb-6 text-left">
+                <label class="block text-sm font-bold text-slate-500 mb-2 pl-1">Tulis Nama Lengkapmu Di Sini:</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-purple-400">
+                        <i class="ph-fill ph-user text-xl"></i>
+                    </div>
+                    <input type="text" id="student-name" placeholder="Contoh: Andi Pratama" class="w-full pl-11 pr-4 py-3 rounded-2xl border-3 border-purple-200 focus:border-purple-400 focus:outline-none text-base sm:text-lg font-bold">
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="flex items-center justify-center w-full bg-emerald-400 hover:bg-emerald-500 active:scale-95 text-white font-extrabold text-lg sm:text-xl py-4 px-6 rounded-2xl shadow-lg border-b-4 border-emerald-600 transition tracking-wide cursor-pointer">
+                Mulai Ujian Sekarang! <i class="ph-bold ph-rocket-launch ml-2"></i>
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="hidden bg-white rounded-3xl p-5 sm:p-6 shadow-xl border-4 border-purple-300 relative">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+                <div class="bg-purple-100 text-purple-700 px-4 py-1.5 rounded-full font-bold text-xs sm:text-sm w-full sm:w-auto max-w-full sm:max-w-[200px] truncate flex items-center">
+                    <i class="ph-fill ph-user-circle text-lg mr-1.5"></i> <span id="display-name">Anak Hebat</span>
+                </div>
+                <div class="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full font-bold text-xs sm:text-sm w-full sm:w-auto text-center flex items-center justify-center">
+                    <i class="ph-fill ph-notepad text-lg mr-1.5"></i> Soal: <span id="current-number" class="ml-1">1</span> / <span id="total-number">25</span>
+                </div>
+            </div>
+
+            <div class="w-full bg-slate-100 rounded-full h-3 sm:h-4 mb-6 p-0.5 border border-slate-200 overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-400 to-purple-400 h-full rounded-full transition-all duration-300" style="width: 4%"></div>
+            </div>
+
+            <div class="mb-6">
+                <span id="badge-tipe" class="inline-flex items-center text-[10px] sm:text-xs font-extrabold px-3 py-1 rounded-md mb-2 uppercase bg-blue-100 text-blue-700">
+                    <i class="ph-bold ph-list-dashes mr-1.5"></i> <span id="badge-text">Pilihan Ganda</span>
+                </span>
+                <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">Mengisi lembar teks soal...</h2>
+            </div>
+
+            <div id="answer-container" class="space-y-3 mb-8"></div>
+
+            <div class="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-4 border-t border-slate-100">
+                <button id="btn-prev" onclick="prevQuestion()" class="flex justify-center items-center bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:pointer-events-none font-bold py-3 sm:py-2.5 px-5 rounded-xl transition cursor-pointer text-sm sm:text-base w-full sm:w-auto text-center">
+                    <i class="ph-bold ph-arrow-left mr-2"></i> Kembali
+                </button>
+                <button id="btn-next" onclick="nextQuestion()" class="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-3 px-8 rounded-xl shadow-md border-b-4 border-blue-700 transition active:scale-95 cursor-pointer text-sm sm:text-base w-full sm:w-auto text-center">
+                    <span id="btn-next-text">Lanjut</span> <i id="btn-next-icon" class="ph-bold ph-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-emerald-300 text-center">
+            <div class="text-6xl sm:text-7xl mb-4 flex justify-center" id="result-emoji">
+                <i class="ph-duotone ph-trophy text-amber-400 drop-shadow-md"></i>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mb-1" id="result-title">Luar Biasa!</h2>
+            <p class="text-sm sm:text-md text-slate-500 mb-6">Kamu sukses menyelesaikan petualangan ujian ini.</p>
+            
+            <div class="inline-block bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-300 px-6 sm:px-8 py-4 rounded-3xl mb-6 w-full sm:w-auto">
+                <div class="text-[10px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider mb-1 flex justify-center items-center"><i class="ph-bold ph-star text-amber-500 mr-1"></i> Nilai Akhir Kamu</div>
+                <div class="text-5xl sm:text-6xl font-black text-amber-600" id="final-score">100</div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-4 mb-6 border text-left text-xs sm:text-sm space-y-2 w-full">
+                <div class="flex items-center"><i class="ph-fill ph-user text-slate-400 mr-2 text-lg"></i> Nama: <span id="res-name" class="font-bold text-slate-800 ml-1"></span></div>
+                <div class="flex items-center"><i class="ph-fill ph-book-open text-purple-400 mr-2 text-lg"></i> Mapel: <span id="res-mapel" class="font-bold text-purple-600 ml-1"></span></div>
+                <div class="flex items-center"><i class="ph-fill ph-check-circle text-emerald-400 mr-2 text-lg"></i> Benar: <span id="res-correct" class="font-bold text-emerald-600 mx-1"></span> dari <span id="res-total" class="font-bold ml-1"></span> Soal</div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="showReviewScreen()" class="flex justify-center items-center w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-base sm:text-lg py-3.5 px-6 rounded-2xl shadow-md border-b-4 border-blue-700 transition active:scale-95 cursor-pointer">
+                    <i class="ph-bold ph-lightbulb mr-2 text-xl"></i> Lihat Pembahasan Soal
+                </button>
+                <button onclick="goToHome()" class="flex justify-center items-center w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-sm sm:text-md py-3.5 sm:py-3 rounded-2xl transition cursor-pointer">
+                    <i class="ph-bold ph-house mr-2 text-lg"></i> Kembali ke Halaman Utama
+                </button>
+            </div>
+        </div>
+
+        <div id="review-screen" class="hidden bg-white rounded-3xl p-5 sm:p-6 shadow-xl border-4 border-indigo-400">
+            <div class="text-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-indigo-600 flex justify-center items-center">
+                    <i class="ph-duotone ph-clipboard-text mr-2"></i> Pembahasan Jawaban
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Ayo pelajari semua jawaban untuk bekal ilmu masa depan!</p>
+            </div>
+
+            <div id="review-list-container" class="space-y-4 sm:space-y-6 max-h-[50vh] sm:max-h-[55vh] overflow-y-auto pr-1 sm:pr-2 mb-6 custom-scrollbar text-sm sm:text-base">
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row gap-3">
+                <button onclick="backToResult()" class="flex justify-center items-center w-full sm:w-1/2 bg-slate-200 hover:bg-slate-300 font-bold py-3 px-4 rounded-xl transition cursor-pointer text-center text-sm sm:text-base">
+                    <i class="ph-bold ph-arrow-left mr-2"></i> Tutup Pembahasan
+                </button>
+                <button onclick="goToHome()" class="flex justify-center items-center w-full sm:w-1/2 bg-purple-500 hover:bg-purple-600 text-white font-extrabold py-3 px-4 rounded-xl shadow-md border-b-4 border-purple-700 transition active:scale-95 cursor-pointer text-center text-sm sm:text-base">
+                    <i class="ph-bold ph-house mr-2"></i> Menu Utama
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // MASTER BANK SOAL DENGAN IKON BARU (Phosphor Icons Class)
+
+const MASTER_BANK_SOAL = {
+    indonesia: {
+        title: "Bahasa Indonesia", icon: "ph-duotone ph-flag-banner text-blue-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Kegiatan tanya jawab yang dilakukan untuk memperoleh data atau informasi dari seorang ahli disebut ....", options: ["Berdiskusi", "Berdebat", "Wawancara", "Pengumuman"], answer: 2, penjelasan: "Wawancara adalah kegiatan tanya jawab dengan narasumber untuk menghimpun keterangan." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: '"Jangan menginjak rumput dan memetik bunga di sekitar area taman ini!"<br>Kalimat di atas termasuk contoh dari kalimat ....', options: ["Berita", "Larangan", "Anjuran", "Pujian"], answer: 1, penjelasan: "Kata 'Jangan' di awal kalimat menandakan sebuah struktur kalimat larangan." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Hari Sabtu sore, cuaca sangat sejuk karena habis hujan. Budi dan adiknya pergi ke lapangan desa untuk bermain layang-layang bersama teman-temannya.<br><br>Berdasarkan teks di atas, kapan Budi dan adiknya bermain layang-layang?", options: ["Hari Minggu pagi", "Hari Sabtu sore", "Hari Jumat malam", "Hari Senin siang"], answer: 1, penjelasan: "Sesuai isi teks bacaan, peristiwa terjadi pada Hari Sabtu sore." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Jika kamu terpisah dari orang tuamu saat berada di pusat perbelanjaan yang ramai, tindakan pertama yang paling aman untuk meminta pertolongan adalah menemui ....", options: ["Pengunjung lain yang sedang belanja", "Petugas keamanan (Satpam) atau pusat informasi", "Orang asing yang menawarkan makanan", "Penjual mainan di luar gedung"], answer: 1, penjelasan: "Satpam atau pusat informasi merupakan pihak resmi terpercaya yang aman menolong anak tersesat." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Saat kita sedang menggunakan internet atau gawai, hal penting yang tidak boleh dibagikan secara sembarangan kepada orang tidak dikenal adalah ....", options: ["Warna baju kesukaan", "Nama hewan peliharaan di rumah", "Alamat rumah dan nomor telepon orang tua", "Judul buku cerita favorit"], answer: 2, penjelasan: "Alamat dan nomor telepon adalah data pribadi krusial yang wajib dirahasiakan demi keamanan." },
+            { id: 6, type: "single", label: "Pilihan Ganda", question: "Ibu baru saja membeli sayur dan buah segar ... pasar tradisional dekat rumah.<br>Kata depan yang paling tepat untuk melengkapi kalimat tersebut adalah ....", options: ["di", "ke", "dari", "pada"], answer: 2, penjelasan: "Kata depan 'dari' berfungsi untuk menyatakan aspek asal tempat kedatangan objek." },
+            { id: 7, type: "single", label: "Pilihan Ganda", question: "Berikut ini merupakan tindakan yang benar dalam merawat hewan peliharaan di rumah adalah ....", options: ["Memberi makan dan minum secara teratur serta membersihkan kandangnya", "Memandikan hewan peliharaan setiap satu jam sekali", "Membiarkan kandangnya kotor agar hewan merasa alami", "Mengurungnya di tempat yang gelap gulita sepanjang hari"], answer: 0, penjelasan: "Kebutuhan pokok pangan yang rutin serta higienitas kandang mutlak diperlukan untuk merawat hewan." },
+            { id: 8, type: "single", label: "Pilihan Ganda", question: "Poster yang baik dan menarik biasanya dipasang di tempat umum dengan tujuan untuk ....", options: ["Menghias dinding yang kosong saja", "Memberikan informasi, imbauan, atau ajakan yang bermanfaat", "Menjual barang-barang mewah dengan harga mahal", "Membagikan rahasia pribadi penulisnya"], answer: 1, penjelasan: "Fungsi media komunikasi poster adalah mengumumkan info, imbauan, atau ajakan persuasif kepada khalayak." },
+            { id: 9, type: "single", label: "Pilihan Ganda", question: '"Sebaiknya kamu memakai jaket tebal karena cuaca di luar sedang sangat dingin."<br>Kalimat tersebut merupakan contoh dari kalimat ....', options: ["Larangan", "Perintah keras", "Anjuran / Saran", "Tanya"], answer: 2, penjelasan: "Kombinasi kata 'Sebaiknya' merujuk sebagai representasi ungkapan anjuran atau saran." },
+            { id: 10, type: "single", label: "Pilihan Ganda", question: '"... jumlah kucing anggora yang kamu pelihara di rumah saat ini, Sila?"<br>Kata tanya yang paling tepat untuk melengkapi kalimat di atas adalah ....', options: ["Mengapa", "Berapa", "Kapan", "Di mana"], answer: 1, penjelasan: "Kata 'Berapa' dipakai khusus menanyakan jumlah atau nilai kuantitas." },
+            { id: 11, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah di antara tindakan berikut yang termasuk cara memelihara dan menyayangi hewan dengan baik? (Pilih 2 jawaban)", options: ["Membersihkan tempat tidurnya secara berkala agar bebas kuman.", "Membiarkannya kelaparan saat kita sedang sibuk bermain.", "Membawa ke dokter hewan jika ia terlihat lemas atau sakit.", "Mengurungnya di dalam kardus yang sempit dan tertutup rapat."], answer: [0, 2], penjelasan: "Menjaga kebersihan area kandang dan mengobati hewan yang sakit ke dokter adalah wujud kasih sayang." },
+            { id: 12, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah kata-kata di bawah ini yang biasanya digunakan di awal sebuah kalimat larangan? (Pilih 2 jawaban)", options: ["Silakan", "Jangan", "Dilarang", "Mari"], answer: [1, 2], penjelasan: "Kata penegas 'Jangan' dan 'Dilarang' bernilai instruksi larangan yang kuat." },
+            { id: 13, type: "complex", label: "Pilihan Ganda Kompleks", question: "Apa saja hal yang harus kamu lakukan jika tersesat di tempat wisata yang belum pernah kamu kunjungi? (Pilih 2 jawaban)", options: ["Tetap tenang, tidak panik, dan tidak berlari menjauh tanpa arah.", "Menangis sekeras-kerasnya sambil ikut berjalan dengan orang asing.", "Mencari pos informasi atau petugas yang menggunakan seragam resmi.", "Bersembunyi di tempat yang gelap dan sempit agar tidak terlihat orang."], answer: [0, 2], penjelasan: "Kondisi emosi wajib tenang, lalu segera melapor ke petugas resmi berseragam di lokasi terdekat." },
+            { id: 14, type: "complex", label: "Pilihan Ganda Kompleks", question: "Pilihlah kalimat-kalimat di bawah ini yang menggunakan kata depan dengan tepat! (Pilih 2 jawaban)", options: ["Kakak sedang membaca buku cerita di teras rumah.", "Kami akan pergi berlibur dari Bali besok pagi menggunakan pesawat.", "Ayah menaruh kunci mobilnya ke atas meja makan.", "Rombongan studi tur itu baru saja tiba dari Bandung."], answer: [0, 3], penjelasan: "Penggunaan 'di' (penunjuk ruang tinggal statis) dan 'dari' (penunjuk titik asal gerakan) sudah tepat." },
+            { id: 15, type: "complex", label: "Pilihan Ganda Kompleks", question: "Apa saja tindakan yang benar agar kita tetap aman saat berselancar atau belajar di internet? (Pilih 2 jawaban)", options: ["Selalu didampingi atau di bawah pengawasan orang tua atau guru.", "Menerima semua ajakan berteman dan panggilan video dari akun asing.", "Segera menutup aplikasi dan melapor ke orang tua jika melihat konten yang menakutkan.", "Memberitahukan kata sandi (password) akun kita kepada semua teman sekelas."], answer: [0, 2], penjelasan: "Pendampingan guru/orang tua serta pelaporan dini konten mencurigakan menjaga privasi anak di internet." },
+            { id: 16, type: "boolean", label: "Benar atau Salah", question: "Pengumuman tertulis yang ditempel di papan mading sekolah hendaknya ditulis menggunakan bahasa yang jelas, ringkas, dan mudah dipahami oleh seluruh siswa.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Pengumuman harus singkat, informatif, dan komunikatif agar langsung dipahami." },
+            { id: 17, type: "boolean", label: "Benar atau Salah", question: "Orang yang bertugas mencari berita, menyusunnya, dan mengajukan pertanyaan dalam kegiatan wawancara dinamakan narasumber.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Pihak yang mencari berita dan melontarkan pertanyaan disebut Pewawancara/Reporter." },
+            { id: 18, type: "boolean", label: "Benar atau Salah", question: 'Kata tanya "Mengapa" merupakan kata tanya yang digunakan untuk menanyakan tempat terjadinya suatu peristiwa atau lokasi.', options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Kata tanya 'Mengapa' menanyakan sebab/alasan, sedangkan lokasi mengandalkan kata 'Di mana'." },
+            { id: 19, type: "boolean", label: "Benar atau Salah", question: "Kelinci merupakan hewan peliharaan yang memiliki ciri fisik bertelinga panjang, bergerak dengan cara melompat, dan sangat gemar memakan sayuran seperti wortel.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Karakteristik biologi fisik kelinci bertelinga panjang, melompat, dan penyuka sayur." },
+            { id: 20, type: "boolean", label: "Benar atau Salah", question: "Jika ada orang asing tidak dikenal memberikan hadiah benda atau makanan dan memaksa mengajakmu ikut dengannya, kamu harus segera menolak tegas dan berteriak meminta tolong.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Langkah penolakan tegas merupakan pertahanan diri yang mutlak dilakukan." },
+            { id: 21, type: "text", label: "Isian Singkat", question: '"... kamu tidak masuk sekolah dan tidak ikut latihan menari kemarin, Doni?"<br><br>Kata tanya yang tepat untuk melengkapi kalimat rumpang di atas adalah ....', answer: "mengapa", penjelasan: "Kata 'Mengapa' melengkapi struktur kalimat tanya yang menginginkan penjelasan alasan." },
+            { id: 22, type: "text", label: "Isian Singkat", question: "Sebelum kita mulai menggambar, mewarnai, atau menulis kalimat di dalam poster, langkah paling pertama yang wajib ditentukan adalah menentukan _____ atau topik poster.", answer: ["tema", "topik"], penjelasan: "Langkah mendasar pra-desain poster adalah mematangkan gagasan tema/topik utama." },
+            { id: 23, type: "text", label: "Isian Singkat", question: 'Kalimat yang diawali dengan penanda kata "Ayo kita bersihkan kelas bersama-sama!" atau "Mari menjaga lingkungan!" termasuk ke dalam jenis kalimat _____ .', answer: "ajakan", penjelasan: "Kata kunci 'Ayo' dan 'Mari' membentuk esensi tipe kalimat ajakan." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "Kakak sedang mengantre untuk membelikan obat batuk nenek _____ apotek dekat klinik.", answer: "di", penjelasan: "Kata depan 'di' disisipkan untuk menyatakan keterangan posisi ruang statis." },
+            { id: 25, type: "text", label: "Isian Singkat", question: 'Perhatikan deskripsi hewan berikut!<br>"Aku adalah hewan air yang bernapas menggunakan insang. Aku memiliki ekor dan sirip untuk membantuku berenang di dalam air."<br><br>Hewan yang dimaksud berdasarkan deskripsi di atas adalah _____ .', answer: "ikan", penjelasan: "Insang, sirip, ekor, dan hidup di air merupakan ciri anatomi fundamental spesies Ikan." }
+        ]
+    },
+    senirupa: {
+        title: "Seni Rupa", icon: "ph-duotone ph-palette text-pink-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Kegiatan memberikan penilaian, penghargaan, dan pemahaman yang mendalam terhadap keindahan sebuah karya seni disebut ....", options: ["Kompetisi seni", "Kreasi seni", "Pameran seni", "Apresiasi seni"], answer: 3, penjelasan: "Apresiasi seni adalah aktivitas menilai, menghargai, serta mendalami nilai estetika karya." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "Jika kita mencelupkan potongan pelepah pisang ke dalam cat warna lalu menempelkannya di atas kertas, kita sedang membuat karya dengan teknik cetak ....", options: ["Saring", "Tinggi (Cap)", "Dalam", "Datar"], answer: 1, penjelasan: "Menempel acuan yang menonjol (pelepah) dinamakan cetak tinggi atau teknik cap." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Alat tradisional yang digunakan untuk menorehkan cairan lilin malam pada kain saat membuat batik tulis bernama ....", options: ["Canting", "Kuas", "Pahat", "Palet"], answer: 0, penjelasan: "Canting adalah alat utama pembawa lilin cair panas dalam membatik tulis tradisional." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Bentuk yang memiliki ukuran pasti, teratur, dan dapat diukur menggunakan alat ukur seperti penggaris dinamakan bentuk ....", options: ["Abstrak", "Geometris", "Organis", "Bebas"], answer: 1, penjelasan: "Bentuk geometris adalah bentuk teratur matematis yang bisa diukur pasti (kubus, lingkaran, segitiga)." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Contoh bentuk non-geometris atau bentuk alam yang sering kita lihat di lingkungan sekitar adalah bentuk ....", options: ["Jendela rumah", "Roda sepeda", "Awan di langit", "Dadu permainan"], answer: 2, penjelasan: "Awan memiliki rupa organis (non-geometris) yang mengikuti kontur bebas alamiah." },
+            { id: 6, type: "single", label: "Pilihan Ganda", question: "Karya seni rupa yang memiliki tiga ukuran, yaitu panjang, lebar, dan tinggi (memiliki volume/ruang nyata) disebut karya seni ....", options: ["Dua dimensi", "Tiga dimensi", "Empat dimensi", "Murni"], answer: 1, penjelasan: "Karya tiga dimensi ditandai dengan kepemilikan volume, kedalaman, ruang, dan tiga poros ukuran." },
+            { id: 7, type: "single", label: "Pilihan Ganda", question: "Salah satu contoh karya seni rupa dua dimensi yang sering dipajang di dinding kelas untuk menyampaikan pesan ajakan adalah ....", options: ["Poster pendidikan", "Patung pahlawan", "Vas bunga keramik", "Meja kayu ukir"], answer: 0, penjelasan: "Poster diproduksi pada lembar kertas datar (dua dimensi) sebagai penyampai pesan visual." },
+            { id: 8, type: "single", label: "Pilihan Ganda", question: "Ciri utama dari karya seni rupa dua dimensi adalah hanya dapat dinikmati keindahannya dari arah ....", options: ["Samping kanan saja", "Belakang saja", "Segala arah", "Depan saja"], answer: 3, penjelasan: "Karya dua dimensi berwujud bidang datar, sehingga hanya ideal dipandang dari satu arah (depan)." },
+            { id: 9, type: "single", label: "Pilihan Ganda", question: "Salah satu teknik pembuatan batik yang pengerjaannya menggunakan mesin cetak modern di pabrik kain disebut teknik ....", options: ["Tulis", "Cap", "Printing", "Colet"], answer: 2, penjelasan: "Teknik printing mengandalkan kecanggihan digital mesin cetak industri tekstil." },
+            { id: 10, type: "single", label: "Pilihan Ganda", question: "Patung Monumen Nasional (Monas) yang berdiri tegak di Jakarta merupakan contoh karya seni rupa ....", options: ["Satu dimensi", "Dua dimensi", "Tiga dimensi", "Desain grafis"], answer: 2, penjelasan: "Monumen/patung adalah karya tiga dimensi karena menempati ruang nyata dan bisa diraba." },
+            { id: 11, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah di bawah ini yang merupakan manfaat dari kegiatan mengapresiasi karya seni teman? (Pilih 2 jawaban)", options: ["Menumbuhkan rasa saling menghargai sesama teman", "Besar kemungkinan membuat teman menjadi malas", "Mengembangkan rasa cinta terhadap karya seni", "Menimbulkan rasa iri dan persaingan yang buruk"], answer: [0, 2], penjelasan: "Apresiasi melatih jiwa toleransi menghormati sesama (A) serta memupuk kecintaan pada seni (C)." },
+            { id: 12, type: "complex", label: "Pilihan Ganda Kompleks", question: "Bahan-bahan alami berikut ini yang dapat digunakan untuk teknik cetak ecoprint (cetak alami) pada kain adalah .... (Pilih 2 jawaban)", options: ["Daun jati", "Batu kali", "Bunga mawar", "Plastik bekas"], answer: [0, 2], penjelasan: "Daun jati dan bunga mawar menyimpan zat warna alami tumbuhan yang apik diekstrak pada kain." },
+            { id: 13, type: "complex", label: "Pilihan Ganda Kompleks", question: "Di bawah ini yang merupakan contoh dari bentuk geometris adalah .... (Pilih 2 jawaban)", options: ["Bentuk segitiga sama sisi", "Bentuk batang pohon tua", "Bentuk lingkaran sempurna", "Bentuk gumpalan asap"], answer: [0, 1], penjelasan: "Pilihan A (segitiga) dan C (lingkaran) merupakan bentuk geometris murni terukur." },
+            { id: 14, type: "complex", label: "Pilihan Ganda Kompleks", question: "Benda-benda di sekitar kita berikut ini yang termasuk ke dalam karya seni rupa tiga dimensi adalah .... (Pilih 2 jawaban)", options: ["Lukisan pemandangan di kanvas", "Guci keramik hiasan meja", "Foto keluarga di dalam bingkai", "Celengan dari tanah liat (gerabah)"], answer: [1, 3], penjelasan: "Guci hiasan dan celengan gerabah memiliki struktur volume ruang tiga dimensi berwujud nyata." },
+            { id: 15, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah yang termasuk teknik membatik tradisional asli Indonesia? (Pilih 2 jawaban)", options: ["Teknik canting tulis", "Teknik sablon digital", "Teknik celup ikat (jumputan)", "Teknik cetak mesin foto kopi"], answer: [0, 2], penjelasan: "Batik tulis buatan tangan (canting) dan kain jumputan (celup ikat) adalah warisan tradisi murni." },
+            { id: 16, type: "boolean", label: "Benar / Salah", question: "Memberikan kritikan yang kasar dan mengejek hasil karya teman di kelas merupakan contoh apresiasi seni yang baik.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Mengumpat/mengejek bukanlah nilai apresiasi, melainkan sikap merundung." },
+            { id: 17, type: "boolean", label: "Benar / Salah", question: "Teknik cetak saring dalam seni grafis sering juga disebut dengan istilah teknik sablon.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Cetak saring mengalirkan tinta lewat media kain kasa berpori (screen/sablon)." },
+            { id: 18, type: "boolean", label: "Benar / Salah", question: "Ruang nyata adalah ruang yang hanya berupa khayalan/ilusi mata pada sebuah lukisan dan tidak bisa diraba volumenya.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Ruang imajinatif pada kertas/kanvas datar dinamakan ruang semu atau ilusi." },
+            { id: 19, type: "boolean", label: "Benar / Salah", question: "Gambar poster dan lukisan pemandangan alam merupakan contoh karya seni rupa dua dimensi.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Keduanya dieksekusi pada lembar media berporos dua ukuran datar." },
+            { id: 20, type: "single", label: "Menjodohkan", question: "Tempat yang digunakan untuk menyimpan, merawat, dan memamerkan benda-benda bersejarah serta karya seni bernilai tinggi dinamakan ....", options: ["Ruang semu (ilusi)", "Museum", "Celup ikat (Jumputan)"], answer: 1, penjelasan: "Museum bertindak sebagai lembaga konservasi benda bernilai historis dan seni tinggi." },
+            { id: 21, type: "single", label: "Menjodohkan", question: "Teknik membuat motif batik pada kain dengan cara mengikat kain menggunakan tali/karet lalu mencelupkannya ke pewarna disebut ....", options: ["Ruang semu (ilusi)", "Museum", "Celup ikat (Jumputan)"], answer: 2, penjelasan: "Metode melilit tali lalu merendam kain ke tangki celup warna dinamakan jumputan/celup ikat." },
+            { id: 22, type: "single", label: "Menjodohkan", question: "Ruang khayalan yang dibuat pelukis pada bidang datar agar gambar terlihat seolah-olah memiliki jarak jauh dan dekat disebut ....", options: ["Ruang semu (ilusi)", "Museum", "Celup ikat (Jumputan)"], answer: 0, penjelasan: "Efek kedalaman semu rekayasa pelukis dinamakan ruang semu atau ilusi mata." },
+            { id: 23, type: "text", label: "Isian Singkat", question: "Memberikan kritik yang membangun dan saran pada buku catatan pameran dapat membantu penyelenggara untuk _______________ kualitas pameran berikutnya.", answer: ["meningkatkan", "memperbaiki"], penjelasan: "Saran konstruktif menolong tim pameran mengevaluasi guna meningkatkan kualitas performa." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "Bidang geometris berupa lingkaran hanya terdiri dari satu sisi garis lengkung yang bagian ujung dan pangkalnya saling _______________", answer: ["bertemu", "menyatu", "terhubung"], penjelasan: "Kedua kutub garis penutup busur lingkaran wajib menyatu seutuhnya." },
+            { id: 25, type: "text", label: "Isian Singkat", question: "Kendi tempat penyimpanan air yang dibuat oleh pengrajin dari bahan tanah liat termasuk contoh hasil karya seni _____ dimensi.", answer: "tiga", penjelasan: "Kendi tanah liat berongga memiliki wujud tiga dimensi yang nyata." }
+        ]
+    },
+    matematika: {
+        title: "Matematika", icon: "ph-duotone ph-calculator text-amber-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Garis yang dibatasi oleh dua titik di kedua ujungnya dinamakan ....", options: ["Garis lurus", "Sinar garis", "Ruas garis", "Garis berpotongan"], answer: 2, penjelasan: "Ruas garis (segmen garis) memiliki ujung-ujung terbatas yang dikunci dua buah titik." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "Perhatikan ciri garis berikut: Memiliki satu titik pangkal, sedangkan ujung lainnya berupa tanda panah yang bisa diperpanjang tanpa batas. Bangun tersebut adalah ....", options: ["Garis lurus", "Sinar garis", "Ruas garis", "Sudut siku-siku"], answer: 1, penjelasan: "Sinar garis berpangkal pada satu titik tetap lalu memanjang searah mata panah tanpa akhir." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Dua buah garis yang posisinya tegak lurus akan membentuk sudut yang besarnya ....", options: ["$45^\\circ$", "$60^\\circ$", "$90^\\circ$", "$180^\\circ$"], answer: 2, penjelasan: "Pertemuan garis tegak lurus mutlak membuahkan sudut siku-siku senilai 90 derajat." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Dua garis yang terletak pada satu bidang datar dan tidak akan pernah bertemu atau berpotongan meskipun diperpanjang sampai tak terhingga disebut garis ....", options: ["Sejajar", "Berpotongan", "Berhimpit", "Tegak lurus"], answer: 0, penjelasan: "Garis sejajar mempunyai gradien sudut searah sehingga konstan tidak berpotongan." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Sudut yang ukurannya lebih besar dari $0^\\circ$ dan kurang dari $90^\\circ$ dinamakan sudut ....", options: ["Siku-siku", "Lancip", "Tumpul", "Refleks"], answer: 1, penjelasan: "Sudut di bawah ambang batas siku-siku dinamakan sudut lancip." },
+            { id: 6, type: "single", label: "Pilihan Ganda", question: "Di antara pilihan derajat berikut, yang merupakan ukuran dari sudut tumpul adalah ....", options: ["$45^\\circ$", "$90^\\circ$", "$125^\\circ$", "$210^\\circ$"], answer: 2, penjelasan: "Sudut tumpul terbentang di antara nilai di atas 90 derajat hingga di bawah 180 derajat." },
+            { id: 7, type: "single", label: "Pilihan Ganda", question: "Jika dua lengan sudut bertemu di satu titik pojok, maka titik pertemuan tersebut dinamakan ....", options: ["Kaki sudut", "Daerah sudut", "Titik sudut", "Garis sudut"], answer: 2, penjelasan: "Titik pertemuan sepasang lengan dinamakan titik sudut." },
+            { id: 8, type: "single", label: "Pilihan Ganda", question: "Perhatikan data nilai ulangan Harian Matematika berikut:<br>8, 6, 7, 9, 8, 7, 6, 8, 10, 8<br><br>Urutan nilai di atas dari yang terbesar ke yang terkecil adalah ....", options: ["6, 6, 7, 7, 8, 8, 8, 8, 9, 10", "10, 9, 8, 8, 8, 8, 7, 7, 6, 6", "10, 9, 8, 7, 6, 10, 9, 8, 7, 6", "8, 8, 8, 8, 10, 9, 7, 7, 6, 6"], answer: 1, penjelasan: "Penyusunan data menurun dimulai angka 10 diakhiri angka 6 secara berurutan." },
+            { id: 9, type: "single", label: "Pilihan Ganda", question: "Berdasarkan data pada soal nomor 8, jumlah siswa yang mendapatkan nilai 8 sebanyak ....", options: ["3 siswa", "4 siswa", "5 siswa", "2 siswa"], answer: 1, penjelasan: "Angka 8 muncul sebanyak empat kali pada rangkaian data tersebut." },
+            { id: 10, type: "single", label: "Pilihan Ganda", question: "Di sebuah meja terdapat 6 buah penghapus, 4 penggaris, 6 pensil, dan 5 buku tulis.<br><br>Benda yang memiliki jumlah sama banyak adalah ....", options: ["Penghapus dan penggaris", "Pensil dan buku tulis", "Penghapus dan pensil", "Penggaris dan buku tulis"], answer: 2, penjelasan: "Penghapus dan pensil sama-sama berjumlah 6." },
+            { id: 11, type: "single", label: "Pilihan Ganda", question: "Selisih antara nilai data terbesar dengan nilai data terkecil dinamakan ....", options: ["Tabel", "Turus", "Jangkauan", "Frekuensi"], answer: 2, penjelasan: "Jangkauan adalah selisih nilai terbesar dan terkecil." },
+            { id: 12, type: "single", label: "Pilihan Ganda", question: "Pada sudut PQR, yang bertindak sebagai titik sudut adalah titik ....", options: ["P", "Q", "R", "PR"], answer: 1, penjelasan: "Titik tengah huruf pada penamaan sudut (Q) merupakan titik sudutnya." },
+            { id: 13, type: "single", label: "Pilihan Ganda", question: "Sudut yang besarnya tepat $180^\\circ$ disebut sudut ....", options: ["Siku-siku", "Lancip", "Lurus", "Refleks"], answer: 2, penjelasan: "Sudut lurus besarnya tepat 180 derajat." },
+            { id: 14, type: "single", label: "Pilihan Ganda", question: "Penulisan data menggunakan garis-garis tegak atau miring (tally) disebut juga dengan ....", options: ["Angka", "Turus", "Grafik", "Gambar"], answer: 1, penjelasan: "Tally dalam bahasa Indonesia disebut turus." },
+            { id: 15, type: "single", label: "Pilihan Ganda", question: "Perhatikan data tinggi badan (dalam cm) lima siswa: 120, 115, 125, 118, 122.<br>Jangkauan dari data tinggi badan tersebut adalah ....", options: ["5 cm", "10 cm", "15 cm", "20 cm"], answer: 1, penjelasan: "Nilai terbesar 125 dikurangi nilai terkecil 115 = 10 cm." },
+            { id: 16, type: "text", label: "Isian Singkat", question: "Garis memanjang yang tidak mempunyai titik ujung di kedua arahnya dinamakan garis ....", answer: "lurus", penjelasan: "Garis lurus memanjang tak berhingga di kedua arah." },
+            { id: 17, type: "text", label: "Isian Singkat", question: "Sebuah kayu diukur menggunakan penggaris. Pangkal kayu diletakkan di angka 2 cm dan ujungnya berada di angka 13 cm. Panjang kayu tersebut adalah _____ cm.", answer: "11", penjelasan: "13 cm - 2 cm = 11 cm." },
+            { id: 18, type: "text", label: "Isian Singkat", question: "Sudut yang besarnya lebih dari $180^\\circ$ tetapi kurang dari $360^\\circ$ disebut sudut ....", answer: "refleks", penjelasan: "Sudut refleks lebih besar dari 180 derajat dan kurang dari 360 derajat." },
+            { id: 19, type: "text", label: "Isian Singkat", question: "Besar sudut terkecil yang terbentuk oleh kedua jarum jam pada saat menunjukkan pukul 02.00 tepat adalah _____ derajat.", answer: "60", penjelasan: "Tiap 1 jam bernilai 30 derajat. Pukul 2 berarti 2 x 30 = 60 derajat." },
+            { id: 20, type: "text", label: "Isian Singkat", question: "Pada pukul 03.00 tepat, kedua jarum jam akan membentuk sudut ....", answer: ["siku-siku", "90"], penjelasan: "Pukul 3 tepat membentuk sudut siku-siku atau 90 derajat." },
+            { id: 21, type: "text", label: "Isian Singkat", question: "Perhatikan kata berikut: MATEMATIKA. Huruf yang jumlahnya paling banyak pada kata tersebut adalah huruf ....", answer: "a", penjelasan: "Huruf 'A' muncul sebanyak 3 kali." },
+            { id: 22, type: "text", label: "Isian Singkat", question: 'Lambang turus empat garis tegak dengan satu coret miring silang mengikat menunjukkan lambang bilangan ....', answer: "5", penjelasan: "Satu ikatan turus penuh bernilai 5." },
+            { id: 23, type: "text", label: "Isian Singkat", question: "Diketahui sekumpulan data nilai siswa: 5, 6, 6, 7, 7, 8, 9, 9, 9. Nilai terkecil dari data tersebut diperoleh sebanyak _____ siswa.", answer: "1", penjelasan: "Nilai terkecil adalah 5, dan hanya ada 1 siswa yang mendapatkannya." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "Garis-garis yang membentuk suatu sudut disebut _____ sudut.", answer: "kaki", penjelasan: "Garis pembentuk sudut disebut kaki sudut." },
+            { id: 25, type: "text", label: "Isian Singkat", question: "Jika diketahui nilai terbesar adalah 10 dan nilai terkecil adalah 4, maka jangkauan datanya adalah ....", answer: "6", penjelasan: "10 - 4 = 6." }
+        ]
+    },
+    inggris: {
+        title: "Bahasa Inggris", icon: "ph-duotone ph-translate text-emerald-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: '"Membaca" dalam bahasa Inggris adalah ....', options: ["Write", "Read", "Listen", "Speak"], answer: 1, penjelasan: "Read = membaca, write = menulis, listen = mendengar, speak = berbicara." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "The restroom is narrow and <b>dirty</b>. Arti dari kata yang ditebalkan adalah ....", options: ["Bersih", "Luas", "Kotor", "Wangi"], answer: 2, penjelasan: "Dirty artinya kotor." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: 'Bahasa Inggris dari angka "35" adalah ....', options: ["Twenty five", "Thirty five", "Forty five", "Fifty"], answer: 1, penjelasan: "Thirty (30) dan five (5)." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: 'Arti dari kata "Library" adalah ....', options: ["Laboratorium", "Ruang guru", "Perpustakaan", "Kantin"], answer: 2, penjelasan: "Library diterjemahkan sebagai perpustakaan." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "The cat is <b>under</b> the table. Arti kata yang ditebalkan adalah ....", options: ["Di atas", "Di bawah", "Di samping", "Di dalam"], answer: 1, penjelasan: "Under berarti di bawah." },
+            { id: 6, type: "single", label: "Pilihan Ganda", question: "Siswa-siswa sedang belajar di dalam kelas.<br>Kalimat bahasa Inggris yang tepat untuk kata yang ditebalkan (belajar) adalah ....", options: ["Play", "Eat", "Study", "Sleep"], answer: 2, penjelasan: "Study merepresentasikan aktivitas belajar." },
+            { id: 7, type: "single", label: "Pilihan Ganda", question: "The classroom is <b>large</b> and clean. Arti dari kata yang ditebalkan adalah ....", options: ["Sempit", "Luas", "Kecil", "Gelap"], answer: 1, penjelasan: "Large bersinonim dengan luas atau besar." },
+            { id: 8, type: "single", label: "Pilihan Ganda", question: "The number before fifty is ....", options: ["Forty eight", "Forty nine", "Forty", "Thirty nine"], answer: 1, penjelasan: "Angka sebelum 50 adalah 49 (forty nine)." },
+            { id: 9, type: "single", label: "Pilihan Ganda", question: "Budi wants to buy some food in the <b>schoolyard</b>. Arti dari kata yang ditebalkan adalah ....", options: ["Kamar mandi", "Halaman sekolah", "Ruang kelas", "Laboratorium komputer"], answer: 1, penjelasan: "Schoolyard diartikan sebagai halaman sekolah." },
+            { id: 10, type: "single", label: "Pilihan Ganda", question: "The pencil is inside the box.<br>Kata \"di dalam\" bahasa Inggrisnya adalah ....", options: ["On", "In", "Behind", "Between"], answer: 1, penjelasan: "In bermakna di dalam." },
+            { id: 11, type: "single", label: "Pilihan Ganda", question: '"Dua puluh tiga" dalam bahasa Inggris ditulis ....', options: ["Twelve", "Twenty two", "Twenty three", "Thirty three"], answer: 2, penjelasan: "Twenty three = 23." },
+            { id: 12, type: "single", label: "Pilihan Ganda", question: "Siti always <b>drinks</b> water every hour. Arti kata yang ditebalkan adalah ....", options: ["Makan", "Memotong", "Minum", "Membeli"], answer: 2, penjelasan: "Drinks artinya minum." },
+            { id: 13, type: "single", label: "Pilihan Ganda", question: 'The computer laboratory is very clean.<br>Lawan kata dari "clean" adalah ....', options: ["Large", "Dirty", "Narrow", "Small"], answer: 1, penjelasan: "Lawan kata bersih (clean) adalah kotor (dirty)." },
+            { id: 14, type: "single", label: "Pilihan Ganda", question: '"Di samping" atau "di sebelah" dalam bahasa Inggris adalah ....', options: ["Beside", "Under", "In front of", "Behind"], answer: 0, penjelasan: "Beside menunjukkan letak posisi di samping." },
+            { id: 15, type: "single", label: "Pilihan Ganda", question: "The teacher writes on the blackboard in the ....", options: ["Library", "Classroom", "Restroom", "Schoolyard"], answer: 1, penjelasan: "Papan tulis biasanya ada di ruang kelas (classroom)." },
+            { id: 16, type: "single", label: "Pilihan Ganda", question: 'What is the English word for "Empat puluh dua"?', options: ["Twenty four", "Forty two", "Fourteen", "Thirty two"], answer: 1, penjelasan: "Forty two = 42." },
+            { id: 17, type: "single", label: "Pilihan Ganda", question: "The students <b>play</b> football in the yard. Arti kata yang ditebalkan adalah ....", options: ["Belajar", "Bermain", "Membaca", "Menulis"], answer: 1, penjelasan: "Play berarti bermain." },
+            { id: 18, type: "single", label: "Pilihan Ganda", question: "The blackboard is _____ the wall.", options: ["Under", "On", "In", "Between"], answer: 1, penjelasan: "Benda yang menempel di dinding dipasangkan preposisi 'on'." },
+            { id: 19, type: "single", label: "Pilihan Ganda", question: "The number after twenty nine is ....", options: ["Twenty eight", "Thirty", "Thirty one", "Forty"], answer: 1, penjelasan: "Angka setelah 29 adalah 30 (thirty)." },
+            { id: 20, type: "single", label: "Pilihan Ganda", question: 'The principal\'s room is clean. Kata "principal\'s room" sama artinya dengan ....', options: ["Ruang kelas", "Ruang Kepala Sekolah", "Perpustakaan", "Kamar mandi"], answer: 1, penjelasan: "Principal's room adalah ruang kepala sekolah." },
+            { id: 21, type: "text", label: "Isian Singkat", question: 'The ball is behind the chair. Arti dari kata "behind" adalah ....', answer: "di belakang", penjelasan: "Behind artinya di belakang." },
+            { id: 22, type: "text", label: "Isian Singkat", question: '"Dua puluh delapan" dalam bahasa Inggris adalah ....', answer: "twenty eight", penjelasan: "28 dieja menjadi twenty eight." },
+            { id: 23, type: "text", label: "Isian Singkat", question: 'The hallway is narrow. Lawan kata dari "narrow" adalah ....', answer: ["large", "wide"], penjelasan: "Lawan kata sempit (narrow) adalah luas/lebar (large/wide)." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "The teacher stands .................... (di depan) the students.", answer: "in front of", penjelasan: "Di depan bahasa Inggrisnya adalah 'in front of'." },
+            { id: 25, type: "text", label: "Isian Singkat", question: "Aisyah <b>buys</b> a book in the bookshop. Arti kata yang ditebalkan adalah ....", answer: "membeli", penjelasan: "Buy bermakna membeli." }
+        ]
+    },
+    ipas: {
+        title: "IPAS", icon: "ph-duotone ph-plant text-cyan-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Di sudut sebuah denah tempat wisata terdapat gambar bintang penunjuk arah dengan huruf \"U\" di bagian atasnya.<br>Fungsi utama dari simbol gambar tersebut adalah ....", options: ["Menunjukkan batas luas wilayah tempat wisata", "Menghitung jarak antardua tempat yang berbeda", "Menunjukkan arah utara sebagai panduan membaca denah", "Menjelaskan nama-nama fasilitas umum di tempat wisata"], answer: 2, penjelasan: "Huruf 'U' mengindikasikan petunjuk arah utara sebagai panduan denah." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "Tradisi Lompat Batu (Hombo Batu) merupakan ritual menguji kedewasaan para pemuda dengan melompati tumpukan batu setinggi 2 meter.<br>Tradisi unik ini berasal dari daerah ....", options: ["Sumba", "Nias", "Minangkabau", "Madura"], answer: 1, penjelasan: "Tradisi Lompat Batu berasal dari Pulau Nias." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Berikut ini yang seluruhnya termasuk ke dalam kelompok kenampakan alam wilayah perairan adalah ....", options: ["Gunung, lembah, dan gurun", "Rawa, sungai, dan laut", "Dataran tinggi, teluk, dan bukit", "Tanjung, semenanjung, dan dataran rendah"], answer: 1, penjelasan: "Rawa, sungai, dan laut adalah wilayah yang digenangi air." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Kebiasaan, norma, atau adat istiadat yang diwariskan secara turun-temurun dari nenek moyang dan masih dijalankan oleh masyarakat hingga saat ini dinamakan ....", options: ["Hukum modern", "Kebudayaan asing", "Tradisi atau adat", "Aturan tertulis"], answer: 2, penjelasan: "Warisan perilaku turun-temurun disebut tradisi atau adat." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Perhatikan peta atau denah mini di bawah ini!<br><b>[ PUSKESMAS ]</b><br><br><br><b>[ PASAR ]=======[ SEKOLAH ]</b><br><br>(Petunjuk arah mata angin: Atas menunjukkan Utara)<br>Berdasarkan posisi pada gambar di atas, letak Pasar berada di sebelah .... dari Sekolah.", options: ["Utara", "Timur", "Selatan", "Barat"], answer: 3, penjelasan: "Mengacu titik Sekolah, posisi Pasar berada di sebelah kirinya yang berarti arah Barat." },
+            { id: 6, type: "complex", label: "Pilihan Ganda Kompleks", question: "Wilayah dataran tinggi memiliki ciri fisik yang sangat khas.<br>Manakah di antara pernyataan berikut yang merupakan karakteristik asli dari wilayah dataran tinggi? (Pilih 2 jawaban)", options: ["Terletak pada ketinggian lebih dari 500 meter di atas permukaan laut.", "Suasana udara di sekitarnya umumnya terasa lebih hangat atau cenderung panas.", "Kondisi udara terasa sangat sejuk, dingin, dan sering berkabut.", "Terletak pada wilayah landai dengan ketinggian antara 0 sampai 200 meter dpl."], answer: [0, 2], penjelasan: "Dataran tinggi berada pada ketinggian >500 meter dpl dan udaranya sejuk." },
+            { id: 7, type: "complex", label: "Pilihan Ganda Kompleks", question: "Sebagian besar wilayah Indonesia berada di jalur cincin api dunia yang membuatnya rawan terhadap bencana gempa bumi.<br>Struktur bangunan tempat tinggal yang aman untuk masyarakat di daerah tersebut adalah .... (Pilih 2 jawaban)", options: ["Menggunakan tiang beton jembatan yang sangat kaku, tebal, dan berat.", "Memanfaatkan struktur kayu atau bambu yang lentur dan elastis terhadap guncangan.", "Menggunakan sambungan bangunan modern yang fleksibel (desain tahan gempa).", "Membangun rumah bertingkat banyak tanpa fondasi cakar ayam yang kuat."], answer: [1, 2], penjelasan: "Struktur lentur dan desain tahan gempa lebih aman terhadap guncangan." },
+            { id: 8, type: "complex", label: "Pilihan Ganda Kompleks", question: "Jenis pekerjaan atau mata pencaharian sangat dipengaruhi oleh kondisi alam sekitar.<br>Jenis pekerjaan yang umumnya mendominasi kehidupan masyarakat yang tinggal di wilayah pesisir pantai adalah .... (Pilih 2 jawaban)", options: ["Petani sayur dan kebun teh", "Nelayan tangkap ikan", "Petani tambak garam", "Pemandu wisata pendakian gunung"], answer: [1, 2], penjelasan: "Masyarakat pesisir umumnya bekerja sebagai nelayan atau petani tambak." },
+            { id: 9, type: "complex", label: "Pilihan Ganda Kompleks", question: "Suku Bajo terkenal karena membangun rumah panggung terapung di atas permukaan air laut di kawasan pesisir.<br>Tujuan utama dari arsitektur rumah panggung terapung ini adalah .... (Pilih 2 jawaban)", options: ["Mempermudah akses transportasi perahu milik warga", "Menghindari risiko tanah longsor yang sering terjadi di bukit", "Menghindari luapan pasang air laut agar rumah tidak tenggelam", "Memerangkap panas matahari di malam hari agar ruangan terasa hangat"], answer: [0, 2], penjelasan: "Rumah panggung mempermudah akses perahu dan menghindari pasang air laut." },
+            { id: 10, type: "complex", label: "Pilihan Ganda Kompleks", question: "Rumah adat Honai milik Suku Dani di Papua sengaja dibangun dengan atap jerami yang sangat rendah dan tanpa jendela.<br>Keunikan struktur bangunan ini bertujuan untuk .... (Pilih 2 jawaban)", options: ["Menjaga agar suhu di dalam rumah tetap hangat dari cuaca dingin pegunungan", "Mempermudah aliran air hujan agar tidak menumpuk di atas atap", "Memerangkap hawa hangat dari perapian di dalam ruangan", "Melindungi bangunan agar tidak mudah retak akibat bencana banjir"], answer: [0, 2], penjelasan: "Desain tanpa jendela menjaga suhu di dalam tetap hangat." },
+            { id: 11, type: "boolean", label: "Benar / Salah", question: "Denah lingkungan sekolah atau rumah biasanya digunakan untuk menunjukkan lokasi fasilitas umum berskala besar seperti rumah sakit, bandara internasional, dan markas kepolisian pusat.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Denah lingkungan jangkauannya kecil, bukan untuk fasilitas skala besar seperti bandara." },
+            { id: 12, type: "boolean", label: "Benar / Salah", question: "Gubernur dan Wakil Gubernur adalah pemimpin tingkat provinsi yang dipilih langsung oleh masyarakat melalui proses Pemilihan Kepala Daerah (Pilkada).", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR." },
+            { id: 13, type: "boolean", label: "Benar / Salah", question: "Tradisi Sekaten yang diselenggarakan secara turun-temurun di Yogyakarta dan Surakarta merupakan kebiasaan baru yang diciptakan sendiri oleh tiap-tiap keluarga modern tanpa pengaruh nenek moyang.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Tradisi diwariskan turun-temurun, bukan dibuat baru oleh keluarga modern." },
+            { id: 14, type: "boolean", label: "Benar / Salah", question: "Tradisi Sambat atau gotong royong mendirikan rumah bersama warga sekampung merupakan salah satu wujud nyata dari pengamalan nilai kebersamaan.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR." },
+            { id: 15, type: "boolean", label: "Benar / Salah", question: "Dataran rendah merupakan bagian daratan yang memiliki bentuk permukaan cenderung datar dengan ketinggian berkisar antara 0 sampai 200 meter di atas permukaan laut.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR." },
+            { id: 16, type: "single", label: "Menjodohkan", question: "Nilai dalam tradisi daerah yang mengajarkan warga untuk selalu kompak dan menumbuhkan rasa persaudaraan yang erat dinamakan ....", options: ["Nilai Kepemimpinan", "Nilai Keberagaman", "Nilai Kebersamaan"], answer: 2, penjelasan: "Kekompakan menumbuhkan nilai kebersamaan." },
+            { id: 17, type: "single", label: "Menjodohkan", question: "Nilai dalam tradisi daerah yang melatih sikap disiplin, tanggung jawab, serta ketegasan seorang ketua adat disebut ....", options: ["Nilai Kepemimpinan", "Nilai Keberagaman", "Nilai Kebersamaan"], answer: 0, penjelasan: "Tanggung jawab dan ketegasan adalah ciri nilai kepemimpinan." },
+            { id: 18, type: "single", label: "Menjodohkan", question: "Nilai dalam tradisi daerah yang menjunjung tinggi tenggang rasa di tengah perbedaan latar belakang masyarakat Indonesia dinamakan ....", options: ["Nilai Kepemimpinan", "Nilai Keberagaman", "Nilai Kebersamaan"], answer: 1, penjelasan: "Tenggang rasa atas perbedaan merupakan wujud nilai keberagaman." },
+            { id: 19, type: "single", label: "Menjodohkan", question: "Cara beradaptasi masyarakat pegunungan Papua agar kondisi dalam rumah adat mereka tidak kedinginan adalah ....", options: ["Memerangkap panas dan membuat perapian", "Rumah dibuat panggung lebih tinggi dari tanah", "Memakai pakaian yang tipis"], answer: 0, penjelasan: "Memerangkap panas dan perapian membuat rumah tetap hangat." },
+            { id: 20, type: "single", label: "Menjodohkan", question: "Penyesuaian arsitektur bangunan rumah masyarakat yang tinggal di dataran rendah dekat muara sungai yang rawan banjir adalah ....", options: ["Memerangkap panas dan membuat perapian", "Rumah dibuat panggung lebih tinggi dari tanah", "Memakai pakaian yang tipis"], answer: 1, penjelasan: "Rumah panggung menghindarkan air banjir masuk ke dalam rumah." },
+            { id: 21, type: "text", label: "Isian Singkat", question: "Perhatikan susunan denah arah mata angin berikut! Jika posisi Rumah Sakit berada tepat di sebelah utara Sekolah, maka letak Sekolah berada di sebelah _______________ Rumah Sakit.", answer: "selatan", penjelasan: "Lawan arah dari Utara adalah Selatan." },
+            { id: 22, type: "text", label: "Isian Singkat", question: "Bagian dari kenampakan alam daratan yang memiliki aliran air alami berukuran besar, memanjang, dan mengalir secara terus-menerus dari hulu menuju ke hilir dinamakan _______________", answer: "sungai", penjelasan: "Aliran air panjang dari hulu ke hilir disebut sungai." },
+            { id: 23, type: "text", label: "Isian Singkat", question: "Wilayah daratan landai yang sangat cocok digunakan untuk area pemukiman padat penduduk, kawasan industri, dan lahan pertanian padi adalah wilayah _______________", answer: "dataran rendah", penjelasan: "Dataran rendah ideal untuk pemukiman dan pertanian." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "Pemimpin di tingkat kecamatan (Camat) ditunjuk langsung oleh Bupati, sedangkan Pemimpin di tingkat desa (Kepala Desa) dipilih langsung oleh warga desa melalui kegiatan _______________", answer: ["pilkades", "pemilihan kepala desa"], penjelasan: "Kepala desa dipilih melalui Pilkades." },
+            { id: 25, type: "text", label: "Isian Singkat", question: "Ritual adat atau tradisi di beberapa wilayah Jawa yang bertujuan untuk membersihkan desa dari nasib buruk, mara bahaya, atau ancaman wabah penyakit dinamakan tradisi _______________", answer: ["bersih desa", "ruwatan"], penjelasan: "Tradisi pembersihan dari nasib buruk sering disebut bersih desa atau ruwatan." }
+        ]
+    },
+    daerah: {
+        title: "Bahasa Daerah", icon: "ph-duotone ph-chat-teardrop-text text-purple-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Baji ampe, battuanna ....", options: ["Tau gaga rupanna", "Tau bajik kelakuanna", "Tau ranggasang"], answer: 1, penjelasan: "Baji ampe berarti orang yang baik perilakunya." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "Luara pakmaik, battuanna ....", options: ["Tau sibakuk", "Tau masarro parru (suka memberi)", "Tau takkulle nipatappak"], answer: 1, penjelasan: "Luara pakmaik melambangkan sifat suka memberi atau dermawan." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Tau lolo bangko, battuanna ....", options: ["Anak caddi-caddi", "Gadis yang sudah dewasa/cukup umur", "Orang tua yang sudah jompo"], answer: 1, penjelasan: "Lolo bangko berarti gadis yang sudah dewasa." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Tau kodi panynyari, battuanna ....", options: ["Tau ra'masak", "Tau kuttu", "Tau ringgasang (mudah marah/tersinggung)"], answer: 2, penjelasan: "Kodi panynyari berarti orang yang mudah tersinggung." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Mata kalorang, battuanna ....", options: ["Tau erok attinro", "Tau pattebakkang dallek", "Tau kuttu amminra"], answer: 1, penjelasan: "Mata kalorang bermakna pembawa rezeki atau beruntung." },
+            { id: 6, type: "text", label: "Isian Singkat", question: "Tuliskan lawan kata (bukuangkana) Bahasa Indonesia dari istilah berikut:<br><b>baji (baik) X kodi (_____)</b>", answer: ["buruk", "jahat"], penjelasan: "Kodi berlawanan makna dengan baji, yang berarti buruk/jahat." },
+            { id: 7, type: "text", label: "Isian Singkat", question: "Terjemahkan pasangan lawan kata di bawah ini ke dalam Bahasa Indonesia:<br><b>kalumanyyang (kaya) X kasi-asi (_____)</b>", answer: "miskin", penjelasan: "Kasi-asi mengekspresikan miskin." },
+            { id: 8, type: "text", label: "Isian Singkat", question: "Tentukan rasa benda berikut dalam Bahasa Makassar:<br><b>Golla (gula) : rasanya = _____</b>", answer: ["tekne", "tanning"], penjelasan: "Gula rasanya manis, diistilahkan 'tekne' atau 'tanning'." },
+            { id: 9, type: "text", label: "Isian Singkat", question: "Tentukan rasa benda berikut dalam Bahasa Makassar:<br><b>Taipa lolo (mangga muda) : rasanya = _____</b>", answer: "cammring", penjelasan: "Mangga muda rasanya asam ('cammring')." },
+            { id: 10, type: "text", label: "Isian Singkat", question: "Tentukan rasa benda berikut dalam Bahasa Makassar:<br><b>Lada (lombok) : rasanya = _____</b>", answer: "pa'risik", penjelasan: "Cabai pedas diistilahkan 'pa'risik'." },
+            { id: 11, type: "text", label: "Isian Singkat", question: "Tentukan rasa benda berikut dalam Bahasa Makassar:<br><b>Ceke (es) : rasanya = _____</b>", answer: "dinging", penjelasan: "Es terasa 'dinging'." },
+            { id: 12, type: "text", label: "Isian Singkat", question: "Susun kata acak menjadi kalimat padu bermakna:<br><b>a'rinra (memasak) — anrongku (ibuku) — juku (ikan)</b>", answer: "anrongku a'rinra juku", penjelasan: "Susunannya: Anrongku (Ibuku) a'rinra (memasak) juku (ikan)." },
+            { id: 13, type: "text", label: "Isian Singkat", question: "Ukirik lontaraki (tulislah ke dalam Aksara Lontara) kata di bawah ini:<br><b>baju = ..... / juku = .....</b> (Ketik pembacaan Latin dasarnya)", answer: ["baju", "juku"], penjelasan: "Padanan tulisan Latin untuk kata tersebut." },
+            { id: 14, type: "text", label: "Isian Singkat", question: "Ukirik latingi (salin ke huruf Latin) aksara Lontara berikut:<br><b>ᨅᨅ</b>", answer: "baba", penjelasan: "Kombinasi huruf Ba-Ba dibaca sebagai kata 'baba'." },
+            { id: 15, type: "text", label: "Isian Singkat", question: "Ukirik latingi (salin ke huruf Latin) aksara Lontara berikut:<br><b>ᨌᨚᨀᨚ</b>", answer: ["coko", "coko'"], penjelasan: "Simbol tersebut dibaca coko'." }
+        ]
+    },
+    pancasila: {
+        title: "Pend. Pancasila", icon: "ph-duotone ph-shield-star text-rose-500",
+        soal: [
+            { id: 1, type: "single", label: "Pilihan Ganda", question: "Suku Sunda merupakan salah satu suku bangsa di Indonesia yang sebagian besar mendiami wilayah provinsi ....", options: ["Jawa Timur", "Jawa Barat", "Sumatra Utara", "Sulawesi Utara"], answer: 1, penjelasan: "Suku Sunda sebagian besar mendiami wilayah Jawa Barat." },
+            { id: 2, type: "single", label: "Pilihan Ganda", question: "Sila kedua Pancasila mengajarkan kita untuk menghargai sesama manusia. Contoh tindakan di sekolah yang sesuai dengan sila kedua adalah ....", options: ["Menolong teman yang terjatuh di lapangan bermain", "Berebut mainan dengan teman sekelas", "Melaksanakan upacara bendera dengan malas", "Memaksakan kehendak saat diskusi kelompok"], answer: 0, penjelasan: "Menolong teman adalah wujud kemanusiaan yang adil dan beradab." },
+            { id: 3, type: "single", label: "Pilihan Ganda", question: "Saat musyawarah menentukan tujuan wisata kelas, pendapat Siti berbeda dengan hasil keputusan bersama. Sikap yang sebaiknya Siti tunjukkan adalah ....", options: ["Marah dan menolak ikut pergi berwisata", "Menghargai keputusan bersama dengan lapang dada", "Memaksa teman-teman mengubah keputusan", "Meminta musyawarah diulang sampai pendapatnya menang"], answer: 1, penjelasan: "Menghargai mufakat bersama adalah penerapan sila keempat." },
+            { id: 4, type: "single", label: "Pilihan Ganda", question: "Para tokoh perumus Pancasila mengutamakan kepentingan bangsa di atas kepentingan pribadi mereka. Nilai karakter positif yang mereka tunjukkan adalah ....", options: ["Egois dan ingin menang sendiri", "Rela berkorban dan cinta tanah air", "Memilih produk buatan luar negeri", "Mudah marah jika pendapatnya ditolak"], answer: 1, penjelasan: "Rela berkorban adalah nilai karakter para pahlawan bangsa." },
+            { id: 5, type: "single", label: "Pilihan Ganda", question: "Meskipun warga di desa Makmur memiliki perbedaan agama dan adat istiadat, mereka selalu hidup rukun dan tidak membeda-bedakan. Sikap ini menunjukkan bahwa mereka menjunjung tinggi semboyan ....", options: ["Bhinneka Tunggal Ika", "Bersatu Kita Teguh", "Garuda Pancasila", "Tut Wuri Handayani"], answer: 0, penjelasan: "Bhinneka Tunggal Ika berarti berbeda-beda namun tetap satu." },
+            { id: 6, type: "single", label: "Pilihan Ganda", question: "Membagi tugas kelompok secara adil dan menghargai hasil karya yang dibuat oleh orang lain merupakan contoh sikap yang mencerminkan Pancasila sila ke ....", options: ["Dua", "Tiga", "Empat", "Lima"], answer: 3, penjelasan: "Bersikap adil merupakan pengamalan sila kelima." },
+            { id: 7, type: "single", label: "Pilihan Ganda", question: "Rumah adat yang berbentuk panggung dan memiliki atap melengkung menyerupai tanduk kerbau bernama rumah adat Gadang, yang berasal dari daerah ....", options: ["Papua", "Sumatra Barat", "Kalimantan Timur", "Jawa Tengah"], answer: 1, penjelasan: "Rumah Gadang berasal dari Sumatra Barat." },
+            { id: 8, type: "single", label: "Pilihan Ganda", question: "Masyarakat suku Jawa yang tinggal di wilayah Jawa Tengah dan Yogyakarta umumnya berkomunikasi menggunakan bahasa daerah, yaitu bahasa ....", options: ["Sunda", "Jawa", "Madura", "Betawi"], answer: 1, penjelasan: "Bahasa daerah di Jawa Tengah adalah Bahasa Jawa." },
+            { id: 9, type: "single", label: "Pilihan Ganda", question: "Salah satu tokoh bangsa yang menyampaikan gagasan mengenai rumusan dasar negara Indonesia pada tanggal 1 Juni 1945 adalah ....", options: ["Ir. Soekarno", "Pangeran Diponegoro", "Sultan Hasanuddin", "Raden Ajeng Kartini"], answer: 0, penjelasan: "Ir. Soekarno berpidato pada 1 Juni 1945." },
+            { id: 10, type: "single", label: "Pilihan Ganda", question: 'Lagu daerah yang berjudul "Rasa Sayange" berasal dari daerah ....', options: ["Aceh", "Papua", "Maluku", "Jawa Barat"], answer: 2, penjelasan: "Lagu Rasa Sayange berasal dari daerah Maluku." },
+            { id: 11, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah permainan tradisional di bawah ini yang dimainkan secara berkelompok atau beregu? (Pilih 2 jawaban)", options: ["Gobak Sodor", "Catur", "Bentengan", "Layang-layang sendirian"], answer: [0, 2], penjelasan: "Gobak sodor dan bentengan dimainkan berkelompok." },
+            { id: 12, type: "complex", label: "Pilihan Ganda Kompleks", question: "Manakah di antara pakaian adat di bawah ini yang berasal dari daerah-daerah di Pulau Jawa? (Pilih 2 jawaban)", options: ["Kebaya", "Baju Bodo", "Surjan", "Ulee Balang"], answer: [0, 2], penjelasan: "Kebaya dan Surjan berasal dari Pulau Jawa." },
+            { id: 13, type: "complex", label: "Pilihan Ganda Kompleks", question: "Siapa saja tokoh di bawah ini yang termasuk dalam anggota Panitia Sembilan? (Pilih 2 jawaban)", options: ["Ir. Soekarno", "Raden Ajeng Kartini", "Drs. Mohammad Hatta", "Pangeran Diponegoro"], answer: [0, 2], penjelasan: "Bung Karno dan Bung Hatta adalah anggota Panitia Sembilan." },
+            { id: 14, type: "complex", label: "Pilihan Ganda Kompleks", question: "Contoh kegiatan di sekolah yang mencerminkan pengamalan sila ketiga (Persatuan Indonesia) adalah .... (Pilih 2 jawaban)", options: ["Melaksanakan piket kebersihan kelas bersama-sama tanpa membeda-bedakan teman", "Mencontek jawaban teman saat ulangan sedang berlangsung", "Mengikuti upacara bendera setiap hari Senin dengan tertib dan khidmat", "Bertengkar dengan teman karena perbedaan pendapat"], answer: [0, 2], penjelasan: "Piket bersama dan upacara mempererat persatuan." },
+            { id: 15, type: "complex", label: "Pilihan Ganda Kompleks", question: "Contoh sikap yang mencerminkan nilai kemanusiaan sesuai sila kedua Pancasila adalah .... (Pilih 2 jawaban)", options: ["Menjenguk dan mendoakan teman sekelas yang sedang sakit", "Menertawakan teman yang tidak sengaja terpeleset di koridor sekolah", "Membantu mengumpulkan sumbangan untuk korban bencana alam", "Menyembunyikan alat tulis milik teman untuk bercanda"], answer: [0, 2], penjelasan: "Menjenguk teman dan membantu korban adalah sikap manusiawi." },
+            { id: 16, type: "boolean", label: "Benar atau Salah", question: "Pernyataan: Bunyi sila ketiga Pancasila adalah \"Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan\".", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Itu bunyi sila keempat. Sila ketiga adalah Persatuan Indonesia." },
+            { id: 17, type: "boolean", label: "Benar atau Salah", question: "Pernyataan: Lagu daerah yang berjudul \"Apuse\" merupakan lagu tradisional yang berasal dari wilayah Papua.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR." },
+            { id: 18, type: "boolean", label: "Benar atau Salah", question: "Pernyataan: Made berasal dari Bali dan Johannes berasal dari Papua. Meskipun mereka memiliki asal suku yang berbeda, mereka harus tetap saling menghargai dan berteman baik.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR. Perbedaan harus dirawat dengan persahabatan." },
+            { id: 19, type: "boolean", label: "Benar atau Salah", question: "Pernyataan: Permainan tradisional congklak adalah permainan yang dimainkan dengan cara melompati kotak kotak gambar di tanah menggunakan satu kaki.", options: ["BENAR", "SALAH"], answer: 1, penjelasan: "Pernyataan SALAH. Itu adalah permainan Engklek, bukan Congklak." },
+            { id: 20, type: "boolean", label: "Benar atau Salah", question: "Pernyataan: Mencintai, bangga, dan menggunakan produk-produk buatan dalam negeri merupakan salah satu wujud penerapan sila ketiga Pancasila.", options: ["BENAR", "SALAH"], answer: 0, penjelasan: "Pernyataan BENAR." },
+            { id: 21, type: "text", label: "Isian Singkat", question: "Sembilan tokoh bangsa yang bertugas merumuskan dan menyusun dasar negara Indonesia sebelum disahkan dikenal dengan sebutan Panitia ....", answer: "panitia sembilan", penjelasan: "Kelompok tersebut disebut Panitia Sembilan." },
+            { id: 22, type: "text", label: "Isian Singkat", question: "Semboyan negara Indonesia yang tertulis pada pita lambang Burung Garuda Pancasila adalah ....", answer: "bhinneka tunggal ika", penjelasan: "Semboyannya adalah Bhinneka Tunggal Ika." },
+            { id: 23, type: "text", label: "Isian Singkat", question: "Agar tidak terjadi kesalahpahaman saat berkomunikasi antarsuku, kita harus menguasai bahasa persatuan, yaitu bahasa ....", answer: "indonesia", penjelasan: "Bahasa Indonesia adalah bahasa persatuan." },
+            { id: 24, type: "text", label: "Isian Singkat", question: "Ketika tetangga di sekitar rumah kita sedang sibuk mempersiapkan perayaan hari besar keagamaannya, sikap kita sebagai tetangga yang baik adalah saling ....", answer: ["menghargai", "menghormati", "toleransi"], penjelasan: "Kita harus saling bertoleransi dan menghargai." },
+            { id: 25, type: "text", label: "Isian Singkat", question: "Selain agama resmi, terdapat pula nilai-nilai spiritual berupa tradisi luhur adat asli yang berkembang dan dianut oleh sebagian masyarakat di Pulau Jawa, yang dikenal dengan sebutan aliran ....", answer: ["kejawen", "aliran kepercayaan"], penjelasan: "Kepercayaan lokal tersebut dikenal sebagai Kejawen atau Aliran Kepercayaan." }
+        ]
+    }
+};
+        let currentMapelKey = "";
+        let namaSiswa = "";
+        let currentIndex = 0;
+        let jawabanSiswa = {}; 
+
+        function selectMapel(key) {
+            if(!MASTER_BANK_SOAL[key]) key = 'indonesia'; 
+            
+            currentMapelKey = key;
+            const mapel = MASTER_BANK_SOAL[key];
+            
+            // Menyisipkan Tag Ikon secara Dinamis
+            document.getElementById('welcome-icon').innerHTML = `<i class="${mapel.icon}"></i>`;
+            document.getElementById('welcome-title').innerText = `Ujian Akhir Semester: ${mapel.title}`;
+            document.getElementById('welcome-subtitle').innerText = `Kelas 3 SD • Total Soal: ${mapel.soal.length} Butir`;
+            
+            document.getElementById('home-screen').classList.replace('block', 'hidden');
+            document.getElementById('welcome-screen').classList.replace('hidden', 'block');
+            document.getElementById('student-name').value = "";
+        }
+
+        function goToHome() {
+            document.getElementById('welcome-screen').classList.replace('block', 'hidden');
+            document.getElementById('quiz-screen').classList.replace('block', 'hidden');
+            document.getElementById('result-screen').classList.replace('block', 'hidden');
+            document.getElementById('review-screen').classList.replace('block', 'hidden');
+            document.getElementById('home-screen').classList.replace('hidden', 'block');
+            currentMapelKey = "";
+            jawabanSiswa = {};
+            currentIndex = 0;
+        }
+
+        function startQuiz() {
+            const inputVal = document.getElementById('student-name').value.trim();
+            namaSiswa = inputVal ? inputVal : "Anak Hebat";
+            
+            document.getElementById('welcome-screen').classList.replace('block', 'hidden');
+            document.getElementById('quiz-screen').classList.replace('hidden', 'block');
+            
+            document.getElementById('display-name').innerText = namaSiswa;
+            currentIndex = 0;
+            jawabanSiswa = {}; 
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const listSoal = MASTER_BANK_SOAL[currentMapelKey].soal;
+            const soal = listSoal[currentIndex];
+            
+            document.getElementById('current-number').innerText = currentIndex + 1;
+            document.getElementById('total-number').innerText = listSoal.length;
+            document.getElementById('badge-text').innerText = soal.label;
+            document.getElementById('question-text').innerHTML = soal.question;
+            
+            const progressPercent = ((currentIndex + 1) / listSoal.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+            
+            document.getElementById('btn-prev').disabled = (currentIndex === 0);
+            
+            const btnNext = document.getElementById('btn-next');
+            const btnNextText = document.getElementById('btn-next-text');
+            const btnNextIcon = document.getElementById('btn-next-icon');
+            
+            if (currentIndex === listSoal.length - 1) {
+                btnNextText.innerText = "Selesai Kirim";
+                btnNextIcon.className = "ph-bold ph-paper-plane-tilt ml-2";
+                btnNext.className = "flex justify-center items-center bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 px-8 rounded-xl shadow-md border-b-4 border-emerald-700 transition active:scale-95 cursor-pointer text-sm sm:text-base w-full sm:w-auto text-center";
+            } else {
+                btnNextText.innerText = "Lanjut";
+                btnNextIcon.className = "ph-bold ph-arrow-right ml-2";
+                btnNext.className = "flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white font-extrabold py-3 px-8 rounded-xl shadow-md border-b-4 border-blue-700 transition active:scale-95 cursor-pointer text-sm sm:text-base w-full sm:w-auto text-center";
+            }
+
+            const container = document.getElementById('answer-container');
+            container.innerHTML = "";
+
+            if (soal.type === "single" || soal.type === "boolean") {
+                soal.options.forEach((opt, idx) => {
+                    const isSelected = (jawabanSiswa[currentIndex] === idx);
+                    const btn = document.createElement('button');
+                    btn.className = `w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl border-2 font-bold text-sm sm:text-md transition duration-200 cursor-pointer flex items-center gap-3 ${
+                        isSelected ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-400 text-purple-900' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                    }`;
+                    btn.innerHTML = `<span class="min-w-[1.75rem] h-7 rounded-full flex items-center justify-center bg-white border border-slate-300 text-xs font-black ${isSelected ? 'text-purple-600 border-purple-500' : ''}">${String.fromCharCode(65 + idx)}</span> <span class="break-words">${opt}</span>`;
+                    btn.onclick = () => { jawabanSiswa[currentIndex] = idx; renderQuestion(); };
+                    container.appendChild(btn);
+                });
+            } else if (soal.type === "complex") {
+                const savedAnswers = jawabanSiswa[currentIndex] || [];
+                soal.options.forEach((opt, idx) => {
+                    const isChecked = savedAnswers.includes(idx);
+                    const label = document.createElement('label');
+                    label.className = `w-full text-left px-4 sm:px-5 py-3 sm:py-3.5 rounded-2xl border-2 font-bold text-sm sm:text-md transition duration-200 cursor-pointer flex items-center gap-3 ${
+                        isChecked ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-400 text-amber-900' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                    }`;
+                    label.innerHTML = `<input type="checkbox" class="min-w-[1.25rem] h-5 accent-amber-500 cursor-pointer" ${isChecked ? 'checked' : ''} onchange="toggleComplex(${idx})"> <span class="break-words">${opt}</span>`;
+                    container.appendChild(label);
+                });
+            } else if (soal.type === "text") {
+                const savedText = jawabanSiswa[currentIndex] || "";
+                const input = document.createElement('input');
+                input.type = "text";
+                input.value = savedText;
+                input.placeholder = "Ketik jawabanmu di sini...";
+                input.className = "w-full px-4 py-3 rounded-2xl border-3 border-blue-200 focus:border-blue-400 focus:outline-none text-base sm:text-lg font-bold text-center";
+                input.oninput = (e) => { jawabanSiswa[currentIndex] = e.target.value; };
+                container.appendChild(input);
+                setTimeout(() => input.focus(), 80);
+            }
+        }
+
+        function toggleComplex(idx) {
+            if (!jawabanSiswa[currentIndex]) jawabanSiswa[currentIndex] = [];
+            const arr = jawabanSiswa[currentIndex];
+            const pos = arr.indexOf(idx);
+            if (pos > -1) arr.splice(pos, 1); else arr.push(idx);
+            renderQuestion();
+        }
+
+        function prevQuestion() { if (currentIndex > 0) { currentIndex--; renderQuestion(); } }
+        
+        function nextQuestion() {
+            const listSoal = MASTER_BANK_SOAL[currentMapelKey].soal;
+            if (currentIndex < listSoal.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                prosesHitungSkor();
+            }
+        }
+
+        function prosesHitungSkor() {
+            const dataObj = MASTER_BANK_SOAL[currentMapelKey];
+            let totalBenar = 0;
+
+            dataObj.soal.forEach((soal, idx) => {
+                const siswaJwb = jawabanSiswa[idx];
+                if (soal.type === "single" || soal.type === "boolean") {
+                    if (siswaJwb === soal.answer) totalBenar++;
+                } else if (soal.type === "complex") {
+                    const studentArr = siswaJwb || [];
+                    const keyArr = soal.answer;
+                    if (studentArr.length === keyArr.length && studentArr.every(v => keyArr.includes(v))) {
+                        totalBenar++;
+                    }
+                } else if (soal.type === "text") {
+                    const textClean = (siswaJwb || "").trim().toLowerCase();
+                    if (Array.isArray(soal.answer)) {
+                        if (soal.answer.some(ans => textClean === ans.toLowerCase())) totalBenar++;
+                    } else {
+                        if (textClean === soal.answer.toLowerCase()) totalBenar++;
+                    }
+                }
+            });
+
+            const nilaiAkhir = Math.round((totalBenar / dataObj.soal.length) * 100);
+            
+            document.getElementById('quiz-screen').classList.replace('block', 'hidden');
+            document.getElementById('result-screen').classList.replace('hidden', 'block');
+            
+            document.getElementById('res-name').innerText = namaSiswa;
+            document.getElementById('res-mapel').innerText = dataObj.title;
+            document.getElementById('res-correct').innerText = totalBenar;
+            document.getElementById('res-total').innerText = dataObj.soal.length;
+            document.getElementById('final-score').innerText = nilaiAkhir;
+
+            const resEmoji = document.getElementById('result-emoji');
+            const resTitle = document.getElementById('result-title');
+            if (nilaiAkhir >= 80) {
+                resEmoji.innerHTML = '<i class="ph-duotone ph-trophy text-amber-400 drop-shadow-md"></i>';
+                resTitle.innerText = "Hebat & Jenius!";
+                triggerPestaKembangApi();
+            } else if (nilaiAkhir >= 60) {
+                resEmoji.innerHTML = '<i class="ph-duotone ph-thumbs-up text-blue-400 drop-shadow-md"></i>';
+                resTitle.innerText = "Bagus Sekali!";
+            } else {
+                resEmoji.innerHTML = '<i class="ph-duotone ph-books text-emerald-400 drop-shadow-md"></i>';
+                resTitle.innerText = "Semangat Belajar!";
+            }
+        }
+
+        function showReviewScreen() {
+            document.getElementById('result-screen').classList.replace('block', 'hidden');
+            document.getElementById('review-screen').classList.replace('hidden', 'block');
+
+            const container = document.getElementById('review-list-container');
+            container.innerHTML = "";
+            const listSoal = MASTER_BANK_SOAL[currentMapelKey].soal;
+
+            listSoal.forEach((soal, idx) => {
+                const siswaJwb = jawabanSiswa[idx];
+                let isCorrect = false;
+                let textSiswa = "";
+                let textKunci = "";
+
+                if (soal.type === "single" || soal.type === "boolean") {
+                    isCorrect = (siswaJwb === soal.answer);
+                    textSiswa = (siswaJwb !== undefined) ? soal.options[siswaJwb] : "<i>(Kosong)</i>";
+                    textKunci = soal.options[soal.answer];
+                } else if (soal.type === "complex") {
+                    const studentArr = siswaJwb || [];
+                    isCorrect = (studentArr.length === soal.answer.length && studentArr.every(v => soal.answer.includes(v)));
+                    textSiswa = studentArr.length > 0 ? studentArr.map(i => soal.options[i]).join(", ") : "<i>(Kosong)</i>";
+                    textKunci = soal.answer.map(i => soal.options[i]).join(", ");
+                } else if (soal.type === "text") {
+                    const rawSiswa = (siswaJwb || "").trim().toLowerCase();
+                    if (Array.isArray(soal.answer)) {
+                        isCorrect = soal.answer.some(ans => rawSiswa === ans.toLowerCase());
+                        textKunci = soal.answer.join(" / ");
+                    } else {
+                        isCorrect = (rawSiswa === soal.answer.toLowerCase());
+                        textKunci = soal.answer;
+                    }
+                    textSiswa = siswaJwb ? siswaJwb : "<i>(Kosong)</i>";
+                }
+
+                // Pengaturan Ikon Benar/Salah Estetis
+                const statusBadge = isCorrect 
+                    ? `<span class="flex items-center text-[10px] sm:text-xs font-black px-2 py-1 rounded bg-emerald-100 text-emerald-700"><i class="ph-bold ph-check-circle mr-1"></i> NOMOR ${idx + 1}</span>`
+                    : `<span class="flex items-center text-[10px] sm:text-xs font-black px-2 py-1 rounded bg-rose-100 text-rose-700"><i class="ph-bold ph-x-circle mr-1"></i> NOMOR ${idx + 1}</span>`;
+
+                const card = document.createElement('div');
+                card.className = `p-3 sm:p-4 rounded-2xl border-2 shadow-sm ${isCorrect ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'}`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        ${statusBadge}
+                    </div>
+                    <p class="font-bold text-slate-800 text-sm sm:text-md mb-2 break-words">${soal.question}</p>
+                    <div class="text-xs space-y-1 bg-white/70 p-2 rounded-xl border border-slate-100 mb-2">
+                        <div><span class="text-slate-400 font-bold inline-block w-20 sm:w-24">Pilihanmu:</span> <span class="${isCorrect ? 'text-emerald-700 font-extrabold' : 'text-rose-700 font-extrabold'}">${textSiswa}</span></div>
+                        <div><span class="text-slate-400 font-bold inline-block w-20 sm:w-24">Kunci Benar:</span> <span class="text-emerald-700 font-extrabold">${textKunci}</span></div>
+                    </div>
+                    <div class="bg-blue-50 rounded-xl p-2.5 border border-blue-100 text-[10px] sm:text-xs text-blue-900 flex gap-2">
+                        <i class="ph-duotone ph-lightbulb text-blue-500 text-lg"></i>
+                        <div><span class="font-extrabold block text-blue-950">Pembahasan:</span>${soal.penjelasan || 'Jawaban di atas dikonfirmasi akurat.'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function backToResult() {
+            document.getElementById('review-screen').classList.replace('block', 'hidden');
+            document.getElementById('result-screen').classList.replace('hidden', 'block');
+        }
+
+        function triggerPestaKembangApi() {
+            let duration = 3 * 1000; let end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+    </script>
+</body>
+</html>
