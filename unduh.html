@@ -34,10 +34,6 @@
             display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        /* --- COMPONENTS --- */
-        
-        
-       
         /* --- TOP NAVIGATION BAR --- */
         .top-nav {
             background-color: #2a0a0a;
@@ -101,19 +97,15 @@
         .close-modal-btn { position:absolute; right:20px; top:20px; border:none; background:#f1f5f9; color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor:pointer; transition: all 0.2s; }
         .close-modal-btn:hover { background: #e2e8f0; color: var(--text-primary); }
 
-        /* RESULT STYLES (New) */
+        /* RESULT STYLES */
         .result-header { text-align: center; margin-bottom: 20px; }
-        .result-details { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #e2e8f0; }
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px; }
-        .detail-row:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
-        .detail-label { color: var(--text-secondary); }
-        .detail-value { font-weight: 600; color: var(--text-primary); text-align: right; }
+        .result-details { background: #f8fafc; border-radius: 12px; padding: 30px 20px; margin-bottom: 25px; border: 1px solid #e2e8f0; text-align: center; }
+        .detail-label { color: var(--text-secondary); font-size: 0.95rem; display: block; margin-bottom: 5px; }
+        .detail-value { font-weight: 700; color: var(--brand-primary); font-size: 1.5rem; margin-bottom: 25px; }
         
-        .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 12px; font-weight: 600; text-decoration: none; color: white; transition: 0.2s; }
+        .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 15px; border-radius: 12px; font-weight: 600; text-decoration: none; color: white; transition: 0.2s; }
         .btn-action:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        .btn-ijazah { background-color: var(--success-color); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-skl { background-color: var(--info-color); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-        .btn-other { background-color: var(--text-secondary); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3); }
+        .btn-folder { background-color: var(--info-color); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 
         /* TOAST */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
@@ -170,8 +162,8 @@
         </div>
 
         <div class="card">
-            <h2 class="card-title">Cari Ijazah & SKL</h2>
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Lengkapi data di bawah ini untuk mencari dokumen kelulusan.</p>
+            <h2 class="card-title">Pusat Data Murid</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">Lengkapi data di bawah ini untuk mencari data murid.</p>
             
             <div class="form-group">
                 <label class="form-label">Nama Lengkap Siswa</label>
@@ -192,7 +184,7 @@
                 <div class="spinner" id="loadingSpinner"></div>
                 <span id="btnCariText" style="display: flex; align-items: center; gap: 8px;">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    Cari Dokumen
+                    Cari Data
                 </span>
             </button>
         </div>
@@ -207,13 +199,13 @@
             
             <div id="input-section">
                 <input type="password" id="passcodeGuru" class="modern-input" placeholder="? ? ? ? ? ?" maxlength="6" style="text-align: center; letter-spacing: 8px; font-weight: 700; font-size: 1.2rem;">
-                <button class="btn-primary" onclick="cekPasscode()">Verifikasi Kode</button>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="cekPasscode()">Verifikasi Kode</button>
             </div>
 
             <div id="guru-result" style="display:none; margin-top:20px; border-top:2px dashed #e2e8f0; padding-top:20px;">
                 <div style="background:#fffbeb; border:2px solid #fde68a; padding:20px; border-radius:12px; text-align:center;">
                     <strong id="namaGuruDisplay" style="font-size:1.2rem; color:var(--brand-primary); display:block; margin-bottom:15px;">Nama Guru</strong>
-                    <a href="#" id="driveLinkGuru" target="_blank" class="btn-action btn-ijazah" style="background:#059669;">Buka Google Drive</a>
+                    <a href="#" id="driveLinkGuru" target="_blank" class="btn-action" style="background:#059669;">Buka Google Drive</a>
                 </div>
             </div>
         </div>
@@ -231,44 +223,22 @@
             </div>
 
             <div class="result-details">
-                <div class="detail-row">
-                    <span class="detail-label">Nama</span>
-                    <span class="detail-value" id="resNama">-</span>
+                <span class="detail-label">Nama Siswa:</span>
+                <div class="detail-value" id="resNama">-</div>
+                
+                <div id="actionButtons">
+                    <a href="#" id="btnDownloadFolder" target="_blank" class="btn-action btn-folder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><folder></folder><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        Buka Folder Data Murid
+                    </a>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">NISN</span>
-                    <span class="detail-value" id="resNisn">-</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Tgl Lahir</span>
-                    <span class="detail-value" id="resTgl">-</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Tahun Lulus</span>
-                    <span class="detail-value" id="resTahun">-</span>
-                </div>
-            </div>
-
-            <div id="actionButtons">
-                <a href="#" id="btnDownloadIjazah" target="_blank" class="btn-action btn-ijazah">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Download Ijazah
-                </a>
-                <a href="#" id="btnDownloadSkl" target="_blank" class="btn-action btn-skl">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Download SKL
-                </a>
-                <a href="#" id="btnDownloadLain" target="_blank" class="btn-action btn-other">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><folder></folder><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    Berkas Lainnya
-                </a>
             </div>
         </div>
     </div>
 
     <script>
-        // --- KONFIGURASI (WAJIB DIGANTI) ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwUorZqStIEU18OAChn0sZYEF06AlIcJV4EiJl4yT-FUFwCNIjdAZmWCp30lpaFDgQi/exec"; 
+        // --- KONFIGURASI (WAJIB DIGANTI DENGAN URL DEPLOY TERBARU) ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6mSmlWmx8aPTMrLBEecG5LUNqvzpq6pRg2v_iz0dcCsZzfXuy7j-GFeigkiBY1eXz/exec"; 
 
         // --- DATA GURU (Lokal) ---
         const DATA_GURU = {
@@ -318,12 +288,16 @@
         function cariDokumen() {
             const nama = document.getElementById('cariNama').value;
             const nisn = document.getElementById('cariNisn').value;
-            const tgl = document.getElementById('cariTgl').value;
+            const tglRaw = document.getElementById('cariTgl').value; // Bawaan input="date" adalah YYYY-MM-DD
             
-            if(!nama || !nisn || !tgl) {
+            if(!nama || !nisn || !tglRaw) {
                 showToast("Harap lengkapi semua data (Nama, NISN, Tgl Lahir)", "error");
                 return;
             }
+
+            // --- KONVERSI FORMAT TANGGAL KE DD/MM/YYYY ---
+            const tglParts = tglRaw.split('-');
+            const tglFormatted = `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}`;
 
             // UI Loading State
             const btn = document.getElementById('btnCari');
@@ -336,21 +310,16 @@
 
             fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ nama: nama, nisn: nisn, tgl: tgl })
+                body: JSON.stringify({ nama: nama, nisn: nisn, tgl: tglFormatted }) // Kirim format DD/MM/YYYY
             })
             .then(res => res.json())
             .then(resp => {
                 if(resp.status === 'success') {
                     // Isi Data ke Modal
                     document.getElementById('resNama').innerText = resp.data.nama;
-                    document.getElementById('resNisn').innerText = resp.data.nisn;
-                    document.getElementById('resTgl').innerText = resp.data.tgl_lahir;
-                    document.getElementById('resTahun').innerText = resp.data.tahun;
 
                     // Atur Tombol Download
-                    setupButton('btnDownloadIjazah', resp.data.link_ijazah);
-                    setupButton('btnDownloadSkl', resp.data.link_skl);
-                    setupButton('btnDownloadLain', resp.data.link_lain);
+                    setupButton('btnDownloadFolder', resp.data.link_folder);
 
                     openModal('resultModal');
                     showToast("Data ditemukan!", "success");
