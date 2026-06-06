@@ -94,6 +94,7 @@
                                 <div>
                                     <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Masuk</p>
                                     <h3 id="stat-masuk" class="text-4xl font-black text-slate-800">...</h3>
+                                    <p class="text-xs text-blue-600 mt-2 font-medium bg-blue-50 px-2 py-1 rounded-md inline-block" id="dash-last-masuk">Nomor Terakhir: -</p>
                                 </div>
                             </div>
                             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow">
@@ -101,15 +102,22 @@
                                 <div>
                                     <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Keluar</p>
                                     <h3 id="stat-keluar" class="text-4xl font-black text-slate-800">...</h3>
+                                    <p class="text-xs text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block" id="dash-last-keluar">Nomor Terakhir: -</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div id="view-surat-masuk" class="hidden space-y-6">
-                        <div class="flex justify-between gap-4">
-                            <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
-                            <button onclick="openModal('modal-form', 'masuk', 'add')" class="admin-only hidden-important bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-primary/30">Tambah Data</button>
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 max-w-max">
+                                <span class="text-sm font-medium text-slate-500">Nomor Terakhir:</span>
+                                <span id="view-last-masuk" class="font-bold text-blue-600">-</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
+                                <button onclick="openModal('modal-form', 'masuk', 'add')" class="admin-only hidden-important bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-primary/30">Tambah Data</button>
+                            </div>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                             <table class="w-full text-left whitespace-nowrap">
@@ -128,9 +136,15 @@
                     </div>
 
                     <div id="view-surat-keluar" class="hidden space-y-6">
-                        <div class="flex justify-between gap-4">
-                            <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
-                            <button onclick="openModal('modal-form', 'keluar', 'add')" class="admin-only hidden-important bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-emerald-500/30">Tambah Data</button>
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 max-w-max">
+                                <span class="text-sm font-medium text-slate-500">Nomor Terakhir:</span>
+                                <span id="view-last-keluar" class="font-bold text-emerald-600">-</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
+                                <button onclick="openModal('modal-form', 'keluar', 'add')" class="admin-only hidden-important bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-emerald-500/30">Tambah Data</button>
+                            </div>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                             <table class="w-full text-left whitespace-nowrap">
@@ -218,18 +232,17 @@
             if(window.innerWidth < 768) toggleSidebar();
         }
 
-        // FUNGSI AUTHENTICATION YANG SUDAH DIPERBARUI
         function handleAuth() {
             if (isAdmin) { 
                 isAdmin = false; 
-                localStorage.removeItem('suratAppAdmin'); // Hapus sesi saat logout
+                localStorage.removeItem('suratAppAdmin'); 
                 updateAuthUI(); 
                 return; 
             }
             Swal.fire({ title: 'Akses Admin', input: 'password', showCancelButton: true, confirmButtonColor: '#4f46e5' }).then(r => {
                 if(r.value === 'aic') { 
                     isAdmin = true; 
-                    localStorage.setItem('suratAppAdmin', 'true'); // Simpan sesi saat login sukses
+                    localStorage.setItem('suratAppAdmin', 'true'); 
                     updateAuthUI(); 
                 } 
                 else if(r.value) Swal.fire({title: 'Error', text: 'Password Salah', icon: 'error', confirmButtonColor: '#4f46e5'});
@@ -251,9 +264,85 @@
             }
         }
 
+// --- SISTEM BACA & GENERATE NOMOR TERAKHIR (DIURUTKAN BERDASARKAN BAGIAN TENGAH) ---
+        function getLastSuratInfo(tipe) {
+            const dataArray = globalData[tipe];
+            if (!dataArray || dataArray.length === 0) {
+                // Default fallback jika data benar-benar kosong
+                return { raw: '-', next: tipe === 'keluar' ? '421,2/001/UPT.SPF.SDKT/VI/2026' : '1' };
+            }
+
+            let maxNum = -1;
+            let lastRaw = '-';
+
+            dataArray.forEach(row => {
+                const noSurat = row[1] ? row[1].toString() : '';
+                
+                if (tipe === 'keluar') {
+                    // Regex khusus surat keluar: mencari angka di antara karakter '/' pertama dan kedua
+                    // Contoh: 421,2/150/UPT.SPF.SDKT/... -> menangkap '150'
+                    const match = noSurat.match(/^[^/]+\/(\d+)/);
+                    if (match) {
+                        const num = parseInt(match[1], 10);
+                        if (num > maxNum) {
+                            maxNum = num;
+                            lastRaw = noSurat;
+                        }
+                    }
+                } else {
+                    // Kembalikan ke logika default jika untuk Surat Masuk formatnya berbeda (angka di awal)
+                    const match = noSurat.match(/^(0*)(\d+)/); 
+                    if (match) {
+                        const num = parseInt(match[2], 10);
+                        if (num > maxNum) {
+                            maxNum = num;
+                            lastRaw = noSurat;
+                        }
+                    }
+                }
+            });
+
+            // Jika tidak ada data berupa angka terdeteksi sama sekali
+            if (maxNum === -1) {
+                const fallbackRaw = dataArray[dataArray.length - 1][1] || '-';
+                return { raw: fallbackRaw, next: '' };
+            }
+
+            // Generate nomor berikutnya
+            let nextStr = '';
+            if (tipe === 'keluar') {
+                // Memecah format surat keluar berdasarkan '/' untuk menaikkan nilai counter di tengah
+                const parts = lastRaw.split('/');
+                if (parts.length >= 2) {
+                    const currentNumStr = parts[1];
+                    const nextNumber = parseInt(currentNumStr, 10) + 1;
+                    
+                    // Mempertahankan padding angka nol (misal 009 jadi 010 atau tetap sesuai panjang karakter asli)
+                    parts[1] = nextNumber.toString().padStart(currentNumStr.length, '0');
+                    nextStr = parts.join('/');
+                } else {
+                    nextStr = lastRaw;
+                }
+            } else {
+                // Logika default increment untuk surat masuk
+                const nextNumMatch = lastRaw.match(/^(0*)(\d+)(.*)/);
+                if (nextNumMatch) {
+                    const leadingZeros = nextNumMatch[1];
+                    const digits = nextNumMatch[2];
+                    const rest = nextNumMatch[3];
+                    const nextNumber = parseInt(digits, 10) + 1;
+                    
+                    const paddedNext = nextNumber.toString().padStart(digits.length + leadingZeros.length, '0');
+                    nextStr = paddedNext + rest;
+                }
+            }
+
+            return { raw: lastRaw, next: nextStr };
+        }
+
         // --- SISTEM CACHE & SINKRONISASI LATAR BELAKANG ---
         function initApp() {
-            updateAuthUI(); // <-- Panggil ini agar UI menyesuaikan dengan status sesi saat halaman dimuat
+            updateAuthUI(); 
             const cachedData = localStorage.getItem('suratAppCache');
             if (cachedData) {
                 try {
@@ -269,6 +358,16 @@
         function updateUI(data) {
             document.getElementById('stat-masuk').innerText = data.totalMasuk;
             document.getElementById('stat-keluar').innerText = data.totalKeluar;
+
+            // UPDATE TAMPILAN NOMOR TERAKHIR
+            const infoMasuk = getLastSuratInfo('masuk');
+            const infoKeluar = getLastSuratInfo('keluar');
+            
+            document.getElementById('dash-last-masuk').innerText = "Nomor Terakhir: " + infoMasuk.raw;
+            document.getElementById('dash-last-keluar').innerText = "Nomor Terakhir: " + infoKeluar.raw;
+            document.getElementById('view-last-masuk').innerText = infoMasuk.raw;
+            document.getElementById('view-last-keluar').innerText = infoKeluar.raw;
+
             renderTable('table-masuk', globalData.masuk, 'masuk');
             renderTable('table-keluar', globalData.keluar, 'keluar');
         }
@@ -348,7 +447,15 @@
             document.getElementById('modal-title').innerText = `${action === 'add' ? 'Tambah' : 'Edit'} Surat ${tipe === 'masuk'?'Masuk':'Keluar'}`;
             
             document.getElementById('form-id').value = rowId;
-            document.getElementById('form-no').value = no;
+            
+            // LOGIKA AUTO-FILL NOMOR SURAT BARU
+            if (action === 'add') {
+                const info = getLastSuratInfo(tipe);
+                document.getElementById('form-no').value = info.next;
+            } else {
+                document.getElementById('form-no').value = no;
+            }
+
             document.getElementById('form-pihak').value = pihak;
             document.getElementById('form-tanggal').value = tgl;
             document.getElementById('form-perihal').value = perihal;
