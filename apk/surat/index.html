@@ -136,6 +136,15 @@
                                 <tbody id="table-masuk" class="divide-y divide-slate-100 text-slate-700"></tbody>
                             </table>
                         </div>
+						
+						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+    <span class="text-sm font-medium text-slate-500" id="page-info-masuk">Menampilkan 0-0 dari 0 data</span>
+    <div class="flex gap-2">
+        <button onclick="changePage('masuk', -1)" id="btn-prev-masuk" class="px-4 py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
+        <button onclick="changePage('masuk', 1)" id="btn-next-masuk" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
+    </div>
+</div>
+						
                     </div>
 
                     <div id="view-surat-keluar" class="hidden space-y-6">
@@ -163,6 +172,15 @@
                                 <tbody id="table-keluar" class="divide-y divide-slate-100 text-slate-700"></tbody>
                             </table>
                         </div>
+						
+						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+    <span class="text-sm font-medium text-slate-500" id="page-info-keluar">Menampilkan 0-0 dari 0 data</span>
+    <div class="flex gap-2">
+        <button onclick="changePage('keluar', -1)" id="btn-prev-keluar" class="px-4 py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
+        <button onclick="changePage('keluar', 1)" id="btn-next-keluar" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
+    </div>
+</div>
+						
                     </div>
                 </div>
 
@@ -397,23 +415,50 @@
 
         // --- RENDER & SORTING ---
         function renderTable(elementId, dataArray, tipe) {
-            const tbody = document.getElementById(elementId);
-            tbody.innerHTML = '';
-            dataArray.forEach(row => {
-                const id = row[0], no = row[1], pihak = row[2], tgl = row[3], perihal = row[4];
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-semibold ${tipe==='masuk'?'text-primary':'text-emerald-600'}">${no}</td>
-                    <td class="px-6 py-4">${tgl}</td><td class="px-6 py-4">${pihak}</td><td class="px-6 py-4 text-slate-500">${perihal}</td>
-                    <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} px-6 py-4 flex gap-2 justify-center">
-                        <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tgl}', '${perihal}')" class="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" title="Edit Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                        <button onclick="processDelete('${id}', '${tipe}')" class="p-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    const tbody = document.getElementById(elementId);
+    tbody.innerHTML = '';
+
+    // Logika Paginasi
+    const limit = paginationConfig[tipe].itemsPerPage;
+    const total = dataArray.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+
+    // Pastikan halaman saat ini tidak melebihi total halaman (berguna saat data dihapus)
+    if (paginationConfig[tipe].currentPage > totalPages) {
+        paginationConfig[tipe].currentPage = totalPages;
+    }
+
+    const page = paginationConfig[tipe].currentPage;
+    const startIndex = (page - 1) * limit;
+    const endIndex = Math.min(startIndex + limit, total);
+    
+    // Potong data hanya untuk halaman saat ini
+    const paginatedItems = dataArray.slice(startIndex, endIndex);
+
+    // Update Teks Informasi (misal: Menampilkan 1-10 dari 45 data)
+    const infoText = total === 0 ? 'Tidak ada data' : `Menampilkan ${startIndex + 1}-${endIndex} dari ${total} data`;
+    document.getElementById(`page-info-${tipe}`).innerText = infoText;
+
+    // Atur Status Tombol (Aktif / Nonaktif)
+    document.getElementById(`btn-prev-${tipe}`).disabled = page === 1;
+    document.getElementById(`btn-next-${tipe}`).disabled = page === totalPages || total === 0;
+
+    // Render baris tabel dari data yang sudah dipotong
+    paginatedItems.forEach(row => {
+        const id = row[0], no = row[1], pihak = row[2], tgl = row[3], perihal = row[4];
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+            <td class="px-6 py-4 font-semibold ${tipe==='masuk'?'text-primary':'text-emerald-600'}">${no}</td>
+            <td class="px-6 py-4">${tgl}</td><td class="px-6 py-4">${pihak}</td><td class="px-6 py-4 text-slate-500 truncate max-w-xs">${perihal}</td>
+            <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} px-6 py-4 flex gap-2 justify-center">
+                <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tgl}', '${perihal}')" class="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" title="Edit Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                <button onclick="processDelete('${id}', '${tipe}')" class="p-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
         function sortData(columnIndex, tipe) {
             const dataArray = globalData[tipe];
@@ -439,7 +484,21 @@
 
             const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
             renderTable(elementId, dataArray, tipe);
+			paginationConfig[tipe].currentPage = 1;
         }
+		
+		let paginationConfig = {
+    masuk: { currentPage: 1, itemsPerPage: 10 },
+    keluar: { currentPage: 1, itemsPerPage: 10 }
+};
+
+
+// Menangani perpindahan halaman
+function changePage(tipe, direction) {
+    paginationConfig[tipe].currentPage += direction;
+    const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
+    renderTable(elementId, globalData[tipe], tipe);
+}
 
         // --- CRUD ACTIONS ---
         function openModal(id, tipe, action, rowId='', no='', pihak='', tgl='', perihal='') {
@@ -513,6 +572,8 @@
                 }
             });
         }
+		
+		
     </script>
 </body>
 </html>
