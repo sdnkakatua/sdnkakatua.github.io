@@ -88,24 +88,27 @@
                             <div class="absolute right-32 -bottom-16 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow">
-                                <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg></div>
-                                <div>
-                                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Masuk</p>
-                                    <h3 id="stat-masuk" class="text-4xl font-black text-slate-800">...</h3>
-                                    <p class="text-xs text-blue-600 mt-2 font-medium bg-blue-50 px-2 py-1 rounded-md inline-block" id="dash-last-masuk">Nomor Terakhir: -</p>
-                                </div>
-                            </div>
-                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow">
-                                <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
-                                <div>
-                                    <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Keluar</p>
-                                    <h3 id="stat-keluar" class="text-4xl font-black text-slate-800">...</h3>
-                                    <p class="text-xs text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block" id="dash-last-keluar">Nomor Terakhir: -</p>
-                                </div>
-                            </div>
-                        </div>
+                        
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div onclick="navigate('surat-masuk')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 transition-all cursor-pointer">
+        <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg></div>
+        <div>
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Masuk</p>
+            <h3 id="stat-masuk" class="text-4xl font-black text-slate-800">...</h3>
+            <p class="text-xs text-blue-600 mt-2 font-medium bg-blue-50 px-2 py-1 rounded-md inline-block" id="dash-last-masuk">Nomor Terakhir: -</p>
+        </div>
+    </div>
+    
+    <div onclick="navigate('surat-keluar')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 transition-all cursor-pointer">
+        <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
+        <div>
+            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Keluar</p>
+            <h3 id="stat-keluar" class="text-4xl font-black text-slate-800">...</h3>
+            <p class="text-xs text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block" id="dash-last-keluar">Nomor Terakhir: -</p>
+        </div>
+    </div>
+</div>
+						
                     </div>
 
                     <div id="view-surat-masuk" class="hidden space-y-6">
