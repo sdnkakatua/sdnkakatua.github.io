@@ -376,22 +376,45 @@
             fetchDataBackground();
         }
 
-        function updateUI(data) {
-            document.getElementById('stat-masuk').innerText = data.totalMasuk;
-            document.getElementById('stat-keluar').innerText = data.totalKeluar;
 
-            // UPDATE TAMPILAN NOMOR TERAKHIR
-            const infoMasuk = getLastSuratInfo('masuk');
-            const infoKeluar = getLastSuratInfo('keluar');
-            
-            document.getElementById('dash-last-masuk').innerText = "Nomor Terakhir: " + infoMasuk.raw;
-            document.getElementById('dash-last-keluar').innerText = "Nomor Terakhir: " + infoKeluar.raw;
-            document.getElementById('view-last-masuk').innerText = infoMasuk.raw;
-            document.getElementById('view-last-keluar').innerText = infoKeluar.raw;
 
-            renderTable('table-masuk', globalData.masuk, 'masuk');
-            renderTable('table-keluar', globalData.keluar, 'keluar');
-        }
+function updateUI(data) {
+    // 1. Update Statistik Dashboard
+    document.getElementById('stat-masuk').innerText = data.totalMasuk;
+    document.getElementById('stat-keluar').innerText = data.totalKeluar;
+
+    const infoMasuk = getLastSuratInfo('masuk');
+    const infoKeluar = getLastSuratInfo('keluar');
+    
+    document.getElementById('dash-last-masuk').innerText = "Nomor Terakhir: " + infoMasuk.raw;
+    document.getElementById('dash-last-keluar').innerText = "Nomor Terakhir: " + infoKeluar.raw;
+    document.getElementById('view-last-masuk').innerText = infoMasuk.raw;
+    document.getElementById('view-last-keluar').innerText = infoKeluar.raw;
+
+    // 2. LOGIKA DEFAULT SORTING (Nomor Surat - Descending)
+    const sortDescending = (a, b) => {
+        let valA = a[1] ? a[1].toString().toLowerCase() : '';
+        let valB = b[1] ? b[1].toString().toLowerCase() : '';
+        // Urutkan dari nilai terbesar ke terkecil
+        if (valA < valB) return 1;
+        if (valA > valB) return -1;
+        return 0;
+    };
+
+    // Terapkan sorting ke data global
+    globalData.masuk.sort(sortDescending);
+    globalData.keluar.sort(sortDescending);
+
+    // Sinkronkan state agar ketika user mengklik header tabel, urutannya menjadi Ascending (ke atas)
+    sortDirections.masuk[1] = 'desc';
+    sortDirections.keluar[1] = 'desc';
+
+    // 3. Render Tabel
+    renderTable('table-masuk', globalData.masuk, 'masuk');
+    renderTable('table-keluar', globalData.keluar, 'keluar');
+}
+
+
 
         async function fetchDataBackground() {
             document.getElementById('loading-indicator').style.display = 'flex'; 
@@ -443,21 +466,26 @@
     document.getElementById(`btn-prev-${tipe}`).disabled = page === 1;
     document.getElementById(`btn-next-${tipe}`).disabled = page === totalPages || total === 0;
 
-    // Render baris tabel dari data yang sudah dipotong
-    paginatedItems.forEach(row => {
-        const id = row[0], no = row[1], pihak = row[2], tgl = row[3], perihal = row[4];
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 transition-colors";
-        tr.innerHTML = `
-            <td class="px-6 py-4 font-semibold ${tipe==='masuk'?'text-primary':'text-emerald-600'}">${no}</td>
-            <td class="px-6 py-4">${tgl}</td><td class="px-6 py-4">${pihak}</td><td class="px-6 py-4 text-slate-500 truncate max-w-xs">${perihal}</td>
-            <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} px-6 py-4 flex gap-2 justify-center">
-                <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tgl}', '${perihal}')" class="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" title="Edit Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-                <button onclick="processDelete('${id}', '${tipe}')" class="p-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
+    // Render baris tabel dari data yang sudah dipotong (atau dataArray jika belum pakai paginasi)
+paginatedItems.forEach(row => {
+    // Kita simpan tglRaw (YYYY-MM-DD) untuk form edit, lalu buat tglFormat untuk tabel
+    const id = row[0], no = row[1], pihak = row[2], tglRaw = row[3], perihal = row[4];
+    const tglFormat = formatTanggalIndo(tglRaw);
+
+    const tr = document.createElement('tr');
+    tr.className = "hover:bg-slate-50 transition-colors";
+    tr.innerHTML = `
+        <td class="px-6 py-4 font-semibold ${tipe==='masuk'?'text-primary':'text-emerald-600'}">${no}</td>
+        <td class="px-6 py-4">${tglFormat}</td>
+        <td class="px-6 py-4">${pihak}</td>
+        <td class="px-6 py-4 text-slate-500 truncate max-w-xs">${perihal}</td>
+        <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} px-6 py-4 flex gap-2 justify-center">
+            <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tglRaw}', '${perihal}')" class="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" title="Edit Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+            <button onclick="processDelete('${id}', '${tipe}')" class="p-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+        </td>
+    `;
+    tbody.appendChild(tr);
+});
 }
 
         function sortData(columnIndex, tipe) {
@@ -499,6 +527,25 @@ function changePage(tipe, direction) {
     const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
     renderTable(elementId, globalData[tipe], tipe);
 }
+
+
+
+// Fungsi untuk mengubah YYYY-MM-DD menjadi DD Bulan YYYY
+function formatTanggalIndo(tanggalString) {
+    if (!tanggalString) return '-';
+    
+    const dateObj = new Date(tanggalString);
+    if (isNaN(dateObj.getTime())) return tanggalString; // Fallback jika format salah
+    
+    const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    
+    const hari = String(dateObj.getDate()).padStart(2, '0');
+    const bulan = namaBulan[dateObj.getMonth()];
+    const tahun = dateObj.getFullYear();
+    
+    return `${hari} ${bulan} ${tahun}`; // Hasil: 26 Desember 2021
+}
+
 
         // --- CRUD ACTIONS ---
         function openModal(id, tipe, action, rowId='', no='', pihak='', tgl='', perihal='') {
