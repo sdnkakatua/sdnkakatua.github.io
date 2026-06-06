@@ -7,9 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Konfigurasi Tailwind
         tailwind.config = {
+            darkMode: 'class', 
             theme: {
-                extend: { colors: { primary: '#4f46e5', secondary: '#6366f1' } }
+                extend: { 
+                    colors: { 
+                        primary: '#4f46e5', 
+                        secondary: '#6366f1' 
+                    } 
+                }
             }
         }
     </script>
@@ -21,53 +28,59 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans overflow-hidden" onload="initApp()">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans overflow-hidden" onload="initApp()">
 
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxgTvkXM9RAKG91uC4JgKXqx66sExmwtPt3rsxsJLWg-9oQBKqFlUUWGakbzRdUA_Ro/exec"; 
     </script>
 
     <div class="flex h-screen w-full">
-        <aside id="sidebar" class="bg-white w-64 border-r border-slate-200 flex flex-col absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 z-20 shadow-lg md:shadow-none">
-            <div class="p-6 flex items-center justify-between border-b border-slate-100">
+        <aside id="sidebar" class="bg-white dark:bg-slate-800 w-64 border-r border-slate-200 dark:border-slate-700 flex flex-col absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 z-20 shadow-lg md:shadow-none">
+            <div class="p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-700">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-lg">AS</div>
-                    <h1 class="text-xl font-bold text-slate-800">Admin Surat</h1>
+                    <h1 class="text-xl font-bold text-slate-800 dark:text-slate-100">Admin Surat</h1>
                 </div>
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-400"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 dark:text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
 
             <nav class="flex-1 p-4 space-y-2">
                 <button onclick="navigate('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6..."></path></svg> Dashboard
                 </button>
-                <button onclick="navigate('surat-masuk')" id="nav-surat-masuk" class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl font-medium">
+                <button onclick="navigate('surat-masuk')" id="nav-surat-masuk" class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary rounded-xl font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg> Surat Masuk
                 </button>
-                <button onclick="navigate('surat-keluar')" id="nav-surat-keluar" class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl font-medium">
+                <button onclick="navigate('surat-keluar')" id="nav-surat-keluar" class="w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary rounded-xl font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg> Surat Keluar
                 </button>
             </nav>
             
-            <div class="p-4 border-t border-slate-100">
-                <div id="auth-status-card" class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+                <div id="auth-status-card" class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3">
                     <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75" id="auth-ping"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-slate-500" id="auth-dot"></span></span>
-                    <span class="text-sm font-medium text-slate-600" id="auth-text">Mode Pengunjung</span>
+                    <span class="text-sm font-medium text-slate-600 dark:text-slate-300" id="auth-text">Mode Pengunjung</span>
                 </div>
             </div>
         </aside>
 
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-10 hidden md:hidden"></div>
 
-        <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50">
-            <header class="bg-white p-4 sm:p-6 border-b border-slate-200 flex justify-between items-center z-0">
+        <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/50">
+            <header class="bg-white dark:bg-slate-800 p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-0">
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleSidebar()" class="md:hidden text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
-                    <h2 id="page-title" class="text-xl sm:text-2xl font-bold text-slate-800">Dashboard</h2>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-500 dark:text-slate-400"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
+                    <h2 id="page-title" class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">Dashboard</h2>
                 </div>
                 <div class="flex items-center gap-4">
                     <div id="loading-indicator" class="hidden items-center gap-2 text-primary font-medium text-sm"><div class="loader"></div> Sinkronisasi...</div>
-                    <button id="btn-auth" onclick="handleAuth()" class="flex items-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200 px-4 py-2 rounded-xl font-medium text-sm transition-colors">
+                    
+					<button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors" title="Ganti Mode Gelap/Terang">
+                        <svg class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                        <svg class="w-6 h-6 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </button>
+					
+					<button id="btn-auth" onclick="handleAuth()" class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 px-4 py-2 rounded-xl font-medium text-sm transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg> Login Admin
                     </button>
                 </div>
@@ -75,8 +88,8 @@
 
             <div class="flex-1 overflow-auto p-4 sm:p-6 flex flex-col">
                 <div class="flex-1">
+                    
                     <div id="view-dashboard" class="space-y-6">
-                        
                         <div class="bg-gradient-to-br from-primary to-secondary p-8 sm:p-10 rounded-3xl shadow-md text-white relative overflow-hidden">
                             <div class="relative z-10">
                                 <h2 class="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight">SD Negeri Kakatua</h2>
@@ -88,114 +101,123 @@
                             <div class="absolute right-32 -bottom-16 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
                         </div>
 
-                        
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-    <div onclick="navigate('surat-masuk')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 transition-all cursor-pointer">
-        <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg></div>
-        <div>
-            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Masuk</p>
-            <h3 id="stat-masuk" class="text-4xl font-black text-slate-800">...</h3>
-            <p class="text-xs text-blue-600 mt-2 font-medium bg-blue-50 px-2 py-1 rounded-md inline-block" id="dash-last-masuk">Nomor Terakhir: -</p>
-        </div>
-    </div>
-    
-    <div onclick="navigate('surat-keluar')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 transition-all cursor-pointer">
-        <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
-        <div>
-            <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Surat Keluar</p>
-            <h3 id="stat-keluar" class="text-4xl font-black text-slate-800">...</h3>
-            <p class="text-xs text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block" id="dash-last-keluar">Nomor Terakhir: -</p>
-        </div>
-    </div>
-</div>
-						
+                            <div onclick="navigate('surat-masuk')" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-5 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 transition-all cursor-pointer">
+                                <div class="p-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg></div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total Surat Masuk</p>
+                                    <h3 id="stat-masuk" class="text-4xl font-black text-slate-800 dark:text-slate-100">...</h3>
+                                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-2 font-medium bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md inline-block" id="dash-last-masuk">Nomor Terakhir: -</p>
+                                </div>
+                            </div>
+                            
+                            <div onclick="navigate('surat-keluar')" class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-5 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 transition-all cursor-pointer">
+                                <div class="p-4 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg></div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Total Surat Keluar</p>
+                                    <h3 id="stat-keluar" class="text-4xl font-black text-slate-800 dark:text-slate-100">...</h3>
+                                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium bg-emerald-50 dark:bg-emerald-900/30 px-2 py-1 rounded-md inline-block" id="dash-last-keluar">Nomor Terakhir: -</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="view-surat-masuk" class="hidden space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 max-w-max">
-                                <span class="text-sm font-medium text-slate-500">Nomor Terakhir:</span>
-                                <span id="view-last-masuk" class="font-bold text-blue-600">-</span>
+                            <div class="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2 max-w-max">
+                                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Nomor Terakhir:</span>
+                                <span id="view-last-masuk" class="font-bold text-blue-600 dark:text-blue-400">-</span>
                             </div>
-                            <div class="flex gap-3">
-                                <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
-                                <button onclick="openModal('modal-form', 'masuk', 'add')" class="admin-only hidden-important bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-primary/30">Tambah Data</button>
+                            
+                            <div class="flex gap-3 flex-wrap">
+                                <div class="relative w-full sm:w-auto">
+                                    <input type="text" id="search-masuk" onkeyup="handleSearch('masuk')" placeholder="Cari surat..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-slate-200">
+                                    <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+                                
+                                <button onclick="openModal('modal-form', 'masuk', 'add')" title="Tambah Data" class="admin-only hidden-important bg-primary hover:bg-secondary text-white w-10 h-10 rounded-xl font-bold text-xl flex items-center justify-center shadow-lg shadow-primary/30">
+                                    +
+                                </button>
                             </div>
                         </div>
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden overflow-x-auto">
                             <table class="w-full text-left">
-    <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm hidden md:table-header-group">
+                                <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm hidden md:table-header-group">
                                     <tr>
-                                        <th onclick="sortData(1, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
-                                        <th onclick="sortData(3, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Tanggal Terima ⇅</th>
-                                        <th onclick="sortData(2, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Pengirim ⇅</th>
-                                        <th onclick="sortData(4, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Perihal ⇅</th>
+                                        <th onclick="sortData(1, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
+                                        <th onclick="sortData(3, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Tanggal Terima ⇅</th>
+                                        <th onclick="sortData(2, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Pengirim ⇅</th>
+                                        <th onclick="sortData(4, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Perihal ⇅</th>
                                         <th class="admin-only hidden-important px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="table-masuk" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                <tbody id="table-masuk" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300"></tbody>
                             </table>
                         </div>
 						
-						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-    <span class="text-sm font-medium text-slate-500" id="page-info-masuk">Menampilkan 0-0 dari 0 data</span>
-    <div class="flex gap-2">
-        <button onclick="changePage('masuk', -1)" id="btn-prev-masuk" class="px-4 py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
-        <button onclick="changePage('masuk', 1)" id="btn-next-masuk" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
-    </div>
-</div>
-						
+						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span class="text-sm font-medium text-slate-500 dark:text-slate-400" id="page-info-masuk">Menampilkan 0-0 dari 0 data</span>
+                            <div class="flex gap-2">
+                                <button onclick="changePage('masuk', -1)" id="btn-prev-masuk" class="px-4 py-2 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
+                                <button onclick="changePage('masuk', 1)" id="btn-next-masuk" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="view-surat-keluar" class="hidden space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                            <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 flex items-center gap-2 max-w-max">
-                                <span class="text-sm font-medium text-slate-500">Nomor Terakhir:</span>
-                                <span id="view-last-keluar" class="font-bold text-emerald-600">-</span>
+                            <div class="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2 max-w-max">
+                                <span class="text-sm font-medium text-slate-500 dark:text-slate-400">Nomor Terakhir:</span>
+                                <span id="view-last-keluar" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
                             </div>
-                            <div class="flex gap-3">
-                                <button onclick="fetchDataBackground()" class="px-4 py-2 bg-slate-100 rounded-xl text-slate-600 font-medium hover:bg-slate-200">Refresh Data</button>
-                                <button onclick="openModal('modal-form', 'keluar', 'add')" class="admin-only hidden-important bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 shadow-lg shadow-emerald-500/30">Tambah Data</button>
+                            <div class="flex gap-3 flex-wrap">
+                                <div class="relative w-full sm:w-auto">
+                                    <input type="text" id="search-keluar" onkeyup="handleSearch('keluar')" placeholder="Cari surat..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:text-slate-200">
+                                    <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </div>
+
+                                <button onclick="openModal('modal-form', 'keluar', 'add')" title="Tambah Data" class="admin-only hidden-important bg-emerald-500 hover:bg-emerald-600 text-white w-10 h-10 rounded-xl font-bold text-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                    +
+                                </button>
                             </div>
                         </div>
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden overflow-x-auto">
                             <table class="w-full text-left">
-    <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm hidden md:table-header-group">
+                                <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm hidden md:table-header-group">
                                     <tr>
-                                        <th onclick="sortData(1, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
-                                        <th onclick="sortData(3, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Tanggal Kirim ⇅</th>
-                                        <th onclick="sortData(2, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Tujuan ⇅</th>
-                                        <th onclick="sortData(4, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Perihal ⇅</th>
+                                        <th onclick="sortData(1, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
+                                        <th onclick="sortData(3, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Tanggal Kirim ⇅</th>
+                                        <th onclick="sortData(2, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Tujuan ⇅</th>
+                                        <th onclick="sortData(4, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Klik untuk urutkan">Perihal ⇅</th>
                                         <th class="admin-only hidden-important px-6 py-4 text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="table-keluar" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                <tbody id="table-keluar" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300"></tbody>
                             </table>
                         </div>
 						
-						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-    <span class="text-sm font-medium text-slate-500" id="page-info-keluar">Menampilkan 0-0 dari 0 data</span>
-    <div class="flex gap-2">
-        <button onclick="changePage('keluar', -1)" id="btn-prev-keluar" class="px-4 py-2 bg-slate-50 text-slate-600 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
-        <button onclick="changePage('keluar', 1)" id="btn-next-keluar" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
-    </div>
-</div>
-						
+						<div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span class="text-sm font-medium text-slate-500 dark:text-slate-400" id="page-info-keluar">Menampilkan 0-0 dari 0 data</span>
+                            <div class="flex gap-2">
+                                <button onclick="changePage('keluar', -1)" id="btn-prev-keluar" class="px-4 py-2 bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Sebelumnya</button>
+                                <button onclick="changePage('keluar', 1)" id="btn-next-keluar" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <footer class="mt-12 pt-6 border-t border-slate-200/60 pb-2 text-center flex flex-col items-center justify-center">
-                    <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">Aplikasi Manajemen Surat Terpadu &copy; 2026 | sdnkakatua</p>
+                <footer class="mt-12 pt-6 border-t border-slate-200/60 dark:border-slate-700/60 pb-2 text-center flex flex-col items-center justify-center">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1 max-w-md mx-auto">Aplikasi Manajemen Surat Terpadu &copy; 2026 | sdnkakatua</p>
                 </footer>
             </div>
         </main>
     </div>
 
     <div id="modal-form" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center hidden opacity-0 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform scale-95 transition-transform" id="modal-form-content">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 id="modal-title" class="text-xl font-bold text-slate-800">Form Surat</h3>
-                <button onclick="closeModal()" class="text-slate-400 bg-white hover:bg-slate-100 rounded-full p-2 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform scale-95 transition-transform" id="modal-form-content">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-800 dark:text-slate-100">Form Surat</h3>
+                <button onclick="closeModal()" class="text-slate-400 bg-white dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-full p-2 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <form onsubmit="submitForm(event)" class="p-6 space-y-4">
                 <input type="hidden" id="form-tipe">
@@ -203,23 +225,23 @@
                 <input type="hidden" id="form-id">
                 
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nomor Surat</label>
-                    <input type="text" id="form-no" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white border-slate-200 transition-all">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nomor Surat</label>
+                    <input type="text" id="form-no" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
                 </div>
                 <div>
-                    <label id="label-pihak" class="block text-sm font-medium text-slate-700 mb-1">Pengirim/Tujuan</label>
-                    <input type="text" id="form-pihak" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white border-slate-200 transition-all">
+                    <label id="label-pihak" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pengirim/Tujuan</label>
+                    <input type="text" id="form-pihak" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
-                    <input type="date" id="form-tanggal" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white border-slate-200 transition-all">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
+                    <input type="date" id="form-tanggal" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Perihal</label>
-                    <textarea id="form-perihal" rows="3" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white border-slate-200 transition-all"></textarea>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Perihal</label>
+                    <textarea id="form-perihal" rows="3" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all"></textarea>
                 </div>
                 <div class="pt-4 flex gap-3 justify-end">
-                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-colors">Batal</button>
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-xl font-medium transition-colors">Batal</button>
                     <button type="submit" id="btn-submit" class="px-5 py-2.5 text-white bg-primary hover:bg-secondary shadow-lg shadow-primary/30 rounded-xl font-medium transition-all">Simpan Data</button>
                 </div>
             </form>
@@ -227,17 +249,42 @@
     </div>
 
     <script>
+        // 1. Cek preferensi user saat halaman pertama kali dimuat
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 2. Fungsi untuk tombol Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            // Simpan pilihan ke localStorage
+            if (html.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+        }
+        
         // MENGAMBIL STATUS LOGIN DARI LOCAL STORAGE
         let isAdmin = localStorage.getItem('suratAppAdmin') === 'true';
         
-        let globalData = {
-            masuk: [],
-            keluar: []
-        };
+        let globalData = { masuk: [], keluar: [] };
         
         let sortDirections = {
             masuk: { 1: 'asc', 2: 'asc', 3: 'asc', 4: 'asc' },
             keluar: { 1: 'asc', 2: 'asc', 3: 'asc', 4: 'asc' }
+        };
+
+        // Variable untuk menyimpan query pencarian (Ide 11: Live Search)
+        let searchQueries = { masuk: '', keluar: '' };
+
+        let paginationConfig = {
+            masuk: { currentPage: 1, itemsPerPage: 10 },
+            keluar: { currentPage: 1, itemsPerPage: 10 }
         };
 
         // UI & Navigasi
@@ -245,7 +292,7 @@
         function navigate(page) {
             ['dashboard', 'surat-masuk', 'surat-keluar'].forEach(id => {
                 document.getElementById('view-' + id).classList.add('hidden');
-                document.getElementById('nav-' + id).className = "w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 hover:text-primary rounded-xl font-medium";
+                document.getElementById('nav-' + id).className = "w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary rounded-xl font-medium";
             });
             document.getElementById('view-' + page).classList.remove('hidden');
             document.getElementById('nav-' + page).className = "w-full flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium shadow-md shadow-primary/20";
@@ -275,7 +322,7 @@
             const text = document.getElementById('auth-text');
             document.getElementById('btn-auth').innerHTML = isAdmin ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg> Logout Admin' : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg> Login Admin';
             text.innerText = isAdmin ? 'Admin Aktif' : 'Mode Pengunjung';
-            text.style.color = isAdmin ? '#047857' : '#475569';
+            text.style.color = isAdmin ? '#047857' : (document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#475569');
             if(isAdmin) {
                 document.getElementById('auth-dot').classList.replace('bg-slate-500', 'bg-emerald-500');
                 document.getElementById('auth-ping').classList.replace('bg-slate-400', 'bg-emerald-400');
@@ -285,11 +332,10 @@
             }
         }
 
-// --- SISTEM BACA & GENERATE NOMOR TERAKHIR (DIURUTKAN BERDASARKAN BAGIAN TENGAH) ---
+        // --- SISTEM BACA & GENERATE NOMOR TERAKHIR ---
         function getLastSuratInfo(tipe) {
             const dataArray = globalData[tipe];
             if (!dataArray || dataArray.length === 0) {
-                // Default fallback jika data benar-benar kosong
                 return { raw: '-', next: tipe === 'keluar' ? '421,2/001/UPT.SPF.SDKT/VI/2026' : '1' };
             }
 
@@ -298,61 +344,42 @@
 
             dataArray.forEach(row => {
                 const noSurat = row[1] ? row[1].toString() : '';
-                
                 if (tipe === 'keluar') {
-                    // Regex khusus surat keluar: mencari angka di antara karakter '/' pertama dan kedua
-                    // Contoh: 421,2/150/UPT.SPF.SDKT/... -> menangkap '150'
                     const match = noSurat.match(/^[^/]+\/(\d+)/);
                     if (match) {
                         const num = parseInt(match[1], 10);
-                        if (num > maxNum) {
-                            maxNum = num;
-                            lastRaw = noSurat;
-                        }
+                        if (num > maxNum) { maxNum = num; lastRaw = noSurat; }
                     }
                 } else {
-                    // Kembalikan ke logika default jika untuk Surat Masuk formatnya berbeda (angka di awal)
                     const match = noSurat.match(/^(0*)(\d+)/); 
                     if (match) {
                         const num = parseInt(match[2], 10);
-                        if (num > maxNum) {
-                            maxNum = num;
-                            lastRaw = noSurat;
-                        }
+                        if (num > maxNum) { maxNum = num; lastRaw = noSurat; }
                     }
                 }
             });
 
-            // Jika tidak ada data berupa angka terdeteksi sama sekali
             if (maxNum === -1) {
                 const fallbackRaw = dataArray[dataArray.length - 1][1] || '-';
                 return { raw: fallbackRaw, next: '' };
             }
 
-            // Generate nomor berikutnya
             let nextStr = '';
             if (tipe === 'keluar') {
-                // Memecah format surat keluar berdasarkan '/' untuk menaikkan nilai counter di tengah
                 const parts = lastRaw.split('/');
                 if (parts.length >= 2) {
                     const currentNumStr = parts[1];
                     const nextNumber = parseInt(currentNumStr, 10) + 1;
-                    
-                    // Mempertahankan padding angka nol (misal 009 jadi 010 atau tetap sesuai panjang karakter asli)
                     parts[1] = nextNumber.toString().padStart(currentNumStr.length, '0');
                     nextStr = parts.join('/');
-                } else {
-                    nextStr = lastRaw;
-                }
+                } else { nextStr = lastRaw; }
             } else {
-                // Logika default increment untuk surat masuk
                 const nextNumMatch = lastRaw.match(/^(0*)(\d+)(.*)/);
                 if (nextNumMatch) {
                     const leadingZeros = nextNumMatch[1];
                     const digits = nextNumMatch[2];
                     const rest = nextNumMatch[3];
                     const nextNumber = parseInt(digits, 10) + 1;
-                    
                     const paddedNext = nextNumber.toString().padStart(digits.length + leadingZeros.length, '0');
                     nextStr = paddedNext + rest;
                 }
@@ -376,45 +403,35 @@
             fetchDataBackground();
         }
 
+        function updateUI(data) {
+            document.getElementById('stat-masuk').innerText = data.totalMasuk;
+            document.getElementById('stat-keluar').innerText = data.totalKeluar;
 
+            const infoMasuk = getLastSuratInfo('masuk');
+            const infoKeluar = getLastSuratInfo('keluar');
+            
+            document.getElementById('dash-last-masuk').innerText = "Nomor Terakhir: " + infoMasuk.raw;
+            document.getElementById('dash-last-keluar').innerText = "Nomor Terakhir: " + infoKeluar.raw;
+            document.getElementById('view-last-masuk').innerText = infoMasuk.raw;
+            document.getElementById('view-last-keluar').innerText = infoKeluar.raw;
 
-function updateUI(data) {
-    // 1. Update Statistik Dashboard
-    document.getElementById('stat-masuk').innerText = data.totalMasuk;
-    document.getElementById('stat-keluar').innerText = data.totalKeluar;
+            const sortDescending = (a, b) => {
+                let valA = a[1] ? a[1].toString().toLowerCase() : '';
+                let valB = b[1] ? b[1].toString().toLowerCase() : '';
+                if (valA < valB) return 1;
+                if (valA > valB) return -1;
+                return 0;
+            };
 
-    const infoMasuk = getLastSuratInfo('masuk');
-    const infoKeluar = getLastSuratInfo('keluar');
-    
-    document.getElementById('dash-last-masuk').innerText = "Nomor Terakhir: " + infoMasuk.raw;
-    document.getElementById('dash-last-keluar').innerText = "Nomor Terakhir: " + infoKeluar.raw;
-    document.getElementById('view-last-masuk').innerText = infoMasuk.raw;
-    document.getElementById('view-last-keluar').innerText = infoKeluar.raw;
+            globalData.masuk.sort(sortDescending);
+            globalData.keluar.sort(sortDescending);
 
-    // 2. LOGIKA DEFAULT SORTING (Nomor Surat - Descending)
-    const sortDescending = (a, b) => {
-        let valA = a[1] ? a[1].toString().toLowerCase() : '';
-        let valB = b[1] ? b[1].toString().toLowerCase() : '';
-        // Urutkan dari nilai terbesar ke terkecil
-        if (valA < valB) return 1;
-        if (valA > valB) return -1;
-        return 0;
-    };
+            sortDirections.masuk[1] = 'desc';
+            sortDirections.keluar[1] = 'desc';
 
-    // Terapkan sorting ke data global
-    globalData.masuk.sort(sortDescending);
-    globalData.keluar.sort(sortDescending);
-
-    // Sinkronkan state agar ketika user mengklik header tabel, urutannya menjadi Ascending (ke atas)
-    sortDirections.masuk[1] = 'desc';
-    sortDirections.keluar[1] = 'desc';
-
-    // 3. Render Tabel
-    renderTable('table-masuk', globalData.masuk, 'masuk');
-    renderTable('table-keluar', globalData.keluar, 'keluar');
-}
-
-
+            renderTable('table-masuk', globalData.masuk, 'masuk');
+            renderTable('table-keluar', globalData.keluar, 'keluar');
+        }
 
         async function fetchDataBackground() {
             document.getElementById('loading-indicator').style.display = 'flex'; 
@@ -436,88 +453,99 @@ function updateUI(data) {
             document.getElementById('loading-indicator').style.display = 'none';
         }
 
+        // --- LIVE SEARCH (Ide 11) ---
+        function handleSearch(tipe) {
+            searchQueries[tipe] = document.getElementById(`search-${tipe}`).value.toLowerCase();
+            paginationConfig[tipe].currentPage = 1; // Kembali ke halaman 1 saat mencari
+            const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
+            renderTable(elementId, globalData[tipe], tipe);
+        }
+
         // --- RENDER & SORTING ---
         function renderTable(elementId, dataArray, tipe) {
-    const tbody = document.getElementById(elementId);
-    tbody.innerHTML = '';
+            const tbody = document.getElementById(elementId);
+            tbody.innerHTML = '';
 
-    // Logika Paginasi
-    const limit = paginationConfig[tipe].itemsPerPage;
-    const total = dataArray.length;
-    const totalPages = Math.ceil(total / limit) || 1;
+            // Filter data berdasarkan kata kunci pencarian
+            let filteredData = dataArray;
+            if (searchQueries[tipe]) {
+                const query = searchQueries[tipe];
+                filteredData = dataArray.filter(row => {
+                    return row.some(cell => cell && cell.toString().toLowerCase().includes(query));
+                });
+            }
 
-    // Pastikan halaman saat ini tidak melebihi total halaman (berguna saat data dihapus)
-    if (paginationConfig[tipe].currentPage > totalPages) {
-        paginationConfig[tipe].currentPage = totalPages;
-    }
+            // Logika Paginasi (Menggunakan data yang sudah difilter)
+            const limit = paginationConfig[tipe].itemsPerPage;
+            const total = filteredData.length;
+            const totalPages = Math.ceil(total / limit) || 1;
 
-    const page = paginationConfig[tipe].currentPage;
-    const startIndex = (page - 1) * limit;
-    const endIndex = Math.min(startIndex + limit, total);
-    
-    // Potong data hanya untuk halaman saat ini
-    const paginatedItems = dataArray.slice(startIndex, endIndex);
+            if (paginationConfig[tipe].currentPage > totalPages) {
+                paginationConfig[tipe].currentPage = totalPages;
+            }
 
-    // Update Teks Informasi (misal: Menampilkan 1-10 dari 45 data)
-    const infoText = total === 0 ? 'Tidak ada data' : `Menampilkan ${startIndex + 1}-${endIndex} dari ${total} data`;
-    document.getElementById(`page-info-${tipe}`).innerText = infoText;
+            const page = paginationConfig[tipe].currentPage;
+            const startIndex = (page - 1) * limit;
+            const endIndex = Math.min(startIndex + limit, total);
+            
+            const paginatedItems = filteredData.slice(startIndex, endIndex);
 
-    // Atur Status Tombol (Aktif / Nonaktif)
-    document.getElementById(`btn-prev-${tipe}`).disabled = page === 1;
-    document.getElementById(`btn-next-${tipe}`).disabled = page === totalPages || total === 0;
+            const infoText = total === 0 ? 'Tidak ada data ditemukan' : `Menampilkan ${startIndex + 1}-${endIndex} dari ${total} data`;
+            document.getElementById(`page-info-${tipe}`).innerText = infoText;
 
-    // Render baris tabel dari data yang sudah dipotong (atau dataArray jika belum pakai paginasi)
-paginatedItems.forEach(row => {
-    const id = row[0], no = row[1], pihak = row[2], tglRaw = row[3], perihal = row[4];
-    
-    // Pastikan Anda menggunakan fungsi formatTanggalIndo yang sudah dibuat sebelumnya
-    const tglFormat = typeof formatTanggalIndo === 'function' ? formatTanggalIndo(tglRaw) : tglRaw; 
-    
-    const labelPihak = tipe === 'masuk' ? 'Pengirim' : 'Tujuan';
-    const warnaNo = tipe === 'masuk' ? 'text-primary' : 'text-emerald-600';
+            document.getElementById(`btn-prev-${tipe}`).disabled = page === 1;
+            document.getElementById(`btn-next-${tipe}`).disabled = page === totalPages || total === 0;
 
-    const tr = document.createElement('tr');
-    
-    // Keajaiban Tailwind: Di HP jadi kolom bersusun (flex-col), di Desktop jadi baris tabel (md:table-row)
-    tr.className = "flex flex-col md:table-row hover:bg-slate-50 transition-all border-b border-slate-200 last:border-0 p-5 md:p-0 gap-2 md:gap-0";
-    
-    tr.innerHTML = `
-        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">No. Surat</span>
-            <span class="font-bold text-lg md:text-base ${warnaNo}">${no}</span>
-        </td>
-        
-        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Tanggal</span>
-            <span>${tglFormat}</span>
-        </td>
-        
-        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">${labelPihak}</span>
-            <span class="font-medium text-slate-700">${pihak}</span>
-        </td>
-        
-        <td class="md:px-6 md:py-4 flex md:table-cell flex-col text-sm md:text-base text-slate-500 w-full">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Perihal</span>
-            <span class="whitespace-normal break-words">${perihal}</span>
-        </td>
-        
-        <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} md:px-6 md:py-4 flex md:table-cell justify-end items-center mt-3 pt-3 border-t border-slate-100 md:border-none w-full">
-            <div class="flex gap-2">
-                <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tglRaw}', '${perihal}')" class="px-4 py-2 md:p-2.5 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Edit Data">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    <span class="md:hidden">Edit</span>
-                </button>
-                <button onclick="processDelete('${id}', '${tipe}')" class="px-4 py-2 md:p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Hapus Data">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    <span class="md:hidden">Hapus</span>
-                </button>
-            </div>
-        </td>
-    `;
-    tbody.appendChild(tr);
-});
-}
+            paginatedItems.forEach(row => {
+                const id = row[0], no = row[1], pihak = row[2], tglRaw = row[3], perihal = row[4];
+                
+                const tglFormat = typeof formatTanggalIndo === 'function' ? formatTanggalIndo(tglRaw) : tglRaw; 
+                
+                const labelPihak = tipe === 'masuk' ? 'Pengirim' : 'Tujuan';
+                const warnaNo = tipe === 'masuk' ? 'text-primary dark:text-blue-400' : 'text-emerald-600 dark:text-emerald-400';
+
+                const tr = document.createElement('tr');
+                
+                // Class untuk tampilan Mobile Card (Ide 13) dan Dark Mode (Ide 12)
+                tr.className = "flex flex-col md:table-row hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all border-b border-slate-200 dark:border-slate-700 last:border-0 p-5 md:p-0 gap-2 md:gap-0";
+                
+                tr.innerHTML = `
+                    <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">No. Surat</span>
+                        <span class="font-bold text-lg md:text-base ${warnaNo}">${no}</span>
+                    </td>
+                    
+                    <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base dark:text-slate-300">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Tanggal</span>
+                        <span>${tglFormat}</span>
+                    </td>
+                    
+                    <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">${labelPihak}</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-200">${pihak}</span>
+                    </td>
+                    
+                    <td class="md:px-6 md:py-4 flex md:table-cell flex-col text-sm md:text-base text-slate-500 dark:text-slate-400 w-full">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Perihal</span>
+                        <span class="whitespace-normal break-words">${perihal}</span>
+                    </td>
+                    
+                    <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} md:px-6 md:py-4 flex md:table-cell justify-end items-center mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 md:border-none w-full">
+                        <div class="flex gap-2">
+                            <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tglRaw}', '${perihal}')" class="px-4 py-2 md:p-2.5 text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/50 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Edit Data">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <span class="md:hidden">Edit</span>
+                            </button>
+                            <button onclick="processDelete('${id}', '${tipe}')" class="px-4 py-2 md:p-2.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Hapus Data">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <span class="md:hidden">Hapus</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         function sortData(columnIndex, tipe) {
             const dataArray = globalData[tipe];
@@ -543,40 +571,28 @@ paginatedItems.forEach(row => {
 
             const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
             renderTable(elementId, dataArray, tipe);
-			paginationConfig[tipe].currentPage = 1;
+            paginationConfig[tipe].currentPage = 1;
         }
-		
-		let paginationConfig = {
-    masuk: { currentPage: 1, itemsPerPage: 10 },
-    keluar: { currentPage: 1, itemsPerPage: 10 }
-};
 
+        function changePage(tipe, direction) {
+            paginationConfig[tipe].currentPage += direction;
+            const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
+            renderTable(elementId, globalData[tipe], tipe);
+        }
 
-// Menangani perpindahan halaman
-function changePage(tipe, direction) {
-    paginationConfig[tipe].currentPage += direction;
-    const elementId = tipe === 'masuk' ? 'table-masuk' : 'table-keluar';
-    renderTable(elementId, globalData[tipe], tipe);
-}
-
-
-
-// Fungsi untuk mengubah YYYY-MM-DD menjadi DD Bulan YYYY
-function formatTanggalIndo(tanggalString) {
-    if (!tanggalString) return '-';
-    
-    const dateObj = new Date(tanggalString);
-    if (isNaN(dateObj.getTime())) return tanggalString; // Fallback jika format salah
-    
-    const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    
-    const hari = String(dateObj.getDate()).padStart(2, '0');
-    const bulan = namaBulan[dateObj.getMonth()];
-    const tahun = dateObj.getFullYear();
-    
-    return `${hari} ${bulan} ${tahun}`; // Hasil: 26 Desember 2021
-}
-
+        function formatTanggalIndo(tanggalString) {
+            if (!tanggalString) return '-';
+            const dateObj = new Date(tanggalString);
+            if (isNaN(dateObj.getTime())) return tanggalString; 
+            
+            const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const hari = String(dateObj.getDate()).padStart(2, '0');
+            const bulan = namaBulan[dateObj.getMonth()];
+            const tahun = dateObj.getFullYear();
+            
+            return `${hari} ${bulan} ${tahun}`; 
+        }
 
         // --- CRUD ACTIONS ---
         function openModal(id, tipe, action, rowId='', no='', pihak='', tgl='', perihal='') {
@@ -588,7 +604,6 @@ function formatTanggalIndo(tanggalString) {
             
             document.getElementById('form-id').value = rowId;
             
-            // LOGIKA AUTO-FILL NOMOR SURAT BARU
             if (action === 'add') {
                 const info = getLastSuratInfo(tipe);
                 document.getElementById('form-no').value = info.next;
@@ -650,8 +665,6 @@ function formatTanggalIndo(tanggalString) {
                 }
             });
         }
-		
-		
     </script>
 </body>
 </html>
