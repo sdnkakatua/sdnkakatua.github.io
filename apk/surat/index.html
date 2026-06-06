@@ -123,8 +123,8 @@
                             </div>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
-                            <table class="w-full text-left whitespace-nowrap">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm">
+                            <table class="w-full text-left">
+    <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm hidden md:table-header-group">
                                     <tr>
                                         <th onclick="sortData(1, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
                                         <th onclick="sortData(3, 'masuk')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Tanggal Terima ⇅</th>
@@ -159,8 +159,8 @@
                             </div>
                         </div>
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
-                            <table class="w-full text-left whitespace-nowrap">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm">
+                            <table class="w-full text-left">
+    <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 text-sm hidden md:table-header-group">
                                     <tr>
                                         <th onclick="sortData(1, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">No. Surat ⇅</th>
                                         <th onclick="sortData(3, 'keluar')" class="px-6 py-4 cursor-pointer hover:bg-slate-200 hover:text-slate-800 transition-colors" title="Klik untuk urutkan">Tanggal Kirim ⇅</th>
@@ -468,20 +468,51 @@ function updateUI(data) {
 
     // Render baris tabel dari data yang sudah dipotong (atau dataArray jika belum pakai paginasi)
 paginatedItems.forEach(row => {
-    // Kita simpan tglRaw (YYYY-MM-DD) untuk form edit, lalu buat tglFormat untuk tabel
     const id = row[0], no = row[1], pihak = row[2], tglRaw = row[3], perihal = row[4];
-    const tglFormat = formatTanggalIndo(tglRaw);
+    
+    // Pastikan Anda menggunakan fungsi formatTanggalIndo yang sudah dibuat sebelumnya
+    const tglFormat = typeof formatTanggalIndo === 'function' ? formatTanggalIndo(tglRaw) : tglRaw; 
+    
+    const labelPihak = tipe === 'masuk' ? 'Pengirim' : 'Tujuan';
+    const warnaNo = tipe === 'masuk' ? 'text-primary' : 'text-emerald-600';
 
     const tr = document.createElement('tr');
-    tr.className = "hover:bg-slate-50 transition-colors";
+    
+    // Keajaiban Tailwind: Di HP jadi kolom bersusun (flex-col), di Desktop jadi baris tabel (md:table-row)
+    tr.className = "flex flex-col md:table-row hover:bg-slate-50 transition-all border-b border-slate-200 last:border-0 p-5 md:p-0 gap-2 md:gap-0";
+    
     tr.innerHTML = `
-        <td class="px-6 py-4 font-semibold ${tipe==='masuk'?'text-primary':'text-emerald-600'}">${no}</td>
-        <td class="px-6 py-4">${tglFormat}</td>
-        <td class="px-6 py-4">${pihak}</td>
-        <td class="px-6 py-4 text-slate-500 truncate max-w-xs">${perihal}</td>
-        <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} px-6 py-4 flex gap-2 justify-center">
-            <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tglRaw}', '${perihal}')" class="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors" title="Edit Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-            <button onclick="processDelete('${id}', '${tipe}')" class="p-2.5 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" title="Hapus Data"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">No. Surat</span>
+            <span class="font-bold text-lg md:text-base ${warnaNo}">${no}</span>
+        </td>
+        
+        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Tanggal</span>
+            <span>${tglFormat}</span>
+        </td>
+        
+        <td class="md:px-6 md:py-4 flex md:table-cell flex-col md:whitespace-nowrap text-sm md:text-base">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">${labelPihak}</span>
+            <span class="font-medium text-slate-700">${pihak}</span>
+        </td>
+        
+        <td class="md:px-6 md:py-4 flex md:table-cell flex-col text-sm md:text-base text-slate-500 w-full">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider md:hidden mb-0.5">Perihal</span>
+            <span class="whitespace-normal break-words">${perihal}</span>
+        </td>
+        
+        <td class="admin-only ${!isAdmin ? 'hidden-important' : ''} md:px-6 md:py-4 flex md:table-cell justify-end items-center mt-3 pt-3 border-t border-slate-100 md:border-none w-full">
+            <div class="flex gap-2">
+                <button onclick="openModal('modal-form', '${tipe}', 'edit', '${id}', '${no}', '${pihak}', '${tglRaw}', '${perihal}')" class="px-4 py-2 md:p-2.5 text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Edit Data">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    <span class="md:hidden">Edit</span>
+                </button>
+                <button onclick="processDelete('${id}', '${tipe}')" class="px-4 py-2 md:p-2.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium flex items-center gap-2" title="Hapus Data">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span class="md:hidden">Hapus</span>
+                </button>
+            </div>
         </td>
     `;
     tbody.appendChild(tr);
