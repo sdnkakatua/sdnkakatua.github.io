@@ -443,17 +443,30 @@ function initApp() {
         altInput: true,          // Mengaktifkan input tampilan tiruan
         altFormat: "d/m/Y",      // Format yang DILIHAT oleh Admin (DD/MM/YYYY)
         allowInput: true,        // Admin tetap bisa mengetik manual jika mau
-        // Menyalin class Tailwind agar tampilan kalender tiruan tetap estetik
         altInputClass: "w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all"
     });
 
-    // Jalankan sisa kode cache yang sudah ada sebelumnya...
+    // --- LOGIKA CACHE YANG BENAR ---
     const cachedData = localStorage.getItem('suratAppCache');
-    if (cachedData) { /* ... kode Anda yang sudah ada ... */ }
+    if (cachedData) { 
+        try {
+            // 1. Terjemahkan teks JSON dari Local Storage menjadi Objek
+            const parsedData = JSON.parse(cachedData);
+            
+            // 2. Masukkan ke variabel global
+            globalData.masuk = parsedData.suratMasuk || [];
+            globalData.keluar = parsedData.suratKeluar || [];
+            
+            // 3. Tampilkan langsung ke layar secara instan!
+            updateUI(parsedData);
+        } catch (error) {
+            console.error("Gagal membaca cache:", error);
+        }
+    }
+    
+    // 4. Setelah layar terisi data lama, diam-diam panggil Google Sheets di background
     fetchDataBackground();
-}
-		
-		
+}		
 		
 
 		
