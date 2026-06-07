@@ -27,12 +27,7 @@
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-	
-	
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
-	
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans overflow-hidden" onload="initApp()">
 
     <script>
@@ -40,7 +35,6 @@
     </script>
 
     <div class="flex h-screen w-full">
-        <!-- Sidebar -->
         <aside id="sidebar" class="bg-white dark:bg-slate-800 w-64 border-r border-slate-200 dark:border-slate-700 flex flex-col absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 z-20 shadow-lg md:shadow-none">
             <div class="p-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-700">
                 <div class="flex items-center gap-3">
@@ -73,7 +67,6 @@
         <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-10 hidden md:hidden"></div>
 
         <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/50">
-            <!-- Header -->
             <header class="bg-white dark:bg-slate-800 p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-0">
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()" class="md:hidden text-slate-500 dark:text-slate-400"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
@@ -93,10 +86,9 @@
                 </div>
             </header>
 
-            <div class="flex-1 overflow-auto p-4 sm:p-6 flex flex-col pb-24">
+            <div class="flex-1 overflow-auto p-4 sm:p-6 flex flex-col">
                 <div class="flex-1">
                     
-                    <!-- View Dashboard -->
                     <div id="view-dashboard" class="space-y-6">
                         <div class="bg-gradient-to-br from-primary to-secondary p-8 sm:p-10 rounded-3xl shadow-md text-white relative overflow-hidden">
                             <div class="relative z-10">
@@ -130,7 +122,6 @@
                         </div>
                     </div>
 
-                    <!-- View Surat Masuk -->
                     <div id="view-surat-masuk" class="hidden space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                             <div class="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2 max-w-max">
@@ -139,11 +130,14 @@
                             </div>
                             
                             <div class="flex gap-3 flex-wrap">
-                                <!-- Kolom Pencarian -->
                                 <div class="relative w-full sm:w-auto">
                                     <input type="text" id="search-masuk" onkeyup="handleSearch('masuk')" placeholder="Cari surat..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 dark:text-slate-200">
                                     <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </div>
+                                
+                                <button onclick="openModal('modal-form', 'masuk', 'add')" title="Tambah Data" class="admin-only hidden-important bg-primary hover:bg-secondary text-white w-10 h-10 rounded-xl font-bold text-xl flex items-center justify-center shadow-lg shadow-primary/30">
+                                    +
+                                </button>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden overflow-x-auto">
@@ -168,14 +162,8 @@
                                 <button onclick="changePage('masuk', 1)" id="btn-next-masuk" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
                             </div>
                         </div>
-
-                        <!-- Tombol Tambah Floating Circle (FAB) -->
-                        <button onclick="openModal('modal-form', 'masuk', 'add')" title="Tambah Data" class="admin-only hidden-important fixed bottom-8 right-8 z-40 bg-primary hover:bg-secondary text-white w-14 h-14 rounded-full font-bold text-2xl flex items-center justify-center shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-transform">
-                            +
-                        </button>
                     </div>
 
-                    <!-- View Surat Keluar -->
                     <div id="view-surat-keluar" class="hidden space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                             <div class="bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center gap-2 max-w-max">
@@ -183,11 +171,14 @@
                                 <span id="view-last-keluar" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
                             </div>
                             <div class="flex gap-3 flex-wrap">
-                                <!-- Kolom Pencarian -->
                                 <div class="relative w-full sm:w-auto">
                                     <input type="text" id="search-keluar" onkeyup="handleSearch('keluar')" placeholder="Cari surat..." class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:text-slate-200">
                                     <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 </div>
+
+                                <button onclick="openModal('modal-form', 'keluar', 'add')" title="Tambah Data" class="admin-only hidden-important bg-emerald-500 hover:bg-emerald-600 text-white w-10 h-10 rounded-xl font-bold text-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                    +
+                                </button>
                             </div>
                         </div>
                         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden overflow-x-auto">
@@ -212,11 +203,6 @@
                                 <button onclick="changePage('keluar', 1)" id="btn-next-keluar" class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors">Selanjutnya</button>
                             </div>
                         </div>
-
-                        <!-- Tombol Tambah Floating Circle (FAB) -->
-                        <button onclick="openModal('modal-form', 'keluar', 'add')" title="Tambah Data" class="admin-only hidden-important fixed bottom-8 right-8 z-40 bg-emerald-500 hover:bg-emerald-600 text-white w-14 h-14 rounded-full font-bold text-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-transform">
-                            +
-                        </button>
                     </div>
                 </div>
 
@@ -227,7 +213,6 @@
         </main>
     </div>
 
-    <!-- Modal Form -->
     <div id="modal-form" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center hidden opacity-0 backdrop-blur-sm transition-opacity">
         <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden transform scale-95 transition-transform" id="modal-form-content">
             <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
@@ -247,13 +232,10 @@
                     <label id="label-pihak" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Pengirim/Tujuan</label>
                     <input type="text" id="form-pihak" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
                 </div>
-				
-				
-				<div>
-    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
-    <input type="text" id="form-tanggal" required placeholder="Pilih Tanggal" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
-</div>
-				
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
+                    <input type="date" id="form-tanggal" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all">
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Perihal</label>
                     <textarea id="form-perihal" rows="3" required class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all"></textarea>
@@ -291,9 +273,6 @@
         let isAdmin = localStorage.getItem('suratAppAdmin') === 'true';
         
         let globalData = { masuk: [], keluar: [] };
-		
-		let kalenderPicker;
-
         
         let sortDirections = {
             masuk: { 1: 'asc', 2: 'asc', 3: 'asc', 4: 'asc' },
@@ -310,9 +289,7 @@
 
         // UI & Navigasi
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebar-overlay').classList.toggle('hidden'); }
-        
-        // Memperbarui fungsi navigasi agar mendukung tombol Back browser
-        function navigate(page, pushToHistory = true) {
+        function navigate(page) {
             ['dashboard', 'surat-masuk', 'surat-keluar'].forEach(id => {
                 document.getElementById('view-' + id).classList.add('hidden');
                 document.getElementById('nav-' + id).className = "w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary rounded-xl font-medium";
@@ -320,27 +297,8 @@
             document.getElementById('view-' + page).classList.remove('hidden');
             document.getElementById('nav-' + page).className = "w-full flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-xl font-medium shadow-md shadow-primary/20";
             document.getElementById('page-title').innerText = page === 'dashboard' ? 'Dashboard' : (page === 'surat-masuk' ? 'Surat Masuk' : 'Surat Keluar');
-            
-            // Catat halaman ke riwayat browser jika navigasi dipicu manual (bukan tombol back)
-            if (pushToHistory) {
-                history.pushState({ page: page }, '', '');
-            }
-
-            // Tutup sidebar di mode mobile jika sedang terbuka
-            if(window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar.classList.contains('-translate-x-full')) {
-                    toggleSidebar();
-                }
-            }
+            if(window.innerWidth < 768) toggleSidebar();
         }
-
-        // Listener untuk mendeteksi penekanan tombol Back / Forward browser
-        window.addEventListener('popstate', function(event) {
-            if (event.state && event.state.page) {
-                navigate(event.state.page, false); // false agar tidak membuat riwayat baru secara bergulung
-            }
-        });
 
         function handleAuth() {
             if (isAdmin) { 
@@ -431,32 +389,19 @@
         }
 
         // --- SISTEM CACHE & SINKRONISASI LATAR BELAKANG ---
-        
-// B. Masukkan kode inisialisasi ini ke dalam fungsi initApp() Anda
-function initApp() {
-    updateAuthUI(); 
-    history.replaceState({ page: 'dashboard' }, '', '');
-
-    // Inisialisasi Flatpickr pada input tanggal
-    kalenderPicker = flatpickr("#form-tanggal", {
-        dateFormat: "Y-m-d",     // Format internal yang disimpan sistem (YYYY-MM-DD)
-        altInput: true,          // Mengaktifkan input tampilan tiruan
-        altFormat: "d/m/Y",      // Format yang DILIHAT oleh Admin (DD/MM/YYYY)
-        allowInput: true,        // Admin tetap bisa mengetik manual jika mau
-        // Menyalin class Tailwind agar tampilan kalender tiruan tetap estetik
-        altInputClass: "w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border rounded-xl outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white dark:focus:bg-slate-900 border-slate-200 dark:border-slate-600 dark:text-white transition-all"
-    });
-
-    // Jalankan sisa kode cache yang sudah ada sebelumnya...
-    const cachedData = localStorage.getItem('suratAppCache');
-    if (cachedData) { /* ... kode Anda yang sudah ada ... */ }
-    fetchDataBackground();
-}
-		
-		
-		
-
-		
+        function initApp() {
+            updateAuthUI(); 
+            const cachedData = localStorage.getItem('suratAppCache');
+            if (cachedData) {
+                try {
+                    const data = JSON.parse(cachedData);
+                    globalData.masuk = data.suratMasuk;
+                    globalData.keluar = data.suratKeluar;
+                    updateUI(data);
+                } catch(e) { console.error("Cache error", e); }
+            }
+            fetchDataBackground();
+        }
 
         function updateUI(data) {
             document.getElementById('stat-masuk').innerText = data.totalMasuk;
@@ -648,48 +593,6 @@ function initApp() {
             
             return `${hari} ${bulan} ${tahun}`; 
         }
-		
-		
-		// 1. Membuat input otomatis menambahkan slash (/) saat user mengetik angka
-function formatDateInput(input) {
-    let v = input.value.replace(/\D/g, '').slice(0, 8);
-    if (v.length >= 4) {
-        input.value = `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
-    } else if (v.length >= 2) {
-        input.value = `${v.slice(0, 2)}/${v.slice(2)}`;
-    } else {
-        input.value = v;
-    }
-}
-
-// 2. Mengubah format yyyy-mm-dd (dari database) menjadi dd/mm/yyyy (untuk ditampilkan di input)
-function convertToDDMMYYYY(dateStr) {
-    if (!dateStr) return '';
-    if (dateStr.includes('/')) return dateStr;
-    
-    // Jika format standar ISO (yyyy-mm-dd)
-    const parts = dateStr.split('-');
-    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    
-    // Jika format objek Date penuh
-    const dateObj = new Date(dateStr);
-    if (!isNaN(dateObj.getTime())) {
-        const d = String(dateObj.getDate()).padStart(2, '0');
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const y = dateObj.getFullYear();
-        return `${d}/${m}/${y}`;
-    }
-    return dateStr;
-}
-
-// 3. Mengubah format dd/mm/yyyy (dari input) kembali ke yyyy-mm-dd sebelum dikirim ke Web App
-function convertToYYYYMMDD(dateStr) {
-    if (!dateStr) return '';
-    const parts = dateStr.split('/');
-    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    return dateStr;
-}
-		
 
         // --- CRUD ACTIONS ---
         function openModal(id, tipe, action, rowId='', no='', pihak='', tgl='', perihal='') {
@@ -709,13 +612,7 @@ function convertToYYYYMMDD(dateStr) {
             }
 
             document.getElementById('form-pihak').value = pihak;
-            if (action === 'add') {
-    kalenderPicker.clear(); // Kosongkan kalender jika tambah data baru
-} else {
-    // Jika format tanggal dari database mengandung waktu (T00:00:00.000Z), kita bersihkan dulu
-    const tglBersih = tgl ? tgl.split('T')[0] : '';
-    kalenderPicker.setDate(tglBersih); // Isi kalender sesuai data yang mau diedit
-}
+            document.getElementById('form-tanggal').value = tgl;
             document.getElementById('form-perihal').value = perihal;
             
             const m = document.getElementById(id);
@@ -741,7 +638,7 @@ function convertToYYYYMMDD(dateStr) {
                 id: document.getElementById('form-id').value,
                 no: document.getElementById('form-no').value,
                 pihak: document.getElementById('form-pihak').value,
-                tanggal: convertToYYYYMMDD(document.getElementById('form-tanggal').value),
+                tanggal: document.getElementById('form-tanggal').value,
                 perihal: document.getElementById('form-perihal').value
             };
 
