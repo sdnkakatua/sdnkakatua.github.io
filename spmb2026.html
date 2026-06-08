@@ -580,6 +580,8 @@
         }
         .toast.show { bottom: 30px; }
 
+
+
         /* --- FLOATING WHATSAPP BUTTON STYLING --- */
         .btn-floating-wa {
             position: fixed;
@@ -632,6 +634,47 @@
                 height: 26px;
             }
         }
+		
+		
+		
+		
+		/* --- ANIMASI GETAR (SHAKE EFFECT) --- */
+@keyframes shake-animation {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.error-shake {
+    animation: shake-animation 0.4s ease-in-out;
+}
+
+/* Style Input saat Error */
+.form-group-wa input.error-field, 
+.form-group-wa textarea.error-field {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+}
+
+/* Pesan Error Kecil di Bawah Input */
+.error-text {
+    color: #dc2626;
+    font-size: 11px;
+    margin-top: 5px;
+    display: none; /* Sembunyi secara default */
+    font-weight: 500;
+}
+
+/* Munculkan pesan error hanya jika input memiliki class .error-field */
+.form-group-wa input.error-field ~ .error-text,
+.form-group-wa textarea.error-field ~ .error-text {
+    display: block;
+}
+	
+
+
+
+	
     </style>
 </head>
 <body>
@@ -932,27 +975,29 @@
 
 
     <div class="modal-overlay" id="waFormModal">
-        <div class="modal-content" style="border-top: 6px solid #25d366;">
-            <div class="modal-icon">💬</div>
-            <h3 class="modal-title" style="margin-bottom: 5px;">Hubungi Operator</h3>
-            <p class="modal-text" style="margin-bottom: 20px;">Silakan isi identitas dan pesan Anda sebelum diarahkan menuju WhatsApp.</p>
-            
-            <div class="form-group-wa">
-                <label for="wa-name">Nama Lengkap</label>
-                <input type="text" id="wa-name" placeholder="Contoh: Budi Santoso">
-            </div>
+    <div class="modal-content" style="border-top: 6px solid #25d366;">
+        <div class="modal-icon">💬</div>
+        <h3 class="modal-title" style="margin-bottom: 5px;">Hubungi Operator</h3>
+        <p class="modal-text" style="margin-bottom: 20px;">Silakan isi identitas dan pesan Anda sebelum diarahkan menuju WhatsApp.</p>
+        
+        <div class="form-group-wa">
+            <label for="wa-name">Nama Lengkap</label>
+            <input type="text" id="wa-name" placeholder="Contoh: Budi Santoso" autocomplete="off">
+            <span class="error-text">Nama lengkap wajib diisi!</span>
+        </div>
 
-            <div class="form-group-wa">
-                <label for="wa-question">Pertanyaan Anda</label>
-                <textarea id="wa-question" rows="4" placeholder="Tulis kendala atau pertanyaan seputar berkas/pendaftaran..."></textarea>
-            </div>
+        <div class="form-group-wa">
+            <label for="wa-question">Pertanyaan Anda</label>
+            <textarea id="wa-question" rows="4" placeholder="Tulis kendala atau pertanyaan seputar berkas/pendaftaran..."></textarea>
+            <span class="error-text">Pertanyaan tidak boleh kosong!</span>
+        </div>
 
-            <div class="modal-buttons" style="margin-top: 25px;">
-                <button class="btn-cancel" onclick="closeWaModal()">Batal</button>
-                <button class="btn-confirm" style="background: #25d366;" onclick="submitWaForm()">Kirim Chat</button>
-            </div>
+        <div class="modal-buttons" style="margin-top: 25px;">
+            <button class="btn-cancel" onclick="closeWaModal()">Batal</button>
+            <button class="btn-confirm" style="background: #25d366;" onclick="submitWaForm()">Kirim Chat</button>
         </div>
     </div>
+</div>
 
 
     <div class="toast" id="successToast">
@@ -1014,29 +1059,61 @@
         }
 
         function submitWaForm() {
-            const name = document.getElementById('wa-name').value.trim();
-            const question = document.getElementById('wa-question').value.trim();
+    const nameInput = document.getElementById('wa-name');
+    const questionInput = document.getElementById('wa-question');
 
-            if (name === "" || question === "") {
-                alert("Harap lengkapi Nama dan Pertanyaan Anda terlebih dahulu.");
-                return;
-            }
+    const name = nameInput.value.trim();
+    const question = questionInput.value.trim();
 
-            const operatorNumber = "6282395223314";
-            
-            // Format teks pesan WhatsApp otomatis
-            const message = `Halo Admin/Operator SPMB UPT SPF SD Negeri Kakatua Makassar.\n\n*Nama:* ${name}\n*Pertanyaan:* ${question}`;
-            const encodedMessage = encodeURIComponent(message);
-            const waUrl = `https://wa.me/${operatorNumber}?text=${encodedMessage}`;
+    let isValid = true;
 
-            // Buka tab chat baru ke WhatsApp
-            window.open(waUrl, '_blank');
-            closeWaModal();
+    // Bersihkan sisa-sisa class error sebelumnya jika ada
+    nameInput.classList.remove('error-field', 'error-shake');
+    questionInput.classList.remove('error-field', 'error-shake');
 
-            // Reset Form kembali kosong
-            document.getElementById('wa-name').value = "";
-            document.getElementById('wa-question').value = "";
-        }
+    // Validasi input Nama
+    if (name === "") {
+        setTimeout(() => { nameInput.classList.add('error-field', 'error-shake'); }, 10);
+        isValid = false;
+    }
+
+    // Validasi input Pertanyaan
+    if (question === "") {
+        setTimeout(() => { questionInput.classList.add('error-field', 'error-shake'); }, 10);
+        isValid = false;
+    }
+
+    // Jika ada yang tidak valid, stop eksekusi dan bersihkan efek getar setelah 500ms
+    if (!isValid) {
+        setTimeout(() => {
+            nameInput.classList.remove('error-shake');
+            questionInput.classList.remove('error-shake');
+        }, 500);
+        return;
+    }
+
+    // PROSES JIKA FORM VALID
+    const operatorNumber = "6282395223314";
+    const message = `Halo Admin/Operator SPMB UPT SPF SD Negeri Kakatua Makassar.\n\n*Nama:* ${name}\n*Pertanyaan:* ${question}`;
+    const encodedMessage = encodeURIComponent(message);
+    const waUrl = `https://wa.me/${operatorNumber}?text=${encodedMessage}`;
+
+    window.open(waUrl, '_blank');
+    closeWaModal();
+
+    // Reset isi form
+    nameInput.value = "";
+    questionInput.value = "";
+}
+
+// --- UX IMPROVEMENT: Hilangkan warna merah secara real-time saat user mulai mengetik ---
+document.getElementById('wa-name').addEventListener('input', function() {
+    this.classList.remove('error-field');
+});
+
+document.getElementById('wa-question').addEventListener('input', function() {
+    this.classList.remove('error-field');
+});
 
         function openAnnouncementPopup(namaJalur, targetDateStr) {
             document.getElementById('popupJalurTitle').innerText = "Pengumuman Hasil Seleksi • " + namaJalur;
