@@ -581,6 +581,51 @@
         .toast.show { bottom: 30px; }
 
 
+/* --- FLOATING AGE CALCULATOR BUTTON STYLING --- */
+.btn-floating-age {
+    position: fixed;
+    bottom: 100px; /* Diatur 100px agar berada tepat di atas tombol WA (30px + 60px + 10px gap) */
+    right: 30px;
+    background-color: #3b82f6; /* Warna biru cerah khusus kalkulator */
+    color: #ffffff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1500; 
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+.btn-floating-age:hover {
+    background-color: #1d4ed8;
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.btn-floating-age svg {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+}
+
+/* Responsivitas Tombol Cek Umur di HP */
+@media (max-width: 576px) {
+    .btn-floating-age {
+        bottom: 80px; /* Menyesuaikan tombol WA di HP (20px + 50px + 10px gap) */
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+    .btn-floating-age svg {
+        width: 24px;
+        height: 24px;
+    }
+}
+
 
         /* --- FLOATING WHATSAPP BUTTON STYLING --- */
         .btn-floating-wa {
@@ -974,6 +1019,31 @@
     </div>
 
 
+<div class="modal-overlay" id="ageCalcModal">
+    <div class="modal-content" style="border-top: 6px solid #3b82f6;">
+        <div class="modal-icon">🧮</div>
+        <h3 class="modal-title" style="margin-bottom: 5px;">Kalkulator Umur Anak</h3>
+        <p class="modal-text" style="margin-bottom: 20px;">Silakan klik kotak di bawah untuk memilih tanggal lahir anak Anda pada kalender (Minimal 6 tahun per 2 Juni 2026).</p>
+        
+        <div class="form-group-wa">
+            <label for="birth-date">Tanggal Lahir Anak</label>
+            <input type="date" 
+                   id="birth-date" 
+                   style="cursor: pointer; width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-theme); background: #fafafa; font-family: 'Poppins', sans-serif;" 
+                   onkeydown="return false" 
+                   onclick="this.showPicker()">
+        </div>
+        
+        <div id="age-result" style="margin-top: 20px; padding: 15px; border-radius: 12px; display: none; text-align: left;"></div>
+
+        <div class="modal-buttons" style="margin-top: 25px;">
+            <button class="btn-cancel" onclick="closeAgeModal()">Tutup</button>
+            <button class="btn-confirm" style="background: #3b82f6;" onclick="checkAge()">Hitung & Cek</button>
+        </div>
+    </div>
+</div>
+
+
     <div class="modal-overlay" id="waFormModal">
     <div class="modal-content" style="border-top: 6px solid #25d366;">
         <div class="modal-icon">💬</div>
@@ -1004,6 +1074,13 @@
         <span class="toast-icon">✨</span>
         <span>Membuka halaman portal pendaftaran...</span>
     </div>
+
+
+<button class="btn-floating-age" onclick="openAgeModal()" title="Cek Kelayakan Umur Anak">
+    <svg viewBox="0 0 24 24">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z"/>
+    </svg>
+</button>
 
 
     <button class="btn-floating-wa" onclick="openWaModal()" title="Hubungi Operator WhatsApp">
@@ -1048,12 +1125,119 @@
         let currentTargetUrl = 'https://spmb.makassarkota.go.id/';
         let popupInterval = null; 
 
-        /* --- NEW: FLOATING WA MODAL LOGIC --- */
-        function openWaModal() {
-            waFormModal.classList.add('active');
-            document.getElementById('wa-name').focus();
-        }
 
+/* --- ENGINE KALKULATOR UMUR ANAK (PER 2 JUNI 2026) --- */
+const ageCalcModal = document.getElementById('ageCalcModal');
+
+function openAgeModal() {
+    ageCalcModal.classList.add('active');
+    document.getElementById('age-result').style.display = 'none'; 
+    
+    const dateInputEl = document.getElementById('birth-date');
+    dateInputEl.value = ''; // Reset tanggal
+    dateInputEl.classList.remove('error-field', 'error-shake'); // Bersihkan sisa error lama
+}
+
+function closeAgeModal() {
+    ageCalcModal.classList.remove('active');
+}
+
+function checkAge() {
+    const dateInputEl = document.getElementById('birth-date');
+    const dateInput = dateInputEl.value;
+    const resultDiv = document.getElementById('age-result');
+    
+    // Bersihkan sisa-sisa class error sebelumnya jika ada
+    dateInputEl.classList.remove('error-field', 'error-shake');
+    
+    // JIKA TANGGAL KOSONG (Kombinasi Getar & Merah hanya pada input ini)
+    if (!dateInput) {
+        // Gunakan setTimeout 10ms agar browser sempat memicu ulang animasi getar
+        setTimeout(() => {
+            dateInputEl.classList.add('error-field', 'error-shake');
+        }, 10);
+        
+        // Bersihkan efek getar saja setelah 500ms agar bisa bergetar lagi saat diklik ulang
+        setTimeout(() => {
+            dateInputEl.classList.remove('error-shake');
+        }, 500);
+        
+        return; // Hentikan eksekusi
+    }
+    
+    const birthDate = new Date(dateInput);
+    const targetDate = new Date(2026, 5, 2); // 2 Juni 2026
+    
+    // Validasi jika tanggal melampaui target
+    if (birthDate > targetDate) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#fef2f2';
+        resultDiv.style.borderLeft = '4px solid #dc2626';
+        resultDiv.innerHTML = `<p style="margin:0; color:#dc2626; font-weight:600; font-size:13px;">⚠️ Tanggal lahir tidak valid karena melebihi batas 2 Juni 2026!</p>`;
+        return;
+    }
+    
+    // Rumus hitung umur presisi
+    let years = targetDate.getFullYear() - birthDate.getFullYear();
+    let months = targetDate.getMonth() - birthDate.getMonth();
+    let days = targetDate.getDate() - birthDate.getDate();
+    
+    if (days < 0) {
+        months--;
+        let prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+    
+    resultDiv.style.display = 'block';
+    
+    if (years >= 6) {
+        resultDiv.style.background = '#e8f5e9';
+        resultDiv.style.borderLeft = '4px solid #2e7d32';
+        resultDiv.innerHTML = `
+            <p style="margin:0; color:#2e7d32; font-weight:700; font-size:14px;">✅ MEMENUHI SYARAT (BISA MENDAFTAR)</p>
+            <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
+                Umur anak pada tanggal 2 Juni 2026 adalah:<br>
+                <strong>${years} Tahun, ${months} Bulan, ${days} Hari</strong>.
+            </p>
+        `;
+    } else {
+        resultDiv.style.background = '#fef2f2';
+        resultDiv.style.borderLeft = '4px solid #dc2626';
+        resultDiv.innerHTML = `
+            <p style="margin:0; color:#dc2626; font-weight:700; font-size:14px;">❌ BELUM CUKUP UMUR</p>
+            <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
+                Umur anak pada tanggal 2 Juni 2026 baru:<br>
+                <strong>${years} Tahun, ${months} Bulan, ${days} Hari</strong>.<br>
+                <span style="font-size:12px; color:#64748b; display:block; margin-top:5px;">* Aturan pendaftaran mewajibkan umur anak minimal 6 tahun pada 2 Juni 2026.</span>
+            </p>
+        `;
+    }
+}
+
+
+        /* --- NEW: FLOATING WA MODAL LOGIC --- */
+function openWaModal() {
+    // 1. Membuka modal WA (sesuai dengan kode lama Anda)
+    waFormModal.classList.add('active'); 
+    
+    // 2. Cari semua input yang sedang berwarna merah/error di dalam modal WA, lalu bersihkan
+    const errorElements = waFormModal.querySelectorAll('.error-field, .error-shake');
+    errorElements.forEach(element => {
+        element.classList.remove('error-field', 'error-shake');
+    });
+
+    // 3. (Opsional) Jika Anda juga ingin mengosongkan isi ketikan teks-nya setiap kali dibuka:
+    /*
+    const inputs = waFormModal.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.value = '';
+    });
+    */
+}
         function closeWaModal() {
             waFormModal.classList.remove('active');
         }
@@ -1108,6 +1292,11 @@
 
 // --- UX IMPROVEMENT: Hilangkan warna merah secara real-time saat user mulai mengetik ---
 document.getElementById('wa-name').addEventListener('input', function() {
+    this.classList.remove('error-field');
+});
+
+// Hilangkan warna merah secara real-time saat user selesai memilih tanggal
+document.getElementById('birth-date').addEventListener('change', function() {
     this.classList.remove('error-field');
 });
 
@@ -1197,6 +1386,7 @@ document.getElementById('wa-question').addEventListener('input', function() {
             if (event.target == infoLoadModal) closeInfoLoadModal();
             if (event.target == announcementModal) closeAnnouncementPopup();
             if (event.target == waFormModal) closeWaModal();
+			if (event.target == ageCalcModal) closeAgeModal();
         }
 
         /* --- SCRIPT COUNTDOWN JALUR --- */
