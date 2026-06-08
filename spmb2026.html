@@ -542,6 +542,36 @@
         .btn-confirm { background: var(--primary); color: white; }
         .btn-confirm:hover { background: var(--primary-hover); }
 
+        /* --- FORM FIELD WHATSAPP MODAL --- */
+        .form-group-wa {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+        .form-group-wa label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .form-group-wa input, .form-group-wa textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-theme);
+            font-family: 'Poppins', sans-serif;
+            font-size: 13.5px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        .form-group-wa input:focus, .form-group-wa textarea:focus {
+            border-color: #25d366;
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.1);
+        }
+
         .toast {
             position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: white; padding: 12px 25px;
@@ -549,6 +579,37 @@
             transition: bottom 0.5s; z-index: 3000;
         }
         .toast.show { bottom: 30px; }
+
+        /* --- FLOATING WHATSAPP BUTTON STYLING --- */
+        .btn-floating-wa {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25d366;
+            color: #ffffff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1500; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+        .btn-floating-wa:hover {
+            background-color: #128c7e;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .btn-floating-wa svg {
+            width: 32px;
+            height: 32px;
+            fill: #ffffff;
+        }
 
         /* --- RESPONSIVITAS --- */
         @media (max-width: 1200px) { .wm-left { left: 13%; } .wm-right { right: 13%; } }
@@ -560,12 +621,21 @@
             .header-nav { gap: 4px; }
             .nav-link { padding: 6px 11px; font-size: 11px; }
             .agenda-box li { flex-direction: column; gap: 2px; margin-bottom: 15px; }
+            .btn-floating-wa {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+            .btn-floating-wa svg {
+                width: 26px;
+                height: 26px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- HEADER NAVBAR -->
     <header>
         <div class="navbar-watermark wm-left">@sdnkakatua</div>
         <div class="navbar-watermark wm-right">@sdnkakatua</div>
@@ -582,7 +652,6 @@
     </header>
 
 
-    <!-- ================= HALAMAN 1: SPMB ================= -->
     <div id="page-spmb">
         <div class="hero">
             <h2>Selamat Datang Generasi Hebat! 🏫</h2>
@@ -593,7 +662,6 @@
             <h2 class="section-title" id="jalur">Jalur & Syarat Pendaftaran</h2>
             <div class="cards">
                 
-                <!-- Card 1 -->
                 <div class="card">
                     <h3>📍 1. Jalur Domisili</h3>
                     <p class="desc">Bagi calon peserta didik yang berdomisili di dalam wilayah yang telah ditetapkan oleh Pemerintah Kota Makassar.</p>
@@ -624,7 +692,6 @@
                     </div>
                 </div>
 
-                <!-- Card 2 -->
                 <div class="card">
                     <h3>🤝 2. Jalur Afirmasi</h3>
                     <p class="desc">Dukungan bagi calon murid dari keluarga ekonomi tidak mampu & penyandang disabilitas untuk mendapat pendidikan setara.</p>
@@ -651,7 +718,6 @@
                     </div>
                 </div>
 
-                <!-- Card 3 -->
                 <div class="card">
                     <h3>🏢 3. Jalur Mutasi</h3>
                     <p class="desc">Fasilitas khusus bagi anak yang mengikuti orang tua pindah tugas atau mutasi pekerjaan ke wilayah sekitar.</p>
@@ -742,7 +808,6 @@
     </div>
 
 
-    <!-- ================= HALAMAN 2: PAGE PENGUMUMAN ================= -->
     <div id="page-pengumuman" style="display: none;">
         <div class="hero">
             <h2>Pengumuman Hasil Seleksi 📢</h2>
@@ -753,7 +818,6 @@
             <h2 class="section-title">Hasil Seleksi SPMB 2026</h2>
             
             <div class="cards" style="margin-bottom: 80px;">
-                <!-- Box Pengumuman 1: Afirmasi -->
                 <div class="card" style="text-align: center; align-items: center; justify-content: center; padding: 35px 25px;">
                     <span style="font-size: 45px; margin-bottom: 10px;">🤝</span>
                     <h3 style="margin-bottom: 10px;">Pengumuman Jalur Afirmasi</h3>
@@ -763,7 +827,6 @@
                     <button class="btn-card" onclick="openAnnouncementPopup('Jalur Afirmasi', '2026-06-18T08:00:00+08:00')">Lihat Pengumuman</button>
                 </div>
 
-                <!-- Box Pengumuman 2: Domisili -->
                 <div class="card" style="text-align: center; align-items: center; justify-content: center; padding: 35px 25px;">
                     <span style="font-size: 45px; margin-bottom: 10px;">📍</span>
                     <h3 style="margin-bottom: 10px;">Pengumuman Jalur Domisili</h3>
@@ -777,19 +840,17 @@
     </div>
 
 
-    <!-- FOOTER -->
     <footer>
         <div class="footer-content" id="kontak">
             <h3>Pusat Layanan SPMB</h3>
             <p>Butuh informasi pendaftaran lebih lanjut? Tim admin kami siap melayani Anda:</p>
-            <p>💬 WhatsApp: <strong><a href="https://wa.me/6282395223314" target="_blank">0823-9522-3314 (Operator)</a></strong></p>
+            <p>💬 WhatsApp: <strong><a href="javascript:void(0)" onclick="openWaModal()">0823-9522-3314 (Operator)</a></strong></p>
             <p>📍 Jl. Gagak No. 24, Kota Makassar, Sulawesi Selatan</p>
             <p style="margin-top: 30px; font-size: 12px; color: #94a3b8;">© 2026 UPT SPF SD Negeri Kakatua. Cerdas, Berkarakter, Berprestasi.</p>
         </div>
     </footer>
 
 
-    <!-- POPUP UTAMA SAAT LOADING AWAL -->
     <div class="modal-overlay" id="infoLoadModal">
         <div class="modal-content">
             <div class="modal-icon">📢</div>
@@ -804,8 +865,8 @@
                 <p style="margin-bottom: 5px; font-weight: 600; color: #2e7d32;">📌 Agenda Hari Ini:</p>
                 <ul style="padding-left: 20px; margin-bottom: 15px; line-height: 1.6; font-size: 13px;">
                     <li><strong>Pendaftaran AKUN SD:</strong> <strong><a href="https://spmb.makassarkota.go.id/pendaftaran/sd/registrasi" target="_blank">KLIK DI SINI</a></strong></li>
-                    <li><strong>Cek NISN</strong> dulu, jika anak memiliki NISN</li>
-                    <li><strong>Lanjutkan Pendaftaran</strong> dengan mengisi form, jika anak tidak memiliki NISN</li>
+                    <li><strong>Cek NISN</strong> dulu, jika anak memiliki NISN.<strong> Lanjutkan Pendaftaran</strong> jika anak tidak memiliki NISN</li>
+                    <li><strong><a href="https://spmb.makassarkota.go.id/reset-password" target="_blank">RESET AKUN</a></strong> jika tidak bisa login</li>
                     
                 </ul>
                 <div style="background: var(--primary-light); padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary); margin-top: 15px;">
@@ -820,7 +881,6 @@
     </div>
 
 
-    <!-- POPUP KONFIRMASI PORTAL LINK DAFTAR -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
             <div class="modal-icon">👦👧</div>
@@ -834,7 +894,6 @@
     </div>
 
 
-    <!-- POPUP SPESIFIK: PENGUMUMAN DENGAN COUNTDOWN -->
     <div class="modal-overlay" id="announcementPopupModal">
         <div class="modal-content">
             <div class="modal-icon" id="popupIcon">⏳</div>
@@ -843,7 +902,6 @@
             <div id="popupCountdownArea">
                 <h2 style="color: #1e293b; font-size: 18px; font-weight: 600; margin: 10px 0;">PENGUMUMAN DIBUKA DALAM:</h2>
                 
-                <!-- Kotak Countdown Modifikasi -->
                 <div class="countdown-container" id="popupCountdownContainer" style="margin: 20px 0;">
                     <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-days" style="font-size: 20px;">00</span>Hari</div>
                     <div class="countdown-item" style="min-width: 60px; padding: 8px;"><span id="p-hours" style="font-size: 20px;">00</span>Jam</div>
@@ -873,20 +931,44 @@
     </div>
 
 
+    <div class="modal-overlay" id="waFormModal">
+        <div class="modal-content" style="border-top: 6px solid #25d366;">
+            <div class="modal-icon">💬</div>
+            <h3 class="modal-title" style="margin-bottom: 5px;">Hubungi Operator</h3>
+            <p class="modal-text" style="margin-bottom: 20px;">Silakan isi identitas dan pesan Anda sebelum diarahkan menuju WhatsApp.</p>
+            
+            <div class="form-group-wa">
+                <label for="wa-name">Nama Lengkap</label>
+                <input type="text" id="wa-name" placeholder="Contoh: Budi Santoso">
+            </div>
+
+            <div class="form-group-wa">
+                <label for="wa-question">Pertanyaan Anda</label>
+                <textarea id="wa-question" rows="4" placeholder="Tulis kendala atau pertanyaan seputar berkas/pendaftaran..."></textarea>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 25px;">
+                <button class="btn-cancel" onclick="closeWaModal()">Batal</button>
+                <button class="btn-confirm" style="background: #25d366;" onclick="submitWaForm()">Kirim Chat</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="toast" id="successToast">
         <span class="toast-icon">✨</span>
         <span>Membuka halaman portal pendaftaran...</span>
     </div>
 
 
-    <!-- JAVASCRIPT CONTROL -->
+    <button class="btn-floating-wa" onclick="openWaModal()" title="Hubungi Operator WhatsApp">
+        <svg viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.267 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.488 1.449 5.412 1.451 5.458 0 9.9-4.444 9.904-9.899.002-2.643-1.03-5.125-2.902-6.997C17.18 1.84 14.694.815 12.01.815 6.545.815 2.103 5.257 2.1 10.722c-.001 1.925.501 3.808 1.458 5.41l-.985 3.597 3.68-.965zm13.069-5.356c-.33-.165-1.951-.963-2.282-1.084-.33-.121-.57-.182-.81.182-.24.364-.93 1.164-1.14 1.401-.21.238-.42.266-.75.101-1.393-.698-2.39-1.213-3.344-2.853-.25-.432.25-.401.714-1.32.076-.153.038-.287-.019-.401-.057-.114-.48-1.157-.657-1.584-.173-.417-.347-.359-.48-.359-.122-.001-.264-.002-.405-.002-.14 0-.369.053-.561.263-.193.21-.735.719-.735 1.753s.75 2.034.855 2.176c.105.14 1.474 2.25 3.572 3.155.5.216.89.345 1.196.44.503.16 1.01.137 1.391.08.426-.064 1.319-.539 1.506-1.059.187-.52.187-.965.131-1.06-.056-.094-.21-.153-.54-.317z"/>
+        </svg>
+    </button>
+
+
     <script>
-	
-	
-	
-	
-	
-	
         /* --- SPA SWITCHING PAGE ENGINE --- */
         function switchPage(page, event) {
             if(event) event.preventDefault();
@@ -915,10 +997,46 @@
         const modal = document.getElementById('confirmModal');
         const infoLoadModal = document.getElementById('infoLoadModal');
         const announcementModal = document.getElementById('announcementPopupModal');
+        const waFormModal = document.getElementById('waFormModal');
         const toast = document.getElementById('successToast');
         
         let currentTargetUrl = 'https://spmb.makassarkota.go.id/';
         let popupInterval = null; 
+
+        /* --- NEW: FLOATING WA MODAL LOGIC --- */
+        function openWaModal() {
+            waFormModal.classList.add('active');
+            document.getElementById('wa-name').focus();
+        }
+
+        function closeWaModal() {
+            waFormModal.classList.remove('active');
+        }
+
+        function submitWaForm() {
+            const name = document.getElementById('wa-name').value.trim();
+            const question = document.getElementById('wa-question').value.trim();
+
+            if (name === "" || question === "") {
+                alert("Harap lengkapi Nama dan Pertanyaan Anda terlebih dahulu.");
+                return;
+            }
+
+            const operatorNumber = "6282395223314";
+            
+            // Format teks pesan WhatsApp otomatis
+            const message = `Halo Admin/Operator SPMB UPT SPF SD Negeri Kakatua Makassar.\n\n*Nama:* ${name}\n*Pertanyaan:* ${question}`;
+            const encodedMessage = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${operatorNumber}?text=${encodedMessage}`;
+
+            // Buka tab chat baru ke WhatsApp
+            window.open(waUrl, '_blank');
+            closeWaModal();
+
+            // Reset Form kembali kosong
+            document.getElementById('wa-name').value = "";
+            document.getElementById('wa-question').value = "";
+        }
 
         function openAnnouncementPopup(namaJalur, targetDateStr) {
             document.getElementById('popupJalurTitle').innerText = "Pengumuman Hasil Seleksi • " + namaJalur;
@@ -1001,6 +1119,7 @@
             if (event.target == modal) closeModal();
             if (event.target == infoLoadModal) closeInfoLoadModal();
             if (event.target == announcementModal) closeAnnouncementPopup();
+            if (event.target == waFormModal) closeWaModal();
         }
 
         /* --- SCRIPT COUNTDOWN JALUR --- */
