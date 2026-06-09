@@ -54,7 +54,7 @@
             line-height: 1.3;
         }
 
-        /* --- HEADER NAVBAR (TRANSPARANSI WATERMARK DIUBAH JADI 50%) --- */
+        /* --- HEADER NAVBAR --- */
         header {
             background: linear-gradient(135deg, #334155 0%, var(--primary) 100%);
             backdrop-filter: blur(12px);
@@ -77,7 +77,7 @@
             transform: translateY(-50%);
             font-size: clamp(14px, 1.6vw, 24px);
             font-weight: 800;
-            color: rgba(255, 255, 255, 0.5); /* 50% Transparansi Putih */
+            color: rgba(255, 255, 255, 0.5); 
             letter-spacing: 2px;
             white-space: nowrap;
             pointer-events: none;
@@ -580,52 +580,50 @@
         }
         .toast.show { bottom: 30px; }
 
+        /* --- FLOATING AGE CALCULATOR BUTTON STYLING --- */
+        .btn-floating-age {
+            position: fixed;
+            bottom: 100px; 
+            right: 30px;
+            background-color: #3b82f6; 
+            color: #ffffff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1500; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+        .btn-floating-age:hover {
+            background-color: #1d4ed8;
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .btn-floating-age svg {
+            width: 28px;
+            height: 28px;
+            fill: #ffffff;
+        }
 
-/* --- FLOATING AGE CALCULATOR BUTTON STYLING --- */
-.btn-floating-age {
-    position: fixed;
-    bottom: 100px; /* Diatur 100px agar berada tepat di atas tombol WA (30px + 60px + 10px gap) */
-    right: 30px;
-    background-color: #3b82f6; /* Warna biru cerah khusus kalkulator */
-    color: #ffffff;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    z-index: 1500; 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-    border: none;
-    padding: 0;
-}
-.btn-floating-age:hover {
-    background-color: #1d4ed8;
-    transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-.btn-floating-age svg {
-    width: 28px;
-    height: 28px;
-    fill: #ffffff;
-}
-
-/* Responsivitas Tombol Cek Umur di HP */
-@media (max-width: 576px) {
-    .btn-floating-age {
-        bottom: 80px; /* Menyesuaikan tombol WA di HP (20px + 50px + 10px gap) */
-        right: 20px;
-        width: 50px;
-        height: 50px;
-    }
-    .btn-floating-age svg {
-        width: 24px;
-        height: 24px;
-    }
-}
-
+        /* Responsivitas Tombol Cek Umur di HP */
+        @media (max-width: 576px) {
+            .btn-floating-age {
+                bottom: 80px; 
+                right: 20px;
+                width: 50px;
+                height: 50px;
+            }
+            .btn-floating-age svg {
+                width: 24px;
+                height: 24px;
+            }
+        }
 
         /* --- FLOATING WHATSAPP BUTTON STYLING --- */
         .btn-floating-wa {
@@ -680,46 +678,38 @@
             }
         }
 		
-		
-		
-		
 		/* --- ANIMASI GETAR (SHAKE EFFECT) --- */
-@keyframes shake-animation {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
-}
+        @keyframes shake-animation {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
 
-.error-shake {
-    animation: shake-animation 0.4s ease-in-out;
-}
+        .error-shake {
+            animation: shake-animation 0.4s ease-in-out;
+        }
 
-/* Style Input saat Error */
-.form-group-wa input.error-field, 
-.form-group-wa textarea.error-field {
-    border-color: #dc2626 !important;
-    background-color: #fef2f2 !important;
-}
+        /* Style Input & Select saat Error */
+        .form-group-wa input.error-field, 
+        .form-group-wa textarea.error-field,
+        .form-group-wa select.error-field {
+            border-color: #dc2626 !important;
+            background-color: #fef2f2 !important;
+        }
 
-/* Pesan Error Kecil di Bawah Input */
-.error-text {
-    color: #dc2626;
-    font-size: 11px;
-    margin-top: 5px;
-    display: none; /* Sembunyi secara default */
-    font-weight: 500;
-}
+        /* Pesan Error Kecil di Bawah Input */
+        .error-text {
+            color: #dc2626;
+            font-size: 11px;
+            margin-top: 5px;
+            display: none; 
+            font-weight: 500;
+        }
 
-/* Munculkan pesan error hanya jika input memiliki class .error-field */
-.form-group-wa input.error-field ~ .error-text,
-.form-group-wa textarea.error-field ~ .error-text {
-    display: block;
-}
-	
-
-
-
-	
+        .form-group-wa input.error-field ~ .error-text,
+        .form-group-wa textarea.error-field ~ .error-text {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -1019,55 +1009,73 @@
     </div>
 
 
-<div class="modal-overlay" id="ageCalcModal">
-    <div class="modal-content" style="border-top: 6px solid #3b82f6;">
-        <div class="modal-icon">🧮</div>
-        <h3 class="modal-title" style="margin-bottom: 5px;">Kalkulator Umur Anak</h3>
-        <p class="modal-text" style="margin-bottom: 20px;">Silakan klik kotak di bawah untuk memilih tanggal lahir anak Anda pada kalender (Minimal 6 tahun per 2 Juni 2026).</p>
-        
-        <div class="form-group-wa">
-            <label for="birth-date">Tanggal Lahir Anak</label>
-            <input type="date" 
-                   id="birth-date" 
-                   style="cursor: pointer; width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border-theme); background: #fafafa; font-family: 'Poppins', sans-serif;" 
-                   onkeydown="return false" 
-                   onclick="this.showPicker()">
-        </div>
-        
-        <div id="age-result" style="margin-top: 20px; padding: 15px; border-radius: 12px; display: none; text-align: left;"></div>
+    <div class="modal-overlay" id="ageCalcModal">
+        <div class="modal-content" style="border-top: 6px solid #3b82f6;">
+            <div class="modal-icon">🧮</div>
+            <h3 class="modal-title" style="margin-bottom: 5px;">Kalkulator Umur Anak</h3>
+            <p class="modal-text" style="margin-bottom: 20px;">Silakan pilih tanggal, bulan, dan tahun lahir anak Anda pada menu di bawah (Minimal 6 tahun per 2 Juni 2026).</p>
+            
+            <div class="form-group-wa">
+                <label>Tanggal Lahir Anak</label>
+                <div style="display: flex; gap: 8px; margin-top: 5px;">
+                    <select id="birth-day" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-theme); background: #fafafa; font-family: 'Poppins', sans-serif; cursor: pointer; outline: none; font-size: 13.5px; color: var(--text-dark);">
+                        <option value="">Hari</option>
+                    </select>
+                    <select id="birth-month" style="flex: 1.5; padding: 12px; border-radius: 12px; border: 1px solid var(--border-theme); background: #fafafa; font-family: 'Poppins', sans-serif; cursor: pointer; outline: none; font-size: 13.5px; color: var(--text-dark);">
+                        <option value="">Bulan</option>
+                        <option value="0">Januari</option>
+                        <option value="1">Februari</option>
+                        <option value="2">Maret</option>
+                        <option value="3">April</option>
+                        <option value="4">Mei</option>
+                        <option value="5">Juni</option>
+                        <option value="6">Juli</option>
+                        <option value="7">Agustus</option>
+                        <option value="8">September</option>
+                        <option value="9">Oktober</option>
+                        <option value="10">November</option>
+                        <option value="11">Desember</option>
+                    </select>
+                    <select id="birth-year" style="flex: 1.2; padding: 12px; border-radius: 12px; border: 1px solid var(--border-theme); background: #fafafa; font-family: 'Poppins', sans-serif; cursor: pointer; outline: none; font-size: 13.5px; color: var(--text-dark);">
+                        <option value="">Tahun</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="age-result" style="margin-top: 20px; padding: 15px; border-radius: 12px; display: none; text-align: left;"></div>
 
-        <div class="modal-buttons" style="margin-top: 25px;">
-            <button class="btn-cancel" onclick="closeAgeModal()">Tutup</button>
-            <button class="btn-confirm" style="background: #3b82f6;" onclick="checkAge()">Hitung & Cek</button>
+            <div class="modal-buttons" style="margin-top: 25px;">
+                <button class="btn-cancel" onclick="closeAgeModal()">Tutup</button>
+                <button class="btn-confirm" style="background: #3b82f6;" onclick="checkAge()">Hitung & Cek</button>
+            </div>
         </div>
     </div>
-</div>
 
 
     <div class="modal-overlay" id="waFormModal">
-    <div class="modal-content" style="border-top: 6px solid #25d366;">
-        <div class="modal-icon">💬</div>
-        <h3 class="modal-title" style="margin-bottom: 5px;">Hubungi Operator</h3>
-        <p class="modal-text" style="margin-bottom: 20px;">Silakan isi identitas dan pesan Anda sebelum diarahkan menuju WhatsApp.</p>
-        
-        <div class="form-group-wa">
-            <label for="wa-name">Nama Lengkap</label>
-            <input type="text" id="wa-name" placeholder="Contoh: Budi Santoso" autocomplete="off">
-            <span class="error-text">Nama lengkap wajib diisi!</span>
-        </div>
+        <div class="modal-content" style="border-top: 6px solid #25d366;">
+            <div class="modal-icon">💬</div>
+            <h3 class="modal-title" style="margin-bottom: 5px;">Hubungi Operator</h3>
+            <p class="modal-text" style="margin-bottom: 20px;">Silakan isi identitas dan pesan Anda sebelum diarahkan menuju WhatsApp.</p>
+            
+            <div class="form-group-wa">
+                <label for="wa-name">Nama Lengkap</label>
+                <input type="text" id="wa-name" placeholder="Contoh: Budi Santoso" autocomplete="off">
+                <span class="error-text">Nama lengkap wajib diisi!</span>
+            </div>
 
-        <div class="form-group-wa">
-            <label for="wa-question">Pertanyaan Anda</label>
-            <textarea id="wa-question" rows="4" placeholder="Tulis kendala atau pertanyaan seputar berkas/pendaftaran..."></textarea>
-            <span class="error-text">Pertanyaan tidak boleh kosong!</span>
-        </div>
+            <div class="form-group-wa">
+                <label for="wa-question">Pertanyaan Anda</label>
+                <textarea id="wa-question" rows="4" placeholder="Tulis kendala atau pertanyaan seputar berkas/pendaftaran..."></textarea>
+                <span class="error-text">Pertanyaan tidak boleh kosong!</span>
+            </div>
 
-        <div class="modal-buttons" style="margin-top: 25px;">
-            <button class="btn-cancel" onclick="closeWaModal()">Batal</button>
-            <button class="btn-confirm" style="background: #25d366;" onclick="submitWaForm()">Kirim Chat</button>
+            <div class="modal-buttons" style="margin-top: 25px;">
+                <button class="btn-cancel" onclick="closeWaModal()">Batal</button>
+                <button class="btn-confirm" style="background: #25d366;" onclick="submitWaForm()">Kirim Chat</button>
+            </div>
         </div>
     </div>
-</div>
 
 
     <div class="toast" id="successToast">
@@ -1076,11 +1084,11 @@
     </div>
 
 
-<button class="btn-floating-age" onclick="openAgeModal()" title="Cek Kelayakan Umur Anak">
-    <svg viewBox="0 0 24 24">
-        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z"/>
-    </svg>
-</button>
+    <button class="btn-floating-age" onclick="openAgeModal()" title="Cek Kelayakan Umur Anak">
+        <svg viewBox="0 0 24 24">
+            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z"/>
+        </svg>
+    </button>
 
 
     <button class="btn-floating-wa" onclick="openWaModal()" title="Hubungi Operator WhatsApp">
@@ -1125,184 +1133,188 @@
         let currentTargetUrl = 'https://spmb.makassarkota.go.id/';
         let popupInterval = null; 
 
+        /* --- ENGINE KALKULATOR UMUR ANAK (ALTERNATIF 1: 3 DROPDOWN) --- */
+        const ageCalcModal = document.getElementById('ageCalcModal');
 
-/* --- ENGINE KALKULATOR UMUR ANAK (PER 2 JUNI 2026) --- */
-const ageCalcModal = document.getElementById('ageCalcModal');
+        function openAgeModal() {
+            ageCalcModal.classList.add('active');
+            document.getElementById('age-result').style.display = 'none'; 
+            
+            const dayEl = document.getElementById('birth-day');
+            const monthEl = document.getElementById('birth-month');
+            const yearEl = document.getElementById('birth-year');
+            
+            // Reset pilihan ke default
+            dayEl.value = '';
+            monthEl.value = '';
+            yearEl.value = '';
+            
+            // Bersihkan sisa efek error merah
+            dayEl.classList.remove('error-field', 'error-shake');
+            monthEl.classList.remove('error-field', 'error-shake');
+            yearEl.classList.remove('error-field', 'error-shake');
+        }
 
-function openAgeModal() {
-    ageCalcModal.classList.add('active');
-    document.getElementById('age-result').style.display = 'none'; 
-    
-    const dateInputEl = document.getElementById('birth-date');
-    dateInputEl.value = ''; // Reset tanggal
-    dateInputEl.classList.remove('error-field', 'error-shake'); // Bersihkan sisa error lama
-}
+        function closeAgeModal() {
+            ageCalcModal.classList.remove('active');
+        }
 
-function closeAgeModal() {
-    ageCalcModal.classList.remove('active');
-}
+        function checkAge() {
+            const dayEl = document.getElementById('birth-day');
+            const monthEl = document.getElementById('birth-month');
+            const yearEl = document.getElementById('birth-year');
+            
+            const day = dayEl.value;
+            const month = monthEl.value;
+            const year = yearEl.value;
+            const resultDiv = document.getElementById('age-result');
+            
+            // Bersihkan efek getar/merah sebelumnya
+            dayEl.classList.remove('error-field', 'error-shake');
+            monthEl.classList.remove('error-field', 'error-shake');
+            yearEl.classList.remove('error-field', 'error-shake');
+            
+            // VALIDASI JIKA SALAH SATU ATAU SEMUA DROPDOWN BELUM DIPILIH
+            if (!day || !month || !year) {
+                setTimeout(() => {
+                    if (!day) dayEl.classList.add('error-field', 'error-shake');
+                    if (!month) monthEl.classList.add('error-field', 'error-shake');
+                    if (!year) yearEl.classList.add('error-field', 'error-shake');
+                }, 10);
+                
+                setTimeout(() => {
+                    dayEl.classList.remove('error-shake');
+                    monthEl.classList.remove('error-shake');
+                    yearEl.classList.remove('error-shake');
+                }, 500);
+                return; 
+            }
+            
+            // Buat objek Date berdasarkan input pilihan dropdown
+            const birthDate = new Date(year, month, day);
+            
+            // VALIDASI VALIDITAS TANGGAL NYATA (Mencegah input tidak logis seperti 31 Februari)
+            if (birthDate.getFullYear() != year || birthDate.getMonth() != month || birthDate.getDate() != day) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#fef2f2';
+                resultDiv.style.borderLeft = '4px solid #dc2626';
+                resultDiv.innerHTML = `<p style="margin:0; color:#dc2626; font-weight:600; font-size:13px;">⚠️ Kombinasi tanggal tidak valid! Bulan yang dipilih tidak memiliki tanggal tersebut.</p>`;
+                return;
+            }
+            
+            const targetDate = new Date(2026, 5, 2); // Batas target: 2 Juni 2026
+            
+            // Validasi jika tanggal melampaui target masa depan
+            if (birthDate > targetDate) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = '#fef2f2';
+                resultDiv.style.borderLeft = '4px solid #dc2626';
+                resultDiv.innerHTML = `<p style="margin:0; color:#dc2626; font-weight:600; font-size:13px;">⚠️ Tanggal lahir tidak valid karena melebihi batas perhitungan 2 Juni 2026!</p>`;
+                return;
+            }
+            
+            // Rumus hitung umur presisi (Tahun, Bulan, Hari)
+            let years = targetDate.getFullYear() - birthDate.getFullYear();
+            let months = targetDate.getMonth() - birthDate.getMonth();
+            let daysDiff = targetDate.getDate() - birthDate.getDate();
+            
+            if (daysDiff < 0) {
+                months--;
+                let prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+                daysDiff += prevMonth.getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            // Tampilkan hasil berdasarkan kelayakan umur minimal 6 tahun
+            if (years >= 6) {
+                resultDiv.style.background = '#e8f5e9';
+                resultDiv.style.borderLeft = '4px solid #2e7d32';
+                resultDiv.innerHTML = `
+                    <p style="margin:0; color:#2e7d32; font-weight:700; font-size:14px;">✅ MEMENUHI SYARAT (BISA MENDAFTAR)</p>
+                    <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
+                        Umur anak pada tanggal 2 Juni 2026 adalah:<br>
+                        <strong>${years} Tahun, ${months} Bulan, ${daysDiff} Hari</strong>.
+                    </p>
+                `;
+            } else {
+                resultDiv.style.background = '#fef2f2';
+                resultDiv.style.borderLeft = '4px solid #dc2626';
+                resultDiv.innerHTML = `
+                    <p style="margin:0; color:#dc2626; font-weight:700; font-size:14px;">❌ BELUM CUKUP UMUR</p>
+                    <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
+                        Umur anak pada tanggal 2 Juni 2026 baru:<br>
+                        <strong>${years} Tahun, ${months} Bulan, ${daysDiff} Hari</strong>.<br>
+                        <span style="font-size:12px; color:#64748b; display:block; margin-top:5px;">* Aturan pendaftaran mewajibkan umur anak minimal 6 tahun pada 2 Juni 2026.</span>
+                    </p>
+                `;
+            }
+        }
 
-function checkAge() {
-    const dateInputEl = document.getElementById('birth-date');
-    const dateInput = dateInputEl.value;
-    const resultDiv = document.getElementById('age-result');
-    
-    // Bersihkan sisa-sisa class error sebelumnya jika ada
-    dateInputEl.classList.remove('error-field', 'error-shake');
-    
-    // JIKA TANGGAL KOSONG (Kombinasi Getar & Merah hanya pada input ini)
-    if (!dateInput) {
-        // Gunakan setTimeout 10ms agar browser sempat memicu ulang animasi getar
-        setTimeout(() => {
-            dateInputEl.classList.add('error-field', 'error-shake');
-        }, 10);
+        /* --- FLOATING WA MODAL LOGIC --- */
+        function openWaModal() {
+            waFormModal.classList.add('active'); 
+            const errorElements = waFormModal.querySelectorAll('.error-field, .error-shake');
+            errorElements.forEach(element => {
+                element.classList.remove('error-field', 'error-shake');
+            });
+        }
         
-        // Bersihkan efek getar saja setelah 500ms agar bisa bergetar lagi saat diklik ulang
-        setTimeout(() => {
-            dateInputEl.classList.remove('error-shake');
-        }, 500);
-        
-        return; // Hentikan eksekusi
-    }
-    
-    const birthDate = new Date(dateInput);
-    const targetDate = new Date(2026, 5, 2); // 2 Juni 2026
-    
-    // Validasi jika tanggal melampaui target
-    if (birthDate > targetDate) {
-        resultDiv.style.display = 'block';
-        resultDiv.style.background = '#fef2f2';
-        resultDiv.style.borderLeft = '4px solid #dc2626';
-        resultDiv.innerHTML = `<p style="margin:0; color:#dc2626; font-weight:600; font-size:13px;">⚠️ Tanggal lahir tidak valid karena melebihi batas 2 Juni 2026!</p>`;
-        return;
-    }
-    
-    // Rumus hitung umur presisi
-    let years = targetDate.getFullYear() - birthDate.getFullYear();
-    let months = targetDate.getMonth() - birthDate.getMonth();
-    let days = targetDate.getDate() - birthDate.getDate();
-    
-    if (days < 0) {
-        months--;
-        let prevMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
-        days += prevMonth.getDate();
-    }
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
-    
-    resultDiv.style.display = 'block';
-    
-    if (years >= 6) {
-        resultDiv.style.background = '#e8f5e9';
-        resultDiv.style.borderLeft = '4px solid #2e7d32';
-        resultDiv.innerHTML = `
-            <p style="margin:0; color:#2e7d32; font-weight:700; font-size:14px;">✅ MEMENUHI SYARAT (BISA MENDAFTAR)</p>
-            <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
-                Umur anak pada tanggal 2 Juni 2026 adalah:<br>
-                <strong>${years} Tahun, ${months} Bulan, ${days} Hari</strong>.
-            </p>
-        `;
-    } else {
-        resultDiv.style.background = '#fef2f2';
-        resultDiv.style.borderLeft = '4px solid #dc2626';
-        resultDiv.innerHTML = `
-            <p style="margin:0; color:#dc2626; font-weight:700; font-size:14px;">❌ BELUM CUKUP UMUR</p>
-            <p style="margin:6px 0 0 0; color:var(--text-dark); font-size:13px; line-height:1.5;">
-                Umur anak pada tanggal 2 Juni 2026 baru:<br>
-                <strong>${years} Tahun, ${months} Bulan, ${days} Hari</strong>.<br>
-                <span style="font-size:12px; color:#64748b; display:block; margin-top:5px;">* Aturan pendaftaran mewajibkan umur anak minimal 6 tahun pada 2 Juni 2026.</span>
-            </p>
-        `;
-    }
-}
-
-
-        /* --- NEW: FLOATING WA MODAL LOGIC --- */
-function openWaModal() {
-    // 1. Membuka modal WA (sesuai dengan kode lama Anda)
-    waFormModal.classList.add('active'); 
-    
-    // 2. Cari semua input yang sedang berwarna merah/error di dalam modal WA, lalu bersihkan
-    const errorElements = waFormModal.querySelectorAll('.error-field, .error-shake');
-    errorElements.forEach(element => {
-        element.classList.remove('error-field', 'error-shake');
-    });
-
-    // 3. (Opsional) Jika Anda juga ingin mengosongkan isi ketikan teks-nya setiap kali dibuka:
-    /*
-    const inputs = waFormModal.querySelectorAll('input, textarea, select');
-    inputs.forEach(input => {
-        input.value = '';
-    });
-    */
-}
         function closeWaModal() {
             waFormModal.classList.remove('active');
         }
 
         function submitWaForm() {
-    const nameInput = document.getElementById('wa-name');
-    const questionInput = document.getElementById('wa-question');
+            const nameInput = document.getElementById('wa-name');
+            const questionInput = document.getElementById('wa-question');
 
-    const name = nameInput.value.trim();
-    const question = questionInput.value.trim();
+            const name = nameInput.value.trim();
+            const question = questionInput.value.trim();
+            let isValid = true;
 
-    let isValid = true;
+            nameInput.classList.remove('error-field', 'error-shake');
+            questionInput.classList.remove('error-field', 'error-shake');
 
-    // Bersihkan sisa-sisa class error sebelumnya jika ada
-    nameInput.classList.remove('error-field', 'error-shake');
-    questionInput.classList.remove('error-field', 'error-shake');
+            if (name === "") {
+                setTimeout(() => { nameInput.classList.add('error-field', 'error-shake'); }, 10);
+                isValid = false;
+            }
 
-    // Validasi input Nama
-    if (name === "") {
-        setTimeout(() => { nameInput.classList.add('error-field', 'error-shake'); }, 10);
-        isValid = false;
-    }
+            if (question === "") {
+                setTimeout(() => { questionInput.classList.add('error-field', 'error-shake'); }, 10);
+                isValid = false;
+            }
 
-    // Validasi input Pertanyaan
-    if (question === "") {
-        setTimeout(() => { questionInput.classList.add('error-field', 'error-shake'); }, 10);
-        isValid = false;
-    }
+            if (!isValid) {
+                setTimeout(() => {
+                    nameInput.classList.remove('error-shake');
+                    questionInput.classList.remove('error-shake');
+                }, 500);
+                return;
+            }
 
-    // Jika ada yang tidak valid, stop eksekusi dan bersihkan efek getar setelah 500ms
-    if (!isValid) {
-        setTimeout(() => {
-            nameInput.classList.remove('error-shake');
-            questionInput.classList.remove('error-shake');
-        }, 500);
-        return;
-    }
+            const operatorNumber = "6282395223314";
+            const message = `Halo Admin/Operator SPMB UPT SPF SD Negeri Kakatua Makassar.\n\n*Nama:* ${name}\n*Pertanyaan:* ${question}`;
+            const encodedMessage = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${operatorNumber}?text=${encodedMessage}`;
 
-    // PROSES JIKA FORM VALID
-    const operatorNumber = "6282395223314";
-    const message = `Halo Admin/Operator SPMB UPT SPF SD Negeri Kakatua Makassar.\n\n*Nama:* ${name}\n*Pertanyaan:* ${question}`;
-    const encodedMessage = encodeURIComponent(message);
-    const waUrl = `https://wa.me/${operatorNumber}?text=${encodedMessage}`;
+            window.open(waUrl, '_blank');
+            closeWaModal();
 
-    window.open(waUrl, '_blank');
-    closeWaModal();
+            nameInput.value = "";
+            questionInput.value = "";
+        }
 
-    // Reset isi form
-    nameInput.value = "";
-    questionInput.value = "";
-}
-
-// --- UX IMPROVEMENT: Hilangkan warna merah secara real-time saat user mulai mengetik ---
-document.getElementById('wa-name').addEventListener('input', function() {
-    this.classList.remove('error-field');
-});
-
-// Hilangkan warna merah secara real-time saat user selesai memilih tanggal
-document.getElementById('birth-date').addEventListener('change', function() {
-    this.classList.remove('error-field');
-});
-
-document.getElementById('wa-question').addEventListener('input', function() {
-    this.classList.remove('error-field');
-});
+        // Real-time UI feedback untuk menghilangkan tanda merah saat mulai diubah
+        document.getElementById('wa-name').addEventListener('input', function() { this.classList.remove('error-field'); });
+        document.getElementById('wa-question').addEventListener('input', function() { this.classList.remove('error-field'); });
+        document.getElementById('birth-day').addEventListener('change', function() { this.classList.remove('error-field'); });
+        document.getElementById('birth-month').addEventListener('change', function() { this.classList.remove('error-field'); });
+        document.getElementById('birth-year').addEventListener('change', function() { this.classList.remove('error-field'); });
 
         function openAnnouncementPopup(namaJalur, targetDateStr) {
             document.getElementById('popupJalurTitle').innerText = "Pengumuman Hasil Seleksi • " + namaJalur;
@@ -1357,10 +1369,30 @@ document.getElementById('wa-question').addEventListener('input', function() {
             infoLoadModal.classList.remove('active');
         }
 
+        /* --- GENERATOR ISI OTO-DROPDOWN HARI & TAHUN SAAT WEBSITE DIBUKA --- */
         window.addEventListener('load', function() {
             setTimeout(() => {
                 infoLoadModal.classList.add('active');
             }, 600); 
+
+            // Isi Dropdown Hari otomatis (1-31)
+            const daySelect = document.getElementById('birth-day');
+            for (let i = 1; i <= 31; i++) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                daySelect.appendChild(opt);
+            }
+
+            // Isi Dropdown Tahun otomatis mundur (2026 down to 2006)
+            const yearSelect = document.getElementById('birth-year');
+            const currentYear = 2026;
+            for (let i = currentYear; i >= currentYear - 20; i--) {
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = i;
+                yearSelect.appendChild(opt);
+            }
         });
 
         function openModal(url = 'https://spmb.makassarkota.go.id/') {
