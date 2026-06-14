@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data GTK - UPT SPF SDN KAKATUA</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
+            
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-700 p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                        <i class="fa-solid fa-school text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">Data GTK</h1>
+                        <p class="text-indigo-100 text-sm mt-1 font-medium">UPT SPF SDN KAKATUA</p>
+                    </div>
+                </div>
+                <button onclick="fetchData()" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg backdrop-blur-sm transition-all flex items-center gap-2 text-sm font-medium">
+                    <i class="fa-solid fa-arrows-rotate"></i> Sinkronisasi Data
+                </button>
+            </div>
+
+            <div class="p-6 border-b border-slate-100 flex flex-wrap gap-3 justify-between items-center bg-slate-50/50">
+                <h2 class="font-semibold text-slate-700 flex items-center gap-2">
+                 </h2>
+                <div class="flex gap-3">
+                    <button onclick="exportExcel()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium shadow-sm">
+                        <i class="fa-solid fa-file-excel"></i> Export XLSX
+                    </button>
+                    <button onclick="exportPDF()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg transition-all flex items-center gap-2 text-sm font-medium shadow-sm">
+                        <i class="fa-solid fa-file-pdf"></i> Export PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full overflow-x-auto custom-scrollbar p-6">
+                <table id="gtk-table" class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-indigo-50/80 text-indigo-900 border-y border-indigo-100">
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-center rounded-l-lg w-16">No.</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Nama Lengkap</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-center">Jenis Kepegawaian</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">NIK</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider">Tgl Lahir</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider text-center">JK</th>
+                            <th class="py-3 px-4 font-semibold text-xs uppercase tracking-wider rounded-r-lg">No Telp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm">
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                <i class="fa-solid fa-circle-info text-2xl mb-2 text-slate-300 block"></i>
+                                Memulai aplikasi... Memuat data terurut secara otomatis.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        
+        <div class="mt-6 text-center text-sm text-slate-400">
+            &copy; <span id="year"></span> UPT SPF SDN KAKATUA. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // URL Web App GAS Anda
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwLMFDWJ5FRThmwPwIi2jRsm71PEFZSmI-xeUY52pweIQy5fwqX0MHDxhFr9VWliL27/exec'; 
+
+        async function fetchData() {
+            Swal.fire({
+                title: 'Sinkronisasi Data...',
+                html: 'Mengambil data dari database SDN Kakatua...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch(API_URL, { method: 'GET', redirect: 'follow' });
+                if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    renderTable(result.data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil Diurutkan!',
+                        text: `${result.data.length} data GTK berhasil diambil.`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    throw new Error(result.message || "Gagal memproses data.");
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Memuat!',
+                    html: `<div class="text-left text-xs bg-slate-100 p-3 rounded font-mono text-rose-600 mb-3 overflow-x-auto">${error.message}</div>`
+                });
+            }
+        }
+
+        // Fungsi pembaca kolom pintar (Mengabaikan sensitivitas huruf besar/kecil & spasi liar)
+        function getValue(obj, exactKeys, fallbackKeywords = []) {
+            for (let k of exactKeys) {
+                let foundKey = Object.keys(obj).find(key => key.toLowerCase().trim() === k.toLowerCase().trim());
+                if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== '') {
+                    return obj[foundKey];
+                }
+            }
+            for (let kw of fallbackKeywords) {
+                let foundKey = Object.keys(obj).find(key => key.toLowerCase().includes(kw.toLowerCase()));
+                if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== '') {
+                    return obj[foundKey];
+                }
+            }
+            return '-';
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-medium">Sheet terbaca, tapi data kosong.</td></tr>`;
+                return;
+            }
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100 hover:bg-slate-50/80 transition-colors";
+                
+                // Mengambil nilai menggunakan Smart Column Detector
+                const nama = getValue(row, ['Nama', 'Nama Lengkap', 'Nama GTK'], ['nama']);
+                const nik = getValue(row, ['NIK', 'No. NIK'], ['nik']);
+                const tglLahir = getValue(row, ['Tgl Lahir', 'Tanggal Lahir'], ['lahir', 'tgl']);
+                const jk = getValue(row, ['Jenis Kelamin', 'JK', 'Kelamin'], ['jk', 'kelamin']);
+                const telp = getValue(row, ['No Telp', 'No HP', 'Telepon'], ['telp', 'hp', 'wa']);
+                const kepegawaian = getValue(row, ['Jenis Kepegawaian', 'Status Kepegawaian', 'Kepegawaian', 'Status'], ['pegawai', 'status']);
+
+                // Pembuatan badge warna kustom berdasarkan teks kepegawaian asli yang didapat
+                let badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700"><i class="fa-solid fa-user mr-1"></i>${kepegawaian}</span>`;
+                const kpLow = kepegawaian.toLowerCase().trim();
+                
+                if (kpLow === 'pns') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700"><i class="fa-solid fa-id-card mr-1"></i>PNS</span>`;
+                } else if (kpLow === 'pppk') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700"><i class="fa-solid fa-briefcase mr-1"></i>PPPK</span>`;
+                } else if (kpLow === 'pppk pw') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-700"><i class="fa-solid fa-user-tie mr-1"></i>PPPK PW</span>`;
+                } else if (kpLow === 'non asn') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700"><i class="fa-solid fa-user-clock mr-1"></i>NON ASN</span>`;
+                } else if (kpLow === 'penjaga keamanan') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700"><i class="fa-solid fa-shield-halved mr-1"></i>Penjaga Keamanan</span>`;
+                } else if (kpLow === 'petugas kebersihan') {
+                    badgePegawai = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-broom mr-1"></i>Petugas Kebersihan</span>`;
+                }
+
+                // Format badge jenis kelamin
+                let jkBadge = `<span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-600">${jk}</span>`;
+                if(jk.toLowerCase().startsWith('l')) jkBadge = `<span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-600">L</span>`;
+                if(jk.toLowerCase().startsWith('p')) jkBadge = `<span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-pink-50 text-pink-600">P</span>`;
+                
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 text-center text-slate-400 font-semibold">${index + 1}</td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-700">${nama}</td>
+                    <td class="py-3.5 px-4 text-center">${badgePegawai}</td>
+                    <td class="py-3.5 px-4 text-slate-600 font-mono tracking-wider text-xs">${nik}</td>
+                    <td class="py-3.5 px-4 text-slate-600 text-xs">${tglLahir}</td>
+                    <td class="py-3.5 px-4 text-center">${jkBadge}</td>
+                    <td class="py-3.5 px-4 text-slate-600 text-xs"><i class="fa-brands fa-whatsapp text-emerald-500 mr-1 text-sm align-middle"></i>${telp}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportExcel() {
+            const table = document.getElementById('gtk-table');
+            if (table.rows.length <= 1 || table.innerText.includes("Memulai aplikasi")) {
+                Swal.fire('Gagal Export', 'Tidak ada data valid untuk diunduh.', 'warning');
+                return;
+            }
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Data GTK Terurut"});
+            XLSX.writeFile(wb, "Data_GTK_Terurut_SDN_KAKATUA.xlsx");
+            Swal.fire({ icon: 'success', title: 'Sukses Export Excel', text: 'File .xlsx berhasil diunduh.', timer: 1500, showConfirmButton: false });
+        }
+
+        function exportPDF() {
+            const table = document.getElementById('gtk-table');
+            if (table.rows.length <= 1 || table.innerText.includes("Memulai aplikasi")) {
+                Swal.fire('Gagal Export', 'Tidak ada data valid untuk diunduh.', 'warning');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); 
+            
+            doc.setFontSize(15);
+            doc.setFont("helvetica", "bold");
+            doc.text("DATA GTK TERURUT - UPT SPF SDN KAKATUA", 14, 18);
+            
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100);
+            doc.text(`Dicetak Otomatis Sistem pada: ${new Date().toLocaleString('id-ID')} WITA`, 14, 24);
+
+            doc.autoTable({
+                html: '#gtk-table',
+                startY: 30,
+                theme: 'grid',
+                styles: { font: "helvetica", fontSize: 9, cellPadding: 2.5 },
+                headStyles: { fillColor: [79, 70, 229], textColor: 255, halign: 'center', fontStyle: 'bold' },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 10 },
+                    2: { halign: 'center', fontStyle: 'bold' },
+                    3: { font: "courier" }, 
+                    5: { halign: 'center' }
+                }
+            });
+
+            doc.save("Data_GTK_Terurut_SDN_KAKATUA.pdf");
+            Swal.fire({ icon: 'success', title: 'Sukses Export PDF', text: 'File .pdf terurut berhasil diunduh.', timer: 1500, showConfirmButton: false });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (API_URL !== '' && !API_URL.includes('MASUKKAN_URL')) {
+                fetchData();
+            }
+        });
+    </script>
+</body>
+</html>
