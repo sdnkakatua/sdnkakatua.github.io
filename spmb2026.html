@@ -954,16 +954,11 @@
                 </ul>
 				
                 <p style="margin-bottom: 5px; font-weight: 600; color: #2e7d32; background: var(--primary-light); padding: 12px; border-radius: 12px; border-left: 6px solid var(--primary); margin-top: 15px;">
-				📌 Agenda Hari Ini: 18 Juni 2026</p>
-                <ul style="padding-left: 20px; margin-bottom: 15px; line-height: 1.6; font-size: 13px;">
-                    <li><strong>PENGUMUMAN Jalur Non-Domisili</strong></li>
-					<ul style="padding-left: 13px; margin-bottom: 15px; line-height: 1.6; font-size: 13px;">
-                   			   
-						<li>Silahkan buka<strong> Akun</strong> masing-masing untuk cek <strong>Pengumuman</strong></li>
-                </ul>
-					
-					
-                </ul>
+    📌 Agenda Hari Ini: <span id="tanggal"></span>
+  </p>
+  <ul id="agenda" style="padding-left: 20px; margin-bottom: 15px; line-height: 1.5; font-size: 13px;">
+    <!-- Agenda akan diisi otomatis -->
+  </ul>
                 
                     <p style="margin: 0; color: var(--primary); font-weight: 600; background: var(--primary-light); padding: 12px; border-radius: 12px; border-left: 6px solid var(--primary); margin-top: 15px;">⚠️ PERHATIAN KHUSUS:</p>
                     <p style="margin: 5px 0 0 0; margin-left: 15px; color: var(--text-dark); font-size: 12.5px;">Pastikan bahwa<strong> Nomor Telepon </strong>yang Anda gunakan saat pendaftaran adalah<strong> Nomor Pribadi </strong>dan<strong> Aktif Whatsapp </strong>agar seluruh proses SPMB dapat berjalan dengan lancar.</p>
@@ -1434,6 +1429,67 @@
             if (event.target == waFormModal) closeWaModal();
 			if (event.target == ageCalcModal) closeAgeModal();
         }
+		
+		
+		 // Ambil tanggal hari ini
+    const today = new Date();
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    const formattedDate = today.toLocaleDateString('id-ID', options);
+    document.getElementById("tanggal").textContent = formattedDate;
+
+    // Agenda berdasarkan tanggal
+    const agendaList = {
+      "18 Juni 2026": [
+        "PENGUMUMAN Jalur <strong>Non-Domisili</strong><br>Login pada <strong>Akun SPMB Anda</strong> untuk cek Pengumuman"
+      ],
+      "19 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+	  "20 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+      "21 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+	  "22 Juni 2026": [
+        "PENDAFTARAN Jalur <strong>Domisili</strong><br>Login pada <strong>Akun SPMB Anda</strong> untuk mendaftar"
+      ],
+      "23 Juni 2026": [
+        "PENDAFTARAN Jalur <strong>Domisili</strong><br>Login pada <strong>Akun SPMB Anda</strong> untuk mendaftar"
+      ],
+	  "24 Juni 2026": [
+        "PENDAFTARAN Jalur <strong>Domisili</strong><br>Login pada <strong>Akun SPMB Anda</strong> untuk mendaftar"
+      ],
+      "25 Juni 2026": [
+        "PENDAFTARAN Jalur <strong>Domisili</strong><br>Login pada <strong>Akun SPMB Anda</strong> untuk mendaftar"
+      ],
+      "26 Juni 2026": [
+        "PENDAFTARAN Jalur <strong>Domisili HARI TERAKHIR</strong><br>Jangan lupa <strong>SELESAIKAN PENDAFTARAN</strong> pada Akun SPMB Anda"
+      ],
+      "27 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+	  "28 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+	  "29 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ],
+	  "30 Juni 2026": [
+        "<strong>Pendaftaran Ulang</strong><br>Pantau Info <strong>Panitia SPMB</strong> terkait <strong>Jadwal Daftar Ulang</strong>"
+      ]
+    };
+
+    const agenda = agendaList[formattedDate] || ["Tidak ada agenda khusus hari ini"];
+    const agendaContainer = document.getElementById("agenda");
+
+    agenda.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `${item}`;
+      agendaContainer.appendChild(li);
+    });
+		
+		
 
         /* --- SCRIPT COUNTDOWN JALUR --- */
         function updateCountdowns() {
