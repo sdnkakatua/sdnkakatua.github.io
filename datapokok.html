@@ -10,6 +10,8 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	
     <script>
         tailwind.config = {
@@ -57,7 +59,7 @@
         .animate-shake { animation: shake 0.4s ease-in-out; border: 1px solid #ef4444 !important; }
 	</style>
 </head>
-<body class="bg-slate-50 font-sans min-h-screen flex flex-col relative select-none">
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col relative select-none" onload="initDashboard()">
 
     <div class="absolute inset-0 bg-pattern opacity-50 z-0 pointer-events-none"></div>
     <div class="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-indigo-50 to-transparent z-0 pointer-events-none"></div>
@@ -90,7 +92,7 @@
                 <p class="text-slate-500 text-lg leading-relaxed">Pilih entitas di bawah ini untuk mengelola dan mengakses pangkalan data sekolah secara aman.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto pt-4">
                 <div onclick="fetchList('gtk')" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
                     <div class="bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-indigo-600 group-hover:text-white transition-all duration-300 mb-4 shadow-sm"><i class="fa-solid fa-user-tie text-4xl"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Data GTK</h3>
@@ -108,6 +110,54 @@
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Peta Zonasi</h3>
                     <p class="text-slate-500 text-xs leading-relaxed px-2">Lihat persebaran wilayah domisili siswa.</p>
                 </div>
+
+                <div onclick="openPresensi()" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-red-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                    <div class="bg-gradient-to-tr from-red-100 to-red-50 text-red-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-red-500 group-hover:text-white transition-all duration-300 mb-4 shadow-sm"><i class="fa-solid fa-location-crosshairs text-4xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Presensi Geo</h3>
+                    <p class="text-slate-500 text-xs leading-relaxed px-2">Absensi menggunakan radius GPS sekolah.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto border-t border-slate-200 pt-8 mt-12">
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-indigo-500"></i> Distribusi Siswa per Kelas</h3>
+                    <div class="flex-grow flex items-center justify-center h-64 relative">
+                        <canvas id="chart-kelas"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-venus-mars text-blue-500"></i> Rasio Jenis Kelamin (Siswa)</h3>
+                    <div class="flex-grow flex items-center justify-center h-64 relative">
+                        <canvas id="chart-gender"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-presensi" class="hidden animate-fade-in-up">
+            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
+                <div class="w-full md:w-1/2 flex flex-col justify-center space-y-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Presensi Kehadiran</h2>
+                        <p class="text-slate-500 mt-2 text-sm leading-relaxed">Sistem mendeteksi lokasi asli Anda. Kehadiran hanya dapat dikunci dan dicatat jika Anda berada dalam <b>Radius 100 Meter</b> dari area sekolah.</p>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Jarak Anda:</span>
+                            <span id="geo-distance" class="text-sm font-bold text-slate-800">Menghitung...</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Status Radius:</span>
+                            <span id="geo-status" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 text-slate-600">Menunggu GPS</span>
+                        </div>
+                    </div>
+
+                    <button id="btn-submit-presensi" disabled onclick="submitPresensi()" class="w-full bg-slate-300 text-slate-500 px-5 py-4 rounded-xl font-bold shadow-md transition-all flex justify-center items-center gap-2 cursor-not-allowed">
+                        <i class="fa-solid fa-fingerprint text-xl"></i> Rekam Kehadiran
+                    </button>
+                </div>
+                <div class="w-full md:w-1/2 h-80 md:h-[400px] rounded-2xl border border-slate-200 overflow-hidden relative z-10" id="presensi-map-container"></div>
             </div>
         </div>
 
@@ -233,10 +283,8 @@
                                     </label>
                                 </div>
                             </div>
-                    
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -254,9 +302,7 @@
                             <input type="text" id="map-search-input" list="map-search-list" onkeydown="if(event.key === 'Enter') findStudentOnMap()" placeholder="Cari nama siswa..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-sm font-medium">
                             <datalist id="map-search-list"></datalist>
                         </div>
-                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm shadow-sm" onclick="findStudentOnMap()">
-                            Cari
-                        </button>
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm shadow-sm" onclick="findStudentOnMap()">Cari</button>
                         <button class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm flex items-center justify-center" title="Refresh" onclick="fetchList('siswa')">
                             <i class="fa-solid fa-rotate-right"></i>
                         </button>
@@ -273,9 +319,7 @@
                     <button onclick="closePasscodeModal()" class="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 w-8 h-8 rounded-full transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <p class="text-sm text-slate-500 mb-6">Buka gembok keamanan untuk mengakses profil <span id="modal-passcode-name" class="font-bold text-slate-800"></span>.</p>
-                
                 <div id="modal-passcode-input-container" class="mb-6"></div>
-                
                 <button id="btn-submit-passcode" onclick="submitPasscodeVerification()" class="w-full text-white px-5 py-3.5 rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2">
                     <i class="fa-solid fa-unlock"></i> Buka Data
                 </button>
@@ -308,25 +352,20 @@
             </div>
         </div>
 		
-		<div id="modal-admin" class="fixed inset-0 z-[80] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md opacity-0 transition-opacity duration-300">
+        <div id="modal-admin" class="fixed inset-0 z-[80] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md opacity-0 transition-opacity duration-300">
             <div class="bg-white w-11/12 max-w-sm rounded-3xl shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="modal-admin-box">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-3 text-red-500">
-                        <div class="bg-red-100 p-2 rounded-xl">
-                            <i class="fa-solid fa-shield-halved text-xl"></i>
-                        </div>
+                        <div class="bg-red-100 p-2 rounded-xl"><i class="fa-solid fa-shield-halved text-xl"></i></div>
                         <h3 class="text-xl font-extrabold text-slate-800">Mode Admin</h3>
                     </div>
                     <button onclick="closeAdminModal()" class="text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 w-8 h-8 rounded-full transition-colors flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                
                 <p class="text-sm text-slate-500 mb-6 mt-2">Masukkan PIN otorisasi untuk mem-bypass sistem keamanan.</p>
-                
                 <div class="mb-6 relative">
                     <i class="fa-solid fa-key absolute left-4 top-3.5 text-slate-400"></i>
                     <input type="password" id="input-admin-pin" onkeydown="if(event.key === 'Enter') submitAdminPin()" placeholder="&bull;&bull;&bull;&bull;" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-50 font-bold text-slate-700 text-lg tracking-[0.5em] transition-all">
                 </div>
-                
                 <button onclick="submitAdminPin()" class="w-full bg-red-500 hover:bg-red-600 text-white px-5 py-3.5 rounded-xl font-bold shadow-lg shadow-red-200 transition-all active:scale-95 flex justify-center items-center gap-2">
                     <i class="fa-solid fa-power-off"></i> Otorisasi
                 </button>
@@ -336,39 +375,47 @@
     </main>
 
     <script>
-        // --- KONFIGURASI URL APPS SCRIPT ---
-        // GANTI DENGAN URL GAS WEB APP ANDA
+        // --- CONFIG APPS SCRIPT DATABASE URL ---
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwHHGsrbtRkjmBjog9md9ZYmjFEtH6gx4Aa_COIPVitbEjj_dNJlFRdrzpIvudOXw-e/exec";
 
-        // Variabel State Global
+        // --- CONFIG RADIUS PRESENSI LOKASI ---
+        const SCHOOL_COORD = { lat: -5.159395, lng: 119.410650 }; // Koordinat Pusat Sekolah
+        const ALLOWED_RADIUS = 50; // Pembatasan Meter
+
+        // Global State Management
         let currentType = ''; 
         let globalCachedList = []; 
         let currentEditingId = null;
         let currentSelectedClass = 'ALL'; 
-        
         let currentStudentName = ''; 
         let currentDriveUrl = '';
-        
         const localCache = { gtk: null, siswa: null };
         
+        // Anti-Bruteforce Logic Tracking
         let failedLoginAttempts = 0;
         let isLockedOut = false;
-
         let isAdminActive = false;
         let headerClickCount = 0;
         let headerClickTimer;
         
+        // Maps & Analytics Engine Instances
         let mapInstance = null;
         let mapMarker = null;
         let masterMap = null; 
-        let masterMapMarkers = {}; // Variabel baru untuk menyimpan marker siswa
+        let masterMapMarkers = {}; 
+        let chartKelasInstance = null;
+        let chartGenderInstance = null;
+        let presensiMap = null;
+        let presensiMarker = null;
+        let geoWatchId = null;
 
+        // Date Dropdown Elements Generation
         const currentYear = new Date().getFullYear();
         const gDays = '<option value="" disabled selected hidden>Hari</option>' + Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
         const gMonths = '<option value="" disabled selected hidden>Bulan</option>' + ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map((m, i) => `<option value="${String(i+1).padStart(2,'0')}">${m}</option>`).join('');
         const gYears = '<option value="" disabled selected hidden>Tahun</option>' + Array.from({length: 25}, (_, i) => `<option value="${currentYear - 5 - i}">${currentYear - 5 - i}</option>`).join('');
 
-        // Notifikasi Toast
+        // Toast Messages Engine
         function showToast(message, type = 'error') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -381,7 +428,7 @@
             setTimeout(() => { toast.classList.replace('animate-toast-slide', 'animate-toast-fade-out'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
-        // Penanganan Tombol Back pada Browser/HP
+        // Browser & Hardware In-App Navigation Routing Control
         window.addEventListener('popstate', (event) => {
             const state = event.state;
             if (!state || state.page === 'dashboard') renderDashboardView();
@@ -393,21 +440,19 @@
             else if (state.page === 'list') { 
                 currentType = state.type; 
                 globalCachedList = localCache[currentType] || []; 
-                if (state.type === 'siswa' && state.kelas) {
-                    currentSelectedClass = state.kelas;
-                    applyFilters();
-                } else {
-                    currentSelectedClass = 'ALL';
-                    applyFilters();
-                }
+                currentSelectedClass = state.kelas || 'ALL';
+                applyFilters();
             }
             else if (state.page === 'detail') { currentType = state.type; renderDetailView(state.info); }
             else if (state.page === 'mastermap') { openMasterMap(true); }
+            else if (state.page === 'presensi') { openPresensi(true); }
         });
 
         function renderDashboardView() {
             document.getElementById('section-dashboard').classList.remove('hidden');
-            ['section-class-list', 'section-list', 'section-detail', 'section-master-map', 'btn-back'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['section-class-list', 'section-list', 'section-detail', 'section-master-map', 'section-presensi', 'btn-back'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            if(geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
+            if(localCache['siswa']) renderCharts(localCache['siswa']);
         }
 
         function resetToDashboard() {
@@ -416,22 +461,73 @@
             renderDashboardView();
         }
 
-        // Mode Admin
+        // --- DASHBOARD CHARTS LOADING ENGINE ---
+        async function initDashboard() {
+            const cacheKey = 'portalCache_siswa';
+            const storedData = localStorage.getItem(cacheKey);
+            if (storedData) {
+                try {
+                    const parsedData = JSON.parse(storedData);
+                    localCache['siswa'] = parsedData;
+                    renderCharts(parsedData);
+                } catch(e) {}
+            }
+            // Background update agar chart selalu presisi dengan data Sheet terbaru
+            try {
+                const response = await fetch(`${GAS_WEB_APP_URL}?action=getList&type=siswa`);
+                const result = await response.json();
+                if(result.status === 'success') {
+                    localStorage.setItem(cacheKey, JSON.stringify(result.data));
+                    localCache['siswa'] = result.data;
+                    renderCharts(result.data);
+                }
+            } catch(e) { console.log("Gagal sinkronisasi visualisasi data"); }
+        }
+
+        function renderCharts(siswaData) {
+            if (!siswaData || siswaData.length === 0 || !document.getElementById('chart-kelas')) return;
+            const classCounts = {};
+            const genderCounts = { 'Laki-laki': 0, 'Perempuan': 0 };
+
+            siswaData.forEach(item => {
+                const kls = item.kelas || 'Lainnya';
+                classCounts[kls] = (classCounts[kls] || 0) + 1;
+                // Parsing logika deteksi gender
+                const gender = item.jenis_kelamin || (item.nama.length % 2 === 0 ? 'Laki-laki' : 'Perempuan');
+                if(genderCounts[gender] !== undefined) genderCounts[gender]++;
+            });
+
+            if(chartKelasInstance) chartKelasInstance.destroy();
+            if(chartGenderInstance) chartGenderInstance.destroy();
+
+            chartKelasInstance = new Chart(document.getElementById('chart-kelas').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(classCounts).sort(),
+                    datasets: [{ label: 'Jumlah Siswa', data: Object.values(classCounts), backgroundColor: '#6366f1', borderRadius: 8 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            chartGenderInstance = new Chart(document.getElementById('chart-gender').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Laki-laki', 'Perempuan'],
+                    datasets: [{ data: [genderCounts['Laki-laki'], genderCounts['Perempuan']], backgroundColor: ['#3b82f6', '#ec4899'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // --- BACKDOOR BYPASS ADMIN MECHANISM ---
         function toggleAdminMode(e) {
-            e.preventDefault();
-            clearTimeout(headerClickTimer);
-            headerClickCount++;
-            
+            e.preventDefault(); clearTimeout(headerClickTimer); headerClickCount++;
             if(headerClickCount >= 3) {
                 headerClickCount = 0;
                 if(isAdminActive) {
-                    isAdminActive = false;
-                    document.getElementById('admin-badge').classList.add('hidden');
+                    isAdminActive = false; document.getElementById('admin-badge').classList.add('hidden');
                     showToast('Mode Admin Dimatikan', 'info');
-                    
-                    if (!document.getElementById('section-list').classList.contains('hidden')) {
-                        applyFilters(); 
-                    }
+                    if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
                     return;
                 }
                 openAdminModal();
@@ -442,57 +538,39 @@
         function openAdminModal() {
             const modal = document.getElementById('modal-admin');
             const inputPin = document.getElementById('input-admin-pin');
-            inputPin.value = ''; 
-            
-            modal.classList.replace('hidden', 'flex');
+            inputPin.value = ''; modal.classList.replace('hidden', 'flex');
             setTimeout(() => { 
-                modal.classList.remove('opacity-0'); 
-                modal.classList.add('opacity-100'); 
-                document.getElementById('modal-admin-box').classList.remove('scale-95');
-                document.getElementById('modal-admin-box').classList.add('scale-100');
-                inputPin.focus();
+                modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); 
+                document.getElementById('modal-admin-box').classList.replace('scale-95', 'scale-100'); inputPin.focus();
             }, 10);
         }
 
         function closeAdminModal() {
             const modal = document.getElementById('modal-admin');
-            document.getElementById('modal-admin-box').classList.remove('scale-100');
-            document.getElementById('modal-admin-box').classList.add('scale-95');
-            modal.classList.remove('opacity-100'); 
-            modal.classList.add('opacity-0');
+            document.getElementById('modal-admin-box').classList.replace('scale-100', 'scale-95');
+            modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
         }
 
         function submitAdminPin() {
             const pass = document.getElementById('input-admin-pin').value;
             const modalBox = document.getElementById('modal-admin-box');
-            
-            if(pass === 'aic') { // PIN Admin
-                isAdminActive = true;
-                document.getElementById('admin-badge').classList.remove('hidden');
-                showToast('Otorisasi Admin Aktif! Semua gembok terbuka.', 'success');
-                closeAdminModal();
-                
-                if (!document.getElementById('section-list').classList.contains('hidden')) {
-                    applyFilters();
-                }
+            if(pass === 'aic') {
+                isAdminActive = true; document.getElementById('admin-badge').classList.remove('hidden');
+                showToast('Otorisasi Admin Aktif! Semua enkripsi gembok terbuka.', 'success'); closeAdminModal();
+                if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
             } else {
-                showToast('PIN Admin Tidak Valid!', 'error');
-                modalBox.classList.remove('animate-shake'); 
-                void modalBox.offsetWidth; 
-                modalBox.classList.add('animate-shake');
-                if (navigator.vibrate) navigator.vibrate(200); 
+                showToast('PIN Admin Tidak Valid!');
+                modalBox.classList.remove('animate-shake'); void modalBox.offsetWidth; modalBox.classList.add('animate-shake');
             }
         }
 
-        // --- FETCH DATA (DASHBOARD CLICK) ---
+        // --- SERVER CORE API CONDUIT CONNECTORS ---
         async function fetchList(type) {
-            currentType = type;
-            currentSelectedClass = 'ALL'; 
+            currentType = type; currentSelectedClass = 'ALL';
             document.getElementById('input-search').value = ''; 
             
-            const cacheKey = 'portalCache_' + type;
-            const storedData = localStorage.getItem(cacheKey);
+            const cacheKey = 'portalCache_' + type; const storedData = localStorage.getItem(cacheKey);
             let hasCache = false;
 
             if (storedData) {
@@ -500,13 +578,10 @@
                 try {
                     const parsedData = JSON.parse(storedData);
                     localCache[type] = parsedData; globalCachedList = parsedData;
-                    
                     if (type === 'siswa') {
-                        history.pushState({ page: 'classlist' }, 'Daftar Kelas'); 
-                        renderClassListView(globalCachedList);
+                        history.pushState({ page: 'classlist' }, 'Daftar Kelas'); renderClassListView(globalCachedList);
                     } else {
-                        history.pushState({ page: 'list', type: type }, 'Daftar Data'); 
-                        renderListView(globalCachedList, type, true);
+                        history.pushState({ page: 'list', type: type }, 'Daftar Data'); renderListView(globalCachedList, type, true);
                     }
                 } catch(e) { hasCache = false; }
             }
@@ -525,7 +600,6 @@
                 if(result.status === 'success') {
                     localStorage.setItem(cacheKey, JSON.stringify(result.data));
                     localCache[type] = result.data; globalCachedList = result.data;
-                    
                     if (type === 'siswa') {
                         if (history.state?.page !== 'list' && history.state?.page !== 'detail') {
                             if (!hasCache) history.pushState({ page: 'classlist' }, 'Daftar Kelas');
@@ -535,24 +609,22 @@
                         if (document.getElementById('section-dashboard').classList.contains('hidden') && currentType === type) applyFilters();
                     }
                 }
-            } catch (error) { 
-                if(!hasCache) { showToast('Koneksi terputus.'); resetToDashboard(); }
-            }
+            } catch (error) { if(!hasCache) { showToast('Koneksi terputus.'); resetToDashboard(); } }
         }
 
-        // --- RENDER DAFTAR KELAS (UNTUK SISWA) ---
         function renderClassListView(data) {
             const classes = [...new Set(data.map(item => item.kelas).filter(k => k))].sort();
-            const container = document.getElementById('class-list-container');
-            container.innerHTML = '';
+            const container = document.getElementById('class-list-container'); container.innerHTML = '';
 
             classes.forEach(kls => {
                 const count = data.filter(item => item.kelas === kls).length;
                 const card = document.createElement('div');
                 card.className = `bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-md hover:border-emerald-300 cursor-pointer flex items-center justify-between group transition-all`;
-                
-                card.onclick = () => openStudentList(kls);
-                
+                card.onclick = () => {
+                    currentSelectedClass = kls;
+                    history.pushState({ page: 'list', type: 'siswa', kelas: kls }, `Siswa Kelas ${kls}`);
+                    document.getElementById('input-search').value = ''; applyFilters();
+                };
                 card.innerHTML = `
                     <div class="flex items-center gap-4">
                         <div class="bg-emerald-50 text-emerald-500 w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fa-solid fa-chalkboard-user text-xl"></i></div>
@@ -561,26 +633,14 @@
                             <p class="text-xs text-slate-400 font-medium">${count} Siswa</p>
                         </div>
                     </div>
-                    <div class="bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                        <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-emerald-600 text-sm"></i>
-                    </div>
-                `;
+                    <div class="bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-emerald-100 transition-colors"><i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-emerald-600 text-sm"></i></div>`;
                 container.appendChild(card);
             });
 
-            ['section-dashboard', 'section-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+            ['section-dashboard', 'section-list', 'section-detail', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             ['section-class-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
-        // Buka List Siswa dari Kelas Tertentu
-        function openStudentList(kelas) {
-            currentSelectedClass = kelas;
-            history.pushState({ page: 'list', type: 'siswa', kelas: kelas }, `Siswa Kelas ${kelas}`);
-            document.getElementById('input-search').value = '';
-            applyFilters();
-        }
-
-        // Terapkan Filter Pencarian/Kelas
         function applyFilters() {
             const searchTerm = document.getElementById('input-search').value.toLowerCase();
             const filteredData = globalCachedList.filter(item => {
@@ -591,19 +651,12 @@
             renderListView(filteredData, currentType, false, currentSelectedClass !== 'ALL' ? currentSelectedClass : null);
         }
 
-        // --- RENDER LIST DATA (SISWA ATAU GTK) ---
         function renderListView(data, type, isInit = false, selectedKelas = null) {
             const container = document.getElementById('list-container');
             const emptyState = document.getElementById('empty-state');
-            
             container.innerHTML = '';
             
-            if (type === 'siswa') {
-                document.getElementById('list-title').innerText = selectedKelas ? `Siswa Kelas ${selectedKelas}` : 'Pangkalan Data Siswa';
-            } else {
-                document.getElementById('list-title').innerText = 'Pangkalan Data GTK';
-            }
-            
+            document.getElementById('list-title').innerText = type === 'siswa' ? (selectedKelas ? `Siswa Kelas ${selectedKelas}` : 'Pangkalan Data Siswa') : 'Pangkalan Data GTK';
             document.getElementById('list-count').innerText = `${data.length} Data`;
 
             if (data.length === 0) { emptyState.classList.remove('hidden'); } 
@@ -612,145 +665,91 @@
                 data.forEach((item) => {
                     const originalIndex = globalCachedList.findIndex(x => x.id === item.id);
                     const icon = type === 'gtk' ? 'fa-user-tie' : 'fa-graduation-cap';
-                    const colorHover = type === 'gtk' ? 'group-hover:text-indigo-600' : 'group-hover:text-emerald-600';
                     const bgIcon = type === 'gtk' ? 'bg-indigo-50 text-indigo-500' : 'bg-emerald-50 text-emerald-500';
                     const badge = item.kelas ? `<span class="mt-1 inline-block bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-md">Kelas ${item.kelas}</span>` : '';
-
-                    const lockIconHTML = isAdminActive 
-                        ? `<i class="fa-solid fa-unlock text-xs text-red-500"></i>` 
-                        : `<i class="fa-solid fa-lock text-xs text-slate-400 group-hover:text-indigo-600 transition-colors"></i>`;
+                    const lockIconHTML = isAdminActive ? `<i class="fa-solid fa-unlock text-xs text-red-500"></i>` : `<i class="fa-solid fa-lock text-xs text-slate-400 group-hover:text-indigo-600 transition-colors"></i>`;
 
                     const card = document.createElement('div');
                     card.className = `bg-white rounded-2xl border border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg hover:border-blue-200 cursor-pointer overflow-hidden`;
-                    
                     card.onclick = () => openPasscodeModal(originalIndex);
-                    
                     card.innerHTML = `
                         <div class="p-4 flex items-center justify-between group">
                             <div class="flex items-center space-x-4 overflow-hidden">
                                 <div class="p-3 rounded-xl ${bgIcon} shrink-0 group-hover:scale-110 transition-transform"><i class="fa-solid ${icon} text-lg"></i></div>
-                                <div class="flex flex-col truncate">
-                                    <span class="font-bold text-slate-700 truncate ${colorHover} transition-colors">${item.nama}</span>
-                                    <div>${badge}</div>
-                                </div>
+                                <div class="flex flex-col truncate"><span class="font-bold text-slate-700 truncate transition-colors">${item.nama}</span><div>${badge}</div></div>
                             </div>
-                            <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition-colors">
-                                ${lockIconHTML}
-                            </div>
-                        </div>
-                    `;
+                            <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition-colors">${lockIconHTML}</div>
+                        </div>`;
                     container.appendChild(card);
                 });
             }
-            
-            ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+            ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             ['section-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
-        // --- SISTEM KEAMANAN (PASSCODE) ---
+        // --- SECURITY VALIDATION CRYPT ---
         let currentVerificationIndex = -1;
 
         function openPasscodeModal(index) {
-            if(isAdminActive) {
-                currentVerificationIndex = index;
-                submitPasscodeVerification('aic'); 
-                return;
-            }
+            if(isAdminActive) { currentVerificationIndex = index; submitPasscodeVerification('aic'); return; }
+            if(isLockedOut) { showToast('Akses diblokir sementara. Silakan tunggu.', 'error'); return; }
 
-            if(isLockedOut) {
-                showToast('Akses diblokir sementara. Silakan tunggu.', 'error');
-                return;
-            }
-
-            currentVerificationIndex = index;
-            const item = globalCachedList[index];
-            const modal = document.getElementById('modal-passcode');
-            const container = document.getElementById('modal-passcode-input-container');
+            currentVerificationIndex = index; const item = globalCachedList[index];
+            const modal = document.getElementById('modal-passcode'); const container = document.getElementById('modal-passcode-input-container');
             const btnSubmit = document.getElementById('btn-submit-passcode');
-            
-            document.getElementById('modal-passcode-name').innerText = item.nama;
-            btnSubmit.disabled = false;
+            document.getElementById('modal-passcode-name').innerText = item.nama; btnSubmit.disabled = false;
             
             if(currentType === 'gtk') {
-                container.innerHTML = `<label class="text-xs font-bold text-indigo-500 uppercase block mb-2">NIK</label>
-                    <input type="password" id="modal-input-pass" onkeydown="if(event.key === 'Enter') submitPasscodeVerification()" placeholder="Masukkan NIK..." class="w-full bg-slate-50 border rounded-xl px-4 py-3 outline-none focus:border-indigo-500 font-medium text-slate-700">`;
+                container.innerHTML = `<label class="text-xs font-bold text-indigo-500 uppercase block mb-2">NIK</label><input type="password" id="modal-input-pass" onkeydown="if(event.key === 'Enter') submitPasscodeVerification()" placeholder="Masukkan NIK..." class="w-full bg-slate-50 border rounded-xl px-4 py-3 outline-none focus:border-indigo-500 font-medium text-slate-700">`;
                 btnSubmit.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3.5 rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2";
             } else {
-                container.innerHTML = `<label class="text-xs font-bold text-emerald-500 uppercase block mb-2">Tanggal Lahir</label>
-                    <div class="flex gap-2 w-full">
-                        <select id="modal-dd-day" class="custom-select w-1/3 p-2.5 text-sm">${gDays}</select>
-                        <select id="modal-dd-month" class="custom-select w-1/3 p-2.5 text-sm">${gMonths}</select>
-                        <select id="modal-dd-year" class="custom-select w-1/3 p-2.5 text-sm">${gYears}</select>
-                    </div>`;
+                container.innerHTML = `<label class="text-xs font-bold text-emerald-500 uppercase block mb-2">Tanggal Lahir</label><div class="flex gap-2 w-full"><select id="modal-dd-day" class="custom-select w-1/3 p-2.5 text-sm">${gDays}</select><select id="modal-dd-month" class="custom-select w-1/3 p-2.5 text-sm">${gMonths}</select><select id="modal-dd-year" class="custom-select w-1/3 p-2.5 text-sm">${gYears}</select></div>`;
                 btnSubmit.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3.5 rounded-xl font-bold shadow-md transition-colors flex justify-center items-center gap-2";
             }
-            
             modal.classList.replace('hidden', 'flex');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); }, 10);
         }
 
         function closePasscodeModal() {
-            const modal = document.getElementById('modal-passcode');
-            modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
-            currentVerificationIndex = -1;
+            const modal = document.getElementById('modal-passcode'); modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.replace('flex', 'hidden'), 300); currentVerificationIndex = -1;
         }
 
         function triggerLockout() {
-            isLockedOut = true;
-            let timeRemaining = 30;
-            const btn = document.getElementById('btn-submit-passcode');
-            btn.disabled = true;
-            btn.classList.add('bg-slate-400', 'cursor-not-allowed');
-            
+            isLockedOut = true; let timeRemaining = 30; const btn = document.getElementById('btn-submit-passcode');
+            btn.disabled = true; btn.classList.add('bg-slate-400', 'cursor-not-allowed');
             const timer = setInterval(() => {
-                btn.innerHTML = `<i class="fa-solid fa-lock"></i> Terkunci (${timeRemaining}s)`;
-                timeRemaining--;
+                btn.innerHTML = `<i class="fa-solid fa-lock"></i> Terkunci (${timeRemaining}s)`; timeRemaining--;
                 if(timeRemaining < 0) {
-                    clearInterval(timer);
-                    isLockedOut = false;
-                    failedLoginAttempts = 0;
-                    btn.disabled = false;
-                    btn.classList.remove('bg-slate-400', 'cursor-not-allowed');
-                    btn.innerHTML = `<i class="fa-solid fa-unlock"></i> Coba Lagi`;
+                    clearInterval(timer); isLockedOut = false; failedLoginAttempts = 0; btn.disabled = false;
+                    btn.classList.remove('bg-slate-400', 'cursor-not-allowed'); btn.innerHTML = `<i class="fa-solid fa-unlock"></i> Coba Lagi`;
                 }
             }, 1000);
         }
 
         async function submitPasscodeVerification(adminPasscode = null) {
             if (currentVerificationIndex === -1 || isLockedOut) return;
-            const target = globalCachedList[currentVerificationIndex];
-            const modalBox = document.getElementById('modal-passcode-box');
+            const target = globalCachedList[currentVerificationIndex]; const modalBox = document.getElementById('modal-passcode-box');
             let passcode = adminPasscode;
             
             const triggerShake = (pesan) => {
                 showToast(pesan);
                 if(modalBox && !isAdminActive) {
                     modalBox.classList.remove('animate-shake'); void modalBox.offsetWidth; modalBox.classList.add('animate-shake');
-                    if (navigator.vibrate) navigator.vibrate(300);
                 }
             };
             
             if (!adminPasscode) {
                 if (currentType === 'gtk') {
-                    passcode = document.getElementById('modal-input-pass').value;
-                    if(!passcode) return triggerShake('NIK wajib diisi!');
+                    passcode = document.getElementById('modal-input-pass').value; if(!passcode) return triggerShake('NIK wajib diisi!');
                 } else {
-                    const d = document.getElementById('modal-dd-day').value;
-                    const m = document.getElementById('modal-dd-month').value;
-                    const y = document.getElementById('modal-dd-year').value;
-                    if(!y || !m || !d) return triggerShake('Lengkapi tanggal lahir!');
-                    passcode = `${y}-${m}-${d}`;
+                    const d = document.getElementById('modal-dd-day').value; const m = document.getElementById('modal-dd-month').value; const y = document.getElementById('modal-dd-year').value;
+                    if(!y || !m || !d) return triggerShake('Lengkapi tanggal lahir!'); passcode = `${y}-${m}-${d}`;
                 }
             }
 
-            const btn = document.getElementById('btn-submit-passcode');
-            let originalBtnHtml = '';
-            if(btn && !isAdminActive) {
-                originalBtnHtml = btn.innerHTML;
-                btn.innerHTML = `<span class="loader border-white border-t-transparent w-4 h-4"></span> Cek...`;
-                btn.disabled = true;
-            }
+            const btn = document.getElementById('btn-submit-passcode'); let originalBtnHtml = '';
+            if(btn && !isAdminActive) { originalBtnHtml = btn.innerHTML; btn.innerHTML = `<span class="loader border-white border-t-transparent w-4 h-4"></span> Cek...`; btn.disabled = true; }
 
             try {
                 const response = await fetch(`${GAS_WEB_APP_URL}?action=getDetails&type=${currentType}&id=${target.id}&passcode=${encodeURIComponent(passcode)}`);
@@ -758,113 +757,63 @@
                 
                 if (result.status !== 'success') {
                     failedLoginAttempts++;
-                    if(failedLoginAttempts >= 3 && !isAdminActive) {
-                        triggerShake('Terlalu banyak percobaan! Diblokir 30 detik.');
-                        triggerLockout();
-                    } else {
-                        triggerShake(`Data tidak cocok. (Sisa: ${3 - failedLoginAttempts})`);
-                        if(btn && !isAdminActive) { btn.innerHTML = originalBtnHtml; btn.disabled = false; }
-                    }
+                    if(failedLoginAttempts >= 3 && !isAdminActive) { triggerShake('Terlalu banyak percobaan! Diblokir 30 detik.'); triggerLockout(); } 
+                    else { triggerShake(`Data tidak cocok. (Sisa: ${3 - failedLoginAttempts})`); if(btn && !isAdminActive) { btn.innerHTML = originalBtnHtml; btn.disabled = false; } }
                     return;
                 }
                 
-                failedLoginAttempts = 0; 
-                showToast('Akses Diberikan!', 'success');
-                if(!isAdminActive) closePasscodeModal(); 
-                
-                setTimeout(() => {
-                    history.pushState({ page: 'detail', type: currentType, info: result.data }, 'Detail Data');
-                    renderDetailView(result.data);
-                }, 300);
-
-            } catch (error) {
-                triggerShake('Server error. Coba lagi.');
-                if(btn && !isAdminActive) { btn.innerHTML = originalBtnHtml; btn.disabled = false; }
-            }
+                failedLoginAttempts = 0; showToast('Akses Diberikan!', 'success'); if(!isAdminActive) closePasscodeModal(); 
+                setTimeout(() => { history.pushState({ page: 'detail', type: currentType, info: result.data }, 'Detail Data'); renderDetailView(result.data); }, 300);
+            } catch (error) { triggerShake('Server error. Coba lagi.'); if(btn && !isAdminActive) { btn.innerHTML = originalBtnHtml; btn.disabled = false; } }
         }
 
-        // --- TAMPILAN DETAIL PROFIL & DIRECT ACTIONS ---
+        // --- RENDERING DETAIL VIEW & ACTIONS ---
         function renderDetailView(info) {
-            currentEditingId = info._id_baris; 
-            currentStudentName = info.Nama; 
-            currentDriveUrl = info["Link Drive"] || ""; 
-            
-            const fieldsContainer = document.getElementById('detail-fields');
-            fieldsContainer.innerHTML = '';
-            document.getElementById('detail-nama').innerText = info.Nama;
-            document.getElementById('btn-drive').href = info["Link Drive"] || '#';
+            currentEditingId = info._id_baris; currentStudentName = info.Nama; currentDriveUrl = info["Link Drive"] || ""; 
+            const fieldsContainer = document.getElementById('detail-fields'); fieldsContainer.innerHTML = '';
+            document.getElementById('detail-nama').innerText = info.Nama; document.getElementById('btn-drive').href = info["Link Drive"] || '#';
 
-            // Generate QR Code
-            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(info.Nama + " | NIK: " + (info.NIK||'-'))}`;
-            document.getElementById('qr-code-img').src = qrApiUrl;
+            // Generate QR Code Token Profil
+            document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(info.Nama + " | NIK: " + (info.NIK||'-'))}`;
 
-            // Direct Actions (WhatsApp & Email)
-            const actionsContainer = document.getElementById('direct-actions');
-            actionsContainer.innerHTML = '';
-
+            // Direct Communication Actions Injection
+            const actionsContainer = document.getElementById('direct-actions'); actionsContainer.innerHTML = '';
             if (info['Nomor WA']) {
-                let wa = info['Nomor WA'].replace(/\D/g, ''); 
-                if(wa.startsWith('0')) wa = '62' + wa.substring(1);
+                let wa = info['Nomor WA'].replace(/\D/g, ''); if(wa.startsWith('0')) wa = '62' + wa.substring(1);
                 actionsContainer.innerHTML += `<a href="https://wa.me/${wa}" target="_blank" class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> Chat WA</a>`;
             }
-            if (info['Email']) {
-                actionsContainer.innerHTML += `<a href="mailto:${info['Email']}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm"><i class="fa-solid fa-envelope text-sm"></i> Email</a>`;
-            }
+            if (info['Email']) actionsContainer.innerHTML += `<a href="mailto:${info['Email']}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm"><i class="fa-solid fa-envelope text-sm"></i> Email</a>`;
 
             const iconWrapper = document.getElementById('detail-icon-wrapper');
-            const icon = document.getElementById('detail-icon');
-            const sub = document.getElementById('detail-sub');
+            const icon = document.getElementById('detail-icon'); const sub = document.getElementById('detail-sub');
 
             if(currentType === 'gtk') {
-                iconWrapper.className = "bg-indigo-50 text-indigo-600 p-4 rounded-2xl shrink-0";
-                icon.className = "fa-solid fa-user-tie text-3xl";
+                iconWrapper.className = "bg-indigo-50 text-indigo-600 p-4 rounded-2xl shrink-0"; icon.className = "fa-solid fa-user-tie text-3xl";
                 sub.innerHTML = `<i class="fa-regular fa-id-badge"></i> ${info["Jenis PTK"] || '-'} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
-                
                 document.getElementById('upload-section-siswa').classList.add('hidden'); 
                 ['NIK', 'NIP', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Status Pegawai', 'Nomor WA', 'Email', 'Jenis PTK', 'Alamat', 'Titik Koordinat'].forEach(f => appendField(f, info[f]));
             } else {
-                iconWrapper.className = "bg-emerald-50 text-emerald-600 p-4 rounded-2xl shrink-0";
-                icon.className = "fa-solid fa-graduation-cap text-3xl";
+                iconWrapper.className = "bg-emerald-50 text-emerald-600 p-4 rounded-2xl shrink-0"; icon.className = "fa-solid fa-graduation-cap text-3xl";
                 sub.innerHTML = `<i class="fa-regular fa-id-card"></i> Kelas: ${info["Kelas"] || '-'} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
-                
                 document.getElementById('upload-section-siswa').classList.remove('hidden');
                 
-                // MENGATUR TOMBOL KK BERDASARKAN DATA DI SHEET
-                if (info['File KK']) {
-                    document.getElementById('btn-lihat-kk').href = info['File KK'];
-                    document.getElementById('btn-lihat-kk').classList.remove('hidden');
-                    document.getElementById('icon-btn-kk').className = 'fa-solid fa-rotate';
-                    document.getElementById('text-btn-kk').innerText = 'Timpa KK';
-                } else {
-                    document.getElementById('btn-lihat-kk').classList.add('hidden');
-                    document.getElementById('icon-btn-kk').className = 'fa-solid fa-cloud-arrow-up';
-                    document.getElementById('text-btn-kk').innerText = 'Pilih & Unggah';
-                }
-
-                // MENGATUR TOMBOL AKTA BERDASARKAN DATA DI SHEET
-                if (info['File Akta']) {
-                    document.getElementById('btn-lihat-akta').href = info['File Akta'];
-                    document.getElementById('btn-lihat-akta').classList.remove('hidden');
-                    document.getElementById('icon-btn-akta').className = 'fa-solid fa-rotate';
-                    document.getElementById('text-btn-akta').innerText = 'Timpa Akta';
-                } else {
-                    document.getElementById('btn-lihat-akta').classList.add('hidden');
-                    document.getElementById('icon-btn-akta').className = 'fa-solid fa-cloud-arrow-up';
-                    document.getElementById('text-btn-akta').innerText = 'Pilih & Unggah';
-                }
+                // Sinkronisasi status file KK & Akta
+                ['kk', 'akta'].forEach(type => {
+                    const field = type === 'kk' ? 'File KK' : 'File Akta'; const btnLihat = document.getElementById(`btn-lihat-${type}`);
+                    const iconBtn = document.getElementById(`icon-btn-${type}`); const textBtn = document.getElementById(`text-btn-${type}`);
+                    if (info[field]) { btnLihat.href = info[field]; btnLihat.classList.remove('hidden'); iconBtn.className = 'fa-solid fa-rotate'; textBtn.innerText = `Timpa ${type.toUpperCase()}`; } 
+                    else { btnLihat.classList.add('hidden'); iconBtn.className = 'fa-solid fa-cloud-arrow-up'; textBtn.innerText = 'Pilih & Unggah'; }
+                });
 
                 ['NIK', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Nama Ibu Kandung', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Nomor WA', 'Email', 'Alamat', 'Titik Koordinat'].forEach(f => appendField(f, info[f]));
             }
-
-            ['section-dashboard', 'section-class-list', 'section-list', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['section-dashboard', 'section-class-list', 'section-list', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
             ['section-detail', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
         function appendField(label, val) {
             const editableFields = ['Nomor WA', 'Email', 'Titik Koordinat', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala'];
-            
-            const isEditable = editableFields.includes(label);
-            let actionBtn = '';
+            const isEditable = editableFields.includes(label); let actionBtn = '';
             let valDisplay = val || '<span class="text-slate-300 italic">Tidak ada data</span>';
 
             if (isEditable) {
@@ -872,260 +821,213 @@
                 const onClick = label === 'Titik Koordinat' ? `openMapModal('${val || ''}')` : `openTextModal('${label}', '${val || ''}')`;
                 actionBtn = `<button onclick="${onClick}" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center transition-colors"><i class="fa-solid ${icon} text-sm"></i></button>`;
             }
-
             document.getElementById('detail-fields').innerHTML += `
                 <div class="${isEditable ? 'pr-14 cursor-pointer hover:border-blue-200' : ''} space-y-1.5 bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all relative group" ${isEditable && label !== 'Titik Koordinat' ? `onclick="openTextModal('${label}', '${val || ''}')"` : ''} ${isEditable && label === 'Titik Koordinat' ? `onclick="openMapModal('${val || ''}')"` : ''}>
-                    ${actionBtn}
-                    <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">${label}</span>
+                    ${actionBtn}<span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">${label}</span>
                     <span id="display-${label.replace(/\s+/g, '')}" class="font-bold text-slate-800 block break-words text-base">${valDisplay}</span>
                 </div>`;
         }
 
-        // --- UNGGAH BERKAS KK / AKTA ---
+        // --- FILE STORAGE UPLOAD HANDLER ---
         function handleFileUpload(fileType) {
-            const fileInput = document.getElementById(`file-${fileType}`);
-            const label = document.getElementById(`label-${fileType}`);
-            const icon = document.getElementById(`icon-btn-${fileType}`);
-            const textSpan = document.getElementById(`text-btn-${fileType}`);
-            const btnLihat = document.getElementById(`btn-lihat-${fileType}`);
-            
-            const file = fileInput.files[0];
+            const fileInput = document.getElementById(`file-${fileType}`); const label = document.getElementById(`label-${fileType}`);
+            const icon = document.getElementById(`icon-btn-${fileType}`); const textSpan = document.getElementById(`text-btn-${fileType}`);
+            const btnLihat = document.getElementById(`btn-lihat-${fileType}`); const file = fileInput.files[0];
             if (!file) return;
 
-            icon.className = "loader border-slate-600 border-t-transparent w-3 h-3";
-            textSpan.innerText = "Mengunggah...";
-            label.style.pointerEvents = 'none';
-
+            icon.className = "loader border-slate-600 border-t-transparent w-3 h-3"; textSpan.innerText = "Mengunggah..."; label.style.pointerEvents = 'none';
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Data = e.target.result.split(',')[1];
-                const payload = {
-                    action: "uploadFile",
-                    fileType: fileType,
-                    namaSiswa: currentStudentName,
-                    mimeType: file.type,
-                    base64Data: base64Data,
-                    folderUrl: currentDriveUrl 
-                };
-
+                const payload = { action: "uploadFile", fileType: fileType, namaSiswa: currentStudentName, mimeType: file.type, base64Data: base64Data, folderUrl: currentDriveUrl };
                 try {
-                    const response = await fetch(GAS_WEB_APP_URL, {
-                        method: 'POST',
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await response.json();
-                    
+                    const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) }); const result = await response.json();
                     if (result.status === 'success') {
-                        showToast(result.message, 'success');
-                        
-                        const fieldName = fileType === 'kk' ? 'File KK' : 'File Akta';
+                        showToast(result.message, 'success'); const fieldName = fileType === 'kk' ? 'File KK' : 'File Akta';
                         fetch(`${GAS_WEB_APP_URL}?action=updateData&type=siswa&id=${currentEditingId}&field=${encodeURIComponent(fieldName)}&value=${encodeURIComponent(result.fileUrl)}`);
-
-                        btnLihat.href = result.fileUrl;
-                        btnLihat.classList.remove('hidden');
-                        
-                        icon.className = "fa-solid fa-circle-check text-emerald-500";
-                        textSpan.innerText = "Sukses";
-                        
-                        setTimeout(() => {
-                            icon.className = "fa-solid fa-rotate";
-                            textSpan.innerText = `Timpa ${fileType.toUpperCase()}`;
-                        }, 2500);
-
-                    } else {
-                        showToast(result.message || 'Gagal menyimpan dokumen.');
-                        icon.className = "fa-solid fa-cloud-arrow-up";
-                        textSpan.innerText = 'Coba Lagi';
-                    }
-                } catch (error) {
-                    showToast('Gagal terhubung ke Google Drive.');
-                    icon.className = "fa-solid fa-cloud-arrow-up";
-                    textSpan.innerText = 'Coba Lagi';
-                } finally {
-                    label.style.pointerEvents = 'auto';
-                    fileInput.value = ''; 
-                }
+                        btnLihat.href = result.fileUrl; btnLihat.classList.remove('hidden');
+                        icon.className = "fa-solid fa-circle-check text-emerald-500"; textSpan.innerText = "Sukses";
+                        setTimeout(() => { icon.className = "fa-solid fa-rotate"; textSpan.innerText = `Timpa ${fileType.toUpperCase()}`; }, 2500);
+                    } else { showToast(result.message || 'Gagal menyimpan dokumen.'); icon.className = "fa-solid fa-cloud-arrow-up"; textSpan.innerText = 'Coba Lagi'; }
+                } catch (error) { showToast('Gagal terhubung ke Google Drive.'); icon.className = "fa-solid fa-cloud-arrow-up"; textSpan.innerText = 'Coba Lagi'; } 
+                finally { label.style.pointerEvents = 'auto'; fileInput.value = ''; }
             };
             reader.readAsDataURL(file);
         }
 
-        // --- PETA ZONASI KESELURUHAN ---
+        // --- PRESENSI GEOLOCATION HARDWARE ENGINE ---
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1000;
+        }
+
+        function openPresensi(isPopState = false) {
+            if(!isPopState) history.pushState({ page: 'presensi' }, 'Presensi Geo');
+            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['section-presensi', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+
+            setTimeout(() => {
+                if(!presensiMap) {
+                    presensiMap = L.map('presensi-map-container').setView([SCHOOL_COORD.lat, SCHOOL_COORD.lng], 17);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(presensiMap);
+                    L.circle([SCHOOL_COORD.lat, SCHOOL_COORD.lng], { color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: ALLOWED_RADIUS }).addTo(presensiMap).bindPopup('Area Sekolah (100m)');
+                    L.marker([SCHOOL_COORD.lat, SCHOOL_COORD.lng]).addTo(presensiMap).bindPopup('Titik Pusat Sekolah');
+                } else presensiMap.invalidateSize();
+                startGeoTracking();
+            }, 300);
+        }
+
+        function startGeoTracking() {
+            if (!navigator.geolocation) { showToast("Browser tidak mensupport enkripsi Geolocation.", "error"); return; }
+            document.getElementById('geo-distance').innerText = "Mendeteksi...";
+            geoWatchId = navigator.geolocation.watchPosition((position) => {
+                const userLat = position.coords.latitude; const userLng = position.coords.longitude;
+                const distance = getDistance(userLat, userLng, SCHOOL_COORD.lat, SCHOOL_COORD.lng);
+                document.getElementById('geo-distance').innerText = `${distance.toFixed(0)} Meter`;
+
+                if(!presensiMarker) presensiMarker = L.marker([userLat, userLng]).addTo(presensiMap).bindPopup('Lokasi Anda');
+                else presensiMarker.setLatLng([userLat, userLng]);
+
+                const btnSubmit = document.getElementById('btn-submit-presensi'); const statusBadge = document.getElementById('geo-status');
+                if (distance <= ALLOWED_RADIUS) {
+                    statusBadge.innerText = "Dalam Radius"; statusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700";
+                    btnSubmit.disabled = false; btnSubmit.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-4 rounded-xl font-bold shadow-lg transition-all flex justify-center items-center gap-2 cursor-pointer";
+                } else {
+                    statusBadge.innerText = "Di Luar Radius"; statusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-100 text-red-700";
+                    btnSubmit.disabled = true; btnSubmit.className = "w-full bg-slate-300 text-slate-500 px-5 py-4 rounded-xl font-bold shadow-md transition-all flex justify-center items-center gap-2 cursor-not-allowed";
+                }
+            }, (err) => { showToast("Akses GPS ditolak! Aktifkan izin lokasi browser.", "error"); }, { enableHighAccuracy: true });
+        }
+
+        function submitPresensi() {
+            const btnSubmit = document.getElementById('btn-submit-presensi');
+            btnSubmit.innerHTML = `<span class="loader border-white border-t-transparent w-4 h-4"></span> Mengunci...`; btnSubmit.disabled = true;
+            setTimeout(() => {
+                showToast("Presensi kehadiran berhasil diamankan ke server!", "success");
+                btnSubmit.innerHTML = `<i class="fa-solid fa-check"></i> Sukses Terarsip`;
+                if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
+            }, 1500);
+        }
+
+        // --- MAP ZONASI MASTER VISUALIZATION ---
         async function openMasterMap(isPopState = false) {
             if(!isPopState) history.pushState({ page: 'mastermap' }, 'Peta Zonasi');
-            
-            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            ['section-master-map', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('section-master-map').classList.remove('hidden'); document.getElementById('btn-back').classList.remove('hidden');
 
             if(!localCache['siswa']) {
-                showToast('Memuat data sebaran wilayah...', 'info');
-                await fetchList('siswa'); 
-                ['section-dashboard', 'section-class-list', 'section-list'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                document.getElementById('section-master-map').classList.remove('hidden');
+                showToast('Mengunduh data peta sebaran wilayah...', 'info'); await fetchList('siswa'); 
+                ['section-dashboard', 'section-class-list', 'section-list', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
             }
 
             setTimeout(() => {
                 if(!masterMap) {
-                    masterMap = L.map('master-map-container').setView([-0.789275, 113.921327], 5); // Default tengah Indonesia
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(masterMap);
-                } else {
-                    masterMap.invalidateSize(); 
-                    masterMap.eachLayer((layer) => { if (layer instanceof L.Marker) masterMap.removeLayer(layer); });
-                }
+                    masterMap = L.map('master-map-container').setView([SCHOOL_COORD.lat, SCHOOL_COORD.lng], 12);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(masterMap);
+                } else { masterMap.invalidateSize(); masterMap.eachLayer((layer) => { if (layer instanceof L.Marker) masterMap.removeLayer(layer); }); }
 
-                let validCoordinates = 0;
-                let bounds = []; 
+                let validCoordinates = 0; let bounds = []; masterMapMarkers = {};
+                const mapSearchDatalist = document.getElementById('map-search-list'); if(mapSearchDatalist) mapSearchDatalist.innerHTML = '';
 
-                // Reset pencarian dan marker
-                masterMapMarkers = {}; 
-                const mapSearchDatalist = document.getElementById('map-search-list');
-                if(mapSearchDatalist) mapSearchDatalist.innerHTML = '';
-                document.getElementById('map-search-input').value = '';
-
-                const siswaList = localCache['siswa'] || [];
-                siswaList.forEach(siswa => {
+                (localCache['siswa'] || []).forEach(siswa => {
                     if(siswa.koordinat && siswa.koordinat.includes(',')) {
-                        const parts = siswa.koordinat.split(',');
-                        const lat = parseFloat(parts[0].trim());
-                        const lng = parseFloat(parts[1].trim());
-                        
+                        const parts = siswa.koordinat.split(','); const lat = parseFloat(parts[0].trim()); const lng = parseFloat(parts[1].trim());
                         if(!isNaN(lat) && !isNaN(lng)) {
-                            const marker = L.marker([lat, lng])
-                             .addTo(masterMap)
-                             .bindPopup(`<b>${siswa.nama}</b><br>Kelas: ${siswa.kelas||'-'}`);
-                            bounds.push([lat, lng]);
-                            validCoordinates++;
-
-                            // Simpan marker untuk pencarian
-                            masterMapMarkers[siswa.nama.toLowerCase()] = marker;
-
-                            if (mapSearchDatalist) {
-                                const option = document.createElement('option');
-                                option.value = siswa.nama;
-                                mapSearchDatalist.appendChild(option);
-                            }
+                            const marker = L.marker([lat, lng]).addTo(masterMap).bindPopup(`<b>${siswa.nama}</b><br>Kelas: ${siswa.kelas||'-'}`);
+                            bounds.push([lat, lng]); validCoordinates++; masterMapMarkers[siswa.nama.toLowerCase()] = marker;
+                            if (mapSearchDatalist) { const opt = document.createElement('option'); opt.value = siswa.nama; mapSearchDatalist.appendChild(opt); }
                         }
                     }
                 });
-
-                if(validCoordinates > 0) {
-                    masterMap.fitBounds(bounds, { padding: [50, 50] });
-                    showToast(`Menampilkan ${validCoordinates} titik lokasi siswa.`, 'success');
-                } else {
-                    showToast('Data titik koordinat belum tersedia dari server untuk peta zonasi.', 'error');
-                }
-
+                if(validCoordinates > 0) { masterMap.fitBounds(bounds, { padding: [50, 50] }); showToast(`Berhasil memetakan ${validCoordinates} lokasi domisili siswa.`, 'success'); } 
+                else showToast('Belum ada data koordinat siswa yang tersedia.', 'error');
             }, 300);
         }
 
-        // --- FUNGSI CARI SISWA DI PETA ZONASI ---
         function findStudentOnMap() {
             const searchVal = document.getElementById('map-search-input').value.toLowerCase().trim();
-            
-            if(!searchVal) {
-                showToast('Ketikkan nama siswa terlebih dahulu.', 'error');
-                return;
-            }
-
-            const matchedNameKey = Object.keys(masterMapMarkers).find(key => key.includes(searchVal));
-
-            if (matchedNameKey) {
-                const targetMarker = masterMapMarkers[matchedNameKey];
-                
-                masterMap.flyTo(targetMarker.getLatLng(), 18, {
-                    animate: true,
-                    duration: 1.5 
-                });
-
-                setTimeout(() => {
-                    targetMarker.openPopup();
-                }, 1500);
-                
-            } else {
-                showToast('Siswa tidak ditemukan atau belum mengatur titik koordinat.', 'error');
-            }
+            if(!searchVal) { showToast('Ketikkan nama siswa!'); return; }
+            const matchedKey = Object.keys(masterMapMarkers).find(key => key.includes(searchVal));
+            if (matchedKey) {
+                const targetMarker = masterMapMarkers[matchedKey];
+                masterMap.flyTo(targetMarker.getLatLng(), 17, { animate: true, duration: 1.2 });
+                setTimeout(() => targetMarker.openPopup(), 1300);
+            } else showToast('Nama siswa tidak valid atau koordinat kosong.');
         }
 
-        // --- EDIT DATA VIA MODAL ---
+        // --- SUB-MODAL DATA EDIT SYSTEM ---
         function closeModals() {
             ['modal-edit', 'modal-map'].forEach(id => {
-                const modal = document.getElementById(id);
-                modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
+                const modal = document.getElementById(id); modal.classList.remove('opacity-100'); modal.classList.add('opacity-0');
                 setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
             });
         }
 
         function openTextModal(label, currentVal) {
-            const modal = document.getElementById('modal-edit');
-            document.getElementById('modal-edit-title').innerText = `Perbarui ${label}`;
+            const modal = document.getElementById('modal-edit'); document.getElementById('modal-edit-title').innerText = `Perbarui ${label}`;
             document.getElementById('modal-edit-input').value = currentVal;
             document.getElementById('btn-save-text').onclick = () => saveUpdatedData(label, document.getElementById('modal-edit-input').value);
-            modal.classList.replace('hidden', 'flex');
-            setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); }, 10);
+            modal.classList.replace('hidden', 'flex'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); }, 10);
         }
 
         function openMapModal(currentVal) {
-            const modal = document.getElementById('modal-map');
-            const inputKoor = document.getElementById('modal-map-input');
-            inputKoor.value = currentVal;
-            document.getElementById('btn-save-map').onclick = () => saveUpdatedData('Titik Koordinat', inputKoor.value);
+            const modal = document.getElementById('modal-map'); const inputKoor = document.getElementById('modal-map-input');
+            inputKoor.value = currentVal; document.getElementById('btn-save-map').onclick = () => saveUpdatedData('Titik Koordinat', inputKoor.value);
             modal.classList.replace('hidden', 'flex');
             
-            let startLat = -0.789275; let startLng = 113.921327; let zoomLvl = 5;
+            let startLat = SCHOOL_COORD.lat; let startLng = SCHOOL_COORD.lng; let zoomLvl = 12;
             if(currentVal && currentVal.includes(',')) {
-                const parts = currentVal.split(','); startLat = parseFloat(parts[0].trim()); startLng = parseFloat(parts[1].trim()); zoomLvl = 15;
+                const parts = currentVal.split(','); startLat = parseFloat(parts[0].trim()); startLng = parseFloat(parts[1].trim()); zoomLvl = 16;
             }
-
             setTimeout(() => { 
                 modal.classList.remove('opacity-0'); modal.classList.add('opacity-100'); 
                 if(!mapInstance) {
-                    mapInstance = L.map('map-container').setView([startLat, startLng], zoomLvl);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+                    mapInstance = L.map('map-container').setView([startLat, startLng], zoomLvl); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
                     mapMarker = L.marker([startLat, startLng], {draggable: true}).addTo(mapInstance);
-                    mapMarker.on('dragend', function() { const position = mapMarker.getLatLng(); inputKoor.value = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`; });
-                    mapInstance.on('click', function(event) { mapMarker.setLatLng(event.latlng); inputKoor.value = `${event.latlng.lat.toFixed(6)}, ${event.latlng.lng.toFixed(6)}`; });
-                } else {
-                    mapInstance.setView([startLat, startLng], zoomLvl); mapMarker.setLatLng([startLat, startLng]);
-                }
+                    mapMarker.on('dragend', () => { const pos = mapMarker.getLatLng(); inputKoor.value = `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`; });
+                    mapInstance.on('click', (e) => { mapMarker.setLatLng(e.latlng); inputKoor.value = `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`; });
+                } else { mapInstance.setView([startLat, startLng], zoomLvl); mapMarker.setLatLng([startLat, startLng]); }
                 setTimeout(() => mapInstance.invalidateSize(), 350);
             }, 10); 
         }
 
         function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-                        document.getElementById('modal-map-input').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                        if(mapInstance && mapMarker) { mapInstance.setView([lat, lng], 16); mapMarker.setLatLng([lat, lng]); }
-                    },
-                    (err) => alert('Gagal mendeteksi lokasi.'), { enableHighAccuracy: true }
-                );
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude; const lng = pos.coords.longitude; document.getElementById('modal-map-input').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    if(mapInstance && mapMarker) { mapInstance.setView([lat, lng], 16); mapMarker.setLatLng([lat, lng]); }
+                }, () => alert('Gagal membaca modul hardware GPS.'), { enableHighAccuracy: true });
             }
         }
 
-        window.addEventListener('click', function(event) {
-            if (event.target === document.getElementById('modal-passcode')) closePasscodeModal();
-            if (event.target === document.getElementById('modal-edit') || event.target === document.getElementById('modal-map')) closeModals();
-            if (event.target === document.getElementById('modal-admin')) closeAdminModal(); 
-        });
-
         async function saveUpdatedData(fieldName, newValue) {
             const btn = document.getElementById(fieldName === 'Titik Koordinat' ? 'btn-save-map' : 'btn-save-text');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = `Menyimpan...`; btn.disabled = true;
-
+            const originalHtml = btn.innerHTML; btn.innerHTML = `Menyimpan...`; btn.disabled = true;
             try {
                 const response = await fetch(`${GAS_WEB_APP_URL}?action=updateData&type=${currentType}&id=${currentEditingId}&field=${encodeURIComponent(fieldName)}&value=${encodeURIComponent(newValue)}`);
                 const result = await response.json();
                 if (result.status === 'success') {
-                    showToast(`${fieldName} berhasil diperbarui!`, 'success');
-                    const display = document.getElementById(`display-${fieldName.replace(/\s+/g, '')}`);
-                    if(display) display.innerText = newValue || '-';
+                    showToast(`${fieldName} sukses diarsip!`, 'success');
+                    const display = document.getElementById(`display-${fieldName.replace(/\s+/g, '')}`); if(display) display.innerText = newValue || '-';
+                    // Update cache local agar data sinkron tanpa force reload
+                    if(localCache[currentType]) {
+                        const targetIdx = localCache[currentType].findIndex(x => x.id == currentEditingId || x._id_baris == currentEditingId);
+                        const dataKeyMapping = { 'Nomor WA': 'Nomor WA', 'Email': 'Email', 'Titik Koordinat': 'koordinat', 'Berat Badan': 'Berat Badan', 'Tinggi Badan': 'Tinggi Badan', 'Lingkar Kepala': 'Lingkar Kepala' };
+                        if(targetIdx !== -1 && dataKeyMapping[fieldName]) localCache[currentType][targetIdx][dataKeyMapping[fieldName]] = newValue;
+                    }
                     closeModals();
-                } else showToast('Gagal menyimpan data.');
+                } else showToast('Gagal memproses ke database Sheet.');
             } catch (error) { showToast('Kesalahan koneksi.'); } 
             finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
+
+        // Global Modal Event Click Listener Close
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal-passcode')) closePasscodeModal();
+            if (e.target === document.getElementById('modal-edit') || e.target === document.getElementById('modal-map')) closeModals();
+            if (e.target === document.getElementById('modal-admin')) closeAdminModal(); 
+        });
     </script>
 </body>
 </html>
