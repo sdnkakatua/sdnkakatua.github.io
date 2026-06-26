@@ -243,14 +243,24 @@
 
         <div id="section-master-map" class="hidden animate-fade-in-up">
             <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm h-[80vh] flex flex-col">
-                <div class="flex justify-between items-center mb-4 shrink-0">
+                <div class="flex justify-between items-center mb-4 shrink-0 flex-wrap gap-4">
                     <div>
                         <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Peta Zonasi Siswa</h2>
                         <p class="text-slate-500 text-sm">Menampilkan seluruh titik koordinat dari pangkalan data.</p>
                     </div>
-                    <button class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm" onclick="fetchList('siswa')">
-                        <i class="fa-solid fa-rotate-right"></i> Refresh
-                    </button>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <div class="relative flex-grow min-w-[200px]">
+                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-slate-400"></i>
+                            <input type="text" id="map-search-input" list="map-search-list" onkeydown="if(event.key === 'Enter') findStudentOnMap()" placeholder="Cari nama siswa..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-slate-700 focus:outline-none focus:border-indigo-500 transition-all text-sm font-medium">
+                            <datalist id="map-search-list"></datalist>
+                        </div>
+                        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold transition-colors text-sm shadow-sm" onclick="findStudentOnMap()">
+                            Cari
+                        </button>
+                        <button class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold transition-colors text-sm flex items-center justify-center" title="Refresh" onclick="fetchList('siswa')">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="master-map-container" class="w-full flex-grow rounded-2xl border border-slate-200 z-[10]"></div>
             </div>
@@ -351,6 +361,7 @@
         let mapInstance = null;
         let mapMarker = null;
         let masterMap = null; 
+        let masterMapMarkers = {}; // Variabel baru untuk menyimpan marker siswa
 
         const currentYear = new Date().getFullYear();
         const gDays = '<option value="" disabled selected hidden>Hari</option>' + Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2,'0')}">${i+1}</option>`).join('');
@@ -964,6 +975,12 @@
                 let validCoordinates = 0;
                 let bounds = []; 
 
+                // Reset pencarian dan marker
+                masterMapMarkers = {}; 
+                const mapSearchDatalist = document.getElementById('map-search-list');
+                if(mapSearchDatalist) mapSearchDatalist.innerHTML = '';
+                document.getElementById('map-search-input').value = '';
+
                 const siswaList = localCache['siswa'] || [];
                 siswaList.forEach(siswa => {
                     if(siswa.koordinat && siswa.koordinat.includes(',')) {
@@ -972,11 +989,20 @@
                         const lng = parseFloat(parts[1].trim());
                         
                         if(!isNaN(lat) && !isNaN(lng)) {
-                            L.marker([lat, lng])
+                            const marker = L.marker([lat, lng])
                              .addTo(masterMap)
                              .bindPopup(`<b>${siswa.nama}</b><br>Kelas: ${siswa.kelas||'-'}`);
                             bounds.push([lat, lng]);
                             validCoordinates++;
+
+                            // Simpan marker untuk pencarian
+                            masterMapMarkers[siswa.nama.toLowerCase()] = marker;
+
+                            if (mapSearchDatalist) {
+                                const option = document.createElement('option');
+                                option.value = siswa.nama;
+                                mapSearchDatalist.appendChild(option);
+                            }
                         }
                     }
                 });
@@ -989,6 +1015,34 @@
                 }
 
             }, 300);
+        }
+
+        // --- FUNGSI CARI SISWA DI PETA ZONASI ---
+        function findStudentOnMap() {
+            const searchVal = document.getElementById('map-search-input').value.toLowerCase().trim();
+            
+            if(!searchVal) {
+                showToast('Ketikkan nama siswa terlebih dahulu.', 'error');
+                return;
+            }
+
+            const matchedNameKey = Object.keys(masterMapMarkers).find(key => key.includes(searchVal));
+
+            if (matchedNameKey) {
+                const targetMarker = masterMapMarkers[matchedNameKey];
+                
+                masterMap.flyTo(targetMarker.getLatLng(), 18, {
+                    animate: true,
+                    duration: 1.5 
+                });
+
+                setTimeout(() => {
+                    targetMarker.openPopup();
+                }, 1500);
+                
+            } else {
+                showToast('Siswa tidak ditemukan atau belum mengatur titik koordinat.', 'error');
+            }
         }
 
         // --- EDIT DATA VIA MODAL ---
