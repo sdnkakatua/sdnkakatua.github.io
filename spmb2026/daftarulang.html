@@ -29,6 +29,7 @@
         }
         .glass-checkbox:checked { background-color: #10b981; border-color: #34d399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
         .glass-checkbox:checked:after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .glass-checkbox:disabled { cursor: not-allowed; opacity: 0.4; }
 
         .glass-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; transition: all 0.3s ease; }
         .glass-input:focus { border-color: #818cf8; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
@@ -51,7 +52,7 @@
         <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 transform-gpu">
             <div class="text-center md:text-left">
                 <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-                    <span class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full">Database Terpusat</span>
+                    <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full cursor-pointer select-none transition-all">Database Terpusat</span>
                     <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Sinkronisasi Background...</span>
                 </div>
                 <h1 class="text-2xl md:text-3xl font-bold text-white bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">Verifikasi & Biodata SPMB</h1>
@@ -75,17 +76,16 @@
                         </tr>
                     </thead>
                     <tbody id="studentTableBody" class="divide-y divide-white/[0.05] text-sm">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby58-fmBBtPQkEyu9U7Ge62CT-BZJ2e0IwS3hgAGKqtfNCVbyvCC0wLcqCpmjoqQa7F4Q/exec';
 
-        const SCH_LAT = -5.159400; // Koordinat Titik Sekolah
+        const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
 
         const glassSwal = Swal.mixin({
@@ -97,13 +97,86 @@
         let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
         let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
         let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
+        
+        // State GUEST / ADMIN (Disimpan di sessionStorage agar aman selama tab terbuka)
+        let isAdmin = sessionStorage.getItem('spmb_isAdmin') === 'true';
 
         document.addEventListener('DOMContentLoaded', () => {
+            updateAdminUI();
             renderTable();
             silentBackgroundSync();
         });
 
-        // RUMUS MENGHITUNG JARAK HAVERSINE
+        // ================= FUNGSI LOGIN & LOGOUT ADMIN (TRIPLE CLICK) =================
+        function handleAdminToggle(event) {
+            // event.detail akan menghasilkan angka berdasarkan jumlah klik cepat beruntun
+            if (event.detail === 3) {
+                if (isAdmin) {
+                    // Proses Logout
+                    Swal.fire({
+                        title: 'Logout Admin?',
+                        text: 'Aplikasi akan dikunci kembali menjadi mode Lihat Saja (Read-Only).',
+                        icon: 'warning',
+                        background: 'rgba(23, 23, 37, 0.95)', color: '#f1f5f9', confirmButtonColor: '#ef4444', cancelButtonColor: '#6366f1',
+                        showCancelButton: true, confirmButtonText: 'Ya, Logout', cancelButtonText: 'Batal',
+                        backdrop: 'rgba(15, 23, 42, 0.6)',
+                        didOpen: (modal) => { modal.style.backdropFilter = 'blur(12px)'; modal.style.border = '1px solid rgba(255, 255, 255, 0.1)'; }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            isAdmin = false;
+                            sessionStorage.setItem('spmb_isAdmin', 'false');
+                            updateAdminUI();
+                            renderTable();
+                            glassSwal.fire({ title: 'Logout Berhasil', text: 'Sekarang dalam mode Read-Only.', icon: 'success' });
+                        }
+                    });
+                } else {
+                    // Proses Login
+                    Swal.fire({
+                        title: 'Verifikasi Admin',
+                        input: 'password',
+                        inputLabel: 'Masukkan Passcode Admin',
+                        inputPlaceholder: 'Ketik passcode...',
+                        background: 'rgba(23, 23, 37, 0.95)', color: '#f1f5f9', confirmButtonColor: '#6366f1', cancelButtonColor: '#ef4444',
+                        showCancelButton: true, confirmButtonText: 'Login', cancelButtonText: 'Batal',
+                        backdrop: 'rgba(15, 23, 42, 0.6)',
+                        didOpen: (modal) => {
+                            modal.style.backdropFilter = 'blur(12px)';
+                            modal.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                            const input = modal.querySelector('.swal2-input');
+                            if (input) {
+                                input.style.background = 'rgba(255, 255, 255, 0.05)';
+                                input.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                                input.style.color = '#f1f5f9';
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.value === 'aic') {
+                            isAdmin = true;
+                            sessionStorage.setItem('spmb_isAdmin', 'true');
+                            updateAdminUI();
+                            renderTable();
+                            glassSwal.fire({ title: 'Login Sukses', text: 'Akses Editor Admin Terbuka!', icon: 'success' });
+                        } else if (result.value !== undefined) {
+                            glassSwal.fire({ title: 'Akses Ditolak', text: 'Passcode yang Anda masukkan salah.', icon: 'error' });
+                        }
+                    });
+                }
+            }
+        }
+
+        // Memperbarui Tampilan Indikator Badge "Database Terpusat"
+        function updateAdminUI() {
+            const badge = document.getElementById('btn-admin-toggle');
+            if (isAdmin) {
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 rounded-full cursor-pointer select-none shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i> Mode Admin (Aktif)';
+            } else {
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
+                badge.innerHTML = 'Database Terpusat';
+            }
+        }
+
         function calculateDistance(lat1, lon1, lat2, lon2) {
             if (!lat1 || !lon1 || isNaN(lat1) || isNaN(lon1)) return '';
             const R = 6371; 
@@ -114,7 +187,6 @@
             return (R * c).toFixed(2);
         }
 
-        // UPDATE JARAK SAAT KETIK ATAU MENGGUNAKAN GPS
         function updateDistance(nisn) {
             const form = document.getElementById(`form_${nisn}`);
             const lat = parseFloat(form.querySelector('[name="lintang"]').value);
@@ -124,17 +196,13 @@
             inputJarak.value = jarak ? jarak + ' km' : '';
         }
 
-        // FITUR GPS (MENGAMBIL LOKASI BROWSER)
         function getLocation(nisn) {
+            if (!isAdmin) return; // Proteksi tambahan sistem
             if (navigator.geolocation) {
                 glassSwal.fire({
                     title: 'Mendeteksi Lokasi...',
-                    text: 'Mohon izinkan akses lokasi (Allow Location) jika diminta browser.',
-                    icon: 'info',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timerProgressBar: true
+                    text: 'Mohon setujui izin lokasi di browser Anda.',
+                    icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timerProgressBar: true
                 });
 
                 navigator.geolocation.getCurrentPosition(
@@ -146,36 +214,30 @@
                         form.querySelector('[name="lintang"]').value = lat.toFixed(6);
                         form.querySelector('[name="bujur"]').value = lon.toFixed(6);
                         
-                        // Perbarui perhitungan jarak otomatis
                         updateDistance(nisn);
-
-                        glassSwal.fire({ 
-                            title: 'GPS Berhasil!', 
-                            text: 'Koordinat lokasi telah dimasukkan otomatis.', 
-                            icon: 'success' 
-                        });
+                        glassSwal.fire({ title: 'GPS Berhasil!', text: 'Koordinat lokasi telah diperbarui.', icon: 'success' });
                     },
                     function(error) {
                         let msg = 'Gagal mendeteksi lokasi.';
-                        if (error.code === 1) msg = 'Akses GPS ditolak. Silakan periksa izin browser Anda.';
-                        else if (error.code === 2) msg = 'Posisi tidak tersedia/Sinyal GPS lemah.';
-                        else if (error.code === 3) msg = 'Waktu permintaan habis.';
-                        glassSwal.fire({ title: 'Gagal', text: msg, icon: 'error' });
+                        if (error.code === 1) msg = 'Akses lokasi ditolak oleh pengguna.';
+                        else if (error.code === 2) msg = 'Sinyal GPS lemah atau posisi tidak ditemukan.';
+                        glassSwal.fire({ title: 'Gagal GPS', text: msg, icon: 'error' });
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
-                glassSwal.fire({ title: 'Tidak Didukung', text: 'Browser Anda tidak mendukung fitur GPS.', icon: 'error' });
+                glassSwal.fire({ title: 'Tidak Didukung', text: 'Browser Anda tidak mendukung fitur lokasi.', icon: 'error' });
             }
         }
 
         async function silentBackgroundSync() {
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
+            
             try {
-                await pushPendingData();
-                await pullFreshData();
-                renderTable();
+                await pushPendingData(); 
+                await pullFreshData();   
+                renderTable();           
             } catch (err) {
                 console.log("Background sync paused (Offline atau Gagal fetch)");
             } finally {
@@ -210,7 +272,7 @@
                     .then(res => res.json())
                     .then(resData => {
                         if(resData.result === 'success') {
-                            delete pendingSync[nisn];
+                            delete pendingSync[nisn]; 
                         }
                     }).catch(e => console.error('Gagal Push: ', nisn));
             });
@@ -239,6 +301,8 @@
         }
 
         function simpanData(nisn, btnElement) {
+            if (!isAdmin) return; // Pengaman ganda sistem
+            
             const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
             btnElement.classList.replace('bg-indigo-600', 'bg-emerald-600');
@@ -282,7 +346,7 @@
                 'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
                 'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
                 'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
-                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
+                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke School (km)': dataToSave.jarakSekolah,
                 'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu
             };
 
@@ -321,9 +385,7 @@
 
         function renderTable() {
             const tbody = document.getElementById('studentTableBody');
-            
             const openRows = Array.from(document.querySelectorAll('.details-row.open')).map(row => row.id.split('_')[1]);
-            
             tbody.innerHTML = '';
 
             if (sheetOrder.length === 0) {
@@ -352,9 +414,10 @@
                 trMain.id = `main_row_${nisn}`;
                 trMain.className = `border-b border-white/[0.05] transition-all duration-200 hover:bg-white/[0.06] border-l-4 ${isRegistered ? 'bg-emerald-500/10 border-l-emerald-500' : 'bg-white/[0.01] border-l-transparent'}`;
                 
+                // Elemen Checkbox akan mendapatkan atribut "disabled" jika BUKAN admin
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
-                        <input type="checkbox" class="glass-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)">
+                        <input type="checkbox" class="glass-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
                     </td>
                     <td class="px-4 py-4 cursor-pointer group" onclick="toggleDetails('${nisn}')">
                         <div class="flex items-center justify-between">
@@ -378,6 +441,7 @@
                 const trDetails = document.createElement('tr');
                 trDetails.className = `border-b border-white/[0.02] bg-black/30`; 
 
+                // Seluruh input form ditambahkan kondisi ${!isAdmin ? 'readonly' : ''}
                 trDetails.innerHTML = `
                     <td colspan="3" class="p-0 border-0">
                         <div id="details_${nisn}" class="details-row ${isOpen ? 'open' : ''}">
@@ -394,52 +458,58 @@
 
                                     <h3 class="text-sm font-semibold text-emerald-300 mb-4 border-b border-white/10 pb-2">Biodata & Data Fisik</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK</label><input type="number" name="nik" class="glass-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor KK</label><input type="number" name="nokk" class="glass-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIPD</label><input type="text" name="nipd" class="glass-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK</label><input type="number" name="nik" class="glass-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor KK</label><input type="number" name="nokk" class="glass-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIPD</label><input type="text" name="nipd" class="glass-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tempat Lahir</label><input type="text" name="tempatLahir" class="glass-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="glass-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor Akta</label><input type="text" name="noAkta" class="glass-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tempat Lahir</label><input type="text" name="tempatLahir" class="glass-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="glass-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor Akta</label><input type="text" name="noAkta" class="glass-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Berat Badan (kg)</label><input type="number" name="beratBadan" class="glass-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="glass-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="glass-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Berat Badan (kg)</label><input type="number" name="beratBadan" class="glass-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="glass-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="glass-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
 
                                     <h3 class="text-sm font-semibold text-fuchsia-300 mb-4 border-b border-white/10 pb-2">Lokasi Koordinat & Orang Tua</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 uppercase">Alamat Lengkap</label><input type="text" name="alamat" class="glass-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}"></div>
+                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 uppercase">Alamat Lengkap</label><input type="text" name="alamat" class="glass-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
                                         <div class="md:col-span-2 flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10 mt-1 mb-1">
                                             <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-map-location-dot mr-2 text-indigo-400"></i>Titik Koordinat Rumah</span>
+                                            ${isAdmin ? `
                                             <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-all shadow-md">
                                                 <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS Saat Ini
                                             </button>
+                                            ` : `
+                                            <span class="text-xs text-amber-400/70 font-medium"><i class="fa-solid fa-eye mr-1"></i> Mode Lihat Saja (Read-Only)</span>
+                                            `}
                                         </div>
 
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Lintang (Latitude)</label><input type="text" name="lintang" class="glass-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Bujur (Longitude)</label><input type="text" name="bujur" class="glass-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Lintang (Latitude)</label><input type="text" name="lintang" class="glass-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Bujur (Longitude)</label><input type="text" name="bujur" class="glass-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
                                         
                                         <div class="md:col-span-2"><label class="text-[10px] text-emerald-400 uppercase">Estimasi Jarak dari Rumah ke Sekolah (Otomatis)</label>
                                             <input type="text" name="jarakSekolah" class="glass-input bg-black/20 text-emerald-300 font-bold tracking-widest border-emerald-500/30" placeholder="Menghitung jarak otomatis..." value="${jarakTampil}" readonly>
                                         </div>
                                         
-                                        <div class="mt-2"><label class="text-[10px] text-slate-400 uppercase">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="glass-input" placeholder="628..." value="${phone}"></div>
+                                        <div class="mt-2"><label class="text-[10px] text-slate-400 uppercase">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="glass-input" placeholder="628..." value="${phone}" ${!isAdmin ? 'readonly' : ''}></div>
                                         <div class="mt-2"></div>
 
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ayah</label><input type="text" name="namaAyah" class="glass-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ayah</label><input type="number" name="nikAyah" class="glass-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ayah</label><input type="text" name="namaAyah" class="glass-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ayah</label><input type="number" name="nikAyah" class="glass-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ibu</label><input type="text" name="namaIbu" class="glass-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}"></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ibu</label><input type="number" name="nikIbu" class="glass-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ibu</label><input type="text" name="namaIbu" class="glass-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ibu</label><input type="number" name="nikIbu" class="glass-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
                                     
+                                    ${isAdmin ? `
                                     <div class="flex justify-end mt-4 border-t border-white/10 pt-4">
                                         <button onclick="simpanData('${nisn}', this)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-500/40 transform hover:-translate-y-0.5">
                                             <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
                                         </button>
                                     </div>
+                                    ` : ''}
 
                                 </div>
                             </div>
