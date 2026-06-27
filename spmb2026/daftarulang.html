@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peringkat Pengumuman SPMB - Sinkronisasi 2 Arah</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } } }
+    </script>
+    
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        .gpu-accelerated { transform: translate3d(0, 0, 0); backface-visibility: hidden; will-change: transform; }
+
+        .glass-checkbox {
+            appearance: none; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 9px; border-radius: 6px; position: relative; cursor: pointer; transition: all 0.2s ease;
+        }
+        .glass-checkbox:checked { background-color: #10b981; border-color: #34d399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .glass-checkbox:checked:after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .glass-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; transition: all 0.3s ease; }
+        .glass-input:focus { border-color: #818cf8; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+        .glass-input::placeholder { color: rgba(255,255,255,0.3); }
+        .glass-input:read-only { background: rgba(0, 0, 0, 0.2); border-color: transparent; color: #a5b4fc; cursor: not-allowed; }
+
+        .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        .details-row.open { grid-template-rows: 1fr; }
+        .details-content { min-height: 0; overflow: hidden; }
+
+        /* Indikator Sync */
+        #sync-status { transition: opacity 0.3s; }
+    </style>
+</head>
+<body class="text-slate-200 antialiased relative p-4 md:p-8 min-h-screen overflow-x-hidden overflow-y-scroll">
+
+    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0 gpu-accelerated"></div>
+    <div class="fixed bottom-[20%] right-[-10%] w-[45vw] h-[45vw] bg-fuchsia-500/10 rounded-full blur-[120px] pointer-events-none z-0 gpu-accelerated"></div>
+
+    <div class="max-w-6xl mx-auto relative z-10">
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 transform-gpu">
+            <div class="text-center md:text-left">
+                <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+                    <span class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full">Database Terpusat</span>
+                    <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Sinkronisasi Background...</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">Verifikasi & Biodata SPMB</h1>
+                <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri, kondisi fisik, dan lokasi akurat siswa.</p>
+            </div>
+            
+            <button onclick="manualSync()" id="btn-sync" class="bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 px-5 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 shadow-lg">
+                <i class="fa-solid fa-rotate"></i>
+                <span class="font-semibold text-sm">Sinkron (2 Arah)</span>
+            </button>
+        </div>
+
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl overflow-hidden transform-gpu">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/10 text-slate-300 text-sm uppercase tracking-wider">
+                            <th class="px-4 py-4 font-semibold text-center w-16">Cek</th>
+                            <th class="px-4 py-4 font-semibold">Nama Siswa</th>
+                            <th class="px-4 py-4 font-semibold text-center w-24">Kontak</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody" class="divide-y divide-white/[0.05] text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby58-fmBBtPQkEyu9U7Ge62CT-BZJ2e0IwS3hgAGKqtfNCVbyvCC0wLcqCpmjoqQa7F4Q/exec';
+
+        const SCH_LAT = -5.159400; // Koordinat Titik Sekolah
+        const SCH_LON = 119.410720;
+
+        const glassSwal = Swal.mixin({
+            background: 'rgba(23, 23, 37, 0.85)', color: '#f1f5f9', confirmButtonColor: '#6366f1',
+            backdrop: 'rgba(15, 23, 42, 0.4)', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+            didOpen: (toast) => { toast.style.backdropFilter = 'blur(12px)'; toast.style.border = '1px solid rgba(255, 255, 255, 0.1)'; }
+        });
+
+        // 1. Inisialisasi Data Murni dari Local Storage / Cache
+        let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
+        let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
+        let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
+
+        // Saat halaman dimuat: Render apa yang ada di cache, lalu sinkron di background
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+            silentBackgroundSync();
+        });
+
+        // Rumus Hitung Jarak
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || isNaN(lat1) || isNaN(lon1)) return '';
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return (R * c).toFixed(2);
+        }
+
+        function updateDistance(nisn) {
+            const form = document.getElementById(`form_${nisn}`);
+            const lat = parseFloat(form.querySelector('[name="lintang"]').value);
+            const lon = parseFloat(form.querySelector('[name="bujur"]').value);
+            const inputJarak = form.querySelector('[name="jarakSekolah"]');
+            const jarak = calculateDistance(lat, lon, SCH_LAT, SCH_LON);
+            inputJarak.value = jarak ? jarak + ' km' : '';
+        }
+
+        // ================= FITUR SINKRONISASI 2 ARAH =================
+        async function silentBackgroundSync() {
+            const statusInd = document.getElementById('sync-status');
+            statusInd.classList.remove('opacity-0');
+            
+            try {
+                await pushPendingData(); // Kirim antrean form
+                await pullFreshData();   // Ambil data sheet
+                renderTable();           // Perbarui tabel secara instan
+            } catch (err) {
+                console.log("Background sync paused (Offline atau Gagal fetch)");
+            } finally {
+                statusInd.classList.add('opacity-0');
+            }
+        }
+
+        async function manualSync() {
+            const btn = document.getElementById('btn-sync');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
+            btn.classList.add('pointer-events-none');
+            
+            try {
+                await pushPendingData();
+                await pullFreshData();
+                renderTable();
+                glassSwal.fire({ title: 'Sinkronisasi Berhasil', text: 'Data dari Spreadsheet berhasil ditarik penuh.', icon: 'success' });
+            } catch (err) {
+                glassSwal.fire({ title: 'Koneksi Bermasalah', text: 'Gagal menghubungi server. Pastikan internet aktif.', icon: 'error' });
+            }
+            
+            btn.innerHTML = `<i class="fa-solid fa-rotate"></i> <span class="font-semibold text-sm">Sinkron (2 Arah)</span>`;
+            btn.classList.remove('pointer-events-none');
+        }
+
+        async function pushPendingData() {
+            const pendingKeys = Object.keys(pendingSync);
+            if(pendingKeys.length === 0) return; 
+
+            const promises = pendingKeys.map(nisn => {
+                return fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(pendingSync[nisn]) })
+                    .then(res => res.json())
+                    .then(resData => {
+                        if(resData.result === 'success') {
+                            delete pendingSync[nisn]; // Hapus dari antrean jika sukses
+                        }
+                    }).catch(e => console.error('Gagal Push: ', nisn));
+            });
+
+            await Promise.all(promises);
+            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+        }
+
+        async function pullFreshData() {
+            const res = await fetch(SCRIPT_URL);
+            const result = await res.json();
+            if(result.result === 'success') {
+                sheetData = {};
+                sheetOrder = [];
+                
+                result.data.forEach(item => { 
+                    if(item.NISN && item.NISN.trim() !== '') {
+                        sheetData[item.NISN] = item; 
+                        sheetOrder.push(item.NISN);
+                    }
+                });
+                
+                // Simpan Data beserta Urutannya ke Local Storage
+                localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+                localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+            }
+        }
+
+        // ================= FITUR SIMPAN DATA (CACHE FIRST) =================
+        function simpanData(nisn, btnElement) {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
+            btnElement.classList.replace('bg-indigo-600', 'bg-emerald-600');
+            setTimeout(() => {
+                btnElement.innerHTML = originalHtml;
+                btnElement.classList.replace('bg-emerald-600', 'bg-indigo-600');
+            }, 2000);
+
+            const form = document.getElementById(`form_${nisn}`);
+            let jarakVal = form.querySelector('[name="jarakSekolah"]').value.replace(' km', '');
+            
+            const dataToSave = {
+                nisn: nisn,
+                nama: form.querySelector('[name="nama"]').value,
+                gender: form.querySelector('[name="gender"]').value,
+                skor: form.querySelector('[name="skor"]').value,
+                pilihan: form.querySelector('[name="pilihan"]').value,
+                phone: form.querySelector('[name="phone"]').value,
+                daftarUlang: document.getElementById(`check_${nisn}`).checked ? 'Sudah' : 'Belum',
+                nik: form.querySelector('[name="nik"]').value,
+                nokk: form.querySelector('[name="nokk"]').value,
+                nipd: form.querySelector('[name="nipd"]').value,
+                tempatLahir: form.querySelector('[name="tempatLahir"]').value,
+                tanggalLahir: form.querySelector('[name="tanggalLahir"]').value,
+                noAkta: form.querySelector('[name="noAkta"]').value,
+                beratBadan: form.querySelector('[name="beratBadan"]').value,
+                tinggiBadan: form.querySelector('[name="tinggiBadan"]').value,
+                lingkarKepala: form.querySelector('[name="lingkarKepala"]').value,
+                alamat: form.querySelector('[name="alamat"]').value,
+                lintang: form.querySelector('[name="lintang"]').value,
+                bujur: form.querySelector('[name="bujur"]').value,
+                jarakSekolah: jarakVal,
+                namaAyah: form.querySelector('[name="namaAyah"]').value,
+                nikAyah: form.querySelector('[name="nikAyah"]').value,
+                namaIbu: form.querySelector('[name="namaIbu"]').value,
+                nikIbu: form.querySelector('[name="nikIbu"]').value,
+            };
+
+            const localDisplayData = {
+                'Daftar Ulang': dataToSave.daftarUlang, 'No HP': dataToSave.phone,
+                'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
+                'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
+                'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
+                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
+                'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu
+            };
+
+            // Simpan ke Data Tampilan (UI)
+            sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
+            localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+
+            // Simpan ke Antrean Background
+            pendingSync[nisn] = dataToSave;
+            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+
+            glassSwal.fire({ title: 'Tersimpan Lokal!', text: 'Data diamankan di perangkat dan masuk antrean sinkronisasi.', icon: 'success' });
+            
+            renderTable();
+            silentBackgroundSync();
+        }
+
+        function toggleDaftarUlang(nisn, checkbox) {
+            const isChecked = checkbox.checked;
+            const mainRow = document.getElementById(`main_row_${nisn}`);
+            if (isChecked) {
+                mainRow.classList.add('bg-emerald-500/10', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.remove('bg-white/[0.01]', 'border-l-transparent');
+            } else {
+                mainRow.classList.remove('bg-emerald-500/10', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.add('bg-white/[0.01]', 'border-l-4', 'border-l-transparent');
+            }
+        }
+
+        function toggleDetails(nisn) {
+            const detailsRow = document.getElementById(`details_${nisn}`);
+            const icon = document.getElementById(`icon_${nisn}`);
+            detailsRow.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+            icon.classList.toggle('text-indigo-400');
+            icon.classList.toggle('text-slate-500');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('studentTableBody');
+            
+            // Pertahankan state mana baris yang sedang terbuka
+            const openRows = Array.from(document.querySelectorAll('.details-row.open')).map(row => row.id.split('_')[1]);
+            
+            tbody.innerHTML = '';
+
+            // Loading state jika belum ada data di cache
+            if (sheetOrder.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-400"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
+                return;
+            }
+            
+            // Iterasi berdasarkan urutan data di Spreadsheet
+            sheetOrder.forEach((nisn, index) => {
+                const sd = sheetData[nisn];
+                const isRegistered = sd['Daftar Ulang'] === 'Sudah';
+                const isOpen = openRows.includes(nisn);
+                
+                // Fallback Variabel (Jika field di spreadsheet belum diisi/kosong)
+                const name = sd['Nama Lengkap'] || '-';
+                const gender = sd['Gender'] || '-';
+                const score = sd['Skor'] || '-';
+                const choice = sd['Pilihan'] || '-';
+                const phone = sd['No HP'] || '';
+                const rank = index + 1; // Peringkat sesuai urutan baris di Spreadsheet
+                
+                let initialLat = parseFloat(sd['Lintang']);
+                let initialLon = parseFloat(sd['Bujur']);
+                let initialJarak = calculateDistance(initialLat, initialLon, SCH_LAT, SCH_LON);
+                let jarakTampil = initialJarak ? initialJarak + ' km' : (sd['Jarak ke Sekolah (km)'] ? sd['Jarak ke Sekolah (km)'] + ' km' : '');
+
+                const trMain = document.createElement('tr');
+                trMain.id = `main_row_${nisn}`;
+                trMain.className = `border-b border-white/[0.05] transition-all duration-200 hover:bg-white/[0.06] border-l-4 ${isRegistered ? 'bg-emerald-500/10 border-l-emerald-500' : 'bg-white/[0.01] border-l-transparent'}`;
+                
+                trMain.innerHTML = `
+                    <td class="px-4 py-4 text-center">
+                        <input type="checkbox" class="glass-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)">
+                    </td>
+                    <td class="px-4 py-4 cursor-pointer group" onclick="toggleDetails('${nisn}')">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-white group-hover:text-indigo-300 transition-colors">
+                                <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md mr-2 text-slate-300">#${rank}</span>
+                                ${name} 
+                                <br> 
+                                <span class="text-[10px] text-slate-400 font-mono tracking-widest mt-1 inline-block ml-8">${nisn}</span>
+                            </span>
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/20">
+                                <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-500'} text-xs transition-transform" id="icon_${nisn}"></i>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"><i class="fa-brands fa-whatsapp text-lg"></i></a>
+                    </td>
+                `;
+                tbody.appendChild(trMain);
+
+                const trDetails = document.createElement('tr');
+                trDetails.className = `border-b border-white/[0.02] bg-black/30`; 
+
+                trDetails.innerHTML = `
+                    <td colspan="3" class="p-0 border-0">
+                        <div id="details_${nisn}" class="details-row ${isOpen ? 'open' : ''}">
+                            <div class="details-content">
+                                <div class="px-6 py-6" id="form_${nisn}">
+                                    
+                                    <h3 class="text-sm font-semibold text-indigo-300 mb-4 border-b border-white/10 pb-2">Informasi Pendaftaran</h3>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Lengkap</label><input type="text" name="nama" class="glass-input" value="${name}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Gender</label><input type="text" name="gender" class="glass-input" value="${gender}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Skor</label><input type="text" name="skor" class="glass-input" value="${score}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Pilihan</label><input type="text" name="pilihan" class="glass-input" value="${choice}" readonly></div>
+                                    </div>
+
+                                    <h3 class="text-sm font-semibold text-emerald-300 mb-4 border-b border-white/10 pb-2">Biodata & Data Fisik</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK</label><input type="number" name="nik" class="glass-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor KK</label><input type="number" name="nokk" class="glass-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIPD</label><input type="text" name="nipd" class="glass-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}"></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tempat Lahir</label><input type="text" name="tempatLahir" class="glass-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="glass-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor Akta</label><input type="text" name="noAkta" class="glass-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}"></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Berat Badan (kg)</label><input type="number" name="beratBadan" class="glass-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="glass-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="glass-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}"></div>
+                                    </div>
+
+                                    <h3 class="text-sm font-semibold text-fuchsia-300 mb-4 border-b border-white/10 pb-2">Lokasi Koordinat & Orang Tua</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 uppercase">Alamat Lengkap</label><input type="text" name="alamat" class="glass-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}"></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Lintang (Latitude)</label><input type="text" name="lintang" class="glass-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Bujur (Longitude)</label><input type="text" name="bujur" class="glass-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
+                                        
+                                        <div class="md:col-span-2"><label class="text-[10px] text-emerald-400 uppercase">Estimasi Jarak dari Rumah ke Sekolah (Otomatis)</label>
+                                            <input type="text" name="jarakSekolah" class="glass-input bg-black/20 text-emerald-300 font-bold tracking-widest border-emerald-500/30" placeholder="Menghitung jarak otomatis..." value="${jarakTampil}" readonly>
+                                        </div>
+                                        
+                                        <div class="mt-2"><label class="text-[10px] text-slate-400 uppercase">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="glass-input" placeholder="628..." value="${phone}"></div>
+                                        <div class="mt-2"></div>
+
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ayah</label><input type="text" name="namaAyah" class="glass-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ayah</label><input type="number" name="nikAyah" class="glass-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}"></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ibu</label><input type="text" name="namaIbu" class="glass-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}"></div>
+                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ibu</label><input type="number" name="nikIbu" class="glass-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}"></div>
+                                    </div>
+                                    
+                                    <div class="flex justify-end mt-4 border-t border-white/10 pt-4">
+                                        <button onclick="simpanData('${nisn}', this)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-500/40 transform hover:-translate-y-0.5">
+                                            <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(trDetails);
+            });
+        }
+    </script>
+</body>
+</html>
