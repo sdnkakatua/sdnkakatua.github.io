@@ -285,6 +285,66 @@
                             </div>
                         </div>
                     </div>
+					
+					
+					<div id="dokumen-tambahan-section" class="hidden mt-8 space-y-4 relative z-10">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="h-8 w-1.5 bg-amber-500 rounded-full"></div>
+        <h3 class="text-lg font-bold text-slate-800">Dokumen Pendukung Lainnya</h3>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-amber-200 hover:shadow-md">
+            
+            <div id="preview-box-tka" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
+                <div class="absolute inset-0 z-10"></div> 
+                <iframe id="iframe-tka" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
+            </div>
+
+            <div id="icon-box-tka" class="bg-amber-50 text-amber-500 p-4 rounded-full mb-1 mt-2">
+                <i class="fa-solid fa-file-pdf text-3xl"></i>
+            </div>
+            
+            <div class="mt-auto w-full">
+                <h4 class="font-bold text-slate-800 text-sm">Hasil TKA</h4>
+                <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Tes Kesiapan Anak</p>
+                
+                <a id="btn-lihat-tka" href="#" target="_blank" class="hidden w-full text-center bg-amber-50 hover:bg-amber-100 text-amber-600 py-2 rounded-xl text-xs font-bold transition-colors border border-amber-200 shadow-sm block">
+                    <i class="fa-solid fa-eye"></i> Buka Penuh
+                </a>
+                <div id="badge-kosong-tka" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
+                    Belum Tersedia
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-purple-200 hover:shadow-md">
+            
+            <div id="preview-box-ijazah" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
+                <div class="absolute inset-0 z-10"></div>
+                <iframe id="iframe-ijazah" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
+            </div>
+
+            <div id="icon-box-ijazah" class="bg-purple-50 text-purple-500 p-4 rounded-full mb-1 mt-2">
+                <i class="fa-solid fa-certificate text-3xl"></i>
+            </div>
+            
+            <div class="mt-auto w-full">
+                <h4 class="font-bold text-slate-800 text-sm">Ijazah Terakhir</h4>
+                <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Dokumen Kelulusan</p>
+                
+                <a id="btn-lihat-ijazah" href="#" target="_blank" class="hidden w-full text-center bg-purple-50 hover:bg-purple-100 text-purple-600 py-2 rounded-xl text-xs font-bold transition-colors border border-purple-200 shadow-sm block">
+                    <i class="fa-solid fa-eye"></i> Buka Penuh
+                </a>
+                <div id="badge-kosong-ijazah" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
+                    Belum Tersedia
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+					
+					
                 </div>
             </div>
         </div>
@@ -792,11 +852,65 @@
                 sub.innerHTML = `<i class="fa-regular fa-id-badge"></i> ${info["Jenis PTK"] || '-'} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
                 document.getElementById('upload-section-siswa').classList.add('hidden'); 
                 ['NIK', 'NIP', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Status Pegawai', 'Nomor WA', 'Email', 'Jenis PTK', 'Alamat', 'Titik Koordinat'].forEach(f => appendField(f, info[f]));
+				document.getElementById('dokumen-tambahan-section').classList.add('hidden');
             } else {
                 iconWrapper.className = "bg-emerald-50 text-emerald-600 p-4 rounded-2xl shrink-0"; icon.className = "fa-solid fa-graduation-cap text-3xl";
                 sub.innerHTML = `<i class="fa-regular fa-id-card"></i> Kelas: ${info["Kelas"] || '-'} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
                 document.getElementById('upload-section-siswa').classList.remove('hidden');
+				
+				// Tampilkan section dokumen tambahan
+document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
+
+// Sinkronisasi tombol dan Pratinjau TKA & Ijazah
+const docs = [
+    { id: 'tka', field: 'Link TKA' },
+    { id: 'ijazah', field: 'Link Ijazah' }
+];
+
+docs.forEach(doc => {
+    const btn = document.getElementById(`btn-lihat-${doc.id}`);
+    const badge = document.getElementById(`badge-kosong-${doc.id}`);
+    const previewBox = document.getElementById(`preview-box-${doc.id}`);
+    const iconBox = document.getElementById(`icon-box-${doc.id}`);
+    const iframe = document.getElementById(`iframe-${doc.id}`);
+    
+    const urlSpreadsheet = info[doc.field];
+
+    if (urlSpreadsheet && urlSpreadsheet.trim() !== '') {
+        // 1. Atur Tombol "Buka Penuh"
+        btn.href = urlSpreadsheet;
+        btn.classList.remove('hidden'); 
+        badge.classList.add('hidden');  
+
+        // 2. Coba tampilkan pratinjau Iframe
+        const previewUrl = getDrivePreviewUrl(urlSpreadsheet);
+        if (previewUrl) {
+            iframe.src = previewUrl;
+            previewBox.classList.remove('hidden'); // Tampilkan kotak iframe
+            iconBox.classList.add('hidden');       // Sembunyikan ikon besar
+        }
+    } else {
+        // Jika data kosong
+        btn.classList.add('hidden');
+        badge.classList.remove('hidden');
+        previewBox.classList.add('hidden');
+        iconBox.classList.remove('hidden');
+        iframe.src = ""; // Bersihkan iframe
+    }
+});
                 
+				// Fungsi untuk mengekstrak ID File dari URL Google Drive
+function getDrivePreviewUrl(url) {
+    if (!url) return null;
+    // Mencocokkan pola URL Drive untuk mengambil ID
+    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+    if (match && match[1]) {
+        return `https://drive.google.com/file/d/${match[1]}/preview`;
+    }
+    return null; // Kembalikan null jika bukan link drive yang valid
+}
+				
+				
                 // Sinkronisasi status file KK & Akta
                 ['kk', 'akta'].forEach(type => {
                     const field = type === 'kk' ? 'File KK' : 'File Akta'; const btnLihat = document.getElementById(`btn-lihat-${type}`);
