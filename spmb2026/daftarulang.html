@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } } }
@@ -16,76 +16,76 @@
     
     <style>
         html { scroll-behavior: smooth; }
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        body { background-color: #0f172a; } 
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
-        .gpu-accelerated { transform: translate3d(0, 0, 0); backface-visibility: hidden; will-change: transform; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        .glass-checkbox {
-            appearance: none; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 9px; border-radius: 6px; position: relative; cursor: pointer; transition: all 0.2s ease;
+        .clean-checkbox {
+            appearance: none; background-color: #1e293b; border: 1px solid #475569;
+            width: 20px; height: 20px; border-radius: 4px; display: inline-grid; place-content: center;
+            cursor: pointer; transition: all 0.2s ease-in-out;
         }
-        .glass-checkbox:checked { background-color: #10b981; border-color: #34d399; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
-        .glass-checkbox:checked:after { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 10px; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .glass-checkbox:disabled { cursor: not-allowed; opacity: 0.4; }
+        .clean-checkbox:checked { background-color: #10b981; border-color: #10b981; }
+        .clean-checkbox:checked::before {
+            content: ""; width: 10px; height: 10px;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            background-color: white; transform: scale(1.1);
+        }
+        .clean-checkbox:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .glass-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; transition: all 0.3s ease; }
-        .glass-input:focus { border-color: #818cf8; background: rgba(255, 255, 255, 0.1); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
-        .glass-input::placeholder { color: rgba(255,255,255,0.3); }
-        .glass-input:read-only { background: rgba(0, 0, 0, 0.2); border-color: transparent; color: #a5b4fc; cursor: not-allowed; }
+        .clean-input { 
+            width: 100%; background: #1e293b; border: 1px solid #334155; color: #f1f5f9; 
+            padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; transition: all 0.2s ease; 
+        }
+        .clean-input:focus { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+        .clean-input::placeholder { color: #64748b; }
+        .clean-input:read-only { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; }
 
-        .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+        .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
         .details-row.open { grid-template-rows: 1fr; }
         .details-content { min-height: 0; overflow: hidden; }
 
         #sync-status { transition: opacity 0.3s; }
         
-        /* Custom SweetAlert2 Override untuk Glassmorphism */
-        div:where(.swal2-container) { backdrop-filter: blur(8px); }
-        .swal2-popup.glass-popup { background: rgba(30, 41, 59, 0.75) !important; backdrop-filter: blur(16px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 1.5rem !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important; color: white !important; }
-        .swal2-title { color: #fff !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        .swal2-popup.clean-popup { background: #1e293b !important; border: 1px solid #334155 !important; border-radius: 1rem !important; color: white !important; }
+        .swal2-title { color: #f8fafc !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
         .swal2-html-container { color: #cbd5e1 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
         
-        /* Input Animasi Passcode */
-        .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; }
-        .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); }
+        .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; background: #0f172a; border: 1px solid #334155; color: #a5b4fc; }
+        .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); color:#475569; }
     </style>
 </head>
-<body class="text-slate-200 antialiased relative p-4 md:p-8 min-h-screen overflow-x-hidden overflow-y-scroll">
-
-    <div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none z-0 gpu-accelerated"></div>
-    <div class="fixed bottom-[20%] right-[-10%] w-[45vw] h-[45vw] bg-fuchsia-500/10 rounded-full blur-[120px] pointer-events-none z-0 gpu-accelerated"></div>
+<body class="text-slate-200 p-4 md:p-8 min-h-screen">
 
     <div class="max-w-6xl mx-auto relative z-10">
-        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 transform-gpu">
+        
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="text-center md:text-left">
                 <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-                    <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full cursor-pointer select-none transition-all">Database Terpusat</span>
-                    <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Sinkronisasi Background...</span>
+                    <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20 transition-all">Database SDN Kakatua</span>
+                    <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Memanggil Database...</span>
                 </div>
-                <h1 class="text-2xl md:text-3xl font-bold text-white bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">Verifikasi & Biodata SPMB</h1>
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Verifikasi & Biodata SPMB</h1>
                 <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri, kondisi fisik, dan lokasi akurat siswa.</p>
             </div>
             
-            <button onclick="manualSync()" id="btn-sync" class="bg-indigo-500/20 hover:bg-indigo-500/40 border border-indigo-500/30 text-indigo-300 px-5 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 shadow-lg">
-                <i class="fa-solid fa-rotate"></i>
-                <span class="font-semibold text-sm">Sinkron (2 Arah)</span>
-            </button>
+           
         </div>
 
-        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl overflow-hidden transform-gpu">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-white/[0.02] border-b border-white/10 text-slate-300 text-sm uppercase tracking-wider">
-                            <th class="px-4 py-4 font-semibold text-center w-16">Cek</th>
+                        <tr class="bg-slate-800/80 border-b border-slate-700 text-slate-400 text-sm uppercase tracking-wider">
+                            <th class="px-4 py-4 font-semibold text-center w-16">Verif</th>
                             <th class="px-4 py-4 font-semibold">Nama Siswa</th>
-                            <th class="px-4 py-4 font-semibold text-center w-24">Kontak</th>
+                            <th class="px-4 py-4 font-semibold text-center w-24">whatsapp</th>
                         </tr>
                     </thead>
-                    <tbody id="studentTableBody" class="divide-y divide-white/[0.05] text-sm">
+                    <tbody id="studentTableBody" class="text-sm">
                     </tbody>
                 </table>
             </div>
@@ -93,23 +93,20 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby58-fmBBtPQkEyu9U7Ge62CT-BZJ2e0IwS3hgAGKqtfNCVbyvCC0wLcqCpmjoqQa7F4Q/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZ8anl9YoCd_oCkomoIRSchcoOH-DzMmvrTyDz386qtXtTjJr6im4D7eYJ1KwxbI6_-Q/exec';
 
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
 
-        // Tema Toast Estetis Modern
-        const glassToast = Swal.mixin({
+        const cleanToast = Swal.mixin({
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
             timer: 3000,
             timerProgressBar: true,
-            background: 'rgba(30, 41, 59, 0.85)',
+            background: '#1e293b',
             color: '#f8fafc',
-            customClass: {
-                popup: 'backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl'
-            }
+            customClass: { popup: 'border border-slate-700 rounded-xl shadow-lg' }
         });
 
         let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
@@ -121,72 +118,78 @@
             updateAdminUI();
             renderTable();
             silentBackgroundSync();
+
+            // FITUR: Enter untuk Simpan Data
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT' && isAdmin) {
+                    const formContainer = e.target.closest('[id^="form_"]');
+                    if (formContainer) {
+                        e.preventDefault(); // Mencegah form reload bawaan browser
+                        const nisn = formContainer.id.split('_')[1];
+                        const btnSave = formContainer.querySelector('button');
+                        if (btnSave) simpanData(nisn, btnSave);
+                    }
+                }
+            });
         });
 
-        // ================= FUNGSI LOGIN & LOGOUT ADMIN (TRIPLE CLICK) =================
         function handleAdminToggle(event) {
             if (event.detail === 3) {
                 if (isAdmin) {
                     Swal.fire({
                         html: `
-                            <div class="mb-4 text-rose-400 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
+                            <div class="mb-4 text-rose-500 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
                             <h2 class="text-2xl font-bold text-white mb-2">Akhiri Sesi Admin?</h2>
-                            <p class="text-slate-400 text-sm mb-6">Aplikasi akan dikunci kembali menjadi mode Lihat Saja (Read-Only).</p>
                         `,
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, Logout',
-                        cancelButtonText: 'Batal',
+                        showCancelButton: true, confirmButtonText: 'Logout', cancelButtonText: 'Batal',
                         buttonsStyling: false,
                         customClass: {
-                            popup: 'glass-popup',
-                            confirmButton: 'bg-rose-500/80 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-rose-500/30 w-32 border border-rose-500/50',
-                            cancelButton: 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-300 px-6 py-2.5 rounded-xl font-semibold transition-all w-32 border border-white/10 mr-3'
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            isAdmin = false;
-                            sessionStorage.setItem('spmb_isAdmin', 'false');
-                            updateAdminUI();
-                            renderTable();
-                            glassToast.fire({ title: 'Logout Berhasil', icon: 'success' });
+                            isAdmin = false; sessionStorage.setItem('spmb_isAdmin', 'false');
+                            updateAdminUI(); renderTable();
+                            cleanToast.fire({ title: 'Logout Berhasil', icon: 'success' });
                         }
                     });
                 } else {
                     Swal.fire({
                         html: `
-                            <div class="mb-4 text-indigo-400 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
-                            <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300 mb-2">Verifikasi Akses</h2>
+                            <div class="mb-4 text-indigo-500 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Verifikasi Akses</h2>
                             <p class="text-slate-400 text-sm mb-6">Masukkan Passcode untuk membuka Mode Editor.</p>
-                            <input type="password" id="passcode-input" class="passcode-input w-full bg-white/5 border border-white/10 text-indigo-200 px-4 py-3 rounded-xl outline-none focus:border-indigo-400 focus:bg-white/10 transition-all shadow-inner mb-2" placeholder="Ketik Passcode" autocomplete="off">
+                            <input type="password" id="passcode-input" class="passcode-input w-full px-4 py-3 rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-2" placeholder="Ketik Passcode" autocomplete="off">
                         `,
-                        showCancelButton: true,
-                        confirmButtonText: 'Masuk',
-                        cancelButtonText: 'Batal',
+                        showCancelButton: true, confirmButtonText: 'Masuk', cancelButtonText: 'Batal',
                         buttonsStyling: false,
                         customClass: {
-                            popup: 'glass-popup',
-                            confirmButton: 'bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30 w-32 border border-indigo-400/50',
-                            cancelButton: 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-300 px-6 py-2.5 rounded-xl font-semibold transition-all w-32 border border-white/10 mr-3'
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
                         },
                         preConfirm: () => {
                             const passcode = document.getElementById('passcode-input').value;
-                            if (!passcode) {
-                                Swal.showValidationMessage('Passcode tidak boleh kosong!');
-                            }
+                            if (!passcode) Swal.showValidationMessage('Passcode tidak boleh kosong!');
                             return passcode;
                         },
                         didOpen: () => {
-                            setTimeout(() => document.getElementById('passcode-input').focus(), 100);
+                            const input = document.getElementById('passcode-input');
+                            setTimeout(() => input.focus(), 100);
+                            // FITUR: Enter untuk Submit Login
+                            input.addEventListener('keypress', (e) => {
+                                if(e.key === 'Enter') Swal.clickConfirm();
+                            });
                         }
                     }).then((result) => {
                         if (result.value === 'aic') {
-                            isAdmin = true;
-                            sessionStorage.setItem('spmb_isAdmin', 'true');
-                            updateAdminUI();
-                            renderTable();
-                            glassToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
+                            isAdmin = true; sessionStorage.setItem('spmb_isAdmin', 'true');
+                            updateAdminUI(); renderTable();
+                            cleanToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
                         } else if (result.value !== undefined) {
-                            glassToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
+                            cleanToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
                         }
                     });
                 }
@@ -196,11 +199,11 @@
         function updateAdminUI() {
             const badge = document.getElementById('btn-admin-toggle');
             if (isAdmin) {
-                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 rounded-full cursor-pointer select-none shadow-[0_0_15px_rgba(16,185,129,0.2)]";
-                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i> Mode Admin';
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer select-none hover:bg-emerald-500/20";
+                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i>Admin | Database SDN Kakatua';
             } else {
-                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
-                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database Terpusat';
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
+                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database SDN Kakatua';
             }
         }
 
@@ -226,57 +229,36 @@
         function getLocation(nisn) {
             if (!isAdmin) return; 
             if (navigator.geolocation) {
-                glassToast.fire({ title: 'Mendeteksi Lokasi...', icon: 'info', timer: 10000 });
-
+                cleanToast.fire({ title: 'Mendeteksi Lokasi...', icon: 'info', timer: 10000 });
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        
                         const form = document.getElementById(`form_${nisn}`);
-                        form.querySelector('[name="lintang"]').value = lat.toFixed(6);
-                        form.querySelector('[name="bujur"]').value = lon.toFixed(6);
-                        
+                        form.querySelector('[name="lintang"]').value = position.coords.latitude.toFixed(6);
+                        form.querySelector('[name="bujur"]').value = position.coords.longitude.toFixed(6);
                         updateDistance(nisn);
-                        glassToast.fire({ title: 'GPS Berhasil!', icon: 'success' });
+                        cleanToast.fire({ title: 'GPS Berhasil!', icon: 'success' });
                     },
-                    function(error) {
-                        glassToast.fire({ title: 'Gagal mendeteksi lokasi.', icon: 'error' });
-                    },
+                    function(error) { cleanToast.fire({ title: 'Gagal mendeteksi lokasi.', icon: 'error' }); },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-            } else {
-                glassToast.fire({ title: 'Browser tidak mendukung GPS.', icon: 'error' });
             }
         }
 
         async function silentBackgroundSync() {
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
-            try {
-                await pushPendingData(); 
-                await pullFreshData();   
-                renderTable();           
-            } catch (err) {
-                console.log("Background sync paused");
-            } finally {
-                statusInd.classList.add('opacity-0');
-            }
+            try { await pushPendingData(); await pullFreshData(); renderTable(); } 
+            catch (err) {} finally { statusInd.classList.add('opacity-0'); }
         }
 
         async function manualSync() {
             const btn = document.getElementById('btn-sync');
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
             btn.classList.add('pointer-events-none');
-            
             try {
-                await pushPendingData();
-                await pullFreshData();
-                renderTable();
-                glassToast.fire({ title: 'Sinkronisasi Berhasil', icon: 'success' });
-            } catch (err) {
-                glassToast.fire({ title: 'Gagal menghubungi server.', icon: 'error' });
-            }
+                await pushPendingData(); await pullFreshData(); renderTable();
+                cleanToast.fire({ title: 'Sinkronisasi Berhasil', icon: 'success' });
+            } catch (err) { cleanToast.fire({ title: 'Gagal menghubungi server.', icon: 'error' }); }
             
             btn.innerHTML = `<i class="fa-solid fa-rotate"></i> <span class="font-semibold text-sm">Sinkron (2 Arah)</span>`;
             btn.classList.remove('pointer-events-none');
@@ -285,17 +267,12 @@
         async function pushPendingData() {
             const pendingKeys = Object.keys(pendingSync);
             if(pendingKeys.length === 0) return; 
-
             const promises = pendingKeys.map(nisn => {
                 return fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(pendingSync[nisn]) })
                     .then(res => res.json())
-                    .then(resData => {
-                        if(resData.result === 'success') {
-                            delete pendingSync[nisn]; 
-                        }
-                    }).catch(e => console.error('Gagal Push: ', nisn));
+                    .then(resData => { if(resData.result === 'success') delete pendingSync[nisn]; })
+                    .catch(e => console.error('Gagal Push: ', nisn));
             });
-
             await Promise.all(promises);
             localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
         }
@@ -304,16 +281,12 @@
             const res = await fetch(SCRIPT_URL);
             const result = await res.json();
             if(result.result === 'success') {
-                sheetData = {};
-                sheetOrder = [];
-                
+                sheetData = {}; sheetOrder = [];
                 result.data.forEach(item => { 
                     if(item.NISN && item.NISN.trim() !== '') {
-                        sheetData[item.NISN] = item; 
-                        sheetOrder.push(item.NISN);
+                        sheetData[item.NISN] = item; sheetOrder.push(item.NISN);
                     }
                 });
-                
                 localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
                 localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
             }
@@ -325,14 +298,19 @@
             const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
             btnElement.classList.replace('bg-indigo-600', 'bg-emerald-600');
+            btnElement.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-700');
             setTimeout(() => {
                 btnElement.innerHTML = originalHtml;
                 btnElement.classList.replace('bg-emerald-600', 'bg-indigo-600');
+                btnElement.classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-700');
             }, 2000);
 
             const form = document.getElementById(`form_${nisn}`);
             let jarakVal = form.querySelector('[name="jarakSekolah"]').value.replace(' km', '');
             
+            // FITUR: Parameter Status Verifikasi
+            const isVerified = document.getElementById(`check_${nisn}`).checked;
+
             const dataToSave = {
                 nisn: nisn,
                 nama: form.querySelector('[name="nama"]').value,
@@ -340,7 +318,7 @@
                 skor: form.querySelector('[name="skor"]').value,
                 pilihan: form.querySelector('[name="pilihan"]').value,
                 phone: form.querySelector('[name="phone"]').value,
-                daftarUlang: document.getElementById(`check_${nisn}`).checked ? 'Sudah' : 'Belum',
+                statusVerifikasi: isVerified ? 'Sudah Verifikasi' : 'Belum', // Sesuai permintaan
                 nik: form.querySelector('[name="nik"]').value,
                 nokk: form.querySelector('[name="nokk"]').value,
                 nipd: form.querySelector('[name="nipd"]').value,
@@ -361,8 +339,8 @@
             };
 
             const localDisplayData = {
-                'Daftar Ulang': dataToSave.daftarUlang, 'No HP': dataToSave.phone,
-                'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
+                'Status Verifikasi': dataToSave.statusVerifikasi, // Terhubung ke Header Kolom Spreadsheet
+                'No HP': dataToSave.phone, 'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
                 'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
                 'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
                 'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
@@ -371,29 +349,26 @@
 
             sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
             localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
-
             pendingSync[nisn] = dataToSave;
             localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
 
-            glassToast.fire({ title: 'Tersimpan & Masuk Antrean!', icon: 'success' });
+            cleanToast.fire({ title: 'Tersimpan & Masuk Antrean!', icon: 'success' });
             
-            renderTable();
-            silentBackgroundSync();
+            renderTable(); silentBackgroundSync();
         }
 
         function toggleDaftarUlang(nisn, checkbox) {
             const isChecked = checkbox.checked;
             const mainRow = document.getElementById(`main_row_${nisn}`);
             if (isChecked) {
-                mainRow.classList.add('bg-emerald-500/10', 'border-l-4', 'border-l-emerald-500');
-                mainRow.classList.remove('bg-white/[0.01]', 'border-l-transparent');
+                mainRow.classList.add('bg-emerald-900/20', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.remove('bg-transparent', 'border-l-transparent');
             } else {
-                mainRow.classList.remove('bg-emerald-500/10', 'border-l-4', 'border-l-emerald-500');
-                mainRow.classList.add('bg-white/[0.01]', 'border-l-4', 'border-l-transparent');
+                mainRow.classList.remove('bg-emerald-900/20', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.add('bg-transparent', 'border-l-4', 'border-l-transparent');
             }
-            // Simpan otomatis toggle checkbox jika dalam mode admin
             if(isAdmin){
-                // Ambil data seadanya dari form dan trigger simpanData agar checkbox tersimpan langsung
+                // Begitu ceklis ditekan, otomatis jalankan save
                 const btnSave = document.querySelector(`#form_${nisn} button`);
                 if(btnSave) simpanData(nisn, btnSave);
             }
@@ -414,13 +389,14 @@
             tbody.innerHTML = '';
 
             if (sheetOrder.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-400"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
                 return;
             }
             
             sheetOrder.forEach((nisn, index) => {
                 const sd = sheetData[nisn];
-                const isRegistered = sd['Daftar Ulang'] === 'Sudah';
+                // FITUR: Periksa berdasarkan 'Status Verifikasi' dari spreadsheet
+                const isRegistered = sd['Status Verifikasi'] === 'Sudah Verifikasi';
                 const isOpen = openRows.includes(nisn);
                 
                 const name = sd['Nama Lengkap'] || '-';
@@ -437,33 +413,33 @@
 
                 const trMain = document.createElement('tr');
                 trMain.id = `main_row_${nisn}`;
-                trMain.className = `border-b border-white/[0.05] transition-all duration-200 hover:bg-white/[0.06] border-l-4 ${isRegistered ? 'bg-emerald-500/10 border-l-emerald-500' : 'bg-white/[0.01] border-l-transparent'}`;
+                trMain.className = `border-b border-slate-700 transition-colors duration-200 border-l-4 hover:bg-slate-700/30 ${isRegistered ? 'bg-emerald-900/20 border-l-emerald-500' : 'bg-transparent border-l-transparent'}`;
                 
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
-                        <input type="checkbox" class="glass-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
+                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
                     </td>
                     <td class="px-4 py-4 cursor-pointer group" onclick="toggleDetails('${nisn}')">
                         <div class="flex items-center justify-between">
-                            <span class="font-medium text-white group-hover:text-indigo-300 transition-colors">
-                                <span class="text-xs bg-white/10 px-2 py-0.5 rounded-md mr-2 text-slate-300">#${rank}</span>
+                            <span class="font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">
+                                <span class="text-xs bg-slate-700 px-2 py-0.5 rounded-md mr-2 text-slate-300">#${rank}</span>
                                 ${name} 
                                 <br> 
-                                <span class="text-[10px] text-slate-400 font-mono tracking-widest mt-1 inline-block ml-8">${nisn}</span>
+                                <span class="text-[10px] text-slate-500 font-mono tracking-widest mt-1 inline-block ml-8">${nisn}</span>
                             </span>
-                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/20 transition-all">
-                                <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-500'} text-xs transition-transform" id="icon_${nisn}"></i>
+                            <div class="w-8 h-8 rounded-full bg-slate-700/50 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                                <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-400'} text-xs transition-transform" id="icon_${nisn}"></i>
                             </div>
                         </div>
                     </td>
                     <td class="px-4 py-4 text-center">
-                        <a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"><i class="fa-brands fa-whatsapp text-lg"></i></a>
+                        <a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-brands fa-whatsapp text-lg"></i></a>
                     </td>
                 `;
                 tbody.appendChild(trMain);
 
                 const trDetails = document.createElement('tr');
-                trDetails.className = `border-b border-white/[0.02] bg-black/30`; 
+                trDetails.className = `border-b border-slate-700 bg-slate-900/50`; 
 
                 trDetails.innerHTML = `
                     <td colspan="3" class="p-0 border-0">
@@ -471,64 +447,64 @@
                             <div class="details-content">
                                 <div class="px-6 py-6" id="form_${nisn}">
                                     
-                                    <h3 class="text-sm font-semibold text-indigo-300 mb-4 border-b border-white/10 pb-2">Informasi Pendaftaran</h3>
+                                    <h3 class="text-sm font-semibold text-indigo-400 mb-4 border-b border-slate-700 pb-2">Informasi Pendaftaran</h3>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Lengkap</label><input type="text" name="nama" class="glass-input" value="${name}" readonly></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Gender</label><input type="text" name="gender" class="glass-input" value="${gender}" readonly></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Skor</label><input type="text" name="skor" class="glass-input" value="${score}" readonly></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Pilihan</label><input type="text" name="pilihan" class="glass-input" value="${choice}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" class="clean-input" value="${name}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Gender</label><input type="text" name="gender" class="clean-input" value="${gender}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Skor</label><input type="text" name="skor" class="clean-input" value="${score}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Pilihan</label><input type="text" name="pilihan" class="clean-input" value="${choice}" readonly></div>
                                     </div>
 
-                                    <h3 class="text-sm font-semibold text-emerald-300 mb-4 border-b border-white/10 pb-2">Biodata & Data Fisik</h3>
+                                    <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK</label><input type="number" name="nik" class="glass-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor KK</label><input type="number" name="nokk" class="glass-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIPD</label><input type="text" name="nipd" class="glass-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK</label><input type="number" name="nik" class="clean-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor KK</label><input type="number" name="nokk" class="clean-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIPD</label><input type="text" name="nipd" class="clean-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tempat Lahir</label><input type="text" name="tempatLahir" class="glass-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="glass-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nomor Akta</label><input type="text" name="noAkta" class="glass-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" class="clean-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="clean-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor Akta</label><input type="text" name="noAkta" class="clean-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Berat Badan (kg)</label><input type="number" name="beratBadan" class="glass-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="glass-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="glass-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Berat Badan (kg)</label><input type="number" name="beratBadan" class="clean-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="clean-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="clean-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
 
-                                    <h3 class="text-sm font-semibold text-fuchsia-300 mb-4 border-b border-white/10 pb-2">Lokasi Koordinat & Orang Tua</h3>
+                                    <h3 class="text-sm font-semibold text-fuchsia-400 mb-4 border-b border-slate-700 pb-2">Lokasi Koordinat & Orang Tua</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 uppercase">Alamat Lengkap</label><input type="text" name="alamat" class="glass-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Alamat Lengkap</label><input type="text" name="alamat" class="clean-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div class="md:col-span-2 flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10 mt-1 mb-1">
+                                        <div class="md:col-span-2 flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 mb-1">
                                             <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-map-location-dot mr-2 text-indigo-400"></i>Titik Koordinat Rumah</span>
                                             ${isAdmin ? `
-                                            <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-all shadow-md">
-                                                <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS Saat Ini
+                                            <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors">
+                                                <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS
                                             </button>
                                             ` : `
-                                            <span class="text-xs text-amber-400/70 font-medium tracking-wide"><i class="fa-solid fa-eye mr-1"></i> Mode Read-Only</span>
+                                            <span class="text-xs text-amber-500 font-medium tracking-wide"><i class="fa-solid fa-eye mr-1"></i> Mode Read-Only</span>
                                             `}
                                         </div>
 
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Lintang (Latitude)</label><input type="text" name="lintang" class="glass-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Bujur (Longitude)</label><input type="text" name="bujur" class="glass-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" class="clean-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" class="clean-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div class="md:col-span-2"><label class="text-[10px] text-emerald-400 uppercase">Estimasi Jarak dari Rumah ke Sekolah (Otomatis)</label>
-                                            <input type="text" name="jarakSekolah" class="glass-input bg-black/20 text-emerald-300 font-bold tracking-widest border-emerald-500/30" placeholder="Menghitung jarak otomatis..." value="${jarakTampil}" readonly>
+                                        <div class="md:col-span-2"><label class="text-[10px] text-emerald-400 font-medium uppercase mb-1 block">Estimasi Jarak dari Rumah ke Sekolah (Otomatis)</label>
+                                            <input type="text" name="jarakSekolah" class="clean-input text-emerald-400 font-bold tracking-widest border-emerald-500/30" placeholder="Menghitung jarak otomatis..." value="${jarakTampil}" readonly style="background-color: #022c22;">
                                         </div>
                                         
-                                        <div class="mt-2"><label class="text-[10px] text-slate-400 uppercase">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="glass-input" placeholder="628..." value="${phone}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div class="mt-2"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="clean-input" placeholder="628..." value="${phone}" ${!isAdmin ? 'readonly' : ''}></div>
                                         <div class="mt-2"></div>
 
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ayah</label><input type="text" name="namaAyah" class="glass-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ayah</label><input type="number" name="nikAyah" class="glass-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" class="clean-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ayah</label><input type="number" name="nikAyah" class="clean-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
-                                        <div><label class="text-[10px] text-slate-400 uppercase">Nama Ibu</label><input type="text" name="namaIbu" class="glass-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 uppercase">NIK Ibu</label><input type="number" name="nikIbu" class="glass-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" class="clean-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ibu</label><input type="number" name="nikIbu" class="clean-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
                                     
                                     ${isAdmin ? `
-                                    <div class="flex justify-end mt-4 border-t border-white/10 pt-4">
-                                        <button onclick="simpanData('${nisn}', this)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-medium text-sm transition-all shadow-lg shadow-indigo-500/40 transform hover:-translate-y-0.5">
+                                    <div class="flex justify-end mt-4 border-t border-slate-700 pt-5">
+                                        <button onclick="simpanData('${nisn}', this)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-colors">
                                             <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
                                         </button>
                                     </div>
