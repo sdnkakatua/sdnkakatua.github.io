@@ -39,7 +39,6 @@
         .details-row.open { grid-template-rows: 1fr; }
         .details-content { min-height: 0; overflow: hidden; }
 
-        /* Indikator Sync */
         #sync-status { transition: opacity 0.3s; }
     </style>
 </head>
@@ -95,18 +94,16 @@
             didOpen: (toast) => { toast.style.backdropFilter = 'blur(12px)'; toast.style.border = '1px solid rgba(255, 255, 255, 0.1)'; }
         });
 
-        // 1. Inisialisasi Data Murni dari Local Storage / Cache
         let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
         let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
         let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
 
-        // Saat halaman dimuat: Render apa yang ada di cache, lalu sinkron di background
         document.addEventListener('DOMContentLoaded', () => {
             renderTable();
             silentBackgroundSync();
         });
 
-        // Rumus Hitung Jarak
+        // RUMUS MENGHITUNG JARAK HAVERSINE
         function calculateDistance(lat1, lon1, lat2, lon2) {
             if (!lat1 || !lon1 || isNaN(lat1) || isNaN(lon1)) return '';
             const R = 6371; 
@@ -117,6 +114,7 @@
             return (R * c).toFixed(2);
         }
 
+        // UPDATE JARAK SAAT KETIK ATAU MENGGUNAKAN GPS
         function updateDistance(nisn) {
             const form = document.getElementById(`form_${nisn}`);
             const lat = parseFloat(form.querySelector('[name="lintang"]').value);
@@ -126,15 +124,58 @@
             inputJarak.value = jarak ? jarak + ' km' : '';
         }
 
-        // ================= FITUR SINKRONISASI 2 ARAH =================
+        // FITUR GPS (MENGAMBIL LOKASI BROWSER)
+        function getLocation(nisn) {
+            if (navigator.geolocation) {
+                glassSwal.fire({
+                    title: 'Mendeteksi Lokasi...',
+                    text: 'Mohon izinkan akses lokasi (Allow Location) jika diminta browser.',
+                    icon: 'info',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timerProgressBar: true
+                });
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        const form = document.getElementById(`form_${nisn}`);
+                        form.querySelector('[name="lintang"]').value = lat.toFixed(6);
+                        form.querySelector('[name="bujur"]').value = lon.toFixed(6);
+                        
+                        // Perbarui perhitungan jarak otomatis
+                        updateDistance(nisn);
+
+                        glassSwal.fire({ 
+                            title: 'GPS Berhasil!', 
+                            text: 'Koordinat lokasi telah dimasukkan otomatis.', 
+                            icon: 'success' 
+                        });
+                    },
+                    function(error) {
+                        let msg = 'Gagal mendeteksi lokasi.';
+                        if (error.code === 1) msg = 'Akses GPS ditolak. Silakan periksa izin browser Anda.';
+                        else if (error.code === 2) msg = 'Posisi tidak tersedia/Sinyal GPS lemah.';
+                        else if (error.code === 3) msg = 'Waktu permintaan habis.';
+                        glassSwal.fire({ title: 'Gagal', text: msg, icon: 'error' });
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                glassSwal.fire({ title: 'Tidak Didukung', text: 'Browser Anda tidak mendukung fitur GPS.', icon: 'error' });
+            }
+        }
+
         async function silentBackgroundSync() {
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
-            
             try {
-                await pushPendingData(); // Kirim antrean form
-                await pullFreshData();   // Ambil data sheet
-                renderTable();           // Perbarui tabel secara instan
+                await pushPendingData();
+                await pullFreshData();
+                renderTable();
             } catch (err) {
                 console.log("Background sync paused (Offline atau Gagal fetch)");
             } finally {
@@ -169,7 +210,7 @@
                     .then(res => res.json())
                     .then(resData => {
                         if(resData.result === 'success') {
-                            delete pendingSync[nisn]; // Hapus dari antrean jika sukses
+                            delete pendingSync[nisn];
                         }
                     }).catch(e => console.error('Gagal Push: ', nisn));
             });
@@ -192,13 +233,11 @@
                     }
                 });
                 
-                // Simpan Data beserta Urutannya ke Local Storage
                 localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
                 localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
             }
         }
 
-        // ================= FITUR SIMPAN DATA (CACHE FIRST) =================
         function simpanData(nisn, btnElement) {
             const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
@@ -247,11 +286,9 @@
                 'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu
             };
 
-            // Simpan ke Data Tampilan (UI)
             sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
             localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
 
-            // Simpan ke Antrean Background
             pendingSync[nisn] = dataToSave;
             localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
 
@@ -285,30 +322,26 @@
         function renderTable() {
             const tbody = document.getElementById('studentTableBody');
             
-            // Pertahankan state mana baris yang sedang terbuka
             const openRows = Array.from(document.querySelectorAll('.details-row.open')).map(row => row.id.split('_')[1]);
             
             tbody.innerHTML = '';
 
-            // Loading state jika belum ada data di cache
             if (sheetOrder.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-400"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
                 return;
             }
             
-            // Iterasi berdasarkan urutan data di Spreadsheet
             sheetOrder.forEach((nisn, index) => {
                 const sd = sheetData[nisn];
                 const isRegistered = sd['Daftar Ulang'] === 'Sudah';
                 const isOpen = openRows.includes(nisn);
                 
-                // Fallback Variabel (Jika field di spreadsheet belum diisi/kosong)
                 const name = sd['Nama Lengkap'] || '-';
                 const gender = sd['Gender'] || '-';
                 const score = sd['Skor'] || '-';
                 const choice = sd['Pilihan'] || '-';
                 const phone = sd['No HP'] || '';
-                const rank = index + 1; // Peringkat sesuai urutan baris di Spreadsheet
+                const rank = index + 1; 
                 
                 let initialLat = parseFloat(sd['Lintang']);
                 let initialLon = parseFloat(sd['Bujur']);
@@ -378,6 +411,13 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                         <div class="md:col-span-2"><label class="text-[10px] text-slate-400 uppercase">Alamat Lengkap</label><input type="text" name="alamat" class="glass-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}"></div>
                                         
+                                        <div class="md:col-span-2 flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10 mt-1 mb-1">
+                                            <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-map-location-dot mr-2 text-indigo-400"></i>Titik Koordinat Rumah</span>
+                                            <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 border border-emerald-500/30 text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-all shadow-md">
+                                                <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS Saat Ini
+                                            </button>
+                                        </div>
+
                                         <div><label class="text-[10px] text-slate-400 uppercase">Lintang (Latitude)</label><input type="text" name="lintang" class="glass-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
                                         <div><label class="text-[10px] text-slate-400 uppercase">Bujur (Longitude)</label><input type="text" name="bujur" class="glass-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')"></div>
                                         
