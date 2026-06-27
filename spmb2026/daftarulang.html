@@ -41,6 +41,16 @@
         .details-content { min-height: 0; overflow: hidden; }
 
         #sync-status { transition: opacity 0.3s; }
+        
+        /* Custom SweetAlert2 Override untuk Glassmorphism */
+        div:where(.swal2-container) { backdrop-filter: blur(8px); }
+        .swal2-popup.glass-popup { background: rgba(30, 41, 59, 0.75) !important; backdrop-filter: blur(16px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 1.5rem !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important; color: white !important; }
+        .swal2-title { color: #fff !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        .swal2-html-container { color: #cbd5e1 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        
+        /* Input Animasi Passcode */
+        .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; }
+        .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); }
     </style>
 </head>
 <body class="text-slate-200 antialiased relative p-4 md:p-8 min-h-screen overflow-x-hidden overflow-y-scroll">
@@ -88,17 +98,23 @@
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
 
-        const glassSwal = Swal.mixin({
-            background: 'rgba(23, 23, 37, 0.85)', color: '#f1f5f9', confirmButtonColor: '#6366f1',
-            backdrop: 'rgba(15, 23, 42, 0.4)', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-            didOpen: (toast) => { toast.style.backdropFilter = 'blur(12px)'; toast.style.border = '1px solid rgba(255, 255, 255, 0.1)'; }
+        // Tema Toast Estetis Modern
+        const glassToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: 'rgba(30, 41, 59, 0.85)',
+            color: '#f8fafc',
+            customClass: {
+                popup: 'backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl'
+            }
         });
 
         let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
         let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
         let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
-        
-        // State GUEST / ADMIN (Disimpan di sessionStorage agar aman selama tab terbuka)
         let isAdmin = sessionStorage.getItem('spmb_isAdmin') === 'true';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -109,46 +125,58 @@
 
         // ================= FUNGSI LOGIN & LOGOUT ADMIN (TRIPLE CLICK) =================
         function handleAdminToggle(event) {
-            // event.detail akan menghasilkan angka berdasarkan jumlah klik cepat beruntun
             if (event.detail === 3) {
                 if (isAdmin) {
-                    // Proses Logout
                     Swal.fire({
-                        title: 'Logout Admin?',
-                        text: 'Aplikasi akan dikunci kembali menjadi mode Lihat Saja (Read-Only).',
-                        icon: 'warning',
-                        background: 'rgba(23, 23, 37, 0.95)', color: '#f1f5f9', confirmButtonColor: '#ef4444', cancelButtonColor: '#6366f1',
-                        showCancelButton: true, confirmButtonText: 'Ya, Logout', cancelButtonText: 'Batal',
-                        backdrop: 'rgba(15, 23, 42, 0.6)',
-                        didOpen: (modal) => { modal.style.backdropFilter = 'blur(12px)'; modal.style.border = '1px solid rgba(255, 255, 255, 0.1)'; }
+                        html: `
+                            <div class="mb-4 text-rose-400 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Akhiri Sesi Admin?</h2>
+                            <p class="text-slate-400 text-sm mb-6">Aplikasi akan dikunci kembali menjadi mode Lihat Saja (Read-Only).</p>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Logout',
+                        cancelButtonText: 'Batal',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'glass-popup',
+                            confirmButton: 'bg-rose-500/80 hover:bg-rose-500 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-rose-500/30 w-32 border border-rose-500/50',
+                            cancelButton: 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-300 px-6 py-2.5 rounded-xl font-semibold transition-all w-32 border border-white/10 mr-3'
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             isAdmin = false;
                             sessionStorage.setItem('spmb_isAdmin', 'false');
                             updateAdminUI();
                             renderTable();
-                            glassSwal.fire({ title: 'Logout Berhasil', text: 'Sekarang dalam mode Read-Only.', icon: 'success' });
+                            glassToast.fire({ title: 'Logout Berhasil', icon: 'success' });
                         }
                     });
                 } else {
-                    // Proses Login
                     Swal.fire({
-                        title: 'Verifikasi Admin',
-                        input: 'password',
-                        inputLabel: 'Masukkan Passcode Admin',
-                        inputPlaceholder: 'Ketik passcode...',
-                        background: 'rgba(23, 23, 37, 0.95)', color: '#f1f5f9', confirmButtonColor: '#6366f1', cancelButtonColor: '#ef4444',
-                        showCancelButton: true, confirmButtonText: 'Login', cancelButtonText: 'Batal',
-                        backdrop: 'rgba(15, 23, 42, 0.6)',
-                        didOpen: (modal) => {
-                            modal.style.backdropFilter = 'blur(12px)';
-                            modal.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-                            const input = modal.querySelector('.swal2-input');
-                            if (input) {
-                                input.style.background = 'rgba(255, 255, 255, 0.05)';
-                                input.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-                                input.style.color = '#f1f5f9';
+                        html: `
+                            <div class="mb-4 text-indigo-400 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-fuchsia-300 mb-2">Verifikasi Akses</h2>
+                            <p class="text-slate-400 text-sm mb-6">Masukkan Passcode untuk membuka Mode Editor.</p>
+                            <input type="password" id="passcode-input" class="passcode-input w-full bg-white/5 border border-white/10 text-indigo-200 px-4 py-3 rounded-xl outline-none focus:border-indigo-400 focus:bg-white/10 transition-all shadow-inner mb-2" placeholder="Ketik Passcode" autocomplete="off">
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Masuk',
+                        cancelButtonText: 'Batal',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'glass-popup',
+                            confirmButton: 'bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-indigo-500/30 w-32 border border-indigo-400/50',
+                            cancelButton: 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-300 px-6 py-2.5 rounded-xl font-semibold transition-all w-32 border border-white/10 mr-3'
+                        },
+                        preConfirm: () => {
+                            const passcode = document.getElementById('passcode-input').value;
+                            if (!passcode) {
+                                Swal.showValidationMessage('Passcode tidak boleh kosong!');
                             }
+                            return passcode;
+                        },
+                        didOpen: () => {
+                            setTimeout(() => document.getElementById('passcode-input').focus(), 100);
                         }
                     }).then((result) => {
                         if (result.value === 'aic') {
@@ -156,24 +184,23 @@
                             sessionStorage.setItem('spmb_isAdmin', 'true');
                             updateAdminUI();
                             renderTable();
-                            glassSwal.fire({ title: 'Login Sukses', text: 'Akses Editor Admin Terbuka!', icon: 'success' });
+                            glassToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
                         } else if (result.value !== undefined) {
-                            glassSwal.fire({ title: 'Akses Ditolak', text: 'Passcode yang Anda masukkan salah.', icon: 'error' });
+                            glassToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
                         }
                     });
                 }
             }
         }
 
-        // Memperbarui Tampilan Indikator Badge "Database Terpusat"
         function updateAdminUI() {
             const badge = document.getElementById('btn-admin-toggle');
             if (isAdmin) {
                 badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 rounded-full cursor-pointer select-none shadow-[0_0_15px_rgba(16,185,129,0.2)]";
-                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i> Mode Admin (Aktif)';
+                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i> Mode Admin';
             } else {
                 badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
-                badge.innerHTML = 'Database Terpusat';
+                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database Terpusat';
             }
         }
 
@@ -197,13 +224,9 @@
         }
 
         function getLocation(nisn) {
-            if (!isAdmin) return; // Proteksi tambahan sistem
+            if (!isAdmin) return; 
             if (navigator.geolocation) {
-                glassSwal.fire({
-                    title: 'Mendeteksi Lokasi...',
-                    text: 'Mohon setujui izin lokasi di browser Anda.',
-                    icon: 'info', toast: true, position: 'top-end', showConfirmButton: false, timerProgressBar: true
-                });
+                glassToast.fire({ title: 'Mendeteksi Lokasi...', icon: 'info', timer: 10000 });
 
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
@@ -215,31 +238,27 @@
                         form.querySelector('[name="bujur"]').value = lon.toFixed(6);
                         
                         updateDistance(nisn);
-                        glassSwal.fire({ title: 'GPS Berhasil!', text: 'Koordinat lokasi telah diperbarui.', icon: 'success' });
+                        glassToast.fire({ title: 'GPS Berhasil!', icon: 'success' });
                     },
                     function(error) {
-                        let msg = 'Gagal mendeteksi lokasi.';
-                        if (error.code === 1) msg = 'Akses lokasi ditolak oleh pengguna.';
-                        else if (error.code === 2) msg = 'Sinyal GPS lemah atau posisi tidak ditemukan.';
-                        glassSwal.fire({ title: 'Gagal GPS', text: msg, icon: 'error' });
+                        glassToast.fire({ title: 'Gagal mendeteksi lokasi.', icon: 'error' });
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
-                glassSwal.fire({ title: 'Tidak Didukung', text: 'Browser Anda tidak mendukung fitur lokasi.', icon: 'error' });
+                glassToast.fire({ title: 'Browser tidak mendukung GPS.', icon: 'error' });
             }
         }
 
         async function silentBackgroundSync() {
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
-            
             try {
                 await pushPendingData(); 
                 await pullFreshData();   
                 renderTable();           
             } catch (err) {
-                console.log("Background sync paused (Offline atau Gagal fetch)");
+                console.log("Background sync paused");
             } finally {
                 statusInd.classList.add('opacity-0');
             }
@@ -254,9 +273,9 @@
                 await pushPendingData();
                 await pullFreshData();
                 renderTable();
-                glassSwal.fire({ title: 'Sinkronisasi Berhasil', text: 'Data dari Spreadsheet berhasil ditarik penuh.', icon: 'success' });
+                glassToast.fire({ title: 'Sinkronisasi Berhasil', icon: 'success' });
             } catch (err) {
-                glassSwal.fire({ title: 'Koneksi Bermasalah', text: 'Gagal menghubungi server. Pastikan internet aktif.', icon: 'error' });
+                glassToast.fire({ title: 'Gagal menghubungi server.', icon: 'error' });
             }
             
             btn.innerHTML = `<i class="fa-solid fa-rotate"></i> <span class="font-semibold text-sm">Sinkron (2 Arah)</span>`;
@@ -301,7 +320,7 @@
         }
 
         function simpanData(nisn, btnElement) {
-            if (!isAdmin) return; // Pengaman ganda sistem
+            if (!isAdmin) return; 
             
             const originalHtml = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
@@ -346,7 +365,7 @@
                 'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
                 'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
                 'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
-                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke School (km)': dataToSave.jarakSekolah,
+                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
                 'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu
             };
 
@@ -356,7 +375,7 @@
             pendingSync[nisn] = dataToSave;
             localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
 
-            glassSwal.fire({ title: 'Tersimpan Lokal!', text: 'Data diamankan di perangkat dan masuk antrean sinkronisasi.', icon: 'success' });
+            glassToast.fire({ title: 'Tersimpan & Masuk Antrean!', icon: 'success' });
             
             renderTable();
             silentBackgroundSync();
@@ -371,6 +390,12 @@
             } else {
                 mainRow.classList.remove('bg-emerald-500/10', 'border-l-4', 'border-l-emerald-500');
                 mainRow.classList.add('bg-white/[0.01]', 'border-l-4', 'border-l-transparent');
+            }
+            // Simpan otomatis toggle checkbox jika dalam mode admin
+            if(isAdmin){
+                // Ambil data seadanya dari form dan trigger simpanData agar checkbox tersimpan langsung
+                const btnSave = document.querySelector(`#form_${nisn} button`);
+                if(btnSave) simpanData(nisn, btnSave);
             }
         }
 
@@ -414,7 +439,6 @@
                 trMain.id = `main_row_${nisn}`;
                 trMain.className = `border-b border-white/[0.05] transition-all duration-200 hover:bg-white/[0.06] border-l-4 ${isRegistered ? 'bg-emerald-500/10 border-l-emerald-500' : 'bg-white/[0.01] border-l-transparent'}`;
                 
-                // Elemen Checkbox akan mendapatkan atribut "disabled" jika BUKAN admin
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
                         <input type="checkbox" class="glass-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
@@ -427,7 +451,7 @@
                                 <br> 
                                 <span class="text-[10px] text-slate-400 font-mono tracking-widest mt-1 inline-block ml-8">${nisn}</span>
                             </span>
-                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/20">
+                            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-500/20 transition-all">
                                 <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-500'} text-xs transition-transform" id="icon_${nisn}"></i>
                             </div>
                         </div>
@@ -441,7 +465,6 @@
                 const trDetails = document.createElement('tr');
                 trDetails.className = `border-b border-white/[0.02] bg-black/30`; 
 
-                // Seluruh input form ditambahkan kondisi ${!isAdmin ? 'readonly' : ''}
                 trDetails.innerHTML = `
                     <td colspan="3" class="p-0 border-0">
                         <div id="details_${nisn}" class="details-row ${isOpen ? 'open' : ''}">
@@ -482,7 +505,7 @@
                                                 <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS Saat Ini
                                             </button>
                                             ` : `
-                                            <span class="text-xs text-amber-400/70 font-medium"><i class="fa-solid fa-eye mr-1"></i> Mode Lihat Saja (Read-Only)</span>
+                                            <span class="text-xs text-amber-400/70 font-medium tracking-wide"><i class="fa-solid fa-eye mr-1"></i> Mode Read-Only</span>
                                             `}
                                         </div>
 
