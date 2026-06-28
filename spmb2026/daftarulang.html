@@ -46,6 +46,7 @@
         .clean-input:focus { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
         .clean-input::placeholder { color: #64748b; }
         .clean-input:read-only { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; }
+        .clean-input:disabled { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
 
         .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
         .details-row.open { grid-template-rows: 1fr; }
@@ -60,7 +61,6 @@
         .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; background: #0f172a; border: 1px solid #334155; color: #a5b4fc; }
         .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); color:#475569; }
 
-        /* Perbaikan z-index Leaflet agar pas di dalam SweetAlert */
         .leaflet-container { z-index: 10 !important; }
     </style>
 </head>
@@ -68,9 +68,9 @@
 
     <div class="max-w-6xl mx-auto relative z-10">
         
-        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="text-center md:text-left flex-1">
-                <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div class="text-center lg:text-left flex-1">
+                <div class="flex items-center justify-center lg:justify-start gap-3 mb-2">
                     <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20 transition-all">Database SDN Kakatua</span>
                     <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Memanggil Database...</span>
                 </div>
@@ -78,19 +78,40 @@
                 <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri, kondisi fisik, dan lokasi akurat siswa.</p>
             </div>
             
-            <div class="flex items-center justify-center gap-3 w-full md:w-auto border-t border-slate-700 pt-5 md:border-0 md:pt-0">
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-5 py-3 text-center min-w-[120px]">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex items-center justify-center gap-3 w-full lg:w-auto border-t border-slate-700 pt-5 lg:border-0 lg:pt-0">
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Total Siswa</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-users text-blue-400"></i>
+                        <h2 id="stat-total" class="text-xl font-black text-blue-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Laki-Laki</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-mars text-sky-400"></i>
+                        <h2 id="stat-male" class="text-xl font-black text-sky-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Perempuan</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-venus text-pink-400"></i>
+                        <h2 id="stat-female" class="text-xl font-black text-pink-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
                     <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Sudah Verif</p>
                     <div class="flex items-center justify-center gap-2">
                         <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                        <h2 id="stat-verified" class="text-2xl font-black text-emerald-400 leading-none">0</h2>
+                        <h2 id="stat-verified" class="text-xl font-black text-emerald-400 leading-none">0</h2>
                     </div>
                 </div>
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-5 py-3 text-center min-w-[120px]">
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px] col-span-2 sm:col-span-1">
                     <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Belum Verif</p>
                     <div class="flex items-center justify-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
-                        <h2 id="stat-unverified" class="text-2xl font-black text-amber-400 leading-none">0</h2>
+                        <h2 id="stat-unverified" class="text-xl font-black text-amber-400 leading-none">0</h2>
                     </div>
                 </div>
             </div>
@@ -263,7 +284,6 @@
             }
         }
 
-        // TAMBAHAN: Fungsi untuk memunculkan map popup
         function openMap(nisn) {
             if (!isAdmin) return;
 
@@ -271,7 +291,6 @@
             let currentLat = form.querySelector('[name="lintang"]').value;
             let currentLon = form.querySelector('[name="bujur"]').value;
             
-            // Default ke koordinat sekolah jika kosong
             let startLat = (currentLat && !isNaN(currentLat)) ? parseFloat(currentLat) : SCH_LAT;
             let startLon = (currentLon && !isNaN(currentLon)) ? parseFloat(currentLon) : SCH_LON;
 
@@ -293,7 +312,6 @@
                     cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
                 },
                 didOpen: () => {
-                    // Inisialisasi Peta
                     const map = L.map('map-container').setView([startLat, startLon], 16);
                     
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -302,21 +320,18 @@
 
                     const marker = L.marker([startLat, startLon], { draggable: true }).addTo(map);
 
-                    // Update koordinat saat marker digeser
                     marker.on('dragend', function (e) {
                         const position = marker.getLatLng();
                         selectedLat = position.lat;
                         selectedLon = position.lng;
                     });
 
-                    // Update koordinat & pindah marker saat peta diklik
                     map.on('click', function (e) {
                         selectedLat = e.latlng.lat;
                         selectedLon = e.latlng.lng;
                         marker.setLatLng(e.latlng);
                     });
 
-                    // Fix masalah peta terkadang tidak memuat utuh dalam modal/popup
                     setTimeout(() => { map.invalidateSize(); }, 200);
                 },
                 preConfirm: () => {
@@ -391,6 +406,7 @@
                 gender: form.querySelector('[name="gender"]').value,
                 skor: form.querySelector('[name="skor"]').value,
                 pilihan: form.querySelector('[name="pilihan"]').value,
+                kelas: form.querySelector('[name="kelas"]').value, // BARU: Menambahkan key kelas untuk sinkronisasi
                 phone: form.querySelector('[name="phone"]').value,
                 statusVerifikasi: isVerified ? 'Sudah Verifikasi' : 'Belum', 
                 nik: form.querySelector('[name="nik"]').value,
@@ -418,7 +434,8 @@
                 'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
                 'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
                 'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
-                'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu
+                'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu,
+                'Kelas': dataToSave.kelas // BARU: Menyimpan info Kelas lokal
             };
 
             sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
@@ -456,21 +473,40 @@
             icon.classList.toggle('text-slate-500');
         }
 
+        // PERBAKAN & TAMBAHAN: Fungsi hitung statistik (Total, L, P, Verif, Belum)
         function updateStatistics() {
+            let totalCount = 0;
+            let maleCount = 0;
+            let femaleCount = 0;
             let verifiedCount = 0;
             let unverifiedCount = 0;
 
             if (sheetOrder && sheetOrder.length > 0) {
+                totalCount = sheetOrder.length;
                 sheetOrder.forEach(nisn => {
                     const sd = sheetData[nisn];
-                    if (sd && sd['Status Verifikasi'] === 'Sudah Verifikasi') {
-                        verifiedCount++;
-                    } else {
-                        unverifiedCount++;
+                    if (sd) {
+                        // Hitung Verifikasi
+                        if (sd['Status Verifikasi'] === 'Sudah Verifikasi') {
+                            verifiedCount++;
+                        } else {
+                            unverifiedCount++;
+                        }
+                        
+                        // Hitung Gender (Mencari teks Laki-laki / Perempuan / L / P)
+                        let gen = (sd['Gender'] || '').toUpperCase().trim();
+                        if (gen.startsWith('L')) {
+                            maleCount++;
+                        } else if (gen.startsWith('P') || gen.startsWith('W')) {
+                            femaleCount++;
+                        }
                     }
                 });
             }
 
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('stat-male').innerText = maleCount;
+            document.getElementById('stat-female').innerText = femaleCount;
             document.getElementById('stat-verified').innerText = verifiedCount;
             document.getElementById('stat-unverified').innerText = unverifiedCount;
         }
@@ -495,6 +531,7 @@
                 const gender = sd['Gender'] || '-';
                 const score = sd['Skor'] || '-';
                 const choice = sd['Pilihan'] || '-';
+                const selectedKelas = sd['Kelas'] || ''; // Ambil data Kelas tersimpan
                 const phone = sd['No HP'] || '';
                 const rank = index + 1; 
                 
@@ -540,11 +577,20 @@
                                 <div class="px-6 py-6" id="form_${nisn}">
                                     
                                     <h3 class="text-sm font-semibold text-indigo-400 mb-4 border-b border-slate-700 pb-2">Informasi Pendaftaran</h3>
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" class="clean-input" value="${name}" readonly></div>
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        <div class="col-span-2 md:col-span-1"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" class="clean-input" value="${name}" readonly></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Gender</label><input type="text" name="gender" class="clean-input" value="${gender}" readonly></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Skor</label><input type="text" name="skor" class="clean-input" value="${score}" readonly></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Pilihan</label><input type="text" name="pilihan" class="clean-input" value="${choice}" readonly></div>
+                                        
+                                        <div>
+                                            <label class="text-[10px] text-indigo-400 font-bold uppercase mb-1 block">Pilihan Kelas</label>
+                                            <select name="kelas" class="clean-input ${isAdmin ? 'cursor-pointer border-indigo-500/40 text-indigo-300' : ''}" ${!isAdmin ? 'disabled' : ''}>
+                                                <option value="" ${selectedKelas === '' ? 'selected' : ''}>-- Pilih Kelas --</option>
+                                                <option value="Kelas A" ${selectedKelas === 'Kelas A' ? 'selected' : ''}>Kelas A</option>
+                                                <option value="Kelas B" ${selectedKelas === 'Kelas B' ? 'selected' : ''}>Kelas B</option>
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
