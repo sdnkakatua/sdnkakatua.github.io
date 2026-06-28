@@ -613,7 +613,7 @@
         function checkAdminMapAccess(isPopState = false) {
             if (!isAdminActive) {
                 showToast("Akses Ditolak! Peta Zonasi hanya untuk Admin.", "error");
-                openAdminModal();
+                // openAdminModal(); // <--- Baris ini dihapus/dinonaktifkan agar popup PIN tidak muncul
                 return;
             }
             openMasterMap(isPopState);
