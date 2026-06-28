@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Ulang SPMB - SDN Kakatua</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js CSS & JS untuk Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } } }
+    </script>
+    
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #0f172a; } 
+        
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .clean-checkbox {
+            appearance: none; background-color: #1e293b; border: 1px solid #475569;
+            width: 20px; height: 20px; border-radius: 4px; display: inline-grid; place-content: center;
+            cursor: pointer; transition: all 0.2s ease-in-out;
+        }
+        .clean-checkbox:checked { background-color: #10b981; border-color: #10b981; }
+        .clean-checkbox:checked::before {
+            content: ""; width: 10px; height: 10px;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            background-color: white; transform: scale(1.1);
+        }
+        .clean-checkbox:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .clean-input { 
+            width: 100%; background: #1e293b; border: 1px solid #334155; color: #f1f5f9; 
+            padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; outline: none; transition: all 0.2s ease; 
+        }
+        .clean-input:focus { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
+        .clean-input::placeholder { color: #64748b; }
+        .clean-input:read-only { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; }
+        .clean-input:disabled { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+
+        .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
+        .details-row.open { grid-template-rows: 1fr; }
+        .details-content { min-height: 0; overflow: hidden; }
+
+        #sync-status { transition: opacity 0.3s; }
+        
+        .swal2-popup.clean-popup { background: #1e293b !important; border: 1px solid #334155 !important; border-radius: 1rem !important; color: white !important; }
+        .swal2-title { color: #f8fafc !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        .swal2-html-container { color: #cbd5e1 !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+        
+        .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; background: #0f172a; border: 1px solid #334155; color: #a5b4fc; }
+        .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); color:#475569; }
+
+        .leaflet-container { z-index: 10 !important; }
+    </style>
+</head>
+<body class="text-slate-200 p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-6xl mx-auto relative z-10">
+        
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div class="text-center lg:text-left flex-1">
+                <div class="flex items-center justify-center lg:justify-start gap-3 mb-2">
+                    <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20 transition-all">Database SDN Kakatua</span>
+                    <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Memanggil Database...</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Verifikasi & Daftar Ulang SPMB</h1>
+                <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri & lakukan daftar ulang di SDN Kakatua.</p>
+            </div>
+            
+            <!-- STATISTIK -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex items-center justify-center gap-3 w-full lg:w-auto border-t border-slate-700 pt-5 lg:border-0 lg:pt-0">
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Total Siswa</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-users text-blue-400"></i>
+                        <h2 id="stat-total" class="text-xl font-black text-blue-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Laki-Laki</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-mars text-sky-400"></i>
+                        <h2 id="stat-male" class="text-xl font-black text-sky-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Perempuan</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-venus text-pink-400"></i>
+                        <h2 id="stat-female" class="text-xl font-black text-pink-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Sudah Verif</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                        <h2 id="stat-verified" class="text-xl font-black text-emerald-400 leading-none">0</h2>
+                    </div>
+                </div>
+                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px] col-span-2 sm:col-span-1">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Belum Verif</p>
+                    <div class="flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
+                        <h2 id="stat-unverified" class="text-xl font-black text-amber-400 leading-none">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/80 border-b border-slate-700 text-slate-400 text-sm uppercase tracking-wider">
+                            <th class="px-4 py-4 font-semibold text-center w-16">Verif</th>
+                            <th class="px-4 py-4 font-semibold">Nama & Kelas</th>
+                            <th class="px-4 py-4 font-semibold text-center w-24">whatsapp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody" class="text-sm">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwZ8anl9YoCd_oCkomoIRSchcoOH-DzMmvrTyDz386qtXtTjJr6im4D7eYJ1KwxbI6_-Q/exec';
+
+        const SCH_LAT = -5.159400; 
+        const SCH_LON = 119.410720;
+
+        const cleanToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#1e293b',
+            color: '#f8fafc',
+            customClass: { popup: 'border border-slate-700 rounded-xl shadow-lg' }
+        });
+
+        let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
+        let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
+        let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
+        let isAdmin = sessionStorage.getItem('spmb_isAdmin') === 'true';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateAdminUI();
+            renderTable();
+            silentBackgroundSync();
+
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT' && isAdmin) {
+                    const formContainer = e.target.closest('[id^="form_"]');
+                    if (formContainer) {
+                        e.preventDefault(); 
+                        const nisn = formContainer.id.split('_')[1];
+                        const btnSave = formContainer.querySelector('button');
+                        if (btnSave) simpanData(nisn, btnSave);
+                    }
+                }
+            });
+        });
+
+        function handleAdminToggle(event) {
+            if (event.detail === 3) {
+                if (isAdmin) {
+                    Swal.fire({
+                        html: `
+                            <div class="mb-4 text-rose-500 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Akhiri Sesi Admin?</h2>
+                        `,
+                        showCancelButton: true, confirmButtonText: 'Logout', cancelButtonText: 'Batal',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            isAdmin = false; sessionStorage.setItem('spmb_isAdmin', 'false');
+                            updateAdminUI(); renderTable();
+                            cleanToast.fire({ title: 'Logout Berhasil', icon: 'success' });
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        html: `
+                            <div class="mb-4 text-indigo-500 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Verifikasi Akses</h2>
+                            <p class="text-slate-400 text-sm mb-6">Masukkan Passcode untuk membuka Mode Editor.</p>
+                            <input type="password" id="passcode-input" class="passcode-input w-full px-4 py-3 rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-2" placeholder="Ketik Passcode" autocomplete="off">
+                        `,
+                        showCancelButton: true, confirmButtonText: 'Masuk', cancelButtonText: 'Batal',
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
+                        },
+                        preConfirm: () => {
+                            const passcode = document.getElementById('passcode-input').value;
+                            if (!passcode) Swal.showValidationMessage('Passcode tidak boleh kosong!');
+                            return passcode;
+                        },
+                        didOpen: () => {
+                            const input = document.getElementById('passcode-input');
+                            setTimeout(() => input.focus(), 100);
+                            input.addEventListener('keypress', (e) => {
+                                if(e.key === 'Enter') Swal.clickConfirm();
+                            });
+                        }
+                    }).then((result) => {
+                        if (result.value === 'aic') {
+                            isAdmin = true; sessionStorage.setItem('spmb_isAdmin', 'true');
+                            updateAdminUI(); renderTable();
+                            cleanToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
+                        } else if (result.value !== undefined) {
+                            cleanToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
+                        }
+                    });
+                }
+            }
+        }
+
+        function updateAdminUI() {
+            const badge = document.getElementById('btn-admin-toggle');
+            if (isAdmin) {
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer select-none hover:bg-emerald-500/20";
+                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i>Admin | Database SDN Kakatua';
+            } else {
+                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
+                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database SDN Kakatua';
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || isNaN(lat1) || isNaN(lon1)) return '';
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return (R * c).toFixed(2);
+        }
+
+        function updateDistance(nisn) {
+            const form = document.getElementById(`form_${nisn}`);
+            const lat = parseFloat(form.querySelector('[name="lintang"]').value);
+            const lon = parseFloat(form.querySelector('[name="bujur"]').value);
+            const inputJarak = form.querySelector('[name="jarakSekolah"]');
+            const jarak = calculateDistance(lat, lon, SCH_LAT, SCH_LON);
+            inputJarak.value = jarak ? jarak + ' km' : '';
+        }
+
+        function getLocation(nisn) {
+            if (!isAdmin) return; 
+            if (navigator.geolocation) {
+                cleanToast.fire({ title: 'Mendeteksi Lokasi...', icon: 'info', timer: 10000 });
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const form = document.getElementById(`form_${nisn}`);
+                        form.querySelector('[name="lintang"]').value = position.coords.latitude.toFixed(6);
+                        form.querySelector('[name="bujur"]').value = position.coords.longitude.toFixed(6);
+                        updateDistance(nisn);
+                        cleanToast.fire({ title: 'GPS Berhasil!', icon: 'success' });
+                    },
+                    function(error) { cleanToast.fire({ title: 'Gagal mendeteksi lokasi.', icon: 'error' }); },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+        }
+
+        function openMap(nisn) {
+            if (!isAdmin) return;
+
+            const form = document.getElementById(`form_${nisn}`);
+            let currentLat = form.querySelector('[name="lintang"]').value;
+            let currentLon = form.querySelector('[name="bujur"]').value;
+            
+            let startLat = (currentLat && !isNaN(currentLat)) ? parseFloat(currentLat) : SCH_LAT;
+            let startLon = (currentLon && !isNaN(currentLon)) ? parseFloat(currentLon) : SCH_LON;
+
+            let selectedLat = startLat;
+            let selectedLon = startLon;
+
+            Swal.fire({
+                title: 'Pilih Titik Lokasi',
+                html: `
+                    <div class="mb-3 text-sm text-slate-400">Geser pin merah atau klik pada area peta untuk memilih koordinat yang tepat.</div>
+                    <div id="map-container" style="height: 350px; border-radius: 0.5rem; border: 1px solid #334155; overflow: hidden;"></div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check mr-2"></i>Simpan Titik',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
+                },
+                didOpen: () => {
+                    const map = L.map('map-container').setView([startLat, startLon], 16);
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    const marker = L.marker([startLat, startLon], { draggable: true }).addTo(map);
+
+                    marker.on('dragend', function (e) {
+                        const position = marker.getLatLng();
+                        selectedLat = position.lat;
+                        selectedLon = position.lng;
+                    });
+
+                    map.on('click', function (e) {
+                        selectedLat = e.latlng.lat;
+                        selectedLon = e.latlng.lng;
+                        marker.setLatLng(e.latlng);
+                    });
+
+                    setTimeout(() => { map.invalidateSize(); }, 200);
+                },
+                preConfirm: () => {
+                    return { lat: selectedLat, lon: selectedLon };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.querySelector('[name="lintang"]').value = result.value.lat.toFixed(6);
+                    form.querySelector('[name="bujur"]').value = result.value.lon.toFixed(6);
+                    updateDistance(nisn);
+                    cleanToast.fire({ title: 'Koordinat diperbarui dari Peta!', icon: 'success' });
+                }
+            });
+        }
+
+        async function silentBackgroundSync() {
+            const statusInd = document.getElementById('sync-status');
+            statusInd.classList.remove('opacity-0');
+            try { await pushPendingData(); await pullFreshData(); renderTable(); } 
+            catch (err) {} finally { statusInd.classList.add('opacity-0'); }
+        }
+
+        async function pushPendingData() {
+            const pendingKeys = Object.keys(pendingSync);
+            if(pendingKeys.length === 0) return; 
+            const promises = pendingKeys.map(nisn => {
+                return fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(pendingSync[nisn]) })
+                    .then(res => res.json())
+                    .then(resData => { if(resData.result === 'success') delete pendingSync[nisn]; })
+                    .catch(e => console.error('Gagal Push: ', nisn));
+            });
+            await Promise.all(promises);
+            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+        }
+
+        async function pullFreshData() {
+            const res = await fetch(SCRIPT_URL);
+            const result = await res.json();
+            if(result.result === 'success') {
+                sheetData = {}; sheetOrder = [];
+                result.data.forEach(item => { 
+                    if(item.NISN && item.NISN.trim() !== '') {
+                        sheetData[item.NISN] = item; sheetOrder.push(item.NISN);
+                    }
+                });
+                localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+                localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+            }
+        }
+
+        function simpanData(nisn, btnElement) {
+            if (!isAdmin) return; 
+            
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
+            btnElement.classList.replace('bg-indigo-600', 'bg-emerald-600');
+            btnElement.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-700');
+            setTimeout(() => {
+                btnElement.innerHTML = originalHtml;
+                btnElement.classList.replace('bg-emerald-600', 'bg-indigo-600');
+                btnElement.classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-700');
+            }, 2000);
+
+            const form = document.getElementById(`form_${nisn}`);
+            let jarakVal = form.querySelector('[name="jarakSekolah"]').value.replace(' km', '');
+            
+            const isVerified = document.getElementById(`check_${nisn}`).checked;
+
+            const dataToSave = {
+                nisn: nisn,
+                nama: form.querySelector('[name="nama"]').value,
+                gender: form.querySelector('[name="gender"]').value,
+                skor: form.querySelector('[name="skor"]').value,
+                pilihan: form.querySelector('[name="pilihan"]').value,
+                kelas: form.querySelector('[name="kelas"]').value,
+                phone: form.querySelector('[name="phone"]').value,
+                statusVerifikasi: isVerified ? 'Sudah Verifikasi' : 'Belum', 
+                nik: form.querySelector('[name="nik"]').value,
+                nokk: form.querySelector('[name="nokk"]').value,
+                nipd: form.querySelector('[name="nipd"]').value,
+                tempatLahir: form.querySelector('[name="tempatLahir"]').value,
+                tanggalLahir: form.querySelector('[name="tanggalLahir"]').value,
+                noAkta: form.querySelector('[name="noAkta"]').value,
+                beratBadan: form.querySelector('[name="beratBadan"]').value,
+                tinggiBadan: form.querySelector('[name="tinggiBadan"]').value,
+                lingkarKepala: form.querySelector('[name="lingkarKepala"]').value,
+                alamat: form.querySelector('[name="alamat"]').value,
+                lintang: form.querySelector('[name="lintang"]').value,
+                bujur: form.querySelector('[name="bujur"]').value,
+                jarakSekolah: jarakVal,
+                namaAyah: form.querySelector('[name="namaAyah"]').value,
+                nikAyah: form.querySelector('[name="nikAyah"]').value,
+                namaIbu: form.querySelector('[name="namaIbu"]').value,
+                nikIbu: form.querySelector('[name="nikIbu"]').value,
+            };
+
+            const localDisplayData = {
+                'Nama Lengkap': dataToSave.nama, 'Gender': dataToSave.gender, 'Skor': dataToSave.skor, 'Pilihan': dataToSave.pilihan,
+                'Status Verifikasi': dataToSave.statusVerifikasi,
+                'No HP': dataToSave.phone, 'NIK': dataToSave.nik, 'Nomor KK': dataToSave.nokk, 'NIPD': dataToSave.nipd,
+                'Tempat Lahir': dataToSave.tempatLahir, 'Tanggal Lahir': dataToSave.tanggalLahir, 'Nomor Akta': dataToSave.noAkta,
+                'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
+                'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
+                'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu,
+                'Kelas': dataToSave.kelas
+            };
+
+            sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
+            localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+            pendingSync[nisn] = dataToSave;
+            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+
+            cleanToast.fire({ title: 'Tersimpan & Masuk Antrean!', icon: 'success' });
+            
+            renderTable(); silentBackgroundSync();
+        }
+
+        function toggleDaftarUlang(nisn, checkbox) {
+            const isChecked = checkbox.checked;
+            const mainRow = document.getElementById(`main_row_${nisn}`);
+            if (isChecked) {
+                mainRow.classList.add('bg-emerald-900/20', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.remove('bg-transparent', 'border-l-transparent');
+            } else {
+                mainRow.classList.remove('bg-emerald-900/20', 'border-l-4', 'border-l-emerald-500');
+                mainRow.classList.add('bg-transparent', 'border-l-4', 'border-l-transparent');
+            }
+            if(isAdmin){
+                const btnSave = document.querySelector(`#form_${nisn} button`);
+                if(btnSave) simpanData(nisn, btnSave);
+            }
+        }
+
+        function toggleDetails(nisn) {
+            const detailsRow = document.getElementById(`details_${nisn}`);
+            const icon = document.getElementById(`icon_${nisn}`);
+            detailsRow.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+            icon.classList.toggle('text-indigo-400');
+            icon.classList.toggle('text-slate-500');
+        }
+
+        function updateStatistics() {
+            let totalCount = 0;
+            let maleCount = 0;
+            let femaleCount = 0;
+            let verifiedCount = 0;
+            let unverifiedCount = 0;
+
+            if (sheetOrder && sheetOrder.length > 0) {
+                totalCount = sheetOrder.length;
+                sheetOrder.forEach(nisn => {
+                    const sd = sheetData[nisn];
+                    if (sd) {
+                        if (sd['Status Verifikasi'] === 'Sudah Verifikasi') {
+                            verifiedCount++;
+                        } else {
+                            unverifiedCount++;
+                        }
+                        
+                        let gen = (sd['Gender'] || '').toUpperCase().trim();
+                        if (gen.startsWith('L')) {
+                            maleCount++;
+                        } else if (gen.startsWith('P') || gen.startsWith('W')) {
+                            femaleCount++;
+                        }
+                    }
+                });
+            }
+
+            document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('stat-male').innerText = maleCount;
+            document.getElementById('stat-female').innerText = femaleCount;
+            document.getElementById('stat-verified').innerText = verifiedCount;
+            document.getElementById('stat-unverified').innerText = unverifiedCount;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('studentTableBody');
+            const openRows = Array.from(document.querySelectorAll('.details-row.open')).map(row => row.id.split('_')[1]);
+            tbody.innerHTML = '';
+
+            if (sheetOrder.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
+                updateStatistics();
+                return;
+            }
+            
+            sheetOrder.forEach((nisn, index) => {
+                const sd = sheetData[nisn];
+                const isRegistered = sd['Status Verifikasi'] === 'Sudah Verifikasi';
+                const isOpen = openRows.includes(nisn);
+                
+                const name = sd['Nama Lengkap'] || '-';
+                const gender = sd['Gender'] || '-';
+                const score = sd['Skor'] || '-';
+                const choice = sd['Pilihan'] || '-';
+                const selectedKelas = sd['Kelas'] || 'Belum ada kelas';
+                const phone = sd['No HP'] || '';
+                const rank = index + 1; 
+                
+                let initialLat = parseFloat(sd['Lintang']);
+                let initialLon = parseFloat(sd['Bujur']);
+                let initialJarak = calculateDistance(initialLat, initialLon, SCH_LAT, SCH_LON);
+                let jarakTampil = initialJarak ? initialJarak + ' km' : (sd['Jarak ke Sekolah (km)'] ? sd['Jarak ke School (km)'] + ' km' : '');
+
+                const trMain = document.createElement('tr');
+                trMain.id = `main_row_${nisn}`;
+                trMain.className = `border-b border-slate-700 transition-colors duration-200 border-l-4 hover:bg-slate-700/30 ${isRegistered ? 'bg-emerald-900/20 border-l-emerald-500' : 'bg-transparent border-l-transparent'}`;
+                
+                trMain.innerHTML = `
+                    <td class="px-4 py-4 text-center">
+                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
+                    </td>
+                    <td class="px-4 py-4 cursor-pointer group" onclick="toggleDetails('${nisn}')">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">
+                                <span class="text-xs bg-slate-700 px-2 py-0.5 rounded-md mr-2 text-slate-300">#${rank}</span>
+                                ${name} 
+                                <br> 
+                                <span class="text-[10px] ${sd['Kelas'] ? 'text-indigo-300 bg-indigo-500/10 border border-indigo-500/20' : 'text-slate-500 bg-slate-800 border border-slate-700'} font-semibold tracking-wider mt-1.5 inline-block ml-8 px-2 py-0.5 rounded-md">
+                                    <i class="fa-solid fa-chalkboard-user mr-1"></i> ${selectedKelas}
+                                </span>
+                            </span>
+                            <div class="w-8 h-8 rounded-full bg-slate-700/50 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                                <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-400'} text-xs transition-transform" id="icon_${nisn}"></i>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-brands fa-whatsapp text-lg"></i></a>
+                    </td>
+                `;
+                tbody.appendChild(trMain);
+
+                const trDetails = document.createElement('tr');
+                trDetails.className = `border-b border-slate-700 bg-slate-900/50`; 
+
+                trDetails.innerHTML = `
+                    <td colspan="3" class="p-0 border-0">
+                        <div id="details_${nisn}" class="details-row ${isOpen ? 'open' : ''}">
+                            <div class="details-content">
+                                <div class="px-6 py-6" id="form_${nisn}">
+                                    
+                                    <h3 class="text-sm font-semibold text-indigo-400 mb-4 border-b border-slate-700 pb-2">Informasi Pendaftaran</h3>
+                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                        <div class="col-span-2 md:col-span-1"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" class="clean-input" value="${name}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Gender</label><input type="text" name="gender" class="clean-input" value="${gender}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Skor</label><input type="text" name="skor" class="clean-input" value="${score}" readonly></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Pilihan</label><input type="text" name="pilihan" class="clean-input" value="${choice}" readonly></div>
+                                        
+                                        <div>
+                                            <label class="text-[10px] text-indigo-400 font-bold uppercase mb-1 block">Pilihan Kelas</label>
+                                            <select name="kelas" class="clean-input ${isAdmin ? 'cursor-pointer border-indigo-500/40 text-indigo-300' : ''}" ${!isAdmin ? 'disabled' : ''}>
+                                                <option value="" ${!sd['Kelas'] ? 'selected' : ''}>-- Pilih Kelas --</option>
+                                                <option value="Kelas A" ${sd['Kelas'] === 'Kelas A' ? 'selected' : ''}>Kelas A</option>
+                                                <option value="Kelas B" ${sd['Kelas'] === 'Kelas B' ? 'selected' : ''}>Kelas B</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK</label><input type="number" name="nik" class="clean-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor KK</label><input type="number" name="nokk" class="clean-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIPD</label><input type="text" name="nipd" class="clean-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" class="clean-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="clean-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor Akta</label><input type="text" name="noAkta" class="clean-input" placeholder="No Akta Lahir" value="${sd['Nomor Akta'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Berat Badan (kg)</label><input type="number" name="beratBadan" class="clean-input" placeholder="Cth: 45" value="${sd['Berat Badan (kg)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tinggi Badan (cm)</label><input type="number" name="tinggiBadan" class="clean-input" placeholder="Cth: 155" value="${sd['Tinggi Badan (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Lingkar Kepala (cm)</label><input type="number" name="lingkarKepala" class="clean-input" placeholder="Cth: 54" value="${sd['Lingkar Kepala (cm)'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                    </div>
+
+                                    <h3 class="text-sm font-semibold text-fuchsia-400 mb-4 border-b border-slate-700 pb-2">Lokasi Koordinat & Orang Tua</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                        <div class="md:col-span-2"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Alamat Lengkap</label><input type="text" name="alamat" class="clean-input" placeholder="Jl. Contoh No. 123" value="${sd['Alamat'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div class="md:col-span-2 flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 mb-1">
+                                            <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-map-location-dot mr-2 text-indigo-400"></i>Titik Koordinat Rumah</span>
+                                            ${isAdmin ? `
+                                            <div class="flex gap-2">
+                                                <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors">
+                                                    <i class="fa-solid fa-location-crosshairs"></i> GPS
+                                                </button>
+                                                <button type="button" onclick="openMap('${nisn}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors shadow-lg shadow-blue-900/20">
+                                                    <i class="fa-solid fa-map"></i> Buka Peta
+                                                </button>
+                                            </div>
+                                            ` : `
+                                            <span class="text-xs text-amber-500 font-medium tracking-wide"><i class="fa-solid fa-eye mr-1"></i> Mode Read-Only</span>
+                                            `}
+                                        </div>
+
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" class="clean-input" placeholder="Cth: -5.151234" value="${sd['Lintang'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" class="clean-input" placeholder="Cth: 119.412345" value="${sd['Bujur'] || ''}" onkeyup="updateDistance('${nisn}')" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div class="md:col-span-2"><label class="text-[10px] text-emerald-400 font-medium uppercase mb-1 block">Estimasi Jarak dari Rumah ke Sekolah (Otomatis)</label>
+                                            <input type="text" name="jarakSekolah" class="clean-input text-emerald-400 font-bold tracking-widest border-emerald-500/30" placeholder="Menghitung jarak otomatis..." value="${jarakTampil}" readonly style="background-color: #022c22;">
+                                        </div>
+                                        
+                                        <div class="mt-2"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">No HP (WhatsApp Aktif)</label><input type="number" name="phone" class="clean-input" placeholder="628..." value="${phone}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div class="mt-2"></div>
+
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" class="clean-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ayah</label><input type="number" name="nikAyah" class="clean-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" class="clean-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ibu</label><input type="number" name="nikIbu" class="clean-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                    </div>
+                                    
+                                    ${isAdmin ? `
+                                    <div class="flex justify-end mt-4 border-t border-slate-700 pt-5">
+                                        <button onclick="simpanData('${nisn}', this)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-colors">
+                                            <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
+                                        </button>
+                                    </div>
+                                    ` : ''}
+
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(trDetails);
+            });
+
+            updateStatistics();
+        }
+    </script>
+</body>
+</html>
