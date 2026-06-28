@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Leaflet.js CSS & JS untuk Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -65,58 +64,83 @@
         .leaflet-container { z-index: 10 !important; }
     </style>
 </head>
-<body class="text-slate-200 p-4 md:p-8 min-h-screen">
+<body class="text-slate-200 p-4 md:p-8 min-h-screen pb-16">
 
-    <div class="max-w-6xl mx-auto relative z-10">
+    <div class="max-w-7xl mx-auto relative z-10">
         
-        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-8 flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div class="text-center lg:text-left flex-1">
-                <div class="flex items-center justify-center lg:justify-start gap-3 mb-2">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md p-6 mb-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="text-center md:text-left w-full flex-1">
+                <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
                     <span id="btn-admin-toggle" onclick="handleAdminToggle(event)" class="px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20 transition-all">Database SDN Kakatua</span>
                     <span id="sync-status" class="text-xs font-semibold tracking-wider text-emerald-400 opacity-0"><i class="fa-solid fa-cloud-arrow-up fa-fade"></i> Memanggil Database...</span>
                 </div>
                 <h1 class="text-2xl md:text-3xl font-bold text-white">Verifikasi & Daftar Ulang SPMB</h1>
-                <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri & lakukan daftar ulang di SDN Kakatua.</p>
+                <p class="text-slate-400 mt-1 text-sm md:text-base">Lengkapi data diri & lakukan daftar ulang di SD Negeri Kakatua.</p>
             </div>
             
-            <!-- STATISTIK -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:flex items-center justify-center gap-3 w-full lg:w-auto border-t border-slate-700 pt-5 lg:border-0 lg:pt-0">
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Total Siswa</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-users text-blue-400"></i>
-                        <h2 id="stat-total" class="text-xl font-black text-blue-400 leading-none">0</h2>
-                    </div>
+            <div class="flex items-center justify-center gap-6 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                <div class="text-center min-w-[60px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i>Verif</p>
+                    <h2 id="stat-verified" class="text-xl font-black text-emerald-400">0</h2>
                 </div>
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Laki-Laki</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-mars text-sky-400"></i>
-                        <h2 id="stat-male" class="text-xl font-black text-sky-400 leading-none">0</h2>
-                    </div>
-                </div>
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Perempuan</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-venus text-pink-400"></i>
-                        <h2 id="stat-female" class="text-xl font-black text-pink-400 leading-none">0</h2>
-                    </div>
-                </div>
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px]">
-                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Sudah Verif</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                        <h2 id="stat-verified" class="text-xl font-black text-emerald-400 leading-none">0</h2>
-                    </div>
-                </div>
-                <div class="bg-slate-700/40 border border-slate-600/50 rounded-xl px-4 py-2.5 text-center min-w-[100px] col-span-2 sm:col-span-1">
-                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider">Belum Verif</p>
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
-                        <h2 id="stat-unverified" class="text-xl font-black text-amber-400 leading-none">0</h2>
-                    </div>
+                <div class="w-px h-10 bg-slate-700"></div>
+                <div class="text-center min-w-[60px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-clock-rotate-left text-amber-500 mr-1"></i>Belum</p>
+                    <h2 id="stat-unverified" class="text-xl font-black text-amber-400">0</h2>
                 </div>
             </div>
+        </div>
+
+        <div class="mb-8 flex flex-wrap items-stretch justify-center gap-4">
+            
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-users text-blue-400 mr-1"></i>Total</p>
+                    <h2 id="stat-total" class="text-xl font-black text-blue-400">0</h2>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
+                    <h2 id="stat-male" class="text-xl font-black text-sky-400">0</h2>
+                </div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
+                    <h2 id="stat-female" class="text-xl font-black text-pink-400">0</h2>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-a text-indigo-400 mr-1"></i>Kelas A</p>
+                    <h2 id="stat-class-a" class="text-xl font-black text-indigo-400">0</h2>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
+                    <h2 id="stat-class-a-male" class="text-xl font-black text-sky-400">0</h2>
+                </div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
+                    <h2 id="stat-class-a-female" class="text-xl font-black text-pink-400">0</h2>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-b text-fuchsia-400 mr-1"></i>Kelas B</p>
+                    <h2 id="stat-class-b" class="text-xl font-black text-fuchsia-400">0</h2>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
+                    <h2 id="stat-class-b-male" class="text-xl font-black text-sky-400">0</h2>
+                </div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
+                    <h2 id="stat-class-b-female" class="text-xl font-black text-pink-400">0</h2>
+                </div>
+            </div>
+
         </div>
 
         <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
@@ -134,6 +158,7 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -468,18 +493,41 @@
         }
 
         function toggleDetails(nisn) {
-            const detailsRow = document.getElementById(`details_${nisn}`);
-            const icon = document.getElementById(`icon_${nisn}`);
-            detailsRow.classList.toggle('open');
-            icon.classList.toggle('rotate-180');
-            icon.classList.toggle('text-indigo-400');
-            icon.classList.toggle('text-slate-500');
+            const currentDetailsRow = document.getElementById(`details_${nisn}`);
+            const currentIcon = document.getElementById(`icon_${nisn}`);
+            const isCurrentlyOpen = currentDetailsRow.classList.contains('open');
+
+            const allOpenRows = document.querySelectorAll('.details-row.open');
+            allOpenRows.forEach(row => {
+                row.classList.remove('open');
+                const rowNisn = row.id.split('_')[1];
+                const icon = document.getElementById(`icon_${rowNisn}`);
+                if (icon) {
+                    icon.classList.remove('rotate-180', 'text-indigo-400');
+                    icon.classList.add('text-slate-500');
+                }
+            });
+
+            if (!isCurrentlyOpen) {
+                currentDetailsRow.classList.add('open');
+                currentIcon.classList.remove('text-slate-500');
+                currentIcon.classList.add('rotate-180', 'text-indigo-400');
+            }
         }
 
         function updateStatistics() {
             let totalCount = 0;
             let maleCount = 0;
             let femaleCount = 0;
+            
+            let classACount = 0;
+            let classAMale = 0;
+            let classAFemale = 0;
+            
+            let classBCount = 0;
+            let classBMale = 0;
+            let classBFemale = 0;
+
             let verifiedCount = 0;
             let unverifiedCount = 0;
 
@@ -488,25 +536,51 @@
                 sheetOrder.forEach(nisn => {
                     const sd = sheetData[nisn];
                     if (sd) {
+                        // Cek Verifikasi
                         if (sd['Status Verifikasi'] === 'Sudah Verifikasi') {
                             verifiedCount++;
                         } else {
                             unverifiedCount++;
                         }
                         
+                        // Cek Gender & Kelas
                         let gen = (sd['Gender'] || '').toUpperCase().trim();
-                        if (gen.startsWith('L')) {
-                            maleCount++;
-                        } else if (gen.startsWith('P') || gen.startsWith('W')) {
-                            femaleCount++;
+                        let isMale = gen.startsWith('L');
+                        let isFemale = gen.startsWith('P') || gen.startsWith('W');
+
+                        if (isMale) maleCount++;
+                        else if (isFemale) femaleCount++;
+
+                        let kls = (sd['Kelas'] || '').trim();
+                        if (kls === 'Kelas A') {
+                            classACount++;
+                            if (isMale) classAMale++;
+                            else if (isFemale) classAFemale++;
+                        } else if (kls === 'Kelas B') {
+                            classBCount++;
+                            if (isMale) classBMale++;
+                            else if (isFemale) classBFemale++;
                         }
                     }
                 });
             }
 
+            // Update Total
             document.getElementById('stat-total').innerText = totalCount;
             document.getElementById('stat-male').innerText = maleCount;
             document.getElementById('stat-female').innerText = femaleCount;
+            
+            // Update Kelas A
+            document.getElementById('stat-class-a').innerText = classACount;
+            document.getElementById('stat-class-a-male').innerText = classAMale;
+            document.getElementById('stat-class-a-female').innerText = classAFemale;
+
+            // Update Kelas B
+            document.getElementById('stat-class-b').innerText = classBCount;
+            document.getElementById('stat-class-b-male').innerText = classBMale;
+            document.getElementById('stat-class-b-female').innerText = classBFemale;
+            
+            // Update Verifikasi
             document.getElementById('stat-verified').innerText = verifiedCount;
             document.getElementById('stat-unverified').innerText = unverifiedCount;
         }
