@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
         tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } } }
     </script>
@@ -56,6 +59,9 @@
         
         .passcode-input { letter-spacing: 0.5em; text-align: center; font-size: 1.5rem; font-weight: bold; background: #0f172a; border: 1px solid #334155; color: #a5b4fc; }
         .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); color:#475569; }
+
+        /* Perbaikan z-index Leaflet agar pas di dalam SweetAlert */
+        .leaflet-container { z-index: 10 !important; }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8 min-h-screen">
@@ -134,7 +140,6 @@
             renderTable();
             silentBackgroundSync();
 
-            // FITUR: Enter untuk Simpan Data
             document.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && e.target.tagName === 'INPUT' && isAdmin) {
                     const formContainer = e.target.closest('[id^="form_"]');
@@ -258,24 +263,80 @@
             }
         }
 
+        // TAMBAHAN: Fungsi untuk memunculkan map popup
+        function openMap(nisn) {
+            if (!isAdmin) return;
+
+            const form = document.getElementById(`form_${nisn}`);
+            let currentLat = form.querySelector('[name="lintang"]').value;
+            let currentLon = form.querySelector('[name="bujur"]').value;
+            
+            // Default ke koordinat sekolah jika kosong
+            let startLat = (currentLat && !isNaN(currentLat)) ? parseFloat(currentLat) : SCH_LAT;
+            let startLon = (currentLon && !isNaN(currentLon)) ? parseFloat(currentLon) : SCH_LON;
+
+            let selectedLat = startLat;
+            let selectedLon = startLon;
+
+            Swal.fire({
+                title: 'Pilih Titik Lokasi',
+                html: `
+                    <div class="mb-3 text-sm text-slate-400">Geser pin merah atau klik pada area peta untuk memilih koordinat yang tepat.</div>
+                    <div id="map-container" style="height: 350px; border-radius: 0.5rem; border: 1px solid #334155; overflow: hidden;"></div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-check mr-2"></i>Simpan Titik',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
+                },
+                didOpen: () => {
+                    // Inisialisasi Peta
+                    const map = L.map('map-container').setView([startLat, startLon], 16);
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    const marker = L.marker([startLat, startLon], { draggable: true }).addTo(map);
+
+                    // Update koordinat saat marker digeser
+                    marker.on('dragend', function (e) {
+                        const position = marker.getLatLng();
+                        selectedLat = position.lat;
+                        selectedLon = position.lng;
+                    });
+
+                    // Update koordinat & pindah marker saat peta diklik
+                    map.on('click', function (e) {
+                        selectedLat = e.latlng.lat;
+                        selectedLon = e.latlng.lng;
+                        marker.setLatLng(e.latlng);
+                    });
+
+                    // Fix masalah peta terkadang tidak memuat utuh dalam modal/popup
+                    setTimeout(() => { map.invalidateSize(); }, 200);
+                },
+                preConfirm: () => {
+                    return { lat: selectedLat, lon: selectedLon };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.querySelector('[name="lintang"]').value = result.value.lat.toFixed(6);
+                    form.querySelector('[name="bujur"]').value = result.value.lon.toFixed(6);
+                    updateDistance(nisn);
+                    cleanToast.fire({ title: 'Koordinat diperbarui dari Peta!', icon: 'success' });
+                }
+            });
+        }
+
         async function silentBackgroundSync() {
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
             try { await pushPendingData(); await pullFreshData(); renderTable(); } 
             catch (err) {} finally { statusInd.classList.add('opacity-0'); }
-        }
-
-        async function manualSync() {
-            const btn = document.getElementById('btn-sync');
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Memproses...`;
-            btn.classList.add('pointer-events-none');
-            try {
-                await pushPendingData(); await pullFreshData(); renderTable();
-                cleanToast.fire({ title: 'Sinkronisasi Berhasil', icon: 'success' });
-            } catch (err) { cleanToast.fire({ title: 'Gagal menghubungi server.', icon: 'error' }); }
-            
-            btn.innerHTML = `<i class="fa-solid fa-rotate"></i> <span class="font-semibold text-sm">Sinkron (2 Arah)</span>`;
-            btn.classList.remove('pointer-events-none');
         }
 
         async function pushPendingData() {
@@ -395,7 +456,6 @@
             icon.classList.toggle('text-slate-500');
         }
 
-        // FITUR: Fungsi update statistik
         function updateStatistics() {
             let verifiedCount = 0;
             let unverifiedCount = 0;
@@ -422,7 +482,7 @@
 
             if (sheetOrder.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
-                updateStatistics(); // Update statistik (0/0) saat loading atau kosong
+                updateStatistics();
                 return;
             }
             
@@ -509,9 +569,14 @@
                                         <div class="md:col-span-2 flex items-center justify-between bg-slate-800 p-3 rounded-lg border border-slate-700 mt-1 mb-1">
                                             <span class="text-xs text-slate-300 font-medium"><i class="fa-solid fa-map-location-dot mr-2 text-indigo-400"></i>Titik Koordinat Rumah</span>
                                             ${isAdmin ? `
-                                            <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors">
-                                                <i class="fa-solid fa-location-crosshairs"></i> Gunakan GPS
-                                            </button>
+                                            <div class="flex gap-2">
+                                                <button type="button" onclick="getLocation('${nisn}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors">
+                                                    <i class="fa-solid fa-location-crosshairs"></i> GPS
+                                                </button>
+                                                <button type="button" onclick="openMap('${nisn}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded flex items-center gap-2 transition-colors shadow-lg shadow-blue-900/20">
+                                                    <i class="fa-solid fa-map"></i> Buka Peta
+                                                </button>
+                                            </div>
                                             ` : `
                                             <span class="text-xs text-amber-500 font-medium tracking-wide"><i class="fa-solid fa-eye mr-1"></i> Mode Read-Only</span>
                                             `}
@@ -550,7 +615,6 @@
                 tbody.appendChild(trDetails);
             });
 
-            // Panggil update perhitungan statistik setelah tabel dirender
             updateStatistics();
         }
     </script>
