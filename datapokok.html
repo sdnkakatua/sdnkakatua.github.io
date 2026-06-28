@@ -92,7 +92,7 @@
                 <p class="text-slate-500 text-lg leading-relaxed">Pilih entitas di bawah ini untuk mengelola dan mengakses pangkalan data sekolah secara aman.</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto pt-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto pt-4">
                 <div onclick="fetchList('gtk')" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
                     <div class="bg-gradient-to-tr from-indigo-100 to-indigo-50 text-indigo-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-indigo-600 group-hover:text-white transition-all duration-300 mb-4 shadow-sm"><i class="fa-solid fa-user-tie text-4xl"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Data GTK</h3>
@@ -105,16 +105,12 @@
                     <p class="text-slate-500 text-xs leading-relaxed px-2">Akses pangkalan data peserta didik aktif.</p>
                 </div>
                 
-                <div onclick="openMasterMap()" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-amber-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                    <div class="bg-gradient-to-tr from-amber-100 to-amber-50 text-amber-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-amber-500 group-hover:text-white transition-all duration-300 mb-4 shadow-sm"><i class="fa-solid fa-map-location-dot text-4xl"></i></div>
+                <div onclick="checkAdminMapAccess()" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-amber-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                    <div class="bg-gradient-to-tr from-amber-100 to-amber-50 text-amber-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-amber-500 group-hover:text-white transition-all duration-300 mb-4 shadow-sm relative">
+                        <i class="fa-solid fa-map-location-dot text-4xl"></i>
+                    </div>
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Peta Zonasi</h3>
-                    <p class="text-slate-500 text-xs leading-relaxed px-2">Lihat persebaran wilayah domisili siswa.</p>
-                </div>
-
-                <div onclick="openPresensi()" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-red-100 hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                    <div class="bg-gradient-to-tr from-red-100 to-red-50 text-red-600 p-5 rounded-3xl group-hover:scale-110 group-hover:from-red-500 group-hover:text-white transition-all duration-300 mb-4 shadow-sm"><i class="fa-solid fa-location-crosshairs text-4xl"></i></div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-2">Presensi Geo</h3>
-                    <p class="text-slate-500 text-xs leading-relaxed px-2">Absensi menggunakan radius GPS sekolah.</p>
+                    <p class="text-slate-500 text-xs leading-relaxed px-2">Lihat persebaran wilayah domisili siswa <br><span class="text-red-500 font-bold">(Khusus Admin)</span>.</p>
                 </div>
             </div>
 
@@ -131,33 +127,6 @@
                         <canvas id="chart-gender"></canvas>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div id="section-presensi" class="hidden animate-fade-in-up">
-            <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm max-w-5xl mx-auto flex flex-col md:flex-row gap-8">
-                <div class="w-full md:w-1/2 flex flex-col justify-center space-y-6">
-                    <div>
-                        <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Presensi Kehadiran</h2>
-                        <p class="text-slate-500 mt-2 text-sm leading-relaxed">Sistem mendeteksi lokasi asli Anda. Kehadiran hanya dapat dikunci dan dicatat jika Anda berada dalam <b>Radius 100 Meter</b> dari area sekolah.</p>
-                    </div>
-                    
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-xs font-bold text-slate-500 uppercase">Jarak Anda:</span>
-                            <span id="geo-distance" class="text-sm font-bold text-slate-800">Menghitung...</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-500 uppercase">Status Radius:</span>
-                            <span id="geo-status" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 text-slate-600">Menunggu GPS</span>
-                        </div>
-                    </div>
-
-                    <button id="btn-submit-presensi" disabled onclick="submitPresensi()" class="w-full bg-slate-300 text-slate-500 px-5 py-4 rounded-xl font-bold shadow-md transition-all flex justify-center items-center gap-2 cursor-not-allowed">
-                        <i class="fa-solid fa-fingerprint text-xl"></i> Rekam Kehadiran
-                    </button>
-                </div>
-                <div class="w-full md:w-1/2 h-80 md:h-[400px] rounded-2xl border border-slate-200 overflow-hidden relative z-10" id="presensi-map-container"></div>
             </div>
         </div>
 
@@ -286,65 +255,62 @@
                         </div>
                     </div>
 					
-					
 					<div id="dokumen-tambahan-section" class="hidden mt-8 space-y-4 relative z-10">
-    <div class="flex items-center gap-3 mb-4">
-        <div class="h-8 w-1.5 bg-amber-500 rounded-full"></div>
-        <h3 class="text-lg font-bold text-slate-800">Dokumen Pendukung Lainnya</h3>
-    </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-amber-200 hover:shadow-md">
-            
-            <div id="preview-box-tka" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
-                <div class="absolute inset-0 z-10"></div> 
-                <iframe id="iframe-tka" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
-            </div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="h-8 w-1.5 bg-amber-500 rounded-full"></div>
+                            <h3 class="text-lg font-bold text-slate-800">Dokumen Pendukung Lainnya</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-amber-200 hover:shadow-md">
+                                
+                                <div id="preview-box-tka" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
+                                    <div class="absolute inset-0 z-10"></div> 
+                                    <iframe id="iframe-tka" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
+                                </div>
 
-            <div id="icon-box-tka" class="bg-amber-50 text-amber-500 p-4 rounded-full mb-1 mt-2">
-                <i class="fa-solid fa-file-pdf text-3xl"></i>
-            </div>
-            
-            <div class="mt-auto w-full">
-                <h4 class="font-bold text-slate-800 text-sm">Hasil TKA</h4>
-                <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Tes Kesiapan Anak</p>
-                
-                <a id="btn-lihat-tka" href="#" target="_blank" class="hidden w-full text-center bg-amber-50 hover:bg-amber-100 text-amber-600 py-2 rounded-xl text-xs font-bold transition-colors border border-amber-200 shadow-sm block">
-                    <i class="fa-solid fa-eye"></i> Buka Penuh
-                </a>
-                <div id="badge-kosong-tka" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
-                    Belum Tersedia
-                </div>
-            </div>
-        </div>
+                                <div id="icon-box-tka" class="bg-amber-50 text-amber-500 p-4 rounded-full mb-1 mt-2">
+                                    <i class="fa-solid fa-file-pdf text-3xl"></i>
+                                </div>
+                                
+                                <div class="mt-auto w-full">
+                                    <h4 class="font-bold text-slate-800 text-sm">Hasil TKA</h4>
+                                    <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Tes Kesiapan Anak</p>
+                                    
+                                    <a id="btn-lihat-tka" href="#" target="_blank" class="hidden w-full text-center bg-amber-50 hover:bg-amber-100 text-amber-600 py-2 rounded-xl text-xs font-bold transition-colors border border-amber-200 shadow-sm block">
+                                        <i class="fa-solid fa-eye"></i> Buka Penuh
+                                    </a>
+                                    <div id="badge-kosong-tka" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
+                                        Belum Tersedia
+                                    </div>
+                                </div>
+                            </div>
 
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-purple-200 hover:shadow-md">
-            
-            <div id="preview-box-ijazah" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
-                <div class="absolute inset-0 z-10"></div>
-                <iframe id="iframe-ijazah" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
-            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-between gap-3 text-center transition-all hover:border-purple-200 hover:shadow-md">
+                                
+                                <div id="preview-box-ijazah" class="hidden w-full h-32 rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50">
+                                    <div class="absolute inset-0 z-10"></div>
+                                    <iframe id="iframe-ijazah" src="" class="w-full h-full border-0 pointer-events-none"></iframe>
+                                </div>
 
-            <div id="icon-box-ijazah" class="bg-purple-50 text-purple-500 p-4 rounded-full mb-1 mt-2">
-                <i class="fa-solid fa-certificate text-3xl"></i>
-            </div>
-            
-            <div class="mt-auto w-full">
-                <h4 class="font-bold text-slate-800 text-sm">Ijazah Terakhir</h4>
-                <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Dokumen Kelulusan</p>
-                
-                <a id="btn-lihat-ijazah" href="#" target="_blank" class="hidden w-full text-center bg-purple-50 hover:bg-purple-100 text-purple-600 py-2 rounded-xl text-xs font-bold transition-colors border border-purple-200 shadow-sm block">
-                    <i class="fa-solid fa-eye"></i> Buka Penuh
-                </a>
-                <div id="badge-kosong-ijazah" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
-                    Belum Tersedia
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-					
-					
+                                <div id="icon-box-ijazah" class="bg-purple-50 text-purple-500 p-4 rounded-full mb-1 mt-2">
+                                    <i class="fa-solid fa-certificate text-3xl"></i>
+                                </div>
+                                
+                                <div class="mt-auto w-full">
+                                    <h4 class="font-bold text-slate-800 text-sm">Ijazah Terakhir</h4>
+                                    <p class="text-slate-400 text-[10px] mt-0.5 mb-2">Dokumen Kelulusan</p>
+                                    
+                                    <a id="btn-lihat-ijazah" href="#" target="_blank" class="hidden w-full text-center bg-purple-50 hover:bg-purple-100 text-purple-600 py-2 rounded-xl text-xs font-bold transition-colors border border-purple-200 shadow-sm block">
+                                        <i class="fa-solid fa-eye"></i> Buka Penuh
+                                    </a>
+                                    <div id="badge-kosong-ijazah" class="w-full text-center bg-slate-50 text-slate-400 py-2 rounded-xl text-xs font-bold border border-slate-100">
+                                        Belum Tersedia
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -437,10 +403,7 @@
     <script>
         // --- CONFIG APPS SCRIPT DATABASE URL ---
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqFzps7KtIRzburEMCCry2WYp8gJqH_RpYkcbQ0c7rqNosOCFna32xCAOerQkjlL-z/exec";
-
-        // --- CONFIG RADIUS PRESENSI LOKASI ---
         const SCHOOL_COORD = { lat: -5.159395, lng: 119.410650 }; // Koordinat Pusat Sekolah
-        const ALLOWED_RADIUS = 50; // Pembatasan Meter
 
         // Global State Management
         let currentType = ''; 
@@ -465,9 +428,6 @@
         let masterMapMarkers = {}; 
         let chartKelasInstance = null;
         let chartGenderInstance = null;
-        let presensiMap = null;
-        let presensiMarker = null;
-        let geoWatchId = null;
 
         // Date Dropdown Elements Generation
         const currentYear = new Date().getFullYear();
@@ -504,14 +464,12 @@
                 applyFilters();
             }
             else if (state.page === 'detail') { currentType = state.type; renderDetailView(state.info); }
-            else if (state.page === 'mastermap') { openMasterMap(true); }
-            else if (state.page === 'presensi') { openPresensi(true); }
+            else if (state.page === 'mastermap') { checkAdminMapAccess(true); }
         });
 
         function renderDashboardView() {
             document.getElementById('section-dashboard').classList.remove('hidden');
-            ['section-class-list', 'section-list', 'section-detail', 'section-master-map', 'section-presensi', 'btn-back'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            if(geoWatchId) { navigator.geolocation.clearWatch(geoWatchId); geoWatchId = null; }
+            ['section-class-list', 'section-list', 'section-detail', 'section-master-map', 'btn-back'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if(localCache['siswa']) renderCharts(localCache['siswa']);
         }
 
@@ -523,6 +481,12 @@
 
         // --- DASHBOARD CHARTS LOADING ENGINE ---
         async function initDashboard() {
+            // Cek SessionStorage untuk Mode Admin Persisten
+            if (sessionStorage.getItem('portalAdminAuth') === 'true') {
+                isAdminActive = true;
+                document.getElementById('admin-badge').classList.remove('hidden');
+            }
+
             const cacheKey = 'portalCache_siswa';
             const storedData = localStorage.getItem(cacheKey);
             if (storedData) {
@@ -532,7 +496,7 @@
                     renderCharts(parsedData);
                 } catch(e) {}
             }
-            // Background update agar chart selalu presisi dengan data Sheet terbaru
+            
             try {
                 const response = await fetch(`${GAS_WEB_APP_URL}?action=getList&type=siswa`);
                 const result = await response.json();
@@ -550,12 +514,28 @@
             const genderCounts = { 'Laki-laki': 0, 'Perempuan': 0 };
 
             siswaData.forEach(item => {
-                const kls = item.kelas || 'Lainnya';
+                if (!item.nama || item.nama.toString().trim() === '') return; // Abaikan baris kosong
+
+                const kls = (item.kelas || item.Kelas || 'Tanpa Kelas').toString().trim();
                 classCounts[kls] = (classCounts[kls] || 0) + 1;
-                // Parsing logika deteksi gender
-                const gender = item.jenis_kelamin || (item.nama.length % 2 === 0 ? 'Laki-laki' : 'Perempuan');
+                
+                // Perbaikan Parsing Gender
+                let jk = (item.jenis_kelamin || item['Jenis Kelamin'] || '').toString().trim().toUpperCase();
+                let gender = 'Laki-laki'; 
+                if (jk === 'P' || jk === 'PEREMPUAN') {
+                    gender = 'Perempuan';
+                } else if (jk === 'L' || jk === 'LAKI-LAKI') {
+                    gender = 'Laki-laki';
+                } else {
+                    gender = (item.nama.length % 2 === 0 ? 'Laki-laki' : 'Perempuan');
+                }
+                
                 if(genderCounts[gender] !== undefined) genderCounts[gender]++;
             });
+
+            // Urutkan kelas dengan format numerik agar urutan seperti 1, 2, 3 ... 10 rapi
+            const sortedLabels = Object.keys(classCounts).sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
+            const sortedData = sortedLabels.map(label => classCounts[label]);
 
             if(chartKelasInstance) chartKelasInstance.destroy();
             if(chartGenderInstance) chartGenderInstance.destroy();
@@ -563,8 +543,8 @@
             chartKelasInstance = new Chart(document.getElementById('chart-kelas').getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(classCounts).sort(),
-                    datasets: [{ label: 'Jumlah Siswa', data: Object.values(classCounts), backgroundColor: '#6366f1', borderRadius: 8 }]
+                    labels: sortedLabels,
+                    datasets: [{ label: 'Jumlah Siswa', data: sortedData, backgroundColor: '#6366f1', borderRadius: 8 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
@@ -585,7 +565,9 @@
             if(headerClickCount >= 3) {
                 headerClickCount = 0;
                 if(isAdminActive) {
-                    isAdminActive = false; document.getElementById('admin-badge').classList.add('hidden');
+                    isAdminActive = false; 
+                    document.getElementById('admin-badge').classList.add('hidden');
+                    sessionStorage.removeItem('portalAdminAuth'); // Hapus sesi jika logout manual
                     showToast('Mode Admin Dimatikan', 'info');
                     if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
                     return;
@@ -616,13 +598,25 @@
             const pass = document.getElementById('input-admin-pin').value;
             const modalBox = document.getElementById('modal-admin-box');
             if(pass === 'aic') {
-                isAdminActive = true; document.getElementById('admin-badge').classList.remove('hidden');
-                showToast('Otorisasi Admin Aktif! Semua enkripsi gembok terbuka.', 'success'); closeAdminModal();
+                isAdminActive = true; 
+                document.getElementById('admin-badge').classList.remove('hidden');
+                sessionStorage.setItem('portalAdminAuth', 'true'); // Simpan sesi
+                showToast('Otorisasi Admin Aktif! Semua enkripsi gembok terbuka.', 'success'); 
+                closeAdminModal();
                 if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
             } else {
                 showToast('PIN Admin Tidak Valid!');
                 modalBox.classList.remove('animate-shake'); void modalBox.offsetWidth; modalBox.classList.add('animate-shake');
             }
+        }
+
+        function checkAdminMapAccess(isPopState = false) {
+            if (!isAdminActive) {
+                showToast("Akses Ditolak! Peta Zonasi hanya untuk Admin.", "error");
+                openAdminModal();
+                return;
+            }
+            openMasterMap(isPopState);
         }
 
         // --- SERVER CORE API CONDUIT CONNECTORS ---
@@ -673,7 +667,7 @@
         }
 
         function renderClassListView(data) {
-            const classes = [...new Set(data.map(item => item.kelas).filter(k => k))].sort();
+            const classes = [...new Set(data.map(item => item.kelas).filter(k => k))].sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
             const container = document.getElementById('class-list-container'); container.innerHTML = '';
 
             classes.forEach(kls => {
@@ -697,14 +691,14 @@
                 container.appendChild(card);
             });
 
-            ['section-dashboard', 'section-list', 'section-detail', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+            ['section-dashboard', 'section-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             ['section-class-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
         function applyFilters() {
             const searchTerm = document.getElementById('input-search').value.toLowerCase();
             const filteredData = globalCachedList.filter(item => {
-                const matchName = item.nama.toLowerCase().includes(searchTerm);
+                const matchName = item.nama && item.nama.toLowerCase().includes(searchTerm);
                 const matchClass = (currentType === 'siswa' && currentSelectedClass !== 'ALL') ? item.kelas === currentSelectedClass : true;
                 return matchName && matchClass;
             });
@@ -743,7 +737,7 @@
                     container.appendChild(card);
                 });
             }
-            ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+            ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             ['section-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
@@ -859,57 +853,52 @@
                 document.getElementById('upload-section-siswa').classList.remove('hidden');
 				
 				// Tampilkan section dokumen tambahan
-document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
+                document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
 
-// Sinkronisasi tombol dan Pratinjau TKA & Ijazah
-const docs = [
-    { id: 'tka', field: 'Link TKA' },
-    { id: 'ijazah', field: 'Link Ijazah' }
-];
+                // Sinkronisasi tombol dan Pratinjau TKA & Ijazah
+                const docs = [
+                    { id: 'tka', field: 'Link TKA' },
+                    { id: 'ijazah', field: 'Link Ijazah' }
+                ];
 
-docs.forEach(doc => {
-    const btn = document.getElementById(`btn-lihat-${doc.id}`);
-    const badge = document.getElementById(`badge-kosong-${doc.id}`);
-    const previewBox = document.getElementById(`preview-box-${doc.id}`);
-    const iconBox = document.getElementById(`icon-box-${doc.id}`);
-    const iframe = document.getElementById(`iframe-${doc.id}`);
-    
-    const urlSpreadsheet = info[doc.field];
+                docs.forEach(doc => {
+                    const btn = document.getElementById(`btn-lihat-${doc.id}`);
+                    const badge = document.getElementById(`badge-kosong-${doc.id}`);
+                    const previewBox = document.getElementById(`preview-box-${doc.id}`);
+                    const iconBox = document.getElementById(`icon-box-${doc.id}`);
+                    const iframe = document.getElementById(`iframe-${doc.id}`);
+                    
+                    const urlSpreadsheet = info[doc.field];
 
-    if (urlSpreadsheet && urlSpreadsheet.trim() !== '') {
-        // 1. Atur Tombol "Buka Penuh"
-        btn.href = urlSpreadsheet;
-        btn.classList.remove('hidden'); 
-        badge.classList.add('hidden');  
+                    if (urlSpreadsheet && urlSpreadsheet.trim() !== '') {
+                        btn.href = urlSpreadsheet;
+                        btn.classList.remove('hidden'); 
+                        badge.classList.add('hidden');  
 
-        // 2. Coba tampilkan pratinjau Iframe
-        const previewUrl = getDrivePreviewUrl(urlSpreadsheet);
-        if (previewUrl) {
-            iframe.src = previewUrl;
-            previewBox.classList.remove('hidden'); // Tampilkan kotak iframe
-            iconBox.classList.add('hidden');       // Sembunyikan ikon besar
-        }
-    } else {
-        // Jika data kosong
-        btn.classList.add('hidden');
-        badge.classList.remove('hidden');
-        previewBox.classList.add('hidden');
-        iconBox.classList.remove('hidden');
-        iframe.src = ""; // Bersihkan iframe
-    }
-});
+                        const previewUrl = getDrivePreviewUrl(urlSpreadsheet);
+                        if (previewUrl) {
+                            iframe.src = previewUrl;
+                            previewBox.classList.remove('hidden'); 
+                            iconBox.classList.add('hidden');       
+                        }
+                    } else {
+                        btn.classList.add('hidden');
+                        badge.classList.remove('hidden');
+                        previewBox.classList.add('hidden');
+                        iconBox.classList.remove('hidden');
+                        iframe.src = ""; 
+                    }
+                });
                 
 				// Fungsi untuk mengekstrak ID File dari URL Google Drive
-function getDrivePreviewUrl(url) {
-    if (!url) return null;
-    // Mencocokkan pola URL Drive untuk mengambil ID
-    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
-    if (match && match[1]) {
-        return `https://drive.google.com/file/d/${match[1]}/preview`;
-    }
-    return null; // Kembalikan null jika bukan link drive yang valid
-}
-				
+                function getDrivePreviewUrl(url) {
+                    if (!url) return null;
+                    const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
+                    if (match && match[1]) {
+                        return `https://drive.google.com/file/d/${match[1]}/preview`;
+                    }
+                    return null; 
+                }
 				
                 // Sinkronisasi status file KK & Akta
                 ['kk', 'akta'].forEach(type => {
@@ -921,7 +910,7 @@ function getDrivePreviewUrl(url) {
 
                 ['NIK', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Nama Ibu Kandung', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Nomor WA', 'Email', 'Alamat', 'Titik Koordinat'].forEach(f => appendField(f, info[f]));
             }
-            ['section-dashboard', 'section-class-list', 'section-list', 'section-master-map', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['section-dashboard', 'section-class-list', 'section-list', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden'));
             ['section-detail', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
@@ -969,70 +958,15 @@ function getDrivePreviewUrl(url) {
             reader.readAsDataURL(file);
         }
 
-        // --- PRESENSI GEOLOCATION HARDWARE ENGINE ---
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))) * 1000;
-        }
-
-        function openPresensi(isPopState = false) {
-            if(!isPopState) history.pushState({ page: 'presensi' }, 'Presensi Geo');
-            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            ['section-presensi', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
-
-            setTimeout(() => {
-                if(!presensiMap) {
-                    presensiMap = L.map('presensi-map-container').setView([SCHOOL_COORD.lat, SCHOOL_COORD.lng], 17);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(presensiMap);
-                    L.circle([SCHOOL_COORD.lat, SCHOOL_COORD.lng], { color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: ALLOWED_RADIUS }).addTo(presensiMap).bindPopup('Area Sekolah (100m)');
-                    L.marker([SCHOOL_COORD.lat, SCHOOL_COORD.lng]).addTo(presensiMap).bindPopup('Titik Pusat Sekolah');
-                } else presensiMap.invalidateSize();
-                startGeoTracking();
-            }, 300);
-        }
-
-        function startGeoTracking() {
-            if (!navigator.geolocation) { showToast("Browser tidak mensupport enkripsi Geolocation.", "error"); return; }
-            document.getElementById('geo-distance').innerText = "Mendeteksi...";
-            geoWatchId = navigator.geolocation.watchPosition((position) => {
-                const userLat = position.coords.latitude; const userLng = position.coords.longitude;
-                const distance = getDistance(userLat, userLng, SCHOOL_COORD.lat, SCHOOL_COORD.lng);
-                document.getElementById('geo-distance').innerText = `${distance.toFixed(0)} Meter`;
-
-                if(!presensiMarker) presensiMarker = L.marker([userLat, userLng]).addTo(presensiMap).bindPopup('Lokasi Anda');
-                else presensiMarker.setLatLng([userLat, userLng]);
-
-                const btnSubmit = document.getElementById('btn-submit-presensi'); const statusBadge = document.getElementById('geo-status');
-                if (distance <= ALLOWED_RADIUS) {
-                    statusBadge.innerText = "Dalam Radius"; statusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700";
-                    btnSubmit.disabled = false; btnSubmit.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-4 rounded-xl font-bold shadow-lg transition-all flex justify-center items-center gap-2 cursor-pointer";
-                } else {
-                    statusBadge.innerText = "Di Luar Radius"; statusBadge.className = "text-xs font-bold px-2 py-1 rounded bg-red-100 text-red-700";
-                    btnSubmit.disabled = true; btnSubmit.className = "w-full bg-slate-300 text-slate-500 px-5 py-4 rounded-xl font-bold shadow-md transition-all flex justify-center items-center gap-2 cursor-not-allowed";
-                }
-            }, (err) => { showToast("Akses GPS ditolak! Aktifkan izin lokasi browser.", "error"); }, { enableHighAccuracy: true });
-        }
-
-        function submitPresensi() {
-            const btnSubmit = document.getElementById('btn-submit-presensi');
-            btnSubmit.innerHTML = `<span class="loader border-white border-t-transparent w-4 h-4"></span> Mengunci...`; btnSubmit.disabled = true;
-            setTimeout(() => {
-                showToast("Presensi kehadiran berhasil diamankan ke server!", "success");
-                btnSubmit.innerHTML = `<i class="fa-solid fa-check"></i> Sukses Terarsip`;
-                if(geoWatchId) navigator.geolocation.clearWatch(geoWatchId);
-            }, 1500);
-        }
-
         // --- MAP ZONASI MASTER VISUALIZATION ---
         async function openMasterMap(isPopState = false) {
             if(!isPopState) history.pushState({ page: 'mastermap' }, 'Peta Zonasi');
-            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['section-dashboard', 'section-class-list', 'section-list', 'section-detail'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('section-master-map').classList.remove('hidden'); document.getElementById('btn-back').classList.remove('hidden');
 
             if(!localCache['siswa']) {
                 showToast('Mengunduh data peta sebaran wilayah...', 'info'); await fetchList('siswa'); 
-                ['section-dashboard', 'section-class-list', 'section-list', 'section-presensi'].forEach(id => document.getElementById(id).classList.add('hidden'));
+                ['section-dashboard', 'section-class-list', 'section-list'].forEach(id => document.getElementById(id).classList.add('hidden'));
             }
 
             setTimeout(() => {
