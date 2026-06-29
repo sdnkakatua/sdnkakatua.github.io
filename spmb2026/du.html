@@ -493,6 +493,8 @@
         }
 
         function toggleDetails(nisn) {
+            if (!isAdmin) return; // Proteksi: Jika bukan admin, fungsi dihentikan langsung
+            
             const currentDetailsRow = document.getElementById(`details_${nisn}`);
             const currentIcon = document.getElementById(`icon_${nisn}`);
             const isCurrentlyOpen = currentDetailsRow.classList.contains('open');
@@ -618,13 +620,14 @@
                 trMain.id = `main_row_${nisn}`;
                 trMain.className = `border-b border-slate-700 transition-colors duration-200 border-l-4 hover:bg-slate-700/30 ${isRegistered ? 'bg-emerald-900/20 border-l-emerald-500' : 'bg-transparent border-l-transparent'}`;
                 
+                // Kondisional: Jika admin, tambahkan cursor-pointer, class group, dan event onclick
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
                         <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
                     </td>
-                    <td class="px-4 py-4 cursor-pointer group" onclick="toggleDetails('${nisn}')">
+                    <td class="px-4 py-4 ${isAdmin ? 'cursor-pointer group' : ''}" ${isAdmin ? `onclick="toggleDetails('${nisn}')"` : ''}>
                         <div class="flex items-center justify-between">
-                            <span class="font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">
+                            <span class="font-medium text-slate-200 ${isAdmin ? 'group-hover:text-indigo-400' : ''} transition-colors">
                                 <span class="text-xs bg-slate-700 px-2 py-0.5 rounded-md mr-2 text-slate-300">#${rank}</span>
                                 ${name} 
                                 <br> 
@@ -632,9 +635,11 @@
                                     <i class="fa-solid fa-chalkboard-user mr-1"></i> ${selectedKelas}
                                 </span>
                             </span>
+                            ${isAdmin ? `
                             <div class="w-8 h-8 rounded-full bg-slate-700/50 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
                                 <i class="fa-solid fa-chevron-down ${isOpen ? 'rotate-180 text-indigo-400' : 'text-slate-400'} text-xs transition-transform" id="icon_${nisn}"></i>
                             </div>
+                            ` : ''}
                         </div>
                     </td>
                     <td class="px-4 py-4 text-center">
@@ -648,7 +653,7 @@
 
                 trDetails.innerHTML = `
                     <td colspan="3" class="p-0 border-0">
-                        <div id="details_${nisn}" class="details-row ${isOpen ? 'open' : ''}">
+                        <div id="details_${nisn}" class="details-row ${isOpen && isAdmin ? 'open' : ''}">
                             <div class="details-content">
                                 <div class="px-6 py-6" id="form_${nisn}">
                                     
