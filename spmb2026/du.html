@@ -62,6 +62,20 @@
         .passcode-input::placeholder { letter-spacing: normal; font-size: 0.875rem; font-weight: normal; transform: translateY(-3px); color:#475569; }
 
         .leaflet-container { z-index: 10 !important; }
+
+        /* Styling Khusus Cetak / PDF */
+        @media print {
+            body { background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+            .no-print, #btn-admin-toggle, #sync-status, .no-print-col { display: none !important; }
+            .max-w-7xl { max-w: 100% !important; width: 100% !important; margin: 0 !important; }
+            .bg-slate-800, .bg-slate-900\/50, .bg-slate-900 { background: #ffffff !important; border-color: #cbd5e1 !important; color: #000000 !important; }
+            h1, h2, h3, p, span, th, td { color: #000000 !important; }
+            .border, .border-b, .border-slate-700 { border-color: #94a3b8 !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border-bottom: 1px solid #94a3b8 !important; padding: 10px !important; background: transparent !important; }
+            .clean-checkbox { border-color: #000000 !important; background: transparent !important; }
+            .clean-checkbox:checked { background-color: #000000 !important; }
+        }
     </style>
 </head>
 <body class="text-slate-200 p-4 md:p-8 min-h-screen pb-16">
@@ -143,6 +157,48 @@
 
         </div>
 
+        <div class="mb-6 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md no-print">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-slate-500"></i>
+                </div>
+                <input type="text" id="searchInput" class="clean-input pl-10 w-full" placeholder="Cari Nama atau NISN...">
+            </div>
+            
+            <div class="w-full md:w-52 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-filter text-slate-500"></i>
+                </div>
+                <select id="filterStatus" class="clean-input pl-10 w-full cursor-pointer appearance-none">
+                    <option value="ALL">Status</option>
+                    <option value="VERIFIED">Sudah Verif</option>
+                    <option value="UNVERIFIED">Belum Verif</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
+                </div>
+            </div>
+
+            <div class="w-full md:w-52 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-chalkboard-user text-slate-500"></i>
+                </div>
+                <select id="filterClass" class="clean-input pl-10 w-full cursor-pointer appearance-none">
+                    <option value="ALL">Kelas</option>
+                    <option value="Kelas A">Kelas A</option>
+                    <option value="Kelas B">Kelas B</option>
+                    <option value="Belum ada kelas">Belum ada kelas</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
+                </div>
+            </div>
+
+            <button onclick="window.print()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors border border-indigo-500/30 shadow-lg shadow-indigo-950/30 whitespace-nowrap">
+                <i class="fa-solid fa-file-pdf text-base"></i>
+            </button>
+        </div>
+
         <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -150,7 +206,7 @@
                         <tr class="bg-slate-800/80 border-b border-slate-700 text-slate-400 text-sm uppercase tracking-wider">
                             <th class="px-4 py-4 font-semibold text-center w-16">Verif</th>
                             <th class="px-4 py-4 font-semibold">Nama & Kelas</th>
-                            <th class="px-4 py-4 font-semibold text-center w-24">whatsapp</th>
+                            <th class="px-4 py-4 font-semibold text-center w-24 no-print-col">whatsapp</th>
                         </tr>
                     </thead>
                     <tbody id="studentTableBody" class="text-sm">
@@ -187,6 +243,11 @@
             updateAdminUI();
             renderTable();
             silentBackgroundSync();
+
+            // Listener Pencarian & Semua Filter
+            document.getElementById('searchInput').addEventListener('input', renderTable);
+            document.getElementById('filterStatus').addEventListener('change', renderTable);
+            document.getElementById('filterClass').addEventListener('change', renderTable);
 
             document.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter' && e.target.tagName === 'INPUT' && isAdmin) {
@@ -493,7 +554,7 @@
         }
 
         function toggleDetails(nisn) {
-            if (!isAdmin) return; // Proteksi: Jika bukan admin, fungsi dihentikan langsung
+            if (!isAdmin) return; 
             
             const currentDetailsRow = document.getElementById(`details_${nisn}`);
             const currentIcon = document.getElementById(`icon_${nisn}`);
@@ -538,14 +599,12 @@
                 sheetOrder.forEach(nisn => {
                     const sd = sheetData[nisn];
                     if (sd) {
-                        // Cek Verifikasi
                         if (sd['Status Verifikasi'] === 'Sudah Verifikasi') {
                             verifiedCount++;
                         } else {
                             unverifiedCount++;
                         }
                         
-                        // Cek Gender & Kelas
                         let gen = (sd['Gender'] || '').toUpperCase().trim();
                         let isMale = gen.startsWith('L');
                         let isFemale = gen.startsWith('P') || gen.startsWith('W');
@@ -567,22 +626,18 @@
                 });
             }
 
-            // Update Total
             document.getElementById('stat-total').innerText = totalCount;
             document.getElementById('stat-male').innerText = maleCount;
             document.getElementById('stat-female').innerText = femaleCount;
             
-            // Update Kelas A
             document.getElementById('stat-class-a').innerText = classACount;
             document.getElementById('stat-class-a-male').innerText = classAMale;
             document.getElementById('stat-class-a-female').innerText = classAFemale;
 
-            // Update Kelas B
             document.getElementById('stat-class-b').innerText = classBCount;
             document.getElementById('stat-class-b-male').innerText = classBMale;
             document.getElementById('stat-class-b-female').innerText = classBFemale;
             
-            // Update Verifikasi
             document.getElementById('stat-verified').innerText = verifiedCount;
             document.getElementById('stat-unverified').innerText = unverifiedCount;
         }
@@ -592,13 +647,54 @@
             const openRows = Array.from(document.querySelectorAll('.details-row.open')).map(row => row.id.split('_')[1]);
             tbody.innerHTML = '';
 
+            const searchInput = document.getElementById('searchInput');
+            const filterStatusInput = document.getElementById('filterStatus');
+            const filterClassInput = document.getElementById('filterClass');
+            
+            const searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const filterStatus = filterStatusInput ? filterStatusInput.value : 'ALL';
+            const filterClass = filterClassInput ? filterClassInput.value : 'ALL';
+
             if (sheetOrder.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
                 updateStatistics();
                 return;
             }
+
+            // Gabungan Logika Filter: Pencarian, Status Verifikasi, dan Pilihan Kelas
+            const filteredOrder = sheetOrder.filter(nisn => {
+                const sd = sheetData[nisn];
+                if (!sd) return false;
+
+                const name = (sd['Nama Lengkap'] || '').toLowerCase();
+                const strNisn = String(nisn).toLowerCase();
+                const isRegistered = sd['Status Verifikasi'] === 'Sudah Verifikasi';
+                const currentClass = sd['Kelas'] || 'Belum ada kelas';
+
+                // 1. Filter Cari Teks
+                const matchesSearch = name.includes(searchQuery) || strNisn.includes(searchQuery);
+
+                // 2. Filter Status Verifikasi
+                let matchesStatus = true;
+                if (filterStatus === 'VERIFIED') matchesStatus = isRegistered;
+                if (filterStatus === 'UNVERIFIED') matchesStatus = !isRegistered;
+
+                // 3. Filter Pilihan Kelas
+                let matchesClass = true;
+                if (filterClass !== 'ALL') {
+                    matchesClass = (currentClass.trim() === filterClass.trim());
+                }
+
+                return matchesSearch && matchesStatus && matchesClass;
+            });
+
+            if (filteredOrder.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-folder-open text-3xl mb-3 text-slate-600"></i><br>Data siswa tidak ditemukan.</td></tr>`;
+                updateStatistics();
+                return;
+            }
             
-            sheetOrder.forEach((nisn, index) => {
+            filteredOrder.forEach((nisn) => {
                 const sd = sheetData[nisn];
                 const isRegistered = sd['Status Verifikasi'] === 'Sudah Verifikasi';
                 const isOpen = openRows.includes(nisn);
@@ -609,7 +705,9 @@
                 const choice = sd['Pilihan'] || '-';
                 const selectedKelas = sd['Kelas'] || 'Belum ada kelas';
                 const phone = sd['No HP'] || '';
-                const rank = index + 1; 
+                
+                // Menjaga nomor urut/rank tetap sesuai dengan database asli
+                const rank = sheetOrder.indexOf(nisn) + 1; 
                 
                 let initialLat = parseFloat(sd['Lintang']);
                 let initialLon = parseFloat(sd['Bujur']);
@@ -620,10 +718,9 @@
                 trMain.id = `main_row_${nisn}`;
                 trMain.className = `border-b border-slate-700 transition-colors duration-200 border-l-4 hover:bg-slate-700/30 ${isRegistered ? 'bg-emerald-900/20 border-l-emerald-500' : 'bg-transparent border-l-transparent'}`;
                 
-                // Kondisional: Jika admin, tambahkan cursor-pointer, class group, dan event onclick
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
-                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
+                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUrang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
                     </td>
                     <td class="px-4 py-4 ${isAdmin ? 'cursor-pointer group' : ''}" ${isAdmin ? `onclick="toggleDetails('${nisn}')"` : ''}>
                         <div class="flex items-center justify-between">
@@ -642,14 +739,15 @@
                             ` : ''}
                         </div>
                     </td>
-                    <td class="px-4 py-4 text-center">
+                    <td class="px-4 py-4 text-center no-print-col">
                         <a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-brands fa-whatsapp text-lg"></i></a>
                     </td>
                 `;
                 tbody.appendChild(trMain);
 
+                // Baris detail disembunyikan sepenuhnya saat dokumen dicetak agar tidak merusak format kertas
                 const trDetails = document.createElement('tr');
-                trDetails.className = `border-b border-slate-700 bg-slate-900/50`; 
+                trDetails.className = `border-b border-slate-700 bg-slate-900/50 no-print`; 
 
                 trDetails.innerHTML = `
                     <td colspan="3" class="p-0 border-0">
