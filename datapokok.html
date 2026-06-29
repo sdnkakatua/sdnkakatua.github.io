@@ -22,6 +22,7 @@
                         'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
                         'toast-slide': 'toastSlide 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
                         'toast-fade-out': 'fadeOut 0.3s ease-out forwards',
+                        'hourglass': 'hourglassFlip 2.5s infinite ease-in-out',
                     },
                     keyframes: {
                         fadeInUp: {
@@ -35,6 +36,11 @@
                         fadeOut: {
                             '0%': { opacity: '1', transform: 'translateY(0)' },
                             '100%': { opacity: '0', transform: 'translateY(-10px)' },
+                        },
+                        hourglassFlip: {
+                            '0%, 15%': { transform: 'rotate(0deg)' },
+                            '40%, 65%': { transform: 'rotate(180deg)' },
+                            '90%, 100%': { transform: 'rotate(360deg)' }
                         }
                     }
                 }
@@ -482,7 +488,6 @@
 
         // --- DASHBOARD CHARTS LOADING ENGINE ---
         async function initDashboard() {
-            // Cek SessionStorage untuk Mode Admin Persisten
             if (sessionStorage.getItem('portalAdminAuth') === 'true') {
                 isAdminActive = true;
                 document.getElementById('admin-badge').classList.remove('hidden');
@@ -515,12 +520,11 @@
             const genderCounts = { 'Laki-laki': 0, 'Perempuan': 0 };
 
             siswaData.forEach(item => {
-                if (!item.nama || item.nama.toString().trim() === '') return; // Abaikan baris kosong
+                if (!item.nama || item.nama.toString().trim() === '') return; 
 
                 const kls = (item.kelas || item.Kelas || 'Tanpa Kelas').toString().trim();
                 classCounts[kls] = (classCounts[kls] || 0) + 1;
                 
-                // Perbaikan Parsing Gender
                 let jk = (item.jenis_kelamin || item['Jenis Kelamin'] || '').toString().trim().toUpperCase();
                 let gender = 'Laki-laki'; 
                 if (jk === 'P' || jk === 'PEREMPUAN') {
@@ -534,7 +538,6 @@
                 if(genderCounts[gender] !== undefined) genderCounts[gender]++;
             });
 
-            // Urutkan kelas dengan format numerik agar urutan seperti 1, 2, 3 ... 10 rapi
             const sortedLabels = Object.keys(classCounts).sort((a, b) => a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'}));
             const sortedData = sortedLabels.map(label => classCounts[label]);
 
@@ -568,7 +571,7 @@
                 if(isAdminActive) {
                     isAdminActive = false; 
                     document.getElementById('admin-badge').classList.add('hidden');
-                    sessionStorage.removeItem('portalAdminAuth'); // Hapus sesi jika logout manual
+                    sessionStorage.removeItem('portalAdminAuth');
                     showToast('Mode Admin Dimatikan', 'info');
                     if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
                     return;
@@ -601,7 +604,7 @@
             if(pass === 'aic') {
                 isAdminActive = true; 
                 document.getElementById('admin-badge').classList.remove('hidden');
-                sessionStorage.setItem('portalAdminAuth', 'true'); // Simpan sesi
+                sessionStorage.setItem('portalAdminAuth', 'true');
                 showToast('Otorisasi Admin Aktif! Semua enkripsi gembok terbuka.', 'success'); 
                 closeAdminModal();
                 if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
@@ -614,10 +617,29 @@
         function checkAdminMapAccess(isPopState = false) {
             if (!isAdminActive) {
                 showToast("Akses Ditolak! Peta Zonasi hanya untuk Admin.", "error");
-                // openAdminModal(); // <--- Baris ini dihapus/dinonaktifkan agar popup PIN tidak muncul
                 return;
             }
             openMasterMap(isPopState);
+        }
+
+        // --- ANIMATED LOADING HOURGLASS ---
+        function showLoadingHourglass() {
+            const container = document.getElementById('list-container');
+            const emptyState = document.getElementById('empty-state');
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = `
+                <div class="col-span-1 sm:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
+                    <div class="w-24 h-24 bg-indigo-50 rounded-2xl border border-indigo-100 shadow-sm flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-hourglass-half text-5xl text-indigo-500 animate-hourglass"></i>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-800 tracking-tight mb-2">Sinkronisasi Database.</h3>
+                    <p class="text-slate-500 font-medium text-lg">Mohon tunggu......</p>
+                </div>
+            `;
+            
+            ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+            ['section-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
         // --- SERVER CORE API CONDUIT CONNECTORS ---
@@ -643,10 +665,9 @@
 
             if (!hasCache) {
                 document.getElementById('section-dashboard').classList.add('hidden');
-                if(type === 'gtk') {
-                    document.getElementById('list-title').innerText = 'Memuat Data...';
-                    document.getElementById('section-list').classList.remove('hidden');
-                }
+                document.getElementById('list-title').innerText = type === 'siswa' ? 'Memuat Data Siswa...' : 'Memuat Data GTK...';
+                document.getElementById('list-count').innerText = 'Mengambil data...';
+                showLoadingHourglass(); 
             }
 
             try {
@@ -661,10 +682,14 @@
                             renderClassListView(globalCachedList);
                         }
                     } else {
-                        if (document.getElementById('section-dashboard').classList.contains('hidden') && currentType === type) applyFilters();
+                        if (document.getElementById('section-dashboard').classList.contains('hidden') || (!hasCache)) {
+                             applyFilters();
+                        }
                     }
                 }
-            } catch (error) { if(!hasCache) { showToast('Koneksi terputus.'); resetToDashboard(); } }
+            } catch (error) { 
+                if(!hasCache) { showToast('Koneksi terputus.'); resetToDashboard(); } 
+            }
         }
 
         function renderClassListView(data) {
@@ -707,6 +732,12 @@
         }
 
         function renderListView(data, type, isInit = false, selectedKelas = null) {
+            data.sort((a, b) => {
+                const nameA = (a.nama || '').toString();
+                const nameB = (b.nama || '').toString();
+                return nameA.localeCompare(nameB, 'id', { numeric: true, sensitivity: 'base' });
+            });
+
             const container = document.getElementById('list-container');
             const emptyState = document.getElementById('empty-state');
             container.innerHTML = '';
@@ -828,10 +859,8 @@
             const fieldsContainer = document.getElementById('detail-fields'); fieldsContainer.innerHTML = '';
             document.getElementById('detail-nama').innerText = info.Nama; document.getElementById('btn-drive').href = info["Link Drive"] || '#';
 
-            // Generate QR Code Token Profil
             document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(info.Nama + " | NIK: " + (info.NIK||'-'))}`;
 
-            // Direct Communication Actions Injection
             const actionsContainer = document.getElementById('direct-actions'); actionsContainer.innerHTML = '';
             if (info['Nomor WA']) {
                 let wa = info['Nomor WA'].replace(/\D/g, ''); if(wa.startsWith('0')) wa = '62' + wa.substring(1);
@@ -852,11 +881,8 @@
                 iconWrapper.className = "bg-emerald-50 text-emerald-600 p-4 rounded-2xl shrink-0"; icon.className = "fa-solid fa-graduation-cap text-3xl";
                 sub.innerHTML = `<i class="fa-regular fa-id-card"></i> Kelas: ${info["Kelas"] || '-'} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
                 document.getElementById('upload-section-siswa').classList.remove('hidden');
-				
-				// Tampilkan section dokumen tambahan
-                document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
+				document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
 
-                // Sinkronisasi tombol dan Pratinjau TKA & Ijazah
                 const docs = [
                     { id: 'tka', field: 'Link TKA' },
                     { id: 'ijazah', field: 'Link Ijazah' }
@@ -891,7 +917,6 @@
                     }
                 });
                 
-				// Fungsi untuk mengekstrak ID File dari URL Google Drive
                 function getDrivePreviewUrl(url) {
                     if (!url) return null;
                     const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
@@ -901,7 +926,6 @@
                     return null; 
                 }
 				
-                // Sinkronisasi status file KK & Akta
                 ['kk', 'akta'].forEach(type => {
                     const field = type === 'kk' ? 'File KK' : 'File Akta'; const btnLihat = document.getElementById(`btn-lihat-${type}`);
                     const iconBtn = document.getElementById(`icon-btn-${type}`); const textBtn = document.getElementById(`text-btn-${type}`);
@@ -1059,7 +1083,6 @@
                 if (result.status === 'success') {
                     showToast(`${fieldName} sukses diarsip!`, 'success');
                     const display = document.getElementById(`display-${fieldName.replace(/\s+/g, '')}`); if(display) display.innerText = newValue || '-';
-                    // Update cache local agar data sinkron tanpa force reload
                     if(localCache[currentType]) {
                         const targetIdx = localCache[currentType].findIndex(x => x.id == currentEditingId || x._id_baris == currentEditingId);
                         const dataKeyMapping = { 'Nomor WA': 'Nomor WA', 'Email': 'Email', 'Titik Koordinat': 'koordinat', 'Berat Badan': 'Berat Badan', 'Tinggi Badan': 'Tinggi Badan', 'Lingkar Kepala': 'Lingkar Kepala' };
@@ -1071,7 +1094,6 @@
             finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
 
-        // Global Modal Event Click Listener Close
         window.addEventListener('click', (e) => {
             if (e.target === document.getElementById('modal-passcode')) closePasscodeModal();
             if (e.target === document.getElementById('modal-edit') || e.target === document.getElementById('modal-map')) closeModals();
