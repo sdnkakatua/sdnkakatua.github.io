@@ -205,6 +205,7 @@
                     <thead>
                         <tr class="bg-slate-800/80 border-b border-slate-700 text-slate-400 text-sm uppercase tracking-wider">
                             <th class="px-4 py-4 font-semibold text-center w-16">Verif</th>
+                            <th class="px-4 py-4 font-semibold text-center w-20">Foto</th>
                             <th class="px-4 py-4 font-semibold">Nama & Kelas</th>
                             <th class="px-4 py-4 font-semibold text-center w-24 no-print-col">whatsapp</th>
                         </tr>
@@ -261,6 +262,17 @@
                 }
             });
         });
+
+        // Helper untuk mengubah Link Share Google Drive menjadi Link Gambar Terbuka/Thumbnail
+        function buildDriveThumbnail(url) {
+            if (!url || url.trim() === '') return '';
+            // Regex universal untuk menangkap ID File unik milik Google Drive
+            const match = url.match(/([-\w]{25,})/);
+            if (match && match[1]) {
+                return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100`;
+            }
+            return '';
+        }
 
         function handleAdminToggle(event) {
             if (event.detail === 3) {
@@ -514,6 +526,7 @@
                 nikAyah: form.querySelector('[name="nikAyah"]').value,
                 namaIbu: form.querySelector('[name="namaIbu"]').value,
                 nikIbu: form.querySelector('[name="nikIbu"]').value,
+                foto: form.querySelector('[name="foto"]').value
             };
 
             const localDisplayData = {
@@ -524,7 +537,7 @@
                 'Berat Badan (kg)': dataToSave.beratBadan, 'Tinggi Badan (cm)': dataToSave.tinggiBadan, 'Lingkar Kepala (cm)': dataToSave.lingkarKepala,
                 'Alamat': dataToSave.alamat, 'Lintang': dataToSave.lintang, 'Bujur': dataToSave.bujur, 'Jarak ke Sekolah (km)': dataToSave.jarakSekolah,
                 'Nama Ayah': dataToSave.namaAyah, 'NIK Ayah': dataToSave.nikAyah, 'Nama Ibu': dataToSave.namaIbu, 'NIK Ibu': dataToSave.nikIbu,
-                'Kelas': dataToSave.kelas
+                'Kelas': dataToSave.kelas, 'Foto': dataToSave.foto
             };
 
             sheetData[nisn] = { ...sheetData[nisn], ...localDisplayData };
@@ -656,7 +669,7 @@
             const filterClass = filterClassInput ? filterClassInput.value : 'ALL';
 
             if (sheetOrder.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 text-indigo-500"></i><br>Menarik data dari Spreadsheet...</td></tr>`;
                 updateStatistics();
                 return;
             }
@@ -689,7 +702,7 @@
             });
 
             if (filteredOrder.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-folder-open text-3xl mb-3 text-slate-600"></i><br>Data siswa tidak ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-folder-open text-3xl mb-3 text-slate-600"></i><br>Data siswa tidak ditemukan.</td></tr>`;
                 updateStatistics();
                 return;
             }
@@ -705,6 +718,7 @@
                 const choice = sd['Pilihan'] || '-';
                 const selectedKelas = sd['Kelas'] || 'Belum ada kelas';
                 const phone = sd['No HP'] || '';
+                const linkFoto = sd['Foto'] || '';
                 
                 // Menjaga nomor urut/rank tetap sesuai dengan database asli
                 const rank = sheetOrder.indexOf(nisn) + 1; 
@@ -712,7 +726,10 @@
                 let initialLat = parseFloat(sd['Lintang']);
                 let initialLon = parseFloat(sd['Bujur']);
                 let initialJarak = calculateDistance(initialLat, initialLon, SCH_LAT, SCH_LON);
-                let jarakTampil = initialJarak ? initialJarak + ' km' : (sd['Jarak ke Sekolah (km)'] ? sd['Jarak ke School (km)'] + ' km' : '');
+                let jarakTampil = initialJarak ? initialJarak + ' km' : (sd['Jarak ke Sekolah (km)'] ? sd['Jarak ke Sekolah (km)'] + ' km' : '');
+
+                // Memproses thumbnail gambar
+                const thumbnailSrc = buildDriveThumbnail(linkFoto);
 
                 const trMain = document.createElement('tr');
                 trMain.id = `main_row_${nisn}`;
@@ -720,7 +737,13 @@
                 
                 trMain.innerHTML = `
                     <td class="px-4 py-4 text-center">
-                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUrang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
+                        <input type="checkbox" class="clean-checkbox" id="check_${nisn}" ${isRegistered ? 'checked' : ''} onchange="toggleDaftarUlang('${nisn}', this)" ${!isAdmin ? 'disabled' : ''}>
+                    </td>
+                    <td class="px-2 py-3 text-center">
+                        ${thumbnailSrc ? 
+                            `<img src="${thumbnailSrc}" class="w-10 h-10 rounded-full object-cover border border-slate-600 mx-auto shadow-sm bg-slate-900" alt="Foto ${name}" onerror="this.src='https://via.placeholder.com/40?text=?'">` : 
+                            `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mx-auto shadow-sm text-slate-400"><i class="fa-solid fa-user text-xs"></i></div>`
+                        }
                     </td>
                     <td class="px-4 py-4 ${isAdmin ? 'cursor-pointer group' : ''}" ${isAdmin ? `onclick="toggleDetails('${nisn}')"` : ''}>
                         <div class="flex items-center justify-between">
@@ -750,13 +773,13 @@
                 trDetails.className = `border-b border-slate-700 bg-slate-900/50 no-print`; 
 
                 trDetails.innerHTML = `
-                    <td colspan="3" class="p-0 border-0">
+                    <td colspan="4" class="p-0 border-0">
                         <div id="details_${nisn}" class="details-row ${isOpen && isAdmin ? 'open' : ''}">
                             <div class="details-content">
                                 <div class="px-6 py-6" id="form_${nisn}">
                                     
                                     <h3 class="text-sm font-semibold text-indigo-400 mb-4 border-b border-slate-700 pb-2">Informasi Pendaftaran</h3>
-                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
                                         <div class="col-span-2 md:col-span-1"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" class="clean-input" value="${name}" readonly></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Gender</label><input type="text" name="gender" class="clean-input" value="${gender}" readonly></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Skor</label><input type="text" name="skor" class="clean-input" value="${score}" readonly></div>
@@ -770,6 +793,7 @@
                                                 <option value="Kelas B" ${sd['Kelas'] === 'Kelas B' ? 'selected' : ''}>Kelas B</option>
                                             </select>
                                         </div>
+                                        <div class="col-span-2 md:col-span-1"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Link Foto (Drive)</label><input type="text" name="foto" class="clean-input" placeholder="Tautan Google Drive" value="${linkFoto}" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
 
                                     <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
