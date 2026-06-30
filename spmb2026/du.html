@@ -45,8 +45,7 @@
         }
         .clean-input:focus { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1; }
         .clean-input::placeholder { color: #64748b; }
-        .clean-input:read-only { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; }
-        .clean-input:disabled { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; -webkit-appearance: none; -moz-appearance: none; appearance: none;}
+        .clean-input:read-only, .clean-input:disabled { background: #0f172a; border-color: transparent; color: #94a3b8; cursor: not-allowed; }
 
         .details-row { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease-out; }
         .details-row.open { grid-template-rows: 1fr; }
@@ -106,7 +105,6 @@
         </div>
 
         <div class="mb-8 flex flex-wrap items-stretch justify-center gap-4">
-            
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
                 <div class="text-center min-w-[50px]">
                     <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-users text-blue-400 mr-1"></i>Total</p>
@@ -154,7 +152,6 @@
                     <h2 id="stat-class-b-female" class="text-xl font-black text-pink-400">0</h2>
                 </div>
             </div>
-
         </div>
 
         <div class="mb-6 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md no-print">
@@ -195,7 +192,7 @@
             </div>
 
             <button onclick="window.print()" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors border border-indigo-500/30 shadow-lg shadow-indigo-950/30 whitespace-nowrap">
-                <i class="fa-solid fa-file-pdf text-base"></i>
+                <i class="fa-solid fa-file-pdf text-base"></i> Cetak PDF
             </button>
         </div>
 
@@ -207,7 +204,7 @@
                             <th class="px-4 py-4 font-semibold text-center w-16">Verif</th>
                             <th class="px-4 py-4 font-semibold text-center w-20">Foto</th>
                             <th class="px-4 py-4 font-semibold">Nama & Kelas</th>
-                            <th class="px-4 py-4 font-semibold text-center w-24 no-print-col">whatsapp</th>
+                            <th class="px-4 py-4 font-semibold text-center w-24 no-print-col">WhatsApp</th>
                         </tr>
                     </thead>
                     <tbody id="studentTableBody" class="text-sm">
@@ -219,7 +216,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8l-ZCZ08a-oAhA1FK6uB7P9uBSRnKzB2FNoR8mFHN7oz6fzmXU2H2pc5DLmmkA8RU5A/exec';
+        // !!! WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT KAMU !!!
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiADJGu0vg5qQ1D5xdc7VnAvlINO9sEFXrjtU2Y8SWqlT86RydBlmKJhuDgfbGmzmV8Q/exec';
 
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
@@ -245,7 +243,6 @@
             renderTable();
             silentBackgroundSync();
 
-            // Listener Pencarian & Semua Filter
             document.getElementById('searchInput').addEventListener('input', renderTable);
             document.getElementById('filterStatus').addEventListener('change', renderTable);
             document.getElementById('filterClass').addEventListener('change', renderTable);
@@ -263,10 +260,9 @@
             });
         });
 
-        // Helper untuk mengubah Link Share Google Drive menjadi Link Gambar Terbuka/Thumbnail
+        // Helper Drive Thumbnail
         function buildDriveThumbnail(url) {
             if (!url || url.trim() === '') return '';
-            // Regex universal untuk menangkap ID File unik milik Google Drive
             const match = url.match(/([-\w]{25,})/);
             if (match && match[1]) {
                 return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100`;
@@ -324,6 +320,7 @@
                             });
                         }
                     }).then((result) => {
+                        // PASSCODE DEFAULT ADALAH: aic
                         if (result.value === 'aic') {
                             isAdmin = true; sessionStorage.setItem('spmb_isAdmin', 'true');
                             updateAdminUI(); renderTable();
@@ -451,7 +448,7 @@
             const statusInd = document.getElementById('sync-status');
             statusInd.classList.remove('opacity-0');
             try { await pushPendingData(); await pullFreshData(); renderTable(); } 
-            catch (err) {} finally { statusInd.classList.add('opacity-0'); }
+            catch (err) { console.error(err); } finally { statusInd.classList.add('opacity-0'); }
         }
 
         async function pushPendingData() {
@@ -482,10 +479,13 @@
             }
         }
 
-        function simpanData(nisn, btnElement) {
+        // SIMPAN DATA (Link Foto URL)
+        async function simpanData(nisn, btnElement) {
             if (!isAdmin) return; 
             
-            const originalHtml = btnElement.innerHTML;
+            const form = document.getElementById(`form_${nisn}`);
+
+            const originalHtml = `<i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan`;
             btnElement.innerHTML = `<i class="fa-solid fa-check mr-2"></i>Tersimpan di Cache`;
             btnElement.classList.replace('bg-indigo-600', 'bg-emerald-600');
             btnElement.classList.replace('hover:bg-indigo-700', 'hover:bg-emerald-700');
@@ -495,10 +495,11 @@
                 btnElement.classList.replace('hover:bg-emerald-700', 'hover:bg-indigo-700');
             }, 2000);
 
-            const form = document.getElementById(`form_${nisn}`);
             let jarakVal = form.querySelector('[name="jarakSekolah"]').value.replace(' km', '');
-            
             const isVerified = document.getElementById(`check_${nisn}`).checked;
+            
+            // Ambil langsung value dari input URL
+            const linkUrlFoto = form.querySelector('[name="foto"]').value;
 
             const dataToSave = {
                 nisn: nisn,
@@ -526,7 +527,7 @@
                 nikAyah: form.querySelector('[name="nikAyah"]').value,
                 namaIbu: form.querySelector('[name="namaIbu"]').value,
                 nikIbu: form.querySelector('[name="nikIbu"]').value,
-                foto: form.querySelector('[name="foto"]').value
+                foto: linkUrlFoto
             };
 
             const localDisplayData = {
@@ -593,30 +594,18 @@
 
         function updateStatistics() {
             let totalCount = 0;
-            let maleCount = 0;
-            let femaleCount = 0;
-            
-            let classACount = 0;
-            let classAMale = 0;
-            let classAFemale = 0;
-            
-            let classBCount = 0;
-            let classBMale = 0;
-            let classBFemale = 0;
-
-            let verifiedCount = 0;
-            let unverifiedCount = 0;
+            let maleCount = 0, femaleCount = 0;
+            let classACount = 0, classAMale = 0, classAFemale = 0;
+            let classBCount = 0, classBMale = 0, classBFemale = 0;
+            let verifiedCount = 0, unverifiedCount = 0;
 
             if (sheetOrder && sheetOrder.length > 0) {
                 totalCount = sheetOrder.length;
                 sheetOrder.forEach(nisn => {
                     const sd = sheetData[nisn];
                     if (sd) {
-                        if (sd['Status Verifikasi'] === 'Sudah Verifikasi') {
-                            verifiedCount++;
-                        } else {
-                            unverifiedCount++;
-                        }
+                        if (sd['Status Verifikasi'] === 'Sudah Verifikasi') verifiedCount++;
+                        else unverifiedCount++;
                         
                         let gen = (sd['Gender'] || '').toUpperCase().trim();
                         let isMale = gen.startsWith('L');
@@ -642,15 +631,12 @@
             document.getElementById('stat-total').innerText = totalCount;
             document.getElementById('stat-male').innerText = maleCount;
             document.getElementById('stat-female').innerText = femaleCount;
-            
             document.getElementById('stat-class-a').innerText = classACount;
             document.getElementById('stat-class-a-male').innerText = classAMale;
             document.getElementById('stat-class-a-female').innerText = classAFemale;
-
             document.getElementById('stat-class-b').innerText = classBCount;
             document.getElementById('stat-class-b-male').innerText = classBMale;
             document.getElementById('stat-class-b-female').innerText = classBFemale;
-            
             document.getElementById('stat-verified').innerText = verifiedCount;
             document.getElementById('stat-unverified').innerText = unverifiedCount;
         }
@@ -674,7 +660,6 @@
                 return;
             }
 
-            // Gabungan Logika Filter: Pencarian, Status Verifikasi, dan Pilihan Kelas
             const filteredOrder = sheetOrder.filter(nisn => {
                 const sd = sheetData[nisn];
                 if (!sd) return false;
@@ -684,19 +669,14 @@
                 const isRegistered = sd['Status Verifikasi'] === 'Sudah Verifikasi';
                 const currentClass = sd['Kelas'] || 'Belum ada kelas';
 
-                // 1. Filter Cari Teks
                 const matchesSearch = name.includes(searchQuery) || strNisn.includes(searchQuery);
 
-                // 2. Filter Status Verifikasi
                 let matchesStatus = true;
                 if (filterStatus === 'VERIFIED') matchesStatus = isRegistered;
                 if (filterStatus === 'UNVERIFIED') matchesStatus = !isRegistered;
 
-                // 3. Filter Pilihan Kelas
                 let matchesClass = true;
-                if (filterClass !== 'ALL') {
-                    matchesClass = (currentClass.trim() === filterClass.trim());
-                }
+                if (filterClass !== 'ALL') matchesClass = (currentClass.trim() === filterClass.trim());
 
                 return matchesSearch && matchesStatus && matchesClass;
             });
@@ -720,7 +700,6 @@
                 const phone = sd['No HP'] || '';
                 const linkFoto = sd['Foto'] || '';
                 
-                // Menjaga nomor urut/rank tetap sesuai dengan database asli
                 const rank = sheetOrder.indexOf(nisn) + 1; 
                 
                 let initialLat = parseFloat(sd['Lintang']);
@@ -728,7 +707,6 @@
                 let initialJarak = calculateDistance(initialLat, initialLon, SCH_LAT, SCH_LON);
                 let jarakTampil = initialJarak ? initialJarak + ' km' : (sd['Jarak ke Sekolah (km)'] ? sd['Jarak ke Sekolah (km)'] + ' km' : '');
 
-                // Memproses thumbnail gambar
                 const thumbnailSrc = buildDriveThumbnail(linkFoto);
 
                 const trMain = document.createElement('tr');
@@ -768,7 +746,6 @@
                 `;
                 tbody.appendChild(trMain);
 
-                // Baris detail disembunyikan sepenuhnya saat dokumen dicetak agar tidak merusak format kertas
                 const trDetails = document.createElement('tr');
                 trDetails.className = `border-b border-slate-700 bg-slate-900/50 no-print`; 
 
@@ -793,7 +770,11 @@
                                                 <option value="Kelas B" ${sd['Kelas'] === 'Kelas B' ? 'selected' : ''}>Kelas B</option>
                                             </select>
                                         </div>
-                                        <div class="col-span-2 md:col-span-1"><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Link Foto (Drive)</label><input type="text" name="foto" class="clean-input" placeholder="Tautan Google Drive" value="${linkFoto}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div class="col-span-2 md:col-span-1">
+                                            <label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Link URL Foto</label>
+                                            <input type="url" name="foto" class="clean-input" placeholder="Paste link foto (Drive/Imgbb)" value="${linkFoto}" ${!isAdmin ? 'readonly' : ''}>
+                                            ${linkFoto ? `<div class="mt-2 text-[10px] text-slate-400"><a href="${linkFoto}" target="_blank" class="text-indigo-400 hover:text-indigo-300 hover:underline"><i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>Buka Foto</a></div>` : ''}
+                                        </div>
                                     </div>
 
                                     <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
