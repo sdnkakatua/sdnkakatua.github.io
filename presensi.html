@@ -582,12 +582,16 @@
             if(data.status === "success") {
                 showToast("✓ Spreadsheet berhasil dibersihkan!", "success");
                 
-                // Menghapus cache pembatasan harian (agar bisa absen lagi)
+                // --- MODIFIKASI: RESET TOTAL MEMORI HP ---
+                // Menghapus semua batasan harian DAN semua kunci login biometrik yang tersimpan di HP ini
                 for (let key in localStorage) {
-                    if (key.startsWith('absen_limit_')) {
+                    if (key.startsWith('absen_limit_') || key.startsWith('biometric_id_')) {
                         localStorage.removeItem(key);
                     }
                 }
+                
+                // Opsional: Hapus juga nama akun yang terakhir kali tersimpan agar layar login bersih total
+                localStorage.removeItem('device_saved_nama');
                 
                 setTimeout(() => location.reload(), 2000);
             } else {
