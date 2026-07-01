@@ -113,7 +113,7 @@
 
 <script>
     // --- KONFIGURASI ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVbr8K4YbYOPy1Mg_TdjFdlehC-HEUoG1W7T-kP4bW1nyA1xAdLyaDIwBoRGuMiOKn1A/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxoCPU_mvNMg_XEay7274Iz06qXR5PbHdiB-irT_qCUhpAes2X8bjcAOrTpTqu9tagWlg/exec';
     const TARGET_LAT = -5.246076;
     const TARGET_LON = 119.472834;
     const MAX_DISTANCE_METERS = 100;
@@ -457,15 +457,15 @@
         // Ambil paket presensi paling awal (First In First Out)
         const targetKirim = antrean[0];
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ 
-                nama: targetKirim.nama, 
-                tipe: targetKirim.tipe, 
-                foto: targetKirim.foto,
-                waktu_lokal: targetKirim.waktuLokal // Data opsional tambahan penanda waktu asli gawai
-            })
-        })
+        // Cari potongan kode ini di dalam fungsi jalankanSinkronisasiOtomatis() Anda:
+fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ 
+        nama: targetKirim.nama, 
+        tipe: targetKirim.tipe, 
+        foto: targetKirim.foto // Mengirim base64 foto dan tipe ('datang'/'pulang')
+    })
+})
         .then(res => res.json())
         .then(() => {
             // Jika sukses terunggah ke spreadsheet, hapus baris ini dari antrean local storage
