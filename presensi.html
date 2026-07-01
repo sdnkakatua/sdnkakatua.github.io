@@ -23,6 +23,9 @@
         <div id="gpsStatusBanner" class="bg-amber-100 text-amber-800 text-xs font-semibold py-2 px-4 text-center border-b border-amber-200">
             Mendeteksi lokasi GPS Anda...
         </div>
+        <div id="syncStatusBanner" class="hidden bg-indigo-600 text-white text-[10px] py-1 px-4 text-center font-medium animate-pulse">
+            Menyinkronkan data presensi tertunda ke spreadsheet...
+        </div>
 
         <div class="p-6 space-y-6">
             
@@ -77,6 +80,7 @@
                 <div class="text-center">
                     <h3 id="welcomeNama" class="text-lg font-bold text-slate-800">Halo, Pengguna</h3>
                     <p class="text-sm text-slate-500">Silakan ambil foto selfie untuk memproses absen</p>
+                    <button onclick="logoutUser()" class="text-xs text-blue-600 underline mt-1 block mx-auto">Bukan Anda? Ganti Nama/Akun</button>
                 </div>
                 
                 <div id="biometricSetupBox" class="hidden bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-center">
@@ -86,9 +90,9 @@
                     </button>
                 </div>
 
-                <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-inner w-full aspect-video flex items-center justify-center">
+                <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-inner w-full max-w-[280px] aspect-[3/4] mx-auto flex items-center justify-center">
                     <video id="video" class="w-full h-full object-cover hidden" autoplay playsinline></video>
-                    <span id="kameraLoading" class="text-slate-400 text-sm animate-pulse">Menghubungkan ke kamera gawai...</span>
+                    <span id="kameraLoading" class="text-slate-400 text-sm p-4 text-center animate-pulse">Menghubungkan ke kamera gawai...</span>
                 </div>
                 <canvas id="canvas" class="hidden"></canvas>
 
@@ -109,9 +113,9 @@
 
 <script>
     // --- KONFIGURASI ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVbr8K4YbYOPy1Mg_TdjFdlehC-HEUoG1W7T-kP4bW1nyA1xAdLyaDIwBoRGuMiOKn1A/exec'; // <-- GANTI DENGAN URL GAS ANDA
-    const TARGET_LAT = -5.246076 //-5.159426;
-    const TARGET_LON = 119.472834; //119.410689;
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVbr8K4YbYOPy1Mg_TdjFdlehC-HEUoG1W7T-kP4bW1nyA1xAdLyaDIwBoRGuMiOKn1A/exec';
+    const TARGET_LAT = -5.246076;
+    const TARGET_LON = 119.472834;
     const MAX_DISTANCE_METERS = 100;
     
     let daftarPegawai = [];
@@ -141,11 +145,14 @@
         }, 3500);
     }
 
-    // --- ALUR JALAN AWAL (HANYA CEK GPS) ---
+    // --- ALUR AWAL ---
     window.onload = () => {
         initDropdowns();
         ambilDaftarPegawai();
         mulaiLacakGPS();
+        
+        // Mulai listener sinkronisasi berkala (setiap 15 detik)
+        setInterval(jalankanSinkronisasiOtomatis, 15000);
     };
 
     function initDropdowns() {
@@ -169,6 +176,13 @@
                 let select = document.getElementById('namaPegawai');
                 select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
                 data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
+
+                // MEMORI LOCAL STORAGE: Ambil opsi nama yang tersimpan di device ini
+                const savedNama = localStorage.getItem('device_saved_nama');
+                if (savedNama) {
+                    select.value = savedNama;
+                    cekKetersediaanBiometrikUser();
+                }
             })
             .catch(() => showToast('Gagal terhubung ke database server.', 'error'));
     }
@@ -183,7 +197,6 @@
 
     function mulaiLacakGPS() {
         const banner = document.getElementById('gpsStatusBanner');
-        
         if (!navigator.geolocation) {
             tampilkanLayarBlokir("GPS Tidak Didukung", "Browser gawai Anda tidak mendukung fitur lokasi GPS.");
             return;
@@ -191,9 +204,8 @@
 
         navigator.geolocation.watchPosition(
             (pos) => {
-                // Sembunyikan layar blokir jika sebelumnya muncul
                 document.getElementById('errorPanel').classList.add('hidden');
-                document.getElementById('loginPanel').classList.remove('hidden');
+                if(!currentUser) document.getElementById('loginPanel').classList.remove('hidden');
 
                 const distance = Math.round(getDistance(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LON));
                 if(distance <= MAX_DISTANCE_METERS) {
@@ -211,7 +223,7 @@
             (err) => {
                 isLocationValid = false;
                 let pesan = "Aplikasi presensi ditolak mengakses lokasi GPS Anda.";
-                if(err.code === 3) pesan = "Waktu pelacakan GPS habis. Pastikan Anda berada di luar ruangan/ruangan terbuka.";
+                if(err.code === 3) pesan = "Waktu pelacakan GPS habis. Pastikan GPS aktif.";
                 tampilkanLayarBlokir("Akses GPS Diperlukan", pesan);
             },
             { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
@@ -221,11 +233,9 @@
     function tampilkanLayarBlokir(judul, isi) {
         document.getElementById('gpsStatusBanner').className = "bg-rose-100 text-rose-800 text-xs font-semibold py-2 px-4 text-center border-b border-rose-200";
         document.getElementById('gpsStatusBanner').innerText = `✗ Akses Terkunci`;
-        
         document.getElementById('errorPanel').classList.remove('hidden');
         document.getElementById('loginPanel').classList.add('hidden');
         document.getElementById('presensiPanel').classList.add('hidden');
-        
         document.getElementById('errorTitle').innerText = judul;
         document.getElementById('errorMessage').innerText = isi;
     }
@@ -234,18 +244,37 @@
         const elements = document.querySelectorAll('#loginPanel select, #loginPanel button');
         elements.forEach(el => {
             el.disabled = !status;
-            if(status) {
-                el.classList.remove('opacity-50', 'cursor-not-allowed');
-            } else {
-                el.classList.add('opacity-50', 'cursor-not-allowed');
-            }
+            if(status) el.classList.remove('opacity-50', 'cursor-not-allowed');
+            else el.classList.add('opacity-50', 'cursor-not-allowed');
         });
     }
 
-    // --- LOGIKA LOGIN & BIOMETRIK ---
+    // --- MANAJEMEN TANGGAL & UNIK HARIAN ---
+    function getHariIniString() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function cekRiwayatAbsenLokal(nama) {
+        const key = `absen_limit_${nama}_${getHariIniString()}`;
+        return JSON.parse(localStorage.getItem(key)) || { datang: false, pulang: false };
+    }
+
+    function kunciRiwayatAbsenLokal(nama, tipe) {
+        const key = `absen_limit_${nama}_${getHariIniString()}`;
+        const riwayat = cekRiwayatAbsenLokal(nama);
+        riwayat[tipe] = true;
+        localStorage.setItem(key, JSON.stringify(riwayat));
+    }
+
+    // --- LOGIKA LOGIN ---
     function cekKetersediaanBiometrikUser() {
         const nama = document.getElementById('namaPegawai').value;
         const btnBypass = document.getElementById('btnBypassBiometric');
+        
+        // Simpan nama terpilih ke device secara live saat dropdown berubah
+        if(nama) localStorage.setItem('device_saved_nama', nama);
+
         if (window.PublicKeyCredential && localStorage.getItem('biometric_id_' + nama)) {
             btnBypass.classList.remove('hidden');
         } else {
@@ -255,7 +284,6 @@
 
     function verifikasiLogin() {
         if(!isLocationValid) return showToast('Posisikan diri Anda di area sekolah!', 'error');
-        
         const nama = document.getElementById('namaPegawai').value;
         const tgl = document.getElementById('dobTanggal').value;
         const bln = document.getElementById('dobBulan').value;
@@ -282,6 +310,8 @@
 
     function suksesLogin(nama) {
         currentUser = nama;
+        
+        // STRUKTUR BARU: Sembunyikan total section pilihan nama/login panel
         document.getElementById('loginPanel').classList.add('hidden');
         document.getElementById('presensiPanel').classList.remove('hidden');
         document.getElementById('welcomeNama').innerText = `Halo, ${nama}`;
@@ -290,11 +320,168 @@
             document.getElementById('biometricSetupBox').classList.remove('hidden');
         }
         
+        // Validasi batasan tombol absen harian (1 kali saja)
+        evaluasiHakTombolAbsen();
+        
         showToast('Berhasil Masuk', 'success');
-        // REKAYASA GESTURE: Nyalakan kamera HANYA setelah ada aksi klik sukses login
-        panggilKameraHP();
+        panggilKameraHPPortrait();
     }
 
+    function evaluasiHakTombolAbsen() {
+        const riwayat = cekRiwayatAbsenLokal(currentUser);
+        const btnDatang = document.getElementById('btnDatang');
+        const btnPulang = document.getElementById('btnPulang');
+
+        if(riwayat.datang) {
+            btnDatang.disabled = true;
+            btnDatang.className = "w-full bg-slate-300 text-slate-500 font-semibold rounded-lg py-3 shadow-inner cursor-not-allowed text-center text-xs";
+            btnDatang.innerText = "✓ Sudah Absen Datang Hari Ini";
+        } else {
+            btnDatang.disabled = false;
+            btnDatang.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg py-3 shadow-md transition-colors flex justify-center items-center gap-2";
+            btnDatang.innerText = "Absen Datang";
+        }
+
+        if(riwayat.pulang) {
+            btnPulang.disabled = true;
+            btnPulang.className = "w-full bg-slate-300 text-slate-500 font-semibold rounded-lg py-3 shadow-inner cursor-not-allowed text-center text-xs";
+            btnPulang.innerText = "✓ Sudah Absen Pulang Hari Ini";
+        } else {
+            btnPulang.disabled = false;
+            btnPulang.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg py-3 shadow-md transition-colors flex justify-center items-center gap-2";
+            btnPulang.innerText = "Absen Pulang";
+        }
+    }
+
+    function logoutUser() {
+        currentUser = null;
+        document.getElementById('loginPanel').classList.remove('hidden');
+        document.getElementById('presensiPanel').classList.add('hidden');
+        const video = document.getElementById('video');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+        video.classList.add('hidden');
+        document.getElementById('kameraLoading').classList.remove('hidden');
+        document.getElementById('btnGroup').classList.add('hidden');
+    }
+
+    // --- AKSES KAMERA PORTRAIT ---
+    function panggilKameraHPPortrait() {
+        const video = document.getElementById('video');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            tampilkanLayarBlokir("Kamera Tidak Didukung", "Situs harus berjalan di protokol HTTPS.");
+            return;
+        }
+
+        // Paksa resolusi ideal vertikal/tegak (Portrait)
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "user",
+                width: { ideal: 480 },
+                height: { ideal: 640 }
+            } 
+        })
+        .then(stream => { 
+            document.getElementById('kameraLoading').classList.add('hidden');
+            video.srcObject = stream; 
+            video.classList.remove('hidden'); 
+            document.getElementById('btnGroup').classList.remove('hidden');
+            document.getElementById('btnGroup').classList.add('grid');
+        })
+        .catch(() => {
+            tampilkanLayarBlokir("Izin Kamera Ditolak", "Aplikasi tidak diizinkan membuka kamera swafoto.");
+        });
+    }
+
+    // --- ANTRIAN LOCAL STORAGE & SILENT SYNC TO SPREADSHEET ---
+    function prosesAbsen(tipe) {
+        const riwayat = cekRiwayatAbsenLokal(currentUser);
+        if (riwayat[tipe]) {
+            return showToast(`Anda sudah melakukan absen ${tipe} hari ini!`, 'error');
+        }
+
+        const btn = document.getElementById(tipe === 'datang' ? 'btnDatang' : 'btnPulang');
+        btn.disabled = true;
+        btn.innerText = `Memproses...`;
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        
+        // Set ukuran kanvas mengikuti aspek rasio portrait (Tegak)
+        canvas.width = 360; 
+        canvas.height = 480;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const b64Foto = canvas.toDataURL('image/jpeg', 0.5);
+
+        // 1. Amankan status di local storage terlebih dahulu agar tidak bisa double-click/spam harian
+        kunciRiwayatAbsenLokal(currentUser, tipe);
+        evaluasiHakTombolAbsen();
+
+        // 2. Simpan ke dalam Antrean Sinkronisasi Lokal (Cache Backup)
+        const timestamp = new Date();
+        const paketData = {
+            id: timestamp.getTime(),
+            nama: currentUser,
+            tipe: tipe,
+            foto: b64Foto,
+            waktuLokal: timestamp.toLocaleString('id-ID')
+        };
+
+        const antrean = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
+        antrean.push(paketData);
+        localStorage.setItem('antrean_presensi', JSON.stringify(antrean));
+
+        showToast(`Presensi ${tipe.toUpperCase()} tersimpan di gawai!`, 'success');
+
+        // 3. Picu Sinkronisasi Diam-diam ke Spreadsheet langsung saat itu juga
+        jalankanSinkronisasiOtomatis();
+
+        // Segarkan halaman kembali setelah 2.5 detik agar siap digunakan oleh pegawai berikutnya
+        setTimeout(() => location.reload(), 2500);
+    }
+
+    function jalankanSinkronisasiOtomatis() {
+        if (!navigator.onLine) return; // Jangan jalankan jika device sedang tidak ada internet
+        
+        let antrean = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
+        if (antrean.length === 0) {
+            document.getElementById('syncStatusBanner').classList.add('hidden');
+            return;
+        }
+
+        // Tampilkan informasi running sync banner
+        document.getElementById('syncStatusBanner').classList.remove('hidden');
+        document.getElementById('syncStatusBanner').innerText = `Sinkronisasi mengunggah ${antrean.length} data presensi tertunda...`;
+
+        // Ambil paket presensi paling awal (First In First Out)
+        const targetKirim = antrean[0];
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                nama: targetKirim.nama, 
+                tipe: targetKirim.tipe, 
+                foto: targetKirim.foto,
+                waktu_lokal: targetKirim.waktuLokal // Data opsional tambahan penanda waktu asli gawai
+            })
+        })
+        .then(res => res.json())
+        .then(() => {
+            // Jika sukses terunggah ke spreadsheet, hapus baris ini dari antrean local storage
+            let antreanTerbaru = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
+            antreanTerbaru = antreanTerbaru.filter(item => item.id !== targetKirim.id);
+            localStorage.setItem('antrean_presensi', JSON.stringify(antreanTerbaru));
+            
+            // Rekursif: Jalankan lagi sampai isi antrean habis total (0)
+            jalankanSinkronisasiOtomatis();
+        })
+        .catch((err) => {
+            console.warn("Koneksi gagal saat sinkronisasi otomatis. Mencoba kembali nanti.", err);
+        });
+    }
+
+    // --- BIOMETRIK BYPASS LAYOUT ---
     async function daftarkanBiometrikPerangkat() {
         try {
             const publicKeyCredentialCreationOptions = {
@@ -335,56 +522,6 @@
         } catch (err) {
             showToast('Biometrik gawai tidak cocok.', 'error');
         }
-    }
-
-    // --- AKSES KAMERA SEBENTAR (DIPICU GESTURE) ---
-    function panggilKameraHP() {
-        const video = document.getElementById('video');
-        
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            tampilkanLayarBlokir("Kamera Tidak Didukung", "Situs harus berjalan di HTTPS / protokol aman untuk membuka kamera gawai.");
-            return;
-        }
-
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-            .then(stream => { 
-                document.getElementById('kameraLoading').classList.add('hidden');
-                video.srcObject = stream; 
-                video.classList.remove('hidden'); 
-                document.getElementById('btnGroup').classList.remove('hidden');
-                document.getElementById('btnGroup').classList.add('grid');
-            })
-            .catch((err) => {
-                tampilkanLayarBlokir("Izin Kamera Ditolak", "Aplikasi tidak diizinkan membuka kamera swafoto gawai Anda.");
-            });
-    }
-
-    function prosesAbsen(tipe) {
-        const btn = document.getElementById(tipe === 'datang' ? 'btnDatang' : 'btnPulang');
-        const originalText = btn.innerText;
-        
-        btn.disabled = true;
-        btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
-
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        canvas.width = 320; canvas.height = 240;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ nama: currentUser, tipe: tipe, foto: canvas.toDataURL('image/jpeg', 0.6) })
-        })
-        .then(res => res.json())
-        .then(() => {
-            showToast(`Presensi ${tipe.toUpperCase()} Berhasil!`, 'success');
-            setTimeout(() => location.reload(), 2000);
-        })
-        .catch(() => { 
-            showToast('Gangguan jaringan server.', 'error');
-            btn.disabled = false;
-            btn.innerText = originalText;
-        });
     }
 </script>
 </body>
