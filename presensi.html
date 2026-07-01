@@ -10,11 +10,12 @@
         tailwind.config = {
             darkMode: 'class',
         }
-        // Skrip untuk membaca tema awal perangkat
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // PERBAIKAN: Default tema dipaksa ke Light Mode kecuali user sebelumnya memilih Dark Mode
+        if (localStorage.theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
         }
     </script>
     <style>
@@ -45,7 +46,7 @@
 
     <main class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full max-w-md rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-black/50 border border-white/50 dark:border-slate-700/50 relative transition-all duration-300 fade-in-up">
         
-        <header class="p-8 pb-4 text-center flex flex-col items-center relative">
+        <header class="p-6 pb-4 sm:p-8 sm:pb-4 text-center flex flex-col items-center relative">
             <div class="absolute top-0 left-0 w-full h-1 rounded-t-[2rem] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
             <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 dark:from-indigo-500 dark:to-purple-500 rounded-2xl shadow-lg shadow-indigo-500/30 flex items-center justify-center mb-4 transform -rotate-3 transition-transform hover:rotate-0">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
@@ -62,7 +63,7 @@
             Menyinkronkan data presensi tertunda ke server...
         </div>
 
-        <div class="p-8 pt-6 space-y-6">
+        <div class="p-6 pt-5 sm:p-8 sm:pt-6 space-y-5 sm:space-y-6">
             
             <div id="errorPanel" class="hidden bg-rose-50/80 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/50 rounded-2xl p-5 text-center space-y-3 shadow-inner">
                 <div class="w-12 h-12 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
@@ -79,9 +80,9 @@
                     <select id="namaPegawai" class="hidden" onchange="cekKetersediaanBiometrikUser()"></select>
                     
                     <div id="customSelectWrapper" class="relative w-full">
-                        <button type="button" onclick="toggleCustomDropdown(event)" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 transition-all outline-none">
-                            <span id="customSelectText" class="truncate">-- Pilih Nama Anda --</span>
-                            <svg id="customSelectArrow" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        <button type="button" onclick="toggleCustomDropdown(event)" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl p-3 sm:p-3.5 flex items-center justify-between shadow-sm hover:border-indigo-300 dark:hover:border-indigo-500 transition-all outline-none">
+                            <span id="customSelectText" class="truncate text-sm sm:text-base">-- Pilih Nama Anda --</span>
+                            <svg id="customSelectArrow" class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
                         
                         <div id="customSelectList" class="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] dark:shadow-black/50 max-h-60 overflow-y-auto hidden opacity-0 transform scale-95 origin-top transition-all duration-200">
@@ -94,33 +95,33 @@
 
                 <div id="passcodeArea" class="space-y-3">
                     <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 ml-1">Katasandi (Tgl Lahir)</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <select id="dobTanggal" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors"><option value="">Tgl</option></select>
-                        <select id="dobBulan" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors">
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                        <select id="dobTanggal" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3 sm:p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-sm sm:text-base"><option value="">Tgl</option></select>
+                        <select id="dobBulan" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3 sm:p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-sm sm:text-base">
                             <option value="">Bulan</option>
                             <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
                             <option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option>
                             <option value="07">Jul</option><option value="08">Ags</option><option value="09">Sep</option>
                             <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
                         </select>
-                        <select id="dobTahun" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors"><option value="">Tahun</option></select>
+                        <select id="dobTahun" class="w-full bg-white/60 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 p-3 sm:p-3.5 shadow-sm outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-500 transition-colors text-sm sm:text-base"><option value="">Tahun</option></select>
                     </div>
                     
-                    <div class="flex gap-3 pt-2">
-                        <button type="button" id="btnMasuk" onclick="verifikasiLogin()" class="flex-1 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl px-4 py-3.5 shadow-lg shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                    <div class="flex gap-2 sm:gap-3 pt-2">
+                        <button type="button" id="btnMasuk" onclick="verifikasiLogin()" class="flex-1 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl px-4 py-3.5 shadow-lg shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 text-sm sm:text-base">
                             Masuk ke Sistem
                         </button>
                         
-                        <button type="button" id="btnBypassBiometric" onclick="loginDenganBiometrik()" class="hidden shrink-0 w-[54px] bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-semibold rounded-xl items-center justify-center shadow-lg shadow-slate-500/30 dark:shadow-black/30 transition-all transform hover:-translate-y-0.5 group">
-                            <svg class="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                        <button type="button" id="btnBypassBiometric" onclick="loginDenganBiometrik()" class="hidden shrink-0 w-[50px] sm:w-[54px] bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-semibold rounded-xl items-center justify-center shadow-lg shadow-slate-500/30 dark:shadow-black/30 transition-all transform hover:-translate-y-0.5 group">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="presensiPanel" class="hidden space-y-5 fade-in-up">
+            <div id="presensiPanel" class="hidden space-y-4 sm:space-y-5 fade-in-up">
                 <div class="text-center bg-indigo-50/50 dark:bg-indigo-900/20 p-3 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30">
-                    <h3 id="welcomeNama" class="text-lg font-extrabold text-indigo-950 dark:text-indigo-100">Halo, Pengguna</h3>
+                    <h3 id="welcomeNama" class="text-base sm:text-lg font-extrabold text-indigo-950 dark:text-indigo-100">Halo, Pengguna</h3>
                     <button onclick="logoutUser()" class="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 underline decoration-slate-300 dark:decoration-slate-600 mt-1 block mx-auto transition-colors">Ganti Akun</button>
                 </div>
                 
@@ -134,20 +135,20 @@
                     </button>
                 </div>
 
-                <div class="relative bg-slate-900 rounded-2xl overflow-hidden shadow-inner w-full max-w-[260px] aspect-[3/4] mx-auto flex items-center justify-center border-4 border-white dark:border-slate-800 ring-1 ring-slate-200 dark:ring-slate-700">
+                <div class="relative bg-slate-900 rounded-2xl overflow-hidden shadow-inner w-full max-w-[240px] sm:max-w-[260px] aspect-[3/4] mx-auto flex items-center justify-center border-4 border-white dark:border-slate-800 ring-1 ring-slate-200 dark:ring-slate-700">
                     <video id="video" class="w-full h-full object-cover hidden transform scale-x-[-1]" autoplay playsinline></video>
-                    <div id="kameraLoading" class="text-slate-400 text-sm p-4 text-center flex flex-col items-center gap-2">
+                    <div id="kameraLoading" class="text-slate-400 text-xs sm:text-sm p-4 text-center flex flex-col items-center gap-2">
                         <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         Membuka Kamera...
                     </div>
                 </div>
                 <canvas id="canvas" class="hidden"></canvas>
 
-                <div id="btnGroup" class="hidden grid-cols-2 gap-3 mt-2">
-                    <button id="btnDatang" onclick="prosesAbsen('datang')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-3.5 shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                <div id="btnGroup" class="hidden grid-cols-2 gap-2 sm:gap-3 mt-2">
+                    <button id="btnDatang" onclick="prosesAbsen('datang')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-3 sm:py-3.5 shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-sm sm:text-base">
                         Datang
                     </button>
-                    <button id="btnPulang" onclick="prosesAbsen('pulang')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl py-3.5 shadow-lg shadow-rose-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2">
+                    <button id="btnPulang" onclick="prosesAbsen('pulang')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl py-3 sm:py-3.5 shadow-lg shadow-rose-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-sm sm:text-base">
                         Pulang
                     </button>
                 </div>
@@ -208,7 +209,7 @@
         const colors = type === 'success' ? 'bg-emerald-500/95 shadow-emerald-500/20' : 
                        type === 'error' ? 'bg-rose-500/95 shadow-rose-500/20' : 'bg-slate-800/95 dark:bg-slate-700/95 shadow-slate-800/20';
         
-        toast.className = `transform transition-all duration-300 ease-in-out toast-enter ${colors} backdrop-blur text-white px-6 py-3.5 rounded-xl shadow-lg font-semibold text-center text-sm mb-2 mx-auto w-max max-w-full border border-white/10`;
+        toast.className = `transform transition-all duration-300 ease-in-out toast-enter ${colors} backdrop-blur text-white px-5 py-3 rounded-xl shadow-lg font-semibold text-center text-sm mb-2 mx-auto w-max max-w-full border border-white/10`;
         toast.innerText = message;
         container.appendChild(toast);
         
@@ -249,7 +250,7 @@
     let isDropdownOpen = false;
 
     function toggleCustomDropdown(event) {
-        if (!isLocationValid) return; // Kunci interaksi jika lokasi luar radius
+        if (!isLocationValid) return; 
         event.stopPropagation();
         const list = document.getElementById('customSelectList');
         const arrow = document.getElementById('customSelectArrow');
@@ -279,7 +280,6 @@
         }, 200);
     }
 
-    // Menutup dropdown custom jika layar luar diklik
     document.addEventListener('click', (e) => {
         const wrapper = document.getElementById('customSelectWrapper');
         if (isDropdownOpen && !wrapper.contains(e.target)) {
@@ -291,12 +291,11 @@
         document.getElementById('customSelectText').innerText = nama;
         document.getElementById('customSelectText').classList.add('font-semibold', 'text-indigo-600', 'dark:text-indigo-400');
         
-        // Memperbarui value select hidden asli agar logika login tetap berjalan
         const hiddenSelect = document.getElementById('namaPegawai');
         hiddenSelect.value = nama;
         
         tutupCustomDropdown();
-        cekKetersediaanBiometrikUser(); // Panggil logika biometrik
+        cekKetersediaanBiometrikUser();
     }
 
     // --- AMBIL DATA PEGAWAI ---
@@ -330,15 +329,12 @@
         const hiddenSelect = document.getElementById('namaPegawai');
         const customUl = document.getElementById('customSelectUl');
         
-        // Bersihkan opsi
         hiddenSelect.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
         customUl.innerHTML = '';
         
         data.forEach(p => {
-            // Isi Hidden Select
             hiddenSelect.appendChild(new Option(p.nama, p.nama));
             
-            // Isi Custom UI
             const li = document.createElement('li');
             li.className = 'px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 hover:bg-indigo-50 dark:hover:bg-slate-700 cursor-pointer transition-colors';
             li.innerText = p.nama;
@@ -346,7 +342,6 @@
             customUl.appendChild(li);
         });
 
-        // Set otomatis jika sebelumnya sudah pernah login
         const savedNama = localStorage.getItem('device_saved_nama');
         if (savedNama) {
             pilihOpsiCustom(savedNama);
@@ -442,7 +437,7 @@
 
         if (window.PublicKeyCredential && localStorage.getItem('biometric_id_' + nama)) {
             btnBypass.classList.remove('hidden');
-            btnBypass.classList.add('flex'); // Pakai flex untuk alignment logo
+            btnBypass.classList.add('flex');
         } else {
             btnBypass.classList.add('hidden');
             btnBypass.classList.remove('flex');
@@ -475,9 +470,13 @@
         return str;
     }
 
+    // PERBAIKAN: Menambahkan dukungan pushState agar tombol Back / Swipe Back berfungsi
     function suksesLogin(nama) {
         currentUser = nama;
         
+        // Push state ke browser history saat berhasil login
+        history.pushState({ panel: 'presensi' }, '', '#presensi');
+
         document.getElementById('loginPanel').classList.add('hidden');
         document.getElementById('presensiPanel').classList.remove('hidden');
         document.getElementById('welcomeNama').innerText = `Halo, ${nama.split(' ')[0]}`;
@@ -491,6 +490,33 @@
         panggilKameraHPPortrait();
     }
 
+    // PERBAIKAN: Listener saat user melakukan Swipe Back / menekan tombol Back HP
+    window.addEventListener('popstate', (event) => {
+        if (currentUser && document.location.hash !== '#presensi') {
+            logoutUser(true); // Parameter true menandakan aksi ini dari fungsi popstate
+        }
+    });
+
+    // PERBAIKAN: Menyesuaikan logoutUser untuk membersihkan history URL
+    function logoutUser(isDariPopState = false) {
+        currentUser = null;
+        document.getElementById('loginPanel').classList.remove('hidden');
+        document.getElementById('presensiPanel').classList.add('hidden');
+        
+        // Membersihkan hash #presensi dari URL jika logout ditekan manual (Ganti Akun)
+        if (!isDariPopState) {
+            history.replaceState(null, '', window.location.pathname);
+        }
+
+        const video = document.getElementById('video');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+        video.classList.add('hidden');
+        document.getElementById('kameraLoading').classList.remove('hidden');
+        document.getElementById('btnGroup').classList.add('hidden');
+    }
+
     function evaluasiHakTombolAbsen() {
         const riwayat = cekRiwayatAbsenLokal(currentUser);
         const btnDatang = document.getElementById('btnDatang');
@@ -502,7 +528,7 @@
             btnDatang.innerText = "✓ Selesai";
         } else {
             btnDatang.disabled = false;
-            btnDatang.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-3.5 shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5";
+            btnDatang.className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl py-3 sm:py-3.5 shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-sm sm:text-base";
             btnDatang.innerText = "Datang";
         }
 
@@ -512,22 +538,9 @@
             btnPulang.innerText = "✓ Selesai";
         } else {
             btnPulang.disabled = false;
-            btnPulang.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl py-3.5 shadow-lg shadow-rose-500/30 transition-all transform hover:-translate-y-0.5";
+            btnPulang.className = "w-full bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl py-3 sm:py-3.5 shadow-lg shadow-rose-500/30 transition-all transform hover:-translate-y-0.5 flex justify-center items-center gap-2 text-sm sm:text-base";
             btnPulang.innerText = "Pulang";
         }
-    }
-
-    function logoutUser() {
-        currentUser = null;
-        document.getElementById('loginPanel').classList.remove('hidden');
-        document.getElementById('presensiPanel').classList.add('hidden');
-        const video = document.getElementById('video');
-        if (video.srcObject) {
-            video.srcObject.getTracks().forEach(track => track.stop());
-        }
-        video.classList.add('hidden');
-        document.getElementById('kameraLoading').classList.remove('hidden');
-        document.getElementById('btnGroup').classList.add('hidden');
     }
 
     function panggilKameraHPPortrait() {
@@ -606,6 +619,7 @@
         showToast(`Presensi ${tipe.toUpperCase()} tersimpan aman!`, 'success');
         jalankanSinkronisasiOtomatis();
 
+        // Menggunakan fungsi standar logout agar hash URL juga ikut direset
         setTimeout(() => logoutUser(), 2000);
     }
 
