@@ -17,7 +17,7 @@
         
         <header class="bg-blue-600 p-6 text-center text-white">
             <h1 class="text-2xl font-bold tracking-wide">Presensi Pegawai</h1>
-            <p class="text-blue-100 mt-1 text-sm">SDN Kakatua</p>
+            <p id="teksSekolah" class="text-blue-100 mt-1 text-sm select-none cursor-pointer">SDN Kakatua</p>
         </header>
 
         <div id="gpsStatusBanner" class="bg-amber-100 text-amber-800 text-xs font-semibold py-2 px-4 text-center border-b border-amber-200">
@@ -113,7 +113,7 @@
 
 <script>
     // --- KONFIGURASI ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyo_D9dT4jvK6qxk19rZ077_vaioUUsGd6wD98uCk_p3ELNzaOI4q0cN5ZrAqgFKHrD0g/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwq0xcYtTeBlt-KhMuy8Fwg-sZJJszwah3oG1xP7hNIZjFpbhDvVnSxvTHu7cn6Tb7Hcg/exec';
     const TARGET_LAT = -5.246076;
     const TARGET_LON = 119.472834;
     const MAX_DISTANCE_METERS = 100;
@@ -150,8 +150,6 @@
         initDropdowns();
         ambilDaftarPegawai();
         mulaiLacakGPS();
-        
-        // Mulai listener sinkronisasi berkala (setiap 15 detik)
         setInterval(jalankanSinkronisasiOtomatis, 15000);
     };
 
@@ -169,49 +167,47 @@
     }
 
     // --- AMBIL DATA PEGAWAI (CACHE + BACKGROUND SYNC) ---
-function ambilDaftarPegawai() {
-    const select = document.getElementById('namaPegawai');
-    
-    const cachedData = localStorage.getItem('cache_daftar_pegawai');
-    if (cachedData) {
-        try {
-            daftarPegawai = JSON.parse(cachedData);
-            renderDropdown(daftarPegawai);
-        } catch (e) {
-            console.warn("Gagal membaca cache lokal pegawai.");
+    function ambilDaftarPegawai() {
+        const select = document.getElementById('namaPegawai');
+        const cachedData = localStorage.getItem('cache_daftar_pegawai');
+        
+        if (cachedData) {
+            try {
+                daftarPegawai = JSON.parse(cachedData);
+                renderDropdown(daftarPegawai);
+            } catch (e) {
+                console.warn("Gagal membaca cache lokal pegawai.");
+            }
+        }
+
+        fetch(SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                localStorage.setItem('cache_daftar_pegawai', JSON.stringify(data));
+                daftarPegawai = data;
+                if (!cachedData) {
+                    renderDropdown(data);
+                }
+            })
+            .catch(() => {
+                if (!cachedData) {
+                    showToast('Koneksi terputus. Gagal memuat daftar nama.', 'error');
+                    select.innerHTML = '<option value="">-- Gagal memuat data --</option>';
+                }
+            });
+    }
+
+    function renderDropdown(data) {
+        const select = document.getElementById('namaPegawai');
+        select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+        data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
+
+        const savedNama = localStorage.getItem('device_saved_nama');
+        if (savedNama) {
+            select.value = savedNama;
+            cekKetersediaanBiometrikUser();
         }
     }
-
-    fetch(SCRIPT_URL)
-        .then(res => res.json())
-        .then(data => {
-            localStorage.setItem('cache_daftar_pegawai', JSON.stringify(data));
-            daftarPegawai = data;
-            if (!cachedData) {
-                renderDropdown(data);
-            }
-        })
-        .catch(() => {
-            if (!cachedData) {
-                showToast('Koneksi terputus. Gagal memuat daftar nama.', 'error');
-                select.innerHTML = '<option value="">-- Gagal memuat data --</option>';
-            } else {
-                console.warn("Sedang offline. Menggunakan data cache.");
-            }
-        });
-}
-
-function renderDropdown(data) {
-    const select = document.getElementById('namaPegawai');
-    select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
-    data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
-
-    const savedNama = localStorage.getItem('device_saved_nama');
-    if (savedNama) {
-        select.value = savedNama;
-        cekKetersediaanBiometrikUser();
-    }
-}
 
     function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3;
@@ -285,7 +281,6 @@ function renderDropdown(data) {
         return JSON.parse(localStorage.getItem(key)) || { datang: false, pulang: false };
     }
 
-    // Mengamankan status di lokal gawai
     function kunciRiwayatAbsenLokal(nama, tipe) {
         const key = `absen_limit_${nama}_${getHariIniString()}`;
         const riwayat = cekRiwayatAbsenLokal(nama);
@@ -293,6 +288,7 @@ function renderDropdown(data) {
         localStorage.setItem(key, JSON.stringify(riwayat));
     }
 
+    // --- LOGIKA LOGIN & BIOMETRIK ---
     function cekKetersediaanBiometrikUser() {
         const nama = document.getElementById('namaPegawai').value;
         const btnBypass = document.getElementById('btnBypassBiometric');
@@ -385,8 +381,6 @@ function renderDropdown(data) {
         video.classList.add('hidden');
         document.getElementById('kameraLoading').classList.remove('hidden');
         document.getElementById('btnGroup').classList.add('hidden');
-        
-        // Memaksa dropdown nama memilih baris kosong lagi
         document.getElementById('namaPegawai').value = "";
     }
 
@@ -398,11 +392,7 @@ function renderDropdown(data) {
         }
 
         navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: "user",
-                width: { ideal: 480 },
-                height: { ideal: 640 }
-            } 
+            video: { facingMode: "user", width: { ideal: 480 }, height: { ideal: 640 } } 
         })
         .then(stream => { 
             document.getElementById('kameraLoading').classList.add('hidden');
@@ -416,7 +406,7 @@ function renderDropdown(data) {
         });
     }
 
-    // --- PROSES ABSEN & WATERMARK KAMERA ---
+    // --- PROSES ABSEN & WATERMARK ---
     function prosesAbsen(tipe) {
         const riwayat = cekRiwayatAbsenLokal(currentUser);
         if (riwayat[tipe]) {
@@ -434,12 +424,12 @@ function renderDropdown(data) {
         canvas.width = 360; 
         canvas.height = 480;
         
-        // 1. Gambar wajah asli dari video ke canvas
+        // 1. Gambar wajah
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // 2. TAMBAHAN: Cetak Watermark Transparan di Bagian Bawah Gambar
+        // 2. Terapkan Watermark
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.fillRect(0, canvas.height - 45, canvas.width, 45); // Kotak hitam background text
+        ctx.fillRect(0, canvas.height - 45, canvas.width, 45);
         
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 11px Arial, sans-serif";
@@ -448,14 +438,11 @@ function renderDropdown(data) {
         const waktuSkrg = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Makassar' });
         ctx.fillText(`WAKTU: ${waktuSkrg} WITA (${tipe.toUpperCase()})`, 10, canvas.height - 12);
 
-        // Ubah canvas menjadi text base64 jpeg kualitas 0.5
         const b64Foto = canvas.toDataURL('image/jpeg', 0.5);
 
-        // Kunci riwayat absen di memori gawai
         kunciRiwayatAbsenLokal(currentUser, tipe);
         evaluasiHakTombolAbsen();
 
-        // Masukkan paket data ke antrean lokal
         const timestamp = new Date();
         const paketData = {
             id: timestamp.getTime(),
@@ -471,10 +458,9 @@ function renderDropdown(data) {
 
         showToast(`Presensi ${tipe.toUpperCase()} tersimpan aman!`, 'success');
 
-        // Langsung picu pengunggahan data
         jalankanSinkronisasiOtomatis();
 
-        // PERBAIKAN: Jangan panggil location.reload(). Cukup bersihkan layar untuk user berikutnya
+        // UI dibersihkan untuk pengguna selanjutnya tanpa reload (mencegah data corrupt)
         setTimeout(() => {
             logoutUser();
         }, 2000);
@@ -509,7 +495,6 @@ function renderDropdown(data) {
                 antreanTerbaru = antreanTerbaru.filter(item => item.id !== targetKirim.id);
                 localStorage.setItem('antrean_presensi', JSON.stringify(antreanTerbaru));
                 
-                // Rekursif: Selesaikan sisa antrean jika ada
                 jalankanSinkronisasiOtomatis();
             }
         })
@@ -558,6 +543,60 @@ function renderDropdown(data) {
         } catch (err) {
             showToast('Biometrik gawai tidak cocok.', 'error');
         }
+    }
+
+    // --- FITUR RAHASIA: RESET DATA SPREADSHEET ---
+    let hitungKlik = 0;
+    let timerKlik;
+
+    document.getElementById('teksSekolah').addEventListener('click', () => {
+        hitungKlik++;
+        clearTimeout(timerKlik);
+        
+        if (hitungKlik >= 3) {
+            hitungKlik = 0; 
+            tampilkanPromptReset();
+        } else {
+            timerKlik = setTimeout(() => { hitungKlik = 0; }, 1000); 
+        }
+    });
+
+    function tampilkanPromptReset() {
+        const p = prompt("Mode Admin Aktif.\nMasukkan Passcode untuk Mereset Spreadsheet:");
+        if (p === "aic") {
+            prosesResetData();
+        } else if (p !== null) {
+            showToast("Passcode salah! Akses ditolak.", "error");
+        }
+    }
+
+    function prosesResetData() {
+        showToast("Memerintahkan server untuk mereset...", "success");
+        
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ tipe: 'reset', passcode: 'aic' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                showToast("✓ Spreadsheet berhasil dibersihkan!", "success");
+                
+                // Menghapus cache pembatasan harian (agar bisa absen lagi)
+                for (let key in localStorage) {
+                    if (key.startsWith('absen_limit_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showToast("Gagal reset data", "error");
+            }
+        })
+        .catch(err => {
+            showToast("Koneksi gagal. Coba lagi.", "error");
+        });
     }
 </script>
 </body>
