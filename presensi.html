@@ -168,24 +168,61 @@
         }
     }
 
-    function ambilDaftarPegawai() {
-        fetch(SCRIPT_URL)
-            .then(res => res.json())
-            .then(data => {
-                daftarPegawai = data;
-                let select = document.getElementById('namaPegawai');
-                select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
-                data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
-
-                // MEMORI LOCAL STORAGE: Ambil opsi nama yang tersimpan di device ini
-                const savedNama = localStorage.getItem('device_saved_nama');
-                if (savedNama) {
-                    select.value = savedNama;
-                    cekKetersediaanBiometrikUser();
-                }
-            })
-            .catch(() => showToast('Gagal terhubung ke database server.', 'error'));
+    // --- AMBIL DATA PEGAWAI (CACHE + BACKGROUND SYNC) ---
+function ambilDaftarPegawai() {
+    const select = document.getElementById('namaPegawai');
+    
+    // 1. FASE INSTAN: Coba muat data dari Local Storage (Cache)
+    const cachedData = localStorage.getItem('cache_daftar_pegawai');
+    if (cachedData) {
+        try {
+            daftarPegawai = JSON.parse(cachedData);
+            renderDropdown(daftarPegawai);
+        } catch (e) {
+            console.warn("Gagal membaca cache lokal pegawai.");
+        }
     }
+
+    // 2. FASE LATAR BELAKANG: Ambil data terbaru dari server diam-diam
+    fetch(SCRIPT_URL)
+        .then(res => res.json())
+        .then(data => {
+            // Perbarui cache di memori gawai untuk penggunaan besok/berikutnya
+            localStorage.setItem('cache_daftar_pegawai', JSON.stringify(data));
+            
+            // Perbarui memori global aplikasi
+            daftarPegawai = data;
+            
+            // Render ulang HANYA JIKA sebelumnya cache kosong (baru pertama buka)
+            // Ini mencegah dropdown "berkedip" atau mereset pilihan saat user sedang klik nama
+            if (!cachedData) {
+                renderDropdown(data);
+            }
+        })
+        .catch(() => {
+            if (!cachedData) {
+                // Hanya tampilkan eror jika cache kosong DAN internet mati
+                showToast('Koneksi terputus. Gagal memuat daftar nama.', 'error');
+                select.innerHTML = '<option value="">-- Gagal memuat data --</option>';
+            } else {
+                console.warn("Sedang offline. Menggunakan data cache.");
+            }
+        });
+}
+
+// FUNGSI PEMBANTU: Memasukkan data array ke dalam elemen Select (Dropdown)
+function renderDropdown(data) {
+    const select = document.getElementById('namaPegawai');
+    select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+    data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
+
+    // Mengingat & memilih otomatis nama terakhir yang login di HP ini
+    const savedNama = localStorage.getItem('device_saved_nama');
+    if (savedNama) {
+        select.value = savedNama;
+        cekKetersediaanBiometrikUser();
+    }
+}
 
     function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3;
