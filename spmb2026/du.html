@@ -215,6 +215,18 @@
 
     </div>
 
+    <div id="lightbox-modal" class="fixed inset-0 z-[100] hidden bg-slate-900/90 backdrop-blur-sm flex-col items-center justify-center transition-opacity duration-300 opacity-0" onclick="closeLightbox()">
+        <div class="relative max-w-3xl max-h-screen p-4 flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute -top-2 -right-2 md:-top-4 md:-right-4 w-10 h-10 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 shadow-lg border-2 border-slate-800 z-10 transition-transform hover:scale-110">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="bg-slate-800 p-2 rounded-xl shadow-2xl border border-slate-700">
+                <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] rounded-lg object-contain">
+            </div>
+            <p id="lightbox-caption" class="text-center text-slate-300 mt-4 font-semibold text-lg bg-slate-900/50 px-6 py-2 rounded-full border border-slate-700 backdrop-blur-md"></p>
+        </div>
+    </div>
+
     <script>
         // !!! WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT KAMU !!!
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwiADJGu0vg5qQ1D5xdc7VnAvlINO9sEFXrjtU2Y8SWqlT86RydBlmKJhuDgfbGmzmV8Q/exec';
@@ -268,6 +280,55 @@
                 return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w100`;
             }
             return '';
+        }
+
+        // Fungsi Validasi NIK/KK 16 Digit
+        function validate16Digits(input) {
+            input.value = input.value.replace(/\D/g, ''); // Paksa hanya angka
+            const valLength = input.value.length;
+            
+            if (valLength === 0) {
+                input.classList.remove('border-rose-500', 'text-rose-400', 'focus:border-rose-500', 'focus:ring-rose-500');
+                return;
+            }
+            
+            if (valLength !== 16) {
+                input.classList.add('border-rose-500', 'text-rose-400', 'focus:border-rose-500', 'focus:ring-rose-500');
+            } else {
+                input.classList.remove('border-rose-500', 'text-rose-400', 'focus:border-rose-500', 'focus:ring-rose-500');
+            }
+        }
+
+        // Fungsi Buka Lightbox
+        function openLightbox(url, name) {
+            if (!url) return;
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            const caption = document.getElementById('lightbox-caption');
+            
+            let fullUrl = url;
+            const match = url.match(/([-\w]{25,})/);
+            if (match && match[1] && url.includes('drive.google.com')) {
+                fullUrl = `https://drive.google.com/uc?id=${match[1]}`;
+            }
+
+            img.src = fullUrl;
+            caption.innerText = `Foto: ${name}`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex'); // Terapkan flexbox
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        // Fungsi Tutup Lightbox
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.getElementById('lightbox-img').src = '';
+            }, 300);
         }
 
         function handleAdminToggle(event) {
@@ -719,7 +780,7 @@
                     </td>
                     <td class="px-2 py-3 text-center">
                         ${thumbnailSrc ? 
-                            `<img src="${thumbnailSrc}" class="w-10 h-10 rounded-full object-cover border border-slate-600 mx-auto shadow-sm bg-slate-900" alt="Foto ${name}" onerror="this.src='https://via.placeholder.com/40?text=?'">` : 
+                            `<img src="${thumbnailSrc}" onclick="openLightbox('${linkFoto}', '${name}')" class="w-10 h-10 rounded-full object-cover border border-slate-600 mx-auto shadow-sm bg-slate-900 cursor-pointer hover:border-indigo-400 hover:ring-2 hover:ring-indigo-500/50 hover:scale-110 transition-all" alt="Foto ${name}" onerror="this.src='https://via.placeholder.com/40?text=?'" title="Klik untuk memperbesar">` : 
                             `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center mx-auto shadow-sm text-slate-400"><i class="fa-solid fa-user text-xs"></i></div>`
                         }
                     </td>
@@ -779,9 +840,14 @@
 
                                     <h3 class="text-sm font-semibold text-emerald-400 mb-4 border-b border-slate-700 pb-2">Biodata & Data Fisik</h3>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK</label><input type="number" name="nik" class="clean-input" placeholder="Ketik NIK" value="${sd['NIK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor KK</label><input type="number" name="nokk" class="clean-input" placeholder="Ketik No KK" value="${sd['Nomor KK'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIPD</label><input type="text" name="nipd" class="clean-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK</label>
+                                        <input type="text" inputmode="numeric" maxlength="16" name="nik" class="clean-input transition-colors duration-300" placeholder="16 Digit NIK" value="${sd['NIK'] || ''}" oninput="validate16Digits(this)" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nomor KK</label>
+                                        <input type="text" inputmode="numeric" maxlength="16" name="nokk" class="clean-input transition-colors duration-300" placeholder="16 Digit No KK" value="${sd['Nomor KK'] || ''}" oninput="validate16Digits(this)" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIPD</label>
+                                        <input type="text" name="nipd" class="clean-input" placeholder="Nomor Induk Siswa" value="${sd['NIPD'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" class="clean-input" placeholder="Kota Kelahiran" value="${sd['Tempat Lahir'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" class="clean-input" value="${sd['Tanggal Lahir'] ? new Date(sd['Tanggal Lahir']).toISOString().split('T')[0] : ''}" ${!isAdmin ? 'readonly' : ''}></div>
@@ -823,10 +889,14 @@
                                         <div class="mt-2"></div>
 
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" class="clean-input" placeholder="Nama Ayah" value="${sd['Nama Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ayah</label><input type="number" name="nikAyah" class="clean-input" placeholder="NIK Ayah" value="${sd['NIK Ayah'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ayah</label>
+                                        <input type="text" inputmode="numeric" maxlength="16" name="nikAyah" class="clean-input transition-colors duration-300" placeholder="16 Digit NIK Ayah" value="${sd['NIK Ayah'] || ''}" oninput="validate16Digits(this)" ${!isAdmin ? 'readonly' : ''}></div>
                                         
                                         <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" class="clean-input" placeholder="Nama Ibu" value="${sd['Nama Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
-                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ibu</label><input type="number" name="nikIbu" class="clean-input" placeholder="NIK Ibu" value="${sd['NIK Ibu'] || ''}" ${!isAdmin ? 'readonly' : ''}></div>
+                                        
+                                        <div><label class="text-[10px] text-slate-400 font-medium uppercase mb-1 block">NIK Ibu</label>
+                                        <input type="text" inputmode="numeric" maxlength="16" name="nikIbu" class="clean-input transition-colors duration-300" placeholder="16 Digit NIK Ibu" value="${sd['NIK Ibu'] || ''}" oninput="validate16Digits(this)" ${!isAdmin ? 'readonly' : ''}></div>
                                     </div>
                                     
                                     ${isAdmin ? `
