@@ -133,10 +133,12 @@
             </div>
 
             <div id="presensiPanel" class="hidden space-y-4 sm:space-y-5 fade-in-up">
-                <div class="text-center bg-indigo-50/50 dark:bg-indigo-900/20 p-3 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30">
-                    <h3 id="welcomeNama" class="text-base sm:text-lg font-extrabold text-indigo-950 dark:text-indigo-100">Halo, Pengguna</h3>
+                <div class="bg-indigo-50/50 dark:bg-indigo-900/20 p-3 rounded-2xl border border-indigo-100/50 dark:border-indigo-800/30 flex items-center justify-between shadow-sm relative">
+                    <div class="w-8 shrink-0"></div> <h3 id="welcomeNama" class="text-base sm:text-lg font-extrabold text-indigo-950 dark:text-indigo-100 text-center flex-1 truncate px-2">Halo, Pengguna</h3>
+                    <button onclick="window.history.back()" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 hover:text-slate-800 dark:hover:bg-slate-700 dark:hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700" title="Kembali ke Halaman Login">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    </button>
                 </div>
-                
                 <div id="biometricSetupBox" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 text-center shadow-sm">
                     <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-800 rounded-full flex items-center justify-center mx-auto mb-2 text-indigo-600 dark:text-indigo-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -248,6 +250,13 @@
         mulaiLacakGPS();
         setInterval(jalankanSinkronisasiOtomatis, 15000);
     };
+
+    // --- LISTENER UNTUK SWIPE BACK / TOMBOL KEMBALI HP ---
+    window.addEventListener('popstate', (event) => {
+        if (currentUser) {
+            logoutUser(true);
+        }
+    });
 
     // --- FITUR THEME TOGGLE (DARK MODE) ---
     function toggleTheme() {
@@ -673,9 +682,9 @@
         hitungKlikLogo++; clearTimeout(timerKlikLogo);
         if (hitungKlikLogo >= 3) {
             hitungKlikLogo = 0;
-            localStorage.removeItem('cache_daftar_pegawai');
-            localStorage.removeItem('device_saved_nama');
-            showToast('Memori Cache dibersihkan! Memuat ulang...', 'success');
+            // Hapus TOTAL seluruh data di Local Storage gawai ini
+            localStorage.clear(); 
+            showToast('Seluruh data, sandi & biometrik dibersihkan!', 'success');
             setTimeout(() => { window.location.reload(); }, 1500);
         } else {
             timerKlikLogo = setTimeout(() => { hitungKlikLogo = 0; }, 1000);
