@@ -10,7 +10,7 @@
         tailwind.config = {
             darkMode: 'class',
         }
-        // PERBAIKAN: Default tema dipaksa ke Light Mode kecuali user sebelumnya memilih Dark Mode
+        // Default tema dipaksa ke Light Mode kecuali user sebelumnya memilih Dark Mode
         if (localStorage.theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
@@ -19,9 +19,10 @@
         }
     </script>
     <style>
-        .toast-enter { opacity: 0; transform: translateY(-20px) translateX(-50%); }
-        .toast-active { opacity: 1; transform: translateY(0) translateX(-50%); }
-        .toast-exit { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+        /* Animasi toast meluncur dari atas */
+        .toast-enter { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        .toast-active { opacity: 1; transform: translateY(0) scale(1); }
+        .toast-exit { opacity: 0; transform: translateY(-20px) scale(0.95); }
         
         /* Custom scrollbar untuk custom dropdown & dropdown biasa */
         ::-webkit-scrollbar { width: 6px; }
@@ -44,11 +45,10 @@
         <svg id="iconMoon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
     </button>
 
-    <main class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full max-w-md rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-black/50 border border-white/50 dark:border-slate-700/50 relative transition-all duration-300 fade-in-up">
+    <main class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full max-w-md rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-black/50 border border-black dark:border-black relative transition-all duration-300 fade-in-up">
         
         <header class="p-6 pb-4 sm:p-8 sm:pb-4 text-center flex flex-col items-center relative">
-            <div class="absolute top-0 left-0 w-full h-1 rounded-t-[2rem] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-            <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 dark:from-indigo-500 dark:to-purple-500 rounded-2xl shadow-lg shadow-indigo-500/30 flex items-center justify-center mb-4 transform -rotate-3 transition-transform hover:rotate-0">
+            <div id="logoUtama" class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 dark:from-indigo-500 dark:to-purple-500 rounded-2xl shadow-lg shadow-indigo-500/30 flex items-center justify-center mb-4 transform -rotate-3 transition-transform hover:rotate-0 cursor-pointer">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path></svg>
             </div>
             <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-indigo-600 dark:from-blue-400 dark:to-indigo-300 tracking-tight">Presensi Digital</h1>
@@ -167,7 +167,7 @@
                 </h3>
             </div>
             <div class="p-6 space-y-5">
-                <p class="text-sm text-slate-600 dark:text-slate-300 text-center leading-relaxed">Masukkan <span class="font-bold text-rose-600 dark:text-rose-400">Passcode</span> untuk mereset data lokal & server.</p>
+                <p class="text-sm text-slate-600 dark:text-slate-300 text-center leading-relaxed">Masukkan <span class="font-bold text-rose-600 dark:text-rose-400">Passcode</span> untuk mereset data server (spreadsheet).</p>
                 <input type="password" id="inputPasscodeReset" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 text-center tracking-[0.5em] font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all outline-none" placeholder="••••">
                 <div class="flex gap-3 pt-2">
                     <button onclick="tutupModalReset()" class="w-full py-3 rounded-xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Batal</button>
@@ -177,7 +177,7 @@
         </div>
     </div>
 
-    <div id="toastContainer" class="fixed top-5 left-1/2 z-50 pointer-events-none w-full max-w-sm px-4"></div>
+    <div id="toastContainer" class="fixed top-0 left-0 right-0 flex flex-col items-center z-[100] pointer-events-none p-4 sm:p-6 gap-2"></div>
 
 <script>
     // --- KONFIGURASI ---
@@ -209,7 +209,7 @@
         const colors = type === 'success' ? 'bg-emerald-500/95 shadow-emerald-500/20' : 
                        type === 'error' ? 'bg-rose-500/95 shadow-rose-500/20' : 'bg-slate-800/95 dark:bg-slate-700/95 shadow-slate-800/20';
         
-        toast.className = `transform transition-all duration-300 ease-in-out toast-enter ${colors} backdrop-blur text-white px-5 py-3 rounded-xl shadow-lg font-semibold text-center text-sm mb-2 mx-auto w-max max-w-full border border-white/10`;
+        toast.className = `transform transition-all duration-300 ease-in-out toast-enter ${colors} backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl font-bold text-center text-sm max-w-xs border border-white/10 pointer-events-auto`;
         toast.innerText = message;
         container.appendChild(toast);
         
@@ -470,11 +470,9 @@
         return str;
     }
 
-    // PERBAIKAN: Menambahkan dukungan pushState agar tombol Back / Swipe Back berfungsi
     function suksesLogin(nama) {
         currentUser = nama;
         
-        // Push state ke browser history saat berhasil login
         history.pushState({ panel: 'presensi' }, '', '#presensi');
 
         document.getElementById('loginPanel').classList.add('hidden');
@@ -490,20 +488,17 @@
         panggilKameraHPPortrait();
     }
 
-    // PERBAIKAN: Listener saat user melakukan Swipe Back / menekan tombol Back HP
     window.addEventListener('popstate', (event) => {
         if (currentUser && document.location.hash !== '#presensi') {
-            logoutUser(true); // Parameter true menandakan aksi ini dari fungsi popstate
+            logoutUser(true);
         }
     });
 
-    // PERBAIKAN: Menyesuaikan logoutUser untuk membersihkan history URL
     function logoutUser(isDariPopState = false) {
         currentUser = null;
         document.getElementById('loginPanel').classList.remove('hidden');
         document.getElementById('presensiPanel').classList.add('hidden');
         
-        // Membersihkan hash #presensi dari URL jika logout ditekan manual (Ganti Akun)
         if (!isDariPopState) {
             history.replaceState(null, '', window.location.pathname);
         }
@@ -619,7 +614,6 @@
         showToast(`Presensi ${tipe.toUpperCase()} tersimpan aman!`, 'success');
         jalankanSinkronisasiOtomatis();
 
-        // Menggunakan fungsi standar logout agar hash URL juga ikut direset
         setTimeout(() => logoutUser(), 2000);
     }
 
@@ -700,19 +694,43 @@
         }
     }
 
-    // --- FITUR RAHASIA: RESET MODAL CUSTOM ---
-    let hitungKlik = 0;
-    let timerKlik;
+    // --- FITUR RAHASIA 1: RESET CACHE LOKAL DARI LOGO ---
+    let hitungKlikLogo = 0;
+    let timerKlikLogo;
+
+    document.getElementById('logoUtama').addEventListener('click', () => {
+        hitungKlikLogo++;
+        clearTimeout(timerKlikLogo);
+        
+        if (hitungKlikLogo >= 3) {
+            hitungKlikLogo = 0; 
+            if (confirm("Anda yakin ingin mereset cache & data lokal aplikasi di perangkat ini? (Riwayat absen, biometrik, daftar nama)")) {
+                showToast("Membersihkan cache lokal...", "success");
+                for (let key in localStorage) {
+                    if (key.startsWith('absen_limit_') || key.startsWith('biometric_id_') || key.startsWith('device_saved_') || key.startsWith('cache_') || key.startsWith('antrean_')) {
+                        localStorage.removeItem(key);
+                    }
+                }
+                setTimeout(() => location.reload(), 1500);
+            }
+        } else {
+            timerKlikLogo = setTimeout(() => { hitungKlikLogo = 0; }, 1000); 
+        }
+    });
+
+    // --- FITUR RAHASIA 2: RESET SERVER (SPREADSHEET) DARI TEKS SEKOLAH ---
+    let hitungKlikTeks = 0;
+    let timerKlikTeks;
 
     document.getElementById('teksSekolah').addEventListener('click', () => {
-        hitungKlik++;
-        clearTimeout(timerKlik);
+        hitungKlikTeks++;
+        clearTimeout(timerKlikTeks);
         
-        if (hitungKlik >= 3) {
-            hitungKlik = 0; 
+        if (hitungKlikTeks >= 3) {
+            hitungKlikTeks = 0; 
             tampilkanModalReset();
         } else {
-            timerKlik = setTimeout(() => { hitungKlik = 0; }, 1000); 
+            timerKlikTeks = setTimeout(() => { hitungKlikTeks = 0; }, 1000); 
         }
     });
 
@@ -751,14 +769,14 @@
         tutupModalReset();
         
         if (p === "aic") {
-            prosesResetData();
+            prosesResetServer();
         } else if (p !== "") {
             showToast("Passcode salah! Akses ditolak.", "error");
         }
     }
 
-    function prosesResetData() {
-        showToast("Membersihkan server...", "success");
+    function prosesResetServer() {
+        showToast("Membersihkan data di server...", "success");
         
         fetch(SCRIPT_URL, {
             method: 'POST',
@@ -767,19 +785,13 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === "success") {
-                showToast("✓ Spreadsheet dan Cache bersih!", "success");
-                for (let key in localStorage) {
-                    if (key.startsWith('absen_limit_') || key.startsWith('biometric_id_') || key.startsWith('device_saved_')) {
-                        localStorage.removeItem(key);
-                    }
-                }
-                setTimeout(() => location.reload(), 2000);
+                showToast("✓ Spreadsheet berhasil dibersihkan!", "success");
             } else {
-                showToast("Gagal reset data", "error");
+                showToast("Gagal mereset data server.", "error");
             }
         })
         .catch(err => {
-            showToast("Koneksi gagal saat mereset.", "error");
+            showToast("Koneksi gagal saat mereset server.", "error");
         });
     }
 </script>
