@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presensi SDN Kakatua</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toast-enter { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+        .toast-active { opacity: 1; transform: translateY(0) translateX(-50%); }
+        .toast-exit { opacity: 0; transform: translateY(-20px) translateX(-50%); }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <main class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
+        
+        <header class="bg-blue-600 p-6 text-center text-white">
+            <h1 class="text-2xl font-bold tracking-wide">Presensi Pegawai</h1>
+            <p class="text-blue-100 mt-1 text-sm">SDN Kakatua</p>
+        </header>
+
+        <div id="gpsStatusBanner" class="bg-amber-100 text-amber-800 text-xs font-semibold py-2 px-4 text-center border-b border-amber-200">
+            Mendeteksi lokasi GPS Anda...
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <div id="errorPanel" class="hidden bg-rose-50 border border-rose-100 rounded-xl p-5 text-center space-y-3">
+                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="font-bold text-rose-800" id="errorTitle">Akses Diblokir</h3>
+                <p class="text-xs text-rose-600 leading-relaxed" id="errorMessage">Mohon aktifkan lokasi gawai Anda.</p>
+                <p class="text-[11px] text-slate-500 bg-white p-2 rounded border border-rose-200 text-left">
+                    <b>Cara Memperbaiki:</b><br>
+                    1. Klik ikon <b>gembok/opsi berkas</b> di pojok kiri atas baris alamat URL browser Anda.<br>
+                    2. Ubah izin <b>Lokasi</b> dan <b>Kamera</b> menjadi <b>"Izinkan" (Allow)</b>.<br>
+                    3. Segarkan (Refresh) halaman ini.
+                </p>
+            </div>
+            
+            <div id="loginPanel" class="space-y-4">
+                <div>
+                    <label for="namaPegawai" class="block text-sm font-medium text-slate-600 mb-1">Pilih Nama Anda</label>
+                    <select id="namaPegawai" onchange="cekKetersediaanBiometrikUser()" class="w-full bg-slate-50 border border-slate-300 text-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 block p-3 transition-colors">
+                        <option value="">Memuat daftar nama...</option>
+                    </select>
+                </div>
+
+                <div id="passcodeArea" class="space-y-3">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Tanggal Lahir (Passcode)</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <select id="dobTanggal" class="w-full bg-slate-50 border border-slate-300 text-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 p-3"><option value="">Tgl</option></select>
+                        <select id="dobBulan" class="w-full bg-slate-50 border border-slate-300 text-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 p-3">
+                            <option value="">Bulan</option>
+                            <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+                            <option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Ags</option><option value="09">Sep</option>
+                            <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                        </select>
+                        <select id="dobTahun" class="w-full bg-slate-50 border border-slate-300 text-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 p-3"><option value="">Tahun</option></select>
+                    </div>
+                    
+                    <button type="button" id="btnMasuk" onclick="verifikasiLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-3 shadow-md transition-all">
+                        Masuk ke Sistem
+                    </button>
+                </div>
+
+                <button id="btnBypassBiometric" onclick="loginDenganBiometrik()" class="hidden w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg px-4 py-3 shadow-md transition-colors flex items-center justify-center gap-2 mt-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+                    Masuk dengan Sidik Jari / Face ID
+                </button>
+            </div>
+
+            <div id="presensiPanel" class="hidden space-y-4">
+                <div class="text-center">
+                    <h3 id="welcomeNama" class="text-lg font-bold text-slate-800">Halo, Pengguna</h3>
+                    <p class="text-sm text-slate-500">Silakan ambil foto selfie untuk memproses absen</p>
+                </div>
+                
+                <div id="biometricSetupBox" class="hidden bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-center">
+                    <p class="text-xs text-indigo-800 mb-2 font-medium">Gawai Anda mendukung Biometrik. Aktifkan untuk bypass login besok.</p>
+                    <button onclick="daftarkanBiometrikPerangkat()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded px-4 py-2 transition-colors">
+                        Aktifkan Biometrik HP Ini
+                    </button>
+                </div>
+
+                <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-inner w-full aspect-video flex items-center justify-center">
+                    <video id="video" class="w-full h-full object-cover hidden" autoplay playsinline></video>
+                    <span id="kameraLoading" class="text-slate-400 text-sm animate-pulse">Menghubungkan ke kamera gawai...</span>
+                </div>
+                <canvas id="canvas" class="hidden"></canvas>
+
+                <div id="btnGroup" class="hidden grid-cols-2 gap-3 mt-4">
+                    <button id="btnDatang" onclick="prosesAbsen('datang')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg py-3 shadow-md transition-colors flex justify-center items-center gap-2">
+                        Absen Datang
+                    </button>
+                    <button id="btnPulang" onclick="prosesAbsen('pulang')" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-lg py-3 shadow-md transition-colors flex justify-center items-center gap-2">
+                        Absen Pulang
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="toastContainer" class="fixed top-5 left-1/2 z-50 pointer-events-none w-full max-w-sm px-4"></div>
+
+<script>
+    // --- KONFIGURASI ---
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVbr8K4YbYOPy1Mg_TdjFdlehC-HEUoG1W7T-kP4bW1nyA1xAdLyaDIwBoRGuMiOKn1A/exec'; // <-- GANTI DENGAN URL GAS ANDA
+    const TARGET_LAT = -5.246076 //-5.159426;
+    const TARGET_LON = 119.472834; //119.410689;
+    const MAX_DISTANCE_METERS = 100;
+    
+    let daftarPegawai = [];
+    let currentUser = null;
+    let isLocationValid = false;
+
+    // --- TOAST NOTIFICATION ---
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        const colors = type === 'success' ? 'bg-emerald-500 text-white' : 
+                       type === 'error' ? 'bg-rose-500 text-white' : 'bg-slate-800 text-white';
+        
+        toast.className = `transform transition-all duration-300 ease-in-out toast-enter ${colors} px-6 py-3 rounded-xl shadow-lg font-medium text-center text-sm mb-2 mx-auto w-max max-w-full`;
+        toast.innerText = message;
+        container.appendChild(toast);
+        
+        requestAnimationFrame(() => {
+            toast.classList.remove('toast-enter');
+            toast.classList.add('toast-active');
+        });
+
+        setTimeout(() => {
+            toast.classList.remove('toast-active');
+            toast.classList.add('toast-exit');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // --- ALUR JALAN AWAL (HANYA CEK GPS) ---
+    window.onload = () => {
+        initDropdowns();
+        ambilDaftarPegawai();
+        mulaiLacakGPS();
+    };
+
+    function initDropdowns() {
+        const tglSelect = document.getElementById('dobTanggal');
+        for (let i = 1; i <= 31; i++) {
+            let val = i < 10 ? '0' + i : i;
+            tglSelect.options[tglSelect.options.length] = new Option(val, val);
+        }
+        const thnSelect = document.getElementById('dobTahun');
+        const thnSekarang = new Date().getFullYear();
+        for (let i = thnSekarang - 18; i >= thnSekarang - 70; i--) {
+            thnSelect.options[thnSelect.options.length] = new Option(i, i);
+        }
+    }
+
+    function ambilDaftarPegawai() {
+        fetch(SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                daftarPegawai = data;
+                let select = document.getElementById('namaPegawai');
+                select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
+                data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
+            })
+            .catch(() => showToast('Gagal terhubung ke database server.', 'error'));
+    }
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const rLat1 = lat1 * Math.PI/180; const rLat2 = lat2 * Math.PI/180;
+        const dLat = (lat2-lat1) * Math.PI/180; const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(rLat1) * Math.cos(rLat2) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    }
+
+    function mulaiLacakGPS() {
+        const banner = document.getElementById('gpsStatusBanner');
+        
+        if (!navigator.geolocation) {
+            tampilkanLayarBlokir("GPS Tidak Didukung", "Browser gawai Anda tidak mendukung fitur lokasi GPS.");
+            return;
+        }
+
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                // Sembunyikan layar blokir jika sebelumnya muncul
+                document.getElementById('errorPanel').classList.add('hidden');
+                document.getElementById('loginPanel').classList.remove('hidden');
+
+                const distance = Math.round(getDistance(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LON));
+                if(distance <= MAX_DISTANCE_METERS) {
+                    isLocationValid = true;
+                    banner.className = "bg-emerald-100 text-emerald-800 text-xs font-semibold py-2 px-4 text-center border-b border-emerald-200";
+                    banner.innerText = `✓ Lokasi Valid (Dalam Radius: ${distance}m)`;
+                    aktifkanSemuaTombolLogin(true);
+                } else {
+                    isLocationValid = false;
+                    banner.className = "bg-rose-100 text-rose-800 text-xs font-semibold py-2 px-4 text-center border-b border-rose-200";
+                    banner.innerText = `✗ Anda berada di luar radius sekolah (${distance}m)`;
+                    aktifkanSemuaTombolLogin(false);
+                }
+            },
+            (err) => {
+                isLocationValid = false;
+                let pesan = "Aplikasi presensi ditolak mengakses lokasi GPS Anda.";
+                if(err.code === 3) pesan = "Waktu pelacakan GPS habis. Pastikan Anda berada di luar ruangan/ruangan terbuka.";
+                tampilkanLayarBlokir("Akses GPS Diperlukan", pesan);
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+        );
+    }
+
+    function tampilkanLayarBlokir(judul, isi) {
+        document.getElementById('gpsStatusBanner').className = "bg-rose-100 text-rose-800 text-xs font-semibold py-2 px-4 text-center border-b border-rose-200";
+        document.getElementById('gpsStatusBanner').innerText = `✗ Akses Terkunci`;
+        
+        document.getElementById('errorPanel').classList.remove('hidden');
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('presensiPanel').classList.add('hidden');
+        
+        document.getElementById('errorTitle').innerText = judul;
+        document.getElementById('errorMessage').innerText = isi;
+    }
+
+    function aktifkanSemuaTombolLogin(status) {
+        const elements = document.querySelectorAll('#loginPanel select, #loginPanel button');
+        elements.forEach(el => {
+            el.disabled = !status;
+            if(status) {
+                el.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    }
+
+    // --- LOGIKA LOGIN & BIOMETRIK ---
+    function cekKetersediaanBiometrikUser() {
+        const nama = document.getElementById('namaPegawai').value;
+        const btnBypass = document.getElementById('btnBypassBiometric');
+        if (window.PublicKeyCredential && localStorage.getItem('biometric_id_' + nama)) {
+            btnBypass.classList.remove('hidden');
+        } else {
+            btnBypass.classList.add('hidden');
+        }
+    }
+
+    function verifikasiLogin() {
+        if(!isLocationValid) return showToast('Posisikan diri Anda di area sekolah!', 'error');
+        
+        const nama = document.getElementById('namaPegawai').value;
+        const tgl = document.getElementById('dobTanggal').value;
+        const bln = document.getElementById('dobBulan').value;
+        const thn = document.getElementById('dobTahun').value;
+
+        if(!nama || !tgl || !bln || !thn) return showToast('Pilih Nama & Tanggal Lahir lengkap!', 'error');
+        
+        const inputPasscode = `${thn}-${bln}-${tgl}`;
+        const user = daftarPegawai.find(p => p.nama === nama);
+
+        if(user && (user.tanggalLahir === inputPasscode || normalisasiTanggal(user.tanggalLahir) === inputPasscode)) {
+            suksesLogin(user.nama);
+        } else {
+            showToast('Passcode Tanggal Lahir salah!', 'error');
+        }
+    }
+
+    function normalisasiTanggal(str) {
+        if(str.includes('-') && str.split('-')[0].length === 2) {
+            let parts = str.split('-'); return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return str;
+    }
+
+    function suksesLogin(nama) {
+        currentUser = nama;
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('presensiPanel').classList.remove('hidden');
+        document.getElementById('welcomeNama').innerText = `Halo, ${nama}`;
+        
+        if (window.PublicKeyCredential && !localStorage.getItem('biometric_id_' + nama)) {
+            document.getElementById('biometricSetupBox').classList.remove('hidden');
+        }
+        
+        showToast('Berhasil Masuk', 'success');
+        // REKAYASA GESTURE: Nyalakan kamera HANYA setelah ada aksi klik sukses login
+        panggilKameraHP();
+    }
+
+    async function daftarkanBiometrikPerangkat() {
+        try {
+            const publicKeyCredentialCreationOptions = {
+                challenge: Uint8Array.from("SDNKAKATUACHALLENGE", c => c.charCodeAt(0)),
+                rp: { name: "Presensi Kakatua" },
+                user: { id: Uint8Array.from(currentUser, c => c.charCodeAt(0)), name: currentUser, displayName: currentUser },
+                pubKeyCredParams: [{type: "public-key", alg: -7}],
+                authenticatorSelection: { authenticatorAttachment: "platform" },
+                timeout: 60000
+            };
+            const credential = await navigator.credentials.create({ publicKey: publicKeyCredentialCreationOptions });
+            if (credential) {
+                localStorage.setItem('biometric_id_' + currentUser, btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId))));
+                document.getElementById('biometricSetupBox').classList.add('hidden');
+                showToast('Sidik Jari/Face ID HP aktif!', 'success');
+            }
+        } catch (err) {
+            showToast('Pendaftaran biometrik dibatalkan.', 'error');
+        }
+    }
+
+    async function loginDenganBiometrik() {
+        if(!isLocationValid) return showToast('Akses dikunci, Anda di luar area!', 'error');
+        const nama = document.getElementById('namaPegawai').value;
+        if(!nama) return;
+
+        try {
+            const savedId = localStorage.getItem('biometric_id_' + nama);
+            const rawId = Uint8Array.from(atob(savedId), c => c.charCodeAt(0));
+            const assertion = await navigator.credentials.get({ 
+                publicKey: {
+                    challenge: Uint8Array.from("SDNKAKATUACHALLENGE", c => c.charCodeAt(0)),
+                    allowCredentials: [{ id: rawId, type: 'public-key' }],
+                    timeout: 60000
+                }
+            });
+            if (assertion) suksesLogin(nama);
+        } catch (err) {
+            showToast('Biometrik gawai tidak cocok.', 'error');
+        }
+    }
+
+    // --- AKSES KAMERA SEBENTAR (DIPICU GESTURE) ---
+    function panggilKameraHP() {
+        const video = document.getElementById('video');
+        
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            tampilkanLayarBlokir("Kamera Tidak Didukung", "Situs harus berjalan di HTTPS / protokol aman untuk membuka kamera gawai.");
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => { 
+                document.getElementById('kameraLoading').classList.add('hidden');
+                video.srcObject = stream; 
+                video.classList.remove('hidden'); 
+                document.getElementById('btnGroup').classList.remove('hidden');
+                document.getElementById('btnGroup').classList.add('grid');
+            })
+            .catch((err) => {
+                tampilkanLayarBlokir("Izin Kamera Ditolak", "Aplikasi tidak diizinkan membuka kamera swafoto gawai Anda.");
+            });
+    }
+
+    function prosesAbsen(tipe) {
+        const btn = document.getElementById(tipe === 'datang' ? 'btnDatang' : 'btnPulang');
+        const originalText = btn.innerText;
+        
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        canvas.width = 320; canvas.height = 240;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ nama: currentUser, tipe: tipe, foto: canvas.toDataURL('image/jpeg', 0.6) })
+        })
+        .then(res => res.json())
+        .then(() => {
+            showToast(`Presensi ${tipe.toUpperCase()} Berhasil!`, 'success');
+            setTimeout(() => location.reload(), 2000);
+        })
+        .catch(() => { 
+            showToast('Gangguan jaringan server.', 'error');
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
+    }
+</script>
+</body>
+</html>
