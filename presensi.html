@@ -113,7 +113,7 @@
 
 <script>
     // --- KONFIGURASI ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwGc7LZLOqUojgle2K9OxGmMglBXrU_GUZpahQ8uZJYVGbyp2WXuY5QHFdUYUTWDV8bLw/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyo_D9dT4jvK6qxk19rZ077_vaioUUsGd6wD98uCk_p3ELNzaOI4q0cN5ZrAqgFKHrD0g/exec';
     const TARGET_LAT = -5.246076;
     const TARGET_LON = 119.472834;
     const MAX_DISTANCE_METERS = 100;
@@ -172,7 +172,6 @@
 function ambilDaftarPegawai() {
     const select = document.getElementById('namaPegawai');
     
-    // 1. FASE INSTAN: Coba muat data dari Local Storage (Cache)
     const cachedData = localStorage.getItem('cache_daftar_pegawai');
     if (cachedData) {
         try {
@@ -183,25 +182,17 @@ function ambilDaftarPegawai() {
         }
     }
 
-    // 2. FASE LATAR BELAKANG: Ambil data terbaru dari server diam-diam
     fetch(SCRIPT_URL)
         .then(res => res.json())
         .then(data => {
-            // Perbarui cache di memori gawai untuk penggunaan besok/berikutnya
             localStorage.setItem('cache_daftar_pegawai', JSON.stringify(data));
-            
-            // Perbarui memori global aplikasi
             daftarPegawai = data;
-            
-            // Render ulang HANYA JIKA sebelumnya cache kosong (baru pertama buka)
-            // Ini mencegah dropdown "berkedip" atau mereset pilihan saat user sedang klik nama
             if (!cachedData) {
                 renderDropdown(data);
             }
         })
         .catch(() => {
             if (!cachedData) {
-                // Hanya tampilkan eror jika cache kosong DAN internet mati
                 showToast('Koneksi terputus. Gagal memuat daftar nama.', 'error');
                 select.innerHTML = '<option value="">-- Gagal memuat data --</option>';
             } else {
@@ -210,13 +201,11 @@ function ambilDaftarPegawai() {
         });
 }
 
-// FUNGSI PEMBANTU: Memasukkan data array ke dalam elemen Select (Dropdown)
 function renderDropdown(data) {
     const select = document.getElementById('namaPegawai');
     select.innerHTML = '<option value="">-- Pilih Nama Anda --</option>';
     data.forEach(p => select.appendChild(new Option(p.nama, p.nama)));
 
-    // Mengingat & memilih otomatis nama terakhir yang login di HP ini
     const savedNama = localStorage.getItem('device_saved_nama');
     if (savedNama) {
         select.value = savedNama;
@@ -286,7 +275,6 @@ function renderDropdown(data) {
         });
     }
 
-    // --- MANAJEMEN TANGGAL & UNIK HARIAN ---
     function getHariIniString() {
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -297,6 +285,7 @@ function renderDropdown(data) {
         return JSON.parse(localStorage.getItem(key)) || { datang: false, pulang: false };
     }
 
+    // Mengamankan status di lokal gawai
     function kunciRiwayatAbsenLokal(nama, tipe) {
         const key = `absen_limit_${nama}_${getHariIniString()}`;
         const riwayat = cekRiwayatAbsenLokal(nama);
@@ -304,12 +293,10 @@ function renderDropdown(data) {
         localStorage.setItem(key, JSON.stringify(riwayat));
     }
 
-    // --- LOGIKA LOGIN ---
     function cekKetersediaanBiometrikUser() {
         const nama = document.getElementById('namaPegawai').value;
         const btnBypass = document.getElementById('btnBypassBiometric');
         
-        // Simpan nama terpilih ke device secara live saat dropdown berubah
         if(nama) localStorage.setItem('device_saved_nama', nama);
 
         if (window.PublicKeyCredential && localStorage.getItem('biometric_id_' + nama)) {
@@ -348,7 +335,6 @@ function renderDropdown(data) {
     function suksesLogin(nama) {
         currentUser = nama;
         
-        // STRUKTUR BARU: Sembunyikan total section pilihan nama/login panel
         document.getElementById('loginPanel').classList.add('hidden');
         document.getElementById('presensiPanel').classList.remove('hidden');
         document.getElementById('welcomeNama').innerText = `Halo, ${nama}`;
@@ -357,9 +343,7 @@ function renderDropdown(data) {
             document.getElementById('biometricSetupBox').classList.remove('hidden');
         }
         
-        // Validasi batasan tombol absen harian (1 kali saja)
         evaluasiHakTombolAbsen();
-        
         showToast('Berhasil Masuk', 'success');
         panggilKameraHPPortrait();
     }
@@ -401,9 +385,11 @@ function renderDropdown(data) {
         video.classList.add('hidden');
         document.getElementById('kameraLoading').classList.remove('hidden');
         document.getElementById('btnGroup').classList.add('hidden');
+        
+        // Memaksa dropdown nama memilih baris kosong lagi
+        document.getElementById('namaPegawai').value = "";
     }
 
-    // --- AKSES KAMERA PORTRAIT ---
     function panggilKameraHPPortrait() {
         const video = document.getElementById('video');
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -411,7 +397,6 @@ function renderDropdown(data) {
             return;
         }
 
-        // Paksa resolusi ideal vertikal/tegak (Portrait)
         navigator.mediaDevices.getUserMedia({ 
             video: { 
                 facingMode: "user",
@@ -431,7 +416,7 @@ function renderDropdown(data) {
         });
     }
 
-    // --- ANTRIAN LOCAL STORAGE & SILENT SYNC TO SPREADSHEET ---
+    // --- PROSES ABSEN & WATERMARK KAMERA ---
     function prosesAbsen(tipe) {
         const riwayat = cekRiwayatAbsenLokal(currentUser);
         if (riwayat[tipe]) {
@@ -444,18 +429,33 @@ function renderDropdown(data) {
 
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
         
-        // Set ukuran kanvas mengikuti aspek rasio portrait (Tegak)
         canvas.width = 360; 
         canvas.height = 480;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // 1. Gambar wajah asli dari video ke canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // 2. TAMBAHAN: Cetak Watermark Transparan di Bagian Bawah Gambar
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, canvas.height - 45, canvas.width, 45); // Kotak hitam background text
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 11px Arial, sans-serif";
+        ctx.fillText(`NAMA : ${currentUser.toUpperCase()}`, 10, canvas.height - 30);
+        
+        const waktuSkrg = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Makassar' });
+        ctx.fillText(`WAKTU: ${waktuSkrg} WITA (${tipe.toUpperCase()})`, 10, canvas.height - 12);
+
+        // Ubah canvas menjadi text base64 jpeg kualitas 0.5
         const b64Foto = canvas.toDataURL('image/jpeg', 0.5);
 
-        // 1. Amankan status di local storage terlebih dahulu agar tidak bisa double-click/spam harian
+        // Kunci riwayat absen di memori gawai
         kunciRiwayatAbsenLokal(currentUser, tipe);
         evaluasiHakTombolAbsen();
 
-        // 2. Simpan ke dalam Antrean Sinkronisasi Lokal (Cache Backup)
+        // Masukkan paket data ke antrean lokal
         const timestamp = new Date();
         const paketData = {
             id: timestamp.getTime(),
@@ -469,17 +469,19 @@ function renderDropdown(data) {
         antrean.push(paketData);
         localStorage.setItem('antrean_presensi', JSON.stringify(antrean));
 
-        showToast(`Presensi ${tipe.toUpperCase()} tersimpan di gawai!`, 'success');
+        showToast(`Presensi ${tipe.toUpperCase()} tersimpan aman!`, 'success');
 
-        // 3. Picu Sinkronisasi Diam-diam ke Spreadsheet langsung saat itu juga
+        // Langsung picu pengunggahan data
         jalankanSinkronisasiOtomatis();
 
-        // Segarkan halaman kembali setelah 2.5 detik agar siap digunakan oleh pegawai berikutnya
-        setTimeout(() => location.reload(), 2500);
+        // PERBAIKAN: Jangan panggil location.reload(). Cukup bersihkan layar untuk user berikutnya
+        setTimeout(() => {
+            logoutUser();
+        }, 2000);
     }
 
     function jalankanSinkronisasiOtomatis() {
-        if (!navigator.onLine) return; // Jangan jalankan jika device sedang tidak ada internet
+        if (!navigator.onLine) return; 
         
         let antrean = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
         if (antrean.length === 0) {
@@ -487,38 +489,35 @@ function renderDropdown(data) {
             return;
         }
 
-        // Tampilkan informasi running sync banner
         document.getElementById('syncStatusBanner').classList.remove('hidden');
-        document.getElementById('syncStatusBanner').innerText = `Sinkronisasi mengunggah ${antrean.length} data presensi tertunda...`;
+        document.getElementById('syncStatusBanner').innerText = `Menyinkronkan mengunggah ${antrean.length} data presensi tertunda...`;
 
-        // Ambil paket presensi paling awal (First In First Out)
         const targetKirim = antrean[0];
 
-        // Cari potongan kode ini di dalam fungsi jalankanSinkronisasiOtomatis() Anda:
-fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ 
-        nama: targetKirim.nama, 
-        tipe: targetKirim.tipe, 
-        foto: targetKirim.foto // Mengirim base64 foto dan tipe ('datang'/'pulang')
-    })
-})
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                nama: targetKirim.nama, 
+                tipe: targetKirim.tipe, 
+                foto: targetKirim.foto 
+            })
+        })
         .then(res => res.json())
-        .then(() => {
-            // Jika sukses terunggah ke spreadsheet, hapus baris ini dari antrean local storage
-            let antreanTerbaru = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
-            antreanTerbaru = antreanTerbaru.filter(item => item.id !== targetKirim.id);
-            localStorage.setItem('antrean_presensi', JSON.stringify(antreanTerbaru));
-            
-            // Rekursif: Jalankan lagi sampai isi antrean habis total (0)
-            jalankanSinkronisasiOtomatis();
+        .then((response) => {
+            if (response.status === "success") {
+                let antreanTerbaru = JSON.parse(localStorage.getItem('antrean_presensi')) || [];
+                antreanTerbaru = antreanTerbaru.filter(item => item.id !== targetKirim.id);
+                localStorage.setItem('antrean_presensi', JSON.stringify(antreanTerbaru));
+                
+                // Rekursif: Selesaikan sisa antrean jika ada
+                jalankanSinkronisasiOtomatis();
+            }
         })
         .catch((err) => {
             console.warn("Koneksi gagal saat sinkronisasi otomatis. Mencoba kembali nanti.", err);
         });
     }
 
-    // --- BIOMETRIK BYPASS LAYOUT ---
     async function daftarkanBiometrikPerangkat() {
         try {
             const publicKeyCredentialCreationOptions = {
