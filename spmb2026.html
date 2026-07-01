@@ -349,19 +349,27 @@
         }
 
         .btn-card {
-            width: 100%;
-            background: var(--primary);
-            color: var(--white);
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(30, 41, 59, 0.15);
-        }
+    width: 100%;
+    background: var(--primary);
+    color: var(--white);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(30, 41, 59, 0.15);
+}
+
+/* Style khusus untuk tombol disabled */
+.btn-card:disabled {
+    background: #9ca3af;   /* abu-abu */
+    cursor: not-allowed;   /* tanda tidak bisa diklik */
+    opacity: 0.8;          /* sedikit transparan biar beda dari aktif */
+}
+
         .btn-card:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
@@ -799,8 +807,9 @@
                             <div class="countdown-item"><span class="mins">00</span>Mnt</div>
                             <div class="countdown-item"><span class="secs">00</span>Dtk</div>
                         </div>
-                        <div class="countdown-message">✅ Daftar Ulang Dibuka</div>
-                        <button class="btn-card" onclick="openModal('https://sd.makassarkota.go.id/dashboard/pengumuman')">Lihat Pengumunan</button>
+                        <div class="countdown-message">✅ Daftar Ulang - TUTUP</div>
+                        <button class="btn-card" disabled>T U T U P</button>
+
                     </div>
                 </div>
 
@@ -831,8 +840,8 @@
                             <div class="countdown-item"><span class="mins">00</span>Mnt</div>
                             <div class="countdown-item"><span class="secs">00</span>Dtk</div>
                         </div>
-                        <div class="countdown-message">✅ Daftar Ulang Telah Selesai</div>
-                        <button class="btn-card" onclick="openModal('https://sd.makassarkota.go.id/dashboard/pengumuman')">Lihat Pengumunan</button>
+                        <div class="countdown-message">✅ Daftar Ulang - TUTUP</div>
+                        <button class="btn-card" disabled>T U T U P</button>
                     </div>
                 </div>
 
@@ -1436,7 +1445,7 @@
       ]
     };
 
-    const agenda = agendaList[formattedDate] || ["Tidak ada agenda khusus hari ini"];
+    const agenda = agendaList[formattedDate] || ["Seluruh tahapan SPMB 2026 sudah TUTUP"];
     const agendaContainer = document.getElementById("agenda");
 
     agenda.forEach(item => {
