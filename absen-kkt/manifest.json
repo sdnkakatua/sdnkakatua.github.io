@@ -1,7 +1,7 @@
 {
   "name": "Presensi SDN Kakatua",
   "short_name": "SDN Kakatua",
-  "start_url": "/index.html",
+  "start_url": "/absen-kkt/index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#4f46e5",
