@@ -63,6 +63,38 @@
             40%, 80% { transform: translateX(8px); }
         }
         .animate-shake { animation: shake 0.4s ease-in-out; border: 1px solid #ef4444 !important; }
+		
+		/* Gaya Floating Button */
+        .admin-fab {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          width: 60px;
+          height: 60px;
+          background-color: #2563eb;
+          color: white;
+          border-radius: 50%;
+          font-size: 30px;
+          border: none;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+          cursor: pointer;
+          z-index: 1000;
+          transition: transform 0.2s;
+        }
+        .admin-fab:hover { transform: scale(1.1); }
+
+        /* Gaya Modal */
+        .modal-overlay {
+          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+          background: rgba(0,0,0,0.5); z-index: 1001;
+          display: flex; justify-content: center; align-items: center;
+        }
+        .modal-content {
+          background: white; padding: 24px; border-radius: 16px;
+          width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
 	</style>
 </head>
 <body class="bg-slate-50 font-sans min-h-screen flex flex-col relative select-none" onload="initDashboard()">
@@ -404,12 +436,46 @@
                 </button>
             </div>
         </div>
+		
+		<!-- Tombol Floating Admin -->
+        <button id="adminFab" class="admin-fab flex items-center justify-center hover:bg-blue-700 transition-colors" style="display: none;" onclick="bukaModalTambah()" title="Tambah Data">
+            <i class="fa-solid fa-plus text-2xl"></i>
+        </button>
+
+        <!-- Popup Modal Tambah Data -->
+        <div id="modalTambah" class="modal-overlay hidden" style="display: none;">
+            <div class="modal-content animate-fade-in-up border border-slate-200">
+                <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+                    <h3 class="text-xl font-bold text-slate-800 tracking-tight">Tambah Data Baru</h3>
+                    <button onclick="tutupModalTambah()" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-2">Pilih Kategori:</label>
+                <select id="pilihTipeData" onchange="renderFormTambah()" class="w-full bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-2.5 outline-none focus:border-blue-500 transition-colors font-medium">
+                <option value="" disabled selected>-- Pilih --</option>
+                <option value="gtk">GTK (Guru/Tendik)</option>
+                <option value="siswa">Siswa</option>
+                </select>
+
+                <!-- Wadah Form Dinamis -->
+                <div id="formTambahContainer" class="mt-4"></div>
+
+                <div class="modal-actions border-t border-slate-100 pt-4 mt-4">
+                    <button onclick="tutupModalTambah()" class="px-4 py-2 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition-colors">Batal</button>
+                    <button onclick="simpanDataBaru()" id="btnSimpanBaru" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md transition-colors" style="display: none;">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
 
     </main>
 
     <script>
         // --- CONFIG APPS SCRIPT DATABASE URL ---
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqFzps7KtIRzburEMCCry2WYp8gJqH_RpYkcbQ0c7rqNosOCFna32xCAOerQkjlL-z/exec";
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwT2FcftAROQ9Eck24k1a86PcWBpebC1QsV5U2CLyGNQl1BdyoaPoEki1Sfunnj8vgb7Q/exec";
         const SCHOOL_COORD = { lat: -5.159395, lng: 119.410650 }; // Koordinat Pusat Sekolah
 
         // Global State Management
@@ -491,6 +557,7 @@
             if (sessionStorage.getItem('portalAdminAuth') === 'true') {
                 isAdminActive = true;
                 document.getElementById('admin-badge').classList.remove('hidden');
+                document.getElementById('adminFab').style.display = 'flex'; // Tampilkan FAB
             }
 
             const cacheKey = 'portalCache_siswa';
@@ -571,6 +638,7 @@
                 if(isAdminActive) {
                     isAdminActive = false; 
                     document.getElementById('admin-badge').classList.add('hidden');
+                    document.getElementById('adminFab').style.display = 'none'; // Sembunyikan FAB
                     sessionStorage.removeItem('portalAdminAuth');
                     showToast('Mode Admin Dimatikan', 'info');
                     if (!document.getElementById('section-list').classList.contains('hidden')) applyFilters();
@@ -604,6 +672,7 @@
             if(pass === 'aic') {
                 isAdminActive = true; 
                 document.getElementById('admin-badge').classList.remove('hidden');
+                document.getElementById('adminFab').style.display = 'flex'; // Tampilkan FAB
                 sessionStorage.setItem('portalAdminAuth', 'true');
                 showToast('Otorisasi Admin Aktif! Semua enkripsi gembok terbuka.', 'success'); 
                 closeAdminModal();
@@ -935,13 +1004,28 @@
 
                 ['NIK', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Nama Ibu Kandung', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Nomor WA', 'Email', 'Alamat', 'Titik Koordinat'].forEach(f => appendField(f, info[f]));
             }
+            
+            // Tambahkan Tombol Hapus Jika Admin Aktif
+            if (isAdminActive) {
+                const deleteBtn = document.createElement('div');
+                deleteBtn.className = "col-span-1 sm:col-span-2 lg:col-span-3 mt-4 flex items-center justify-center";
+                deleteBtn.innerHTML = `
+                    <button onclick="hapusDataPilihan('${info._id_baris}')" class="w-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 hover:border-red-500 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-trash-can"></i> Hapus Data Ini
+                    </button>
+                `;
+                document.getElementById('detail-fields').appendChild(deleteBtn);
+            }
+
             ['section-dashboard', 'section-class-list', 'section-list', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden'));
             ['section-detail', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
         function appendField(label, val) {
             const editableFields = ['Nomor WA', 'Email', 'Titik Koordinat', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala'];
-            const isEditable = editableFields.includes(label); let actionBtn = '';
+            // Admin bisa mengedit SEMUA field, user biasa hanya field tertentu
+            const isEditable = isAdminActive || editableFields.includes(label); 
+            let actionBtn = '';
             let valDisplay = val || '<span class="text-slate-300 italic">Tidak ada data</span>';
 
             if (isEditable) {
@@ -1078,15 +1162,18 @@
             const btn = document.getElementById(fieldName === 'Titik Koordinat' ? 'btn-save-map' : 'btn-save-text');
             const originalHtml = btn.innerHTML; btn.innerHTML = `Menyimpan...`; btn.disabled = true;
             try {
-                const response = await fetch(`${GAS_WEB_APP_URL}?action=updateData&type=${currentType}&id=${currentEditingId}&field=${encodeURIComponent(fieldName)}&value=${encodeURIComponent(newValue)}`);
+                // Tambahkan &passcode=aic di akhir URL
+const response = await fetch(`${GAS_WEB_APP_URL}?action=updateData&type=${currentType}&id=${currentEditingId}&field=${encodeURIComponent(fieldName)}&value=${encodeURIComponent(newValue)}&passcode=aic`);
                 const result = await response.json();
                 if (result.status === 'success') {
                     showToast(`${fieldName} sukses diarsip!`, 'success');
                     const display = document.getElementById(`display-${fieldName.replace(/\s+/g, '')}`); if(display) display.innerText = newValue || '-';
                     if(localCache[currentType]) {
                         const targetIdx = localCache[currentType].findIndex(x => x.id == currentEditingId || x._id_baris == currentEditingId);
-                        const dataKeyMapping = { 'Nomor WA': 'Nomor WA', 'Email': 'Email', 'Titik Koordinat': 'koordinat', 'Berat Badan': 'Berat Badan', 'Tinggi Badan': 'Tinggi Badan', 'Lingkar Kepala': 'Lingkar Kepala' };
-                        if(targetIdx !== -1 && dataKeyMapping[fieldName]) localCache[currentType][targetIdx][dataKeyMapping[fieldName]] = newValue;
+                        // Coba sesuaikan semua key secara dinamis
+                        if(targetIdx !== -1) {
+                            localCache[currentType][targetIdx][fieldName] = newValue;
+                        }
                     }
                     closeModals();
                 } else showToast('Gagal memproses ke database Sheet.');
@@ -1094,11 +1181,134 @@
             finally { btn.innerHTML = originalHtml; btn.disabled = false; }
         }
 
+        // --- SISTEM MODAL TAMBAH DATA (ADMIN) ---
+        function bukaModalTambah() {
+            document.getElementById('modalTambah').style.display = 'flex';
+        }
+
+        function tutupModalTambah() {
+            document.getElementById('modalTambah').style.display = 'none';
+            document.getElementById('pilihTipeData').value = "";
+            document.getElementById('formTambahContainer').innerHTML = "";
+            document.getElementById('btnSimpanBaru').style.display = 'none';
+        }
+
+        function renderFormTambah() {
+            const tipe = document.getElementById('pilihTipeData').value;
+            const container = document.getElementById('formTambahContainer');
+            document.getElementById('btnSimpanBaru').style.display = 'inline-block';
+            
+            let html = '<div class="space-y-4">';
+            if(tipe === 'gtk') {
+                html += `
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">Nama Lengkap</label><input type="text" id="inputBaru_Nama" placeholder="Contoh: Budi Santoso, S.Pd" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium"></div>
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">NIK</label><input type="text" id="inputBaru_NIK" placeholder="Nomor Induk Kependudukan" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium"></div>
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">Jenis PTK</label><input type="text" id="inputBaru_Jenis PTK" placeholder="Contoh: Guru Kelas" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-indigo-500 text-sm font-medium"></div>
+                `;
+            } else if(tipe === 'siswa') {
+                html += `
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">Nama Lengkap Siswa</label><input type="text" id="inputBaru_Nama" placeholder="Nama Lengkap" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium"></div>
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">Kelas</label><input type="text" id="inputBaru_Kelas" placeholder="Contoh: 1A" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium"></div>
+                    <div><label class="text-xs font-bold text-slate-500 mb-1 block">Tanggal Lahir (Format: YYYY-MM-DD)</label><input type="date" id="inputBaru_Tanggal Lahir" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-xl outline-none focus:border-emerald-500 text-sm font-medium text-slate-700"></div>
+                `;
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function simpanDataBaru() {
+            const tipe = document.getElementById('pilihTipeData').value;
+            const btn = document.getElementById('btnSimpanBaru');
+            
+            const inputs = document.querySelectorAll('#formTambahContainer input');
+            const dataToSave = {};
+            inputs.forEach(inp => {
+                const key = inp.id.replace('inputBaru_', '');
+                dataToSave[key] = inp.value;
+            });
+
+            if (!dataToSave['Nama']) {
+                showToast("Nama tidak boleh kosong!");
+                return;
+            }
+
+            const payload = { 
+    action: 'addData', 
+    type: tipe, 
+    data: dataToSave,
+    passcode: 'aic' // Meneruskan PIN admin ke backend (sesuaikan nama parameternya jika di GAS berbeda)
+};
+
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="loader border-white border-t-transparent w-4 h-4"></span> Menyimpan...`;
+            btn.disabled = true;
+
+            try {
+                 const response = await fetch(GAS_WEB_APP_URL, {
+                     method: 'POST',
+                     body: JSON.stringify(payload)
+                 });
+                 const result = await response.json();
+                 
+                 if(result.status === 'success') {
+                     showToast('Data berhasil ditambahkan', 'success');
+                     
+                     // Bersihkan cache agar data terbaru bisa termuat
+                     localStorage.removeItem('portalCache_' + tipe);
+                     
+                     tutupModalTambah();
+                     
+                     // Langsung load ulang datanya
+                     fetchList(tipe); 
+                 } else {
+                     showToast(result.message || 'Gagal menambah data');
+                 }
+            } catch(e) {
+                 showToast('Kesalahan jaringan, gagal menghubungi server.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- SISTEM HAPUS DATA (ADMIN) ---
+        async function hapusDataPilihan(idBaris) {
+            if (!confirm("Peringatan!\nAnda yakin ingin menghapus data ini dari Database? Aksi ini permanen dan tidak dapat dibatalkan.")) {
+                return;
+            }
+            
+            showToast('Memproses penghapusan...', 'info');
+            
+            try {
+                // Asumsi parameter backend membutuhkan action=deleteData, type, dan id (baris/unik ID)
+                // Tambahkan &passcode=aic di akhir URL
+const response = await fetch(`${GAS_WEB_APP_URL}?action=deleteData&type=${currentType}&id=${idBaris}&passcode=aic`);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showToast('Data berhasil dihapus selamanya.', 'success');
+                    
+                    // Bersihkan cache lokal & refresh list
+                    localStorage.removeItem('portalCache_' + currentType);
+                    
+                    // Kembali ke halaman list
+                    history.back();
+                    setTimeout(() => fetchList(currentType), 300); 
+                } else {
+                    showToast(result.message || 'Gagal menghapus data dari Server.');
+                }
+            } catch(e) {
+                showToast('Kesalahan koneksi saat menghapus data.');
+            }
+        }
+
         window.addEventListener('click', (e) => {
             if (e.target === document.getElementById('modal-passcode')) closePasscodeModal();
             if (e.target === document.getElementById('modal-edit') || e.target === document.getElementById('modal-map')) closeModals();
             if (e.target === document.getElementById('modal-admin')) closeAdminModal(); 
+            if (e.target === document.getElementById('modalTambah')) tutupModalTambah();
         });
+
     </script>
 </body>
 </html>
