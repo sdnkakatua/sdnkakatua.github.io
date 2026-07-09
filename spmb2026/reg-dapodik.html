@@ -31,8 +31,7 @@
         <div class="container mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="bg-white-600 p-2.5 rounded-xl text-white shadow-md shadow-gray-500/20">
-                    <!-- Ganti ikon lucide dengan SVG logo Dapodik -->
-<div class="w-5 h-5">
+                    <div class="w-5 h-5">
   <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgG5bgNjUPoRJdIGHeF2-rDq7ZKzWBeIkGXbpNo4Ue_ewwVU5l9Qgp8bzrOS_8vkCsBjojr7qEuChdx1fy9WoizzHTCXE6n7DOMo834Ph-pS-lJwiZM3qWUSJYx9AeUsCPhfHRZSCs4Y6Qi3v4P_ghAK4iz2vVzYLS7rz1-tQoKTw9GhQmgvj2iCZEQ/s4167/logo_dapodik.png" alt="Logo Dapodik" class="w-5 h-5" />
 </div>
 
@@ -484,8 +483,7 @@
         </div>
     </div>
 	
-	<!-- MODAL MASTER ADMIN (KECIL & MINIMALIS) -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+	<div id="adminModal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="adminModalContent" class="bg-white rounded-3xl p-6 w-full max-w-[260px] shadow-2xl transform scale-95 transition-transform duration-300 text-center border border-slate-100">
             <div class="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
                 <i data-lucide="key" class="w-5 h-5"></i>
@@ -493,7 +491,7 @@
             <h3 class="text-sm font-bold text-slate-800 mb-0.5 tracking-tight">Mode Master</h3>
             <p class="text-[10px] text-slate-400 mb-5 font-medium">Otorisasi bypass sistem</p>
             
-            <input type="password" id="adminPasscodeInput" placeholder="••••" class="w-full text-center tracking-[0.4em] font-extrabold border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white focus:outline-none mb-5 transition-all text-slate-700">
+            <input type="password" id="adminPasscodeInput" placeholder="â¢â¢â¢â¢" class="w-full text-center tracking-[0.4em] font-extrabold border border-slate-200 rounded-xl p-3 text-sm bg-slate-50 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 focus:bg-white focus:outline-none mb-5 transition-all text-slate-700">
             
             <div class="flex gap-2.5">
                 <button onclick="closeAdminModal()" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
@@ -519,7 +517,7 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         // ================= CONFIGURATION =================
-        const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbygM5gTV2Rvw7H_HTvNbgWm5hwnUi9A18XpUQVz0YQaOHdoLZ_qAttDMGU7d-XXKLxdZw/exec'; 
+        const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbz2OhS1dQ-cElMQbv03T-LDr1oDkNgII3JhfzG-LuRXkfHcspatOyF1P_-F_iyoNaH-EA/exec'; 
 		const LAT_SEKOLAH = -5.159401;
 		const LNG_SEKOLAH = 119.410653;
 
@@ -1057,36 +1055,37 @@
 				}
 			}
 			
-					async function executeAdminBypass() {
-			notify("Membuka berkas via Master Admin...", "info");
-			
-			// Cek cache lokal terlebih dahulu untuk Instant Load
-			const savedServerData = localStorage.getItem(`server_data_${activeNisn}`);
-			if (savedServerData) {
-				loadDataToForm(JSON.parse(savedServerData)); 
-				bukaHalamanForm(); 
-			}
+			// Ganti fungsi executeAdminBypass yang lama dengan ini
+async function executeAdminBypass() {
+    notify("Membuka berkas via Master Admin...", "info");
+    
+    const savedServerData = localStorage.getItem(`server_data_${activeNisn}`);
+    if (savedServerData) {
+        loadDataToForm(JSON.parse(savedServerData)); 
+        bukaHalamanForm(); 
+    }
 
-			try {
-				// Kirim parameter bypass=true ke Google Apps Script Anda (jika script disesuaikan)
-				// Atau biarkan kosong jika API getDetail Anda memperbolehkan dob kosong khusus request tertentu
-				const res = await fetch(`${URL_WEB_APP}?action=getDetail&nisn=${activeNisn}&bypass=true`);
-				const result = await res.json();
-				
-				if (result.status === 'success') {
-					loadDataToForm(result.data);
-					if (!savedServerData) bukaHalamanForm();
-					localStorage.setItem(`server_data_${activeNisn}`, JSON.stringify(result.data));
-					notify("Akses Berkas Terbuka (Admin Mode)!", "success");
-				} else {
-					// Jika Apps Script Anda mewajibkan DOB dan tidak mendukung bypass, 
-					// fungsi akan menampilkan error. Pastikan server Anda mendukung action tanpa DOB.
-					if (!savedServerData) notify(result.message, "error");
-				}
-			} catch (e) {
-				if (!savedServerData) notify("Gangguan Jaringan/Server Google Script", "error");
-			}
-		}
+    try {
+        // Karena kita di mode admin, langsung gunakan parameter bypass=true
+        // Tanpa perlu mencari dan mencocokkan tanggal lahir
+        const url = `${URL_WEB_APP}?action=getDetail&nisn=${activeNisn}&bypass=true`;
+
+        const res = await fetch(url);
+        const result = await res.json();
+        
+        if (result.status === 'success') {
+            loadDataToForm(result.data);
+            if (!savedServerData) bukaHalamanForm();
+            localStorage.setItem(`server_data_${activeNisn}`, JSON.stringify(result.data));
+            notify("Akses Berkas Terbuka (Admin Mode)!", "success");
+        } else {
+            if (!savedServerData) notify(result.message, "error");
+        }
+    } catch (e) {
+        if (!savedServerData) notify("Gangguan Jaringan/Server Google Script", "error");
+    }
+}
+					
     </script>
 </body>
 </html>
