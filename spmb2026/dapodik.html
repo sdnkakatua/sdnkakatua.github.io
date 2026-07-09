@@ -38,28 +38,32 @@
 </head>
 <body class="bg-[#F8FAFC] text-slate-800 flex flex-col min-h-screen">
 
-    <nav class="sticky top-0 z-40 glass border-b border-slate-600/80 shadow-sm">
-        <div class="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-white-600 p-2.5 rounded-xl text-white shadow-md shadow-gray-500/20">
-                    <div class="w-5 h-5">
-                      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgG5bgNjUPoRJdIGHeF2-rDq7ZKzWBeIkGXbpNo4Ue_ewwVU5l9Qgp8bzrOS_8vkCsBjojr7qEuChdx1fy9WoizzHTCXE6n7DOMo834Ph-pS-lJwiZM3qWUSJYx9AeUsCPhfHRZSCs4Y6Qi3v4P_ghAK4iz2vVzYLS7rz1-tQoKTw9GhQmgvj2iCZEQ/s4167/logo_dapodik.png" alt="Logo Dapodik" class="w-5 h-5" />
-                    </div>
-                </div>
-                <div>
-                    <span class="font-bold text-lg tracking-tight text-slate-900 block leading-tight">DATA DAPODIK</span>
-                    <span class="text-[11px] text-slate-500 font-medium tracking-wide block">UPT SPF SDN KAKATUA</span>
+<nav class="sticky top-0 z-40 bg-gradient-to-r from-slate-900 via-slate-950 to-blue-950 border-b border-slate-800 shadow-lg shadow-slate-950/20 backdrop-blur-md">
+    <div class="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <!-- Bingkai Logo Versi Transparan Premium -->
+            <div class="bg-white/5 backdrop-blur-md p-2 rounded-xl text-white border border-white/10 shadow-inner">
+                <div class="w-5 h-5">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgG5bgNjUPoRJdIGHeF2-rDq7ZKzWBeIkGXbpNo4Ue_ewwVU5l9Qgp8bzrOS_8vkCsBjojr7qEuChdx1fy9WoizzHTCXE6n7DOMo834Ph-pS-lJwiZM3qWUSJYx9AeUsCPhfHRZSCs4Y6Qi3v4P_ghAK4iz2vVzYLS7rz1-tQoKTw9GhQmgvj2iCZEQ/s4167/logo_dapodik.png" alt="Logo Dapodik" class="w-5 h-5" />
                 </div>
             </div>
-			<div id="syncStatus" onclick="triggerAdminCheck()" class="text-xs font-semibold px-3 py-1.5 bg-green-50 text-green-700 rounded-full border border-slate-300 flex items-center gap-2 cursor-pointer select-none hover:bg-slate-100 transition-colors">
-				<span class="relative flex h-2 w-2">
-					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-					<span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-				</span>
-				Data Sync <span id="adminBadge" class="hidden ml-1 px-1.5 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-md uppercase">Admin</span>
-			</div>
+            <div>
+                <span class="font-extrabold text-base md:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 block leading-tight">DATA DAPODIK</span>
+                <span class="text-[10px] text-blue-400 font-bold tracking-widest block uppercase">UPT SPF SDN KAKATUA</span>
+            </div>
         </div>
-    </nav>
+        
+        <!-- Tombol Status Sinkronisasi Versi Glow-in-the-dark -->
+        <div id="syncStatus" onclick="triggerAdminCheck()" class="text-xs font-semibold px-3 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 flex items-center gap-2 cursor-pointer select-none hover:bg-emerald-500/20 transition-all shadow-sm">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>Data Sync</span>
+            <span id="adminBadge" class="hidden ml-1 px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-black rounded-md uppercase tracking-wider shadow-md shadow-red-900/50">Admin</span>
+        </div>
+    </div>
+</nav>
 
     <section id="pageList" class="container mx-auto px-4 py-8 flex-grow show-page">
         <div class="max-w-2xl mx-auto">
@@ -135,7 +139,7 @@
                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
                         <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">A. Data Induk (Terkunci / Tidak Dapat Diubah)</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">A. Data Induk (Tidak Dapat Diubah)</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
@@ -156,7 +160,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nomor Kartu Keluarga</label>
-                            <input type="text" id="nomorKk" class="w-full bg-slate-50 border border-slate-300 bg-slate-100 rounded-xl p-3 text-sm font-medium text-slate-600 cursor-not-allowed" readonly>
+                            <input type="text" id="nomorKk" placeholder="terisi otomatis" class="w-full bg-slate-50 border border-slate-300 bg-slate-100 rounded-xl p-3 text-sm font-medium text-slate-600 cursor-not-allowed" readonly>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Tempat Lahir</label>
@@ -168,7 +172,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nomor Registrasi Akta Lahir</label>
-                            <input type="text" id="noAkta" class="w-full bg-slate-50 border border-slate-300 bg-slate-100 rounded-xl p-3 text-sm font-medium text-slate-600 cursor-not-allowed" readonly>
+                            <input type="text" id="noAkta" placeholder="terisi otomatis"	 class="w-full bg-slate-50 border border-slate-300 bg-slate-100 rounded-xl p-3 text-sm font-medium text-slate-600 cursor-not-allowed" readonly>
                         </div>
                     </div>
                 </div>
@@ -181,15 +185,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div class="md:col-span-2 lg:col-span-3">
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Alamat Lengkap (Sesuai KK)</label>
-                            <input type="text" name="alamat" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+                            <input type="text" name="alamat" placeholder="alamat sesuai pada Kartu Keluarga" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">RT</label>
-                            <input type="text" name="rt" placeholder="000" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+                            <input type="text" name="rt" placeholder="" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">RW</label>
-                            <input type="text" name="rw" placeholder="000" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+                            <input type="text" name="rw" placeholder="" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Dusun <span class="text-slate-600 font-normal italic">(Jika Ada)</span></label>
@@ -205,7 +209,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Kode Pos <span class="text-slate-600 font-normal italic">(Jika Ada)</span></label>
-                            <input type="number" name="kodePos" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" name="kodePos" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Titik Koordinat Geosilokal</label>
@@ -219,7 +223,7 @@
 						<div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Jarak Rumah Ke Sekolah (km) <span class="text-slate-600 font-normal italic">(Otomatis)</span></label>
                             <div class="relative">
-							<input type="number" name="jarakRumah" id="jarakRumah" placeholder="0.00" class="w-full border border-slate-600 rounded-xl p-3 pr-12 text-sm input-focus cacheable" readonly>
+							<input type="number" name="jarakRumah" id="jarakRumah" placeholder="terisi otomatis" class="w-full border border-slate-600 rounded-xl p-3 pr-12 text-sm input-focus cacheable" readonly>
 							</div>
                         </div>
                         <div>
@@ -242,10 +246,6 @@
                                 <option value="Kendaraan umum">Kendaraan umum</option>
                                 <option value="Ojek">Ojek</option>
                             </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Anak Ke-berapa</label>
-                            <input type="number" name="anakKe" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                         
                         <div class="md:col-span-2 lg:col-span-3 bg-slate-50 border border-slate-600/60 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
@@ -279,9 +279,17 @@
                                     <input type="text" name="namaAyah" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">NIK Ayah</label>
-                                    <input type="number" name="nikAyah" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                                </div>
+									<label class="block text-xs font-bold text-slate-700 mb-1">NIK Ayah</label>
+									<input type="text" 
+										   inputmode="numeric" 
+										   pattern="[0-9]{16}" 
+										   minlength="16" 
+										   maxlength="16" 
+										   oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+										   placeholder="16 digit nomor NIK" 
+										   name="nikAyah" 
+										   class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+								</div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Lahir</label>
@@ -330,9 +338,17 @@
                                     <input type="text" name="namaIbu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1">NIK Ibu</label>
-                                    <input type="number" name="nikIbu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
-                                </div>
+									<label class="block text-xs font-bold text-slate-700 mb-1">NIK Ibu</label>
+									<input type="text" 
+										   inputmode="numeric" 
+										   pattern="[0-9]{16}" 
+										   minlength="16" 
+										   maxlength="16" 
+										   oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+										   placeholder="16 digit nomor NIK" 
+										   name="nikIbu" 
+										   class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+								</div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Lahir</label>
@@ -374,17 +390,25 @@
                     <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
                         <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
                             <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">CD. Data Wali <span class="text-slate-600 font-normal italic">(Diisi karena murid tidak tinggal bersama orang tua)</span></h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">C-D. Data Wali <span class="text-slate-600 font-normal italic">(Diisi karena murid tidak tinggal bersama orang tua)</span></h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Wali</label>
                                 <input type="text" name="namaWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">NIK Wali</label>
-                                <input type="number" name="nikWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                            </div>
+							<div>
+								<label class="block text-xs font-bold text-slate-700 mb-1">NIK Wali</label>
+								<input type="text" 
+									   inputmode="numeric" 
+									   pattern="[0-9]{16}" 
+									   minlength="16" 
+									   maxlength="16" 
+									   oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+									   placeholder="16 digit nomor NIK" 
+									   name="nikWali" 
+									   class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+							</div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Lahir Wali</label>
                                 <input type="number" name="tahunLahirWali" placeholder="YYYY" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
@@ -426,7 +450,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Nomor WA Orang Tua</label>
-                            <input type="number" name="noHp" placeholder="Contoh: 082395..." class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" name="noHp" placeholder="Contoh: 082395..." class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                         <div class="md:col-span-1 lg:col-span-2">
                             <label class="block text-xs font-bold text-slate-700 mb-1">Email Orang Tua</label>
@@ -444,9 +468,13 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1">Lingkar Kepala Anak (cm)</label>
                             <input type="number" name="lingkarKepala" placeholder="00" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
-                        <div class="md:col-span-2">
+                        <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Jumlah Saudara Kandung</label>
                             <input type="number" name="jumlahSaudara" placeholder="0" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Anak Ke-berapa</label>
+                            <input type="number" name="anakKe" placeholder="0" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
                     </div>
                 </div>
@@ -459,7 +487,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Kesejahteraan</label>
-                            <select name="jenisKesejahteraan" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable">
+                            <select name="jenisKesejahteraan" id="jenisKesejahteraan" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable">
                                 <option value="">-- Tidak Ada / Pilih --</option>
                                 <option value="PKH">PKH (Program Keluarga Harapan)</option>
                                 <option value="PIP">PIP (Program Indonesia Pintar)</option>
@@ -468,13 +496,18 @@
                                 <option value="Kartu Kesehatan">Kartu Kesehatan / KIS / BPJS</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Kartu Jaminan</label>
-                            <input type="text" name="noKartu" placeholder="Tulis nomor kartu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Tertera di Kartu</label>
-                            <input type="text" name="namaDiKartu" placeholder="Sesuai cetakan kartu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                        
+                        <div id="wrapper_kesejahteraan_section" class="hidden max-h-0 opacity-0 overflow-hidden transition-all duration-700 ease-in-out md:col-span-1 lg:col-span-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Kartu Jaminan</label>
+                                    <input type="text" name="noKartu" placeholder="Tulis nomor kartu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Tertera di Kartu</label>
+                                    <input type="text" name="namaDiKartu" placeholder="Sesuai cetakan kartu" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -570,7 +603,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbz2OhS1dQ-cElMQbv03T-LDr1oDkNgII3JhfzG-LuRXkfHcspatOyF1P_-F_iyoNaH-EA/exec'; 
+        const URL_WEB_APP = 'https://script.google.com/macros/s/AKfycbzL2qB1qRASj1WUWPos3RLCpQ7apUsVE5as840N7ioCCLelCWEsQb08P71fNQFmbS9fSQ/exec'; 
 		const LAT_SEKOLAH = -5.159401;
 		const LNG_SEKOLAH = 119.410653;
 
@@ -642,6 +675,18 @@
                         // Munculkan jika tidak memilih "Bersama orang tua" dan tidak kosong
                         const showWali = this.value !== 'Bersama orang tua' && this.value !== '';
                         toggleSection('wrapper_wali_section', showWali, '1000px');
+                    });
+                });
+            }
+
+            // SISIPAN: Trigger untuk jenis kesejahteraan -> Form Nomor Kartu & Nama Kartu
+            const jenisKesejahteraan = document.getElementById('jenisKesejahteraan');
+            if (jenisKesejahteraan) {
+                ['change', 'input'].forEach(evt => {
+                    jenisKesejahteraan.addEventListener(evt, function() {
+                        // Munculkan jika dropdown tidak bernilai kosong/pilih-opsi
+                        const showFields = this.value !== '';
+                        toggleSection('wrapper_kesejahteraan_section', showFields, '200px');
                     });
                 });
             }
@@ -852,6 +897,10 @@
             const tt = document.getElementById('tempatTinggal');
             if(tt) toggleSection('wrapper_wali_section', tt.value !== 'Bersama orang tua' && tt.value !== '', '1000px');
 
+            // SISIPAN: Sinkronkan visual form Jaminan Sosial setelah data ter-load dari Server
+            const jk = document.getElementById('jenisKesejahteraan');
+            if(jk) toggleSection('wrapper_kesejahteraan_section', jk.value !== '', '200px');
+
             loadCache(activeNisn);
             isFormDirty = false; 
         }
@@ -983,6 +1032,10 @@
                 
                 const tt = document.getElementById('tempatTinggal');
                 if(tt) toggleSection('wrapper_wali_section', tt.value !== 'Bersama orang tua' && tt.value !== '', '1000px');
+
+                // SISIPAN: Sinkronkan visual form Jaminan Sosial setelah draf cache di-load kembali
+                const jk = document.getElementById('jenisKesejahteraan');
+                if(jk) toggleSection('wrapper_kesejahteraan_section', jk.value !== '', '200px');
             }
 			if (document.getElementById('koordinat')) {
 				hitungJarakKeSekolah(document.getElementById('koordinat').value);
