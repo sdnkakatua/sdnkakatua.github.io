@@ -236,7 +236,9 @@
         let sheetData = JSON.parse(localStorage.getItem('spmb_sheetData')) || {};
         let sheetOrder = JSON.parse(localStorage.getItem('spmb_sheetOrder')) || [];
         let pendingSync = JSON.parse(localStorage.getItem('spmb_pendingSync')) || {};
-        let isAdmin = sessionStorage.getItem('spmb_isAdmin') === 'true';
+        let userRole = sessionStorage.getItem('spmb_role') || 'guest';
+let isAdmin = userRole === 'admin';
+let isGuru = userRole === 'guru';
 
         document.addEventListener('DOMContentLoaded', () => {
             updateAdminUI();
@@ -320,78 +322,88 @@
         }
 
         function handleAdminToggle(event) {
-            if (event.detail === 3) {
-                if (isAdmin) {
-                    Swal.fire({
-                        html: `
-                            <div class="mb-4 text-rose-500 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Akhiri Sesi Admin?</h2>
-                        `,
-                        showCancelButton: true, confirmButtonText: 'Logout', cancelButtonText: 'Batal',
-                        buttonsStyling: false,
-                        customClass: {
-                            popup: 'clean-popup',
-                            confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
-                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            isAdmin = false; sessionStorage.setItem('spmb_isAdmin', 'false');
-                            updateAdminUI(); renderTable();
-                            cleanToast.fire({ title: 'Logout Berhasil', icon: 'success' });
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        html: `
-                            <div class="mb-4 text-indigo-500 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Verifikasi Akses</h2>
-                            <p class="text-slate-400 text-sm mb-6">Masukkan Passcode untuk membuka Mode Editor.</p>
-                            <input type="password" id="passcode-input" class="passcode-input w-full px-4 py-3 rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-2" placeholder="Ketik Passcode" autocomplete="off">
-                        `,
-                        showCancelButton: true, confirmButtonText: 'Masuk', cancelButtonText: 'Batal',
-                        buttonsStyling: false,
-                        customClass: {
-                            popup: 'clean-popup',
-                            confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
-                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
-                        },
-                        preConfirm: () => {
-                            const passcode = document.getElementById('passcode-input').value;
-                            if (!passcode) Swal.showValidationMessage('Passcode tidak boleh kosong!');
-                            return passcode;
-                        },
-                        didOpen: () => {
-                            const input = document.getElementById('passcode-input');
-                            setTimeout(() => input.focus(), 100);
-                            input.addEventListener('keypress', (e) => {
-                                if(e.key === 'Enter') Swal.clickConfirm();
-                            });
-                        }
-                    }).then((result) => {
-                        // PASSCODE DEFAULT ADALAH: aic
-                        if (result.value === 'aic') {
-                            isAdmin = true; sessionStorage.setItem('spmb_isAdmin', 'true');
-                            updateAdminUI(); renderTable();
-                            cleanToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
-                        } else if (result.value !== undefined) {
-                            cleanToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
-                        }
+    if (event.detail === 3) { // Klik 3 kali berturut-turut
+        if (isAdmin || isGuru) {
+            Swal.fire({
+                html: `
+                    <div class="mb-4 text-rose-500 text-5xl mt-2"><i class="fa-solid fa-lock"></i></div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Akhiri Sesi?</h2>
+                `,
+                showCancelButton: true, confirmButtonText: 'Logout', cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-rose-600 hover:bg-rose-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    userRole = 'guest'; isAdmin = false; isGuru = false; 
+                    sessionStorage.setItem('spmb_role', 'guest');
+                    updateAdminUI(); renderTable();
+                    cleanToast.fire({ title: 'Logout Berhasil', icon: 'success' });
+                }
+            });
+        } else {
+            Swal.fire({
+                html: `
+                    <div class="mb-4 text-indigo-500 text-5xl mt-2"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Verifikasi Akses</h2>
+                    <p class="text-slate-400 text-sm mb-6">Masukkan Passcode untuk membuka akses.</p>
+                    <input type="password" id="passcode-input" class="passcode-input w-full px-4 py-3 rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 mb-2" placeholder="Ketik Passcode" autocomplete="off">
+                `,
+                showCancelButton: true, confirmButtonText: 'Masuk', cancelButtonText: 'Batal',
+                buttonsStyling: false,
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors w-32',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors w-32 border border-slate-600 mr-3'
+                },
+                preConfirm: () => {
+                    const passcode = document.getElementById('passcode-input').value;
+                    if (!passcode) Swal.showValidationMessage('Passcode tidak boleh kosong!');
+                    return passcode;
+                },
+                didOpen: () => {
+                    const input = document.getElementById('passcode-input');
+                    setTimeout(() => input.focus(), 100);
+                    input.addEventListener('keypress', (e) => {
+                        if(e.key === 'Enter') Swal.clickConfirm();
                     });
                 }
-            }
+            }).then((result) => {
+                // LOGIKA MULTI-ROLE
+                if (result.value === 'aic') {
+                    userRole = 'admin'; isAdmin = true; isGuru = false;
+                    sessionStorage.setItem('spmb_role', 'admin');
+                    updateAdminUI(); renderTable();
+                    cleanToast.fire({ title: 'Akses Editor Terbuka', icon: 'success' });
+                } else if (result.value === 'sdkkt') {
+                    userRole = 'guru'; isAdmin = false; isGuru = true;
+                    sessionStorage.setItem('spmb_role', 'guru');
+                    updateAdminUI(); renderTable();
+                    cleanToast.fire({ title: 'Akses Guru Terbuka', icon: 'success' });
+                } else if (result.value !== undefined) {
+                    cleanToast.fire({ title: 'Akses Ditolak', text: 'Passcode salah.', icon: 'error' });
+                }
+            });
         }
+    }
+}
 
-        function updateAdminUI() {
-            const badge = document.getElementById('btn-admin-toggle');
-            if (isAdmin) {
-                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer select-none hover:bg-emerald-500/20";
-                badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i>Admin | Database SDN Kakatua';
-            } else {
-                badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
-                badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database SDN Kakatua';
-            }
-        }
+      function updateAdminUI() {
+    const badge = document.getElementById('btn-admin-toggle');
+    if (isAdmin) {
+        badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer select-none hover:bg-emerald-500/20";
+        badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i>Admin | Database SDN Kakatua';
+    } else if (isGuru) {
+        badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 rounded-full cursor-pointer select-none hover:bg-teal-500/20";
+        badge.innerHTML = '<i class="fa-solid fa-chalkboard-user mr-1 fa-beat-fade"></i>Guru | Database SDN Kakatua';
+    } else {
+        badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
+        badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database SDN Kakatua';
+    }
+}
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             if (!lat1 || !lon1 || isNaN(lat1) || isNaN(lon1)) return '';
@@ -789,11 +801,11 @@
                             ` : ''}
                         </div>
                     </td>
-                    <td class="px-4 py-4 text-center no-print-col">
-    ${isAdmin ? 
+                   <td class="px-4 py-4 text-center no-print-col">
+    ${(isAdmin || isGuru) ? 
         `<a href="https://wa.me/${phone}" target="_blank" class="inline-flex items-center justify-center w-9 h-9 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors"><i class="fa-brands fa-whatsapp text-lg"></i></a>` 
         : 
-        `<span class="inline-flex items-center justify-center w-9 h-9 bg-slate-800 text-slate-600 border border-slate-700 rounded-lg cursor-not-allowed" title="Akses WhatsApp hanya untuk Admin"><i class="fa-brands fa-whatsapp text-lg"></i></span>`
+        `<span class="inline-flex items-center justify-center w-9 h-9 bg-slate-800 text-slate-600 border border-slate-700 rounded-lg cursor-not-allowed" title="Akses WhatsApp hanya untuk Panitia"><i class="fa-brands fa-whatsapp text-lg"></i></span>`
     }
 </td>
                 `;
