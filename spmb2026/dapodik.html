@@ -543,6 +543,22 @@
             </div>
         </div>
     </div>
+	
+	<!-- MODAL PERINGATAN DATA BELUM DISIMPAN -->
+    <div id="unsavedModal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div id="unsavedModalContent" class="bg-white rounded-3xl p-6 w-full max-w-[280px] shadow-2xl transform scale-95 transition-transform duration-300 text-center border border-slate-100">
+            <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800 mb-1.5 tracking-tight">Perubahan Belum Disimpan</h3>
+            <p class="text-[11px] text-slate-500 mb-6 font-medium leading-relaxed">Ada rincian data murid yang belum disinkronkan ke server Google. Yakin ingin keluar?</p>
+            
+            <div class="flex gap-2.5">
+                <button onclick="closeUnsavedModal()" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-slate-500 bg-slate-100 hover:bg-slate-200 transition-colors">Batal</button>
+                <button id="btnConfirmExit" class="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 shadow-md shadow-slate-800/20 transition-all active:scale-95">Tetap Keluar</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="bg-slate-900 text-slate-400 mt-auto py-3 border-t border-slate-900">
         <div class="container mx-auto px-4 text-center">
@@ -785,15 +801,50 @@
             isFormDirty = false; // Kunci ulang status agar tidak memicu warning secara instan
         }
 
-        // POPSTATE INTERCEPTION UNTUK WARNING (IDEA 3)
+// ==========================================
+        // SISTEM PERINGATAN UNSAVED CHANGES
+        // ==========================================
+        let exitActionCallback = null;
+
+        function openUnsavedModal(callback) {
+            exitActionCallback = callback;
+            const modal = document.getElementById('unsavedModal');
+            const content = document.getElementById('unsavedModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+            
+            lucide.createIcons();
+            
+            document.getElementById('btnConfirmExit').onclick = () => {
+                closeUnsavedModal();
+                if (exitActionCallback) exitActionCallback();
+            };
+        }
+
+        function closeUnsavedModal() {
+            const modal = document.getElementById('unsavedModal');
+            const content = document.getElementById('unsavedModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // POPSTATE INTERCEPTION (Tangkapan Swipe Back di HP)
         window.onpopstate = function(event) {
             if (isFormDirty) {
-                if (!confirm("Ada perubahan data rincian murid yang belum disimpan ke server Google. Tetap keluar?")) {
-                    // Masukkan kembali state agar form tidak tertutup otomatis
-                    history.pushState({ page: 'detail', nisn: activeNisn }, '', `?nisn=${activeNisn}`);
-                    return;
-                }
-                isFormDirty = false;
+                // Cegah navigasi instan dari browser
+                history.pushState({ page: 'detail', nisn: activeNisn }, '', `?nisn=${activeNisn}`);
+                
+                openUnsavedModal(() => {
+                    isFormDirty = false;
+                    history.back(); // Lanjutkan proses kembali setelah konfirmasi
+                });
+                return;
             }
 
             if (event.state && event.state.page === 'detail') {
@@ -805,13 +856,13 @@
             }
         };
 
-        // MANUAL BACK BUTTON INTERCEPTION (IDEA 3)
+        // MANUAL BACK BUTTON INTERCEPTION (Tombol Kembali)
         function goBack() {
             if (isFormDirty) {
-                if (confirm("Ada perubahan data rincian murid yang belum disimpan ke server Google. Tetap keluar?")) {
+                openUnsavedModal(() => {
                     isFormDirty = false;
                     history.back();
-                }
+                });
             } else {
                 history.back();
             }
