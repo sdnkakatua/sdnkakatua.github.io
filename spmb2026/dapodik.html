@@ -24,7 +24,7 @@
         .show-page { display: block; opacity: 1; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SKELETON ANIMATION EFFECTS (IDEA 4) */
+        /* SKELETON ANIMATION EFFECTS */
         .skeleton {
             background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
             background-size: 200% 100%;
@@ -99,15 +99,6 @@
                             <div class="space-y-2 w-2/3">
                                 <div class="h-4 skeleton rounded w-2/3"></div>
                                 <div class="h-3 skeleton rounded w-1/2"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div class="flex items-center gap-3.5 w-full">
-                            <div class="w-10 h-10 rounded-xl skeleton flex-shrink-0"></div>
-                            <div class="space-y-2 w-2/3">
-                                <div class="h-4 skeleton rounded w-3/5"></div>
-                                <div class="h-3 skeleton rounded w-1/4"></div>
                             </div>
                         </div>
                     </div>
@@ -233,7 +224,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Tempat Tinggal</label>
-                            <select name="tempatTinggal" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable" required>
+                            <select name="tempatTinggal" id="tempatTinggal" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable" required>
                                 <option value="">-- Pilih --</option>
                                 <option value="Bersama orang tua">Bersama orang tua</option>
                                 <option value="Wali">Wali</option>
@@ -256,17 +247,20 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1.5">Anak Ke-berapa</label>
                             <input type="number" name="anakKe" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable" required>
                         </div>
+                        
                         <div class="md:col-span-2 lg:col-span-3 bg-slate-50 border border-slate-600/60 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
                             <div>
                                 <label class="block text-sm font-bold text-slate-800">Apakah memiliki KIP?</label>
                                 <p class="text-xs text-slate-500">Kartu Indonesia Pintar</p>
                             </div>
-                            <div class="flex flex-grow md:justify-end items-center gap-6">
-                                <div class="flex gap-4">
+                            <div class="flex flex-col md:flex-row flex-grow md:justify-end md:items-center gap-4 md:gap-6 w-full md:w-auto">
+                                <div class="flex gap-4 flex-shrink-0">
                                     <label class="flex items-center gap-2 text-sm font-medium cursor-pointer"><input type="radio" name="punyaKip" value="Tidak" onclick="toggleKIP(false)" checked class="w-4 h-4 text-blue-600"> Tidak</label>
                                     <label class="flex items-center gap-2 text-sm font-medium cursor-pointer"><input type="radio" name="punyaKip" value="Ya" onclick="toggleKIP(true)" class="w-4 h-4 text-blue-600"> Ya</label>
                                 </div>
-                                <input type="text" id="kip" name="kip" placeholder="Tulis Nomor KIP Anda" class="w-full md:max-w-xs border border-slate-600 rounded-xl p-2.5 text-sm input-focus cacheable hidden">
+                                <div id="wrapper_kip_section" class="max-h-0 opacity-0 overflow-hidden transition-all duration-500 ease-in-out w-full md:max-w-xs hidden">
+                                    <input type="text" id="kip" name="kip" placeholder="Tulis Nomor KIP Anda" class="w-full border border-slate-600 rounded-xl p-2.5 text-sm input-focus cacheable">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -328,7 +322,7 @@
                         <div>
                             <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
                                 <i data-lucide="user" class="w-4 h-4 text-pink-500"></i>
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">E. Data Ibu Kandung</h3>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">D. Data Ibu Kandung</h3>
                             </div>
                             <div class="space-y-4">
                                 <div>
@@ -376,49 +370,50 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
-                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
-                        <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">E. Data Wali <span class="text-slate-600 font-normal italic">(Diisi hanya jika murid tidak tinggal bersama orang tua)</span></h3>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Wali</label>
-                            <input type="text" name="namaWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                <div id="wrapper_wali_section" class="hidden max-h-0 opacity-0 overflow-hidden transition-all duration-700 ease-in-out">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
+                        <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
+                            <i data-lucide="users" class="w-4 h-4 text-purple-500"></i>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">CD. Data Wali <span class="text-slate-600 font-normal italic">(Diisi karena murid tidak tinggal bersama orang tua)</span></h3>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">NIK Wali</label>
-                            <input type="number" name="nikWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Lahir Wali</label>
-                            <input type="number" name="tahunLahirWali" placeholder="YYYY" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Pendidikan Terakhir Wali</label>
-                            <select name="pendidikanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable">
-                                <option value="">Pilih</option>
-                                <option value="Tidak sekolah">Tidak sekolah</option>
-                                <option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA">SMA</option>
-                                <option value="D1">D1</option><option value="D2">D2</option><option value="D3">D3</option>
-                                <option value="D4/S1">D4/S1</option><option value="S2">S2</option><option value="S3">S3</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Pekerjaan Wali</label>
-                            <input type="text" name="pekerjaanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Penghasilan Wali</label>
-                            <select name="pendidikanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable">
-                                <option value="">Pilih</option>
-                                <option value="<500.000">&lt; 500.000</option>
-                                <option value="500.000-999.999">500.000 - 999.999</option>
-                                <option value="1.000.000-1.999.999">1.000.000 - 1.999.999</option>
-                                <option value="2.000.000-4.999.999">2.000.000 - 4.999.999</option>
-                                <option value="5.000.000-20.000.000">5.000.000 - 20.000.000</option>
-                                <option value="tidak berpenghasilan">Tidak berpenghasilan</option>
-                            </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Wali</label>
+                                <input type="text" name="namaWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">NIK Wali</label>
+                                <input type="number" name="nikWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Lahir Wali</label>
+                                <input type="number" name="tahunLahirWali" placeholder="YYYY" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Pendidikan Terakhir Wali</label>
+                                <select name="pendidikanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable">
+                                    <option value="">Pilih</option>
+                                    <option value="Tidak sekolah">Tidak sekolah</option>
+                                    <option value="SD">SD</option><option value="SMP">SMP</option><option value="SMA">SMA</option>
+                                    <option value="D1">D1</option><option value="D2">D2</option><option value="D3">D3</option>
+                                    <option value="D4/S1">D4/S1</option><option value="S2">S2</option><option value="S3">S3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Pekerjaan Wali</label>
+                                <input type="text" name="pekerjaanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm input-focus cacheable">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Penghasilan Wali</label>
+                                <select name="penghasilanWali" class="w-full border border-slate-600 rounded-xl p-3 text-sm bg-white input-focus cacheable"> <option value="">Pilih</option>
+                                    <option value="<500.000">&lt; 500.000</option>
+                                    <option value="500.000-999.999">500.000 - 999.999</option>
+                                    <option value="1.000.000-1.999.999">1.000.000 - 1.999.999</option>
+                                    <option value="2.000.000-4.999.999">2.000.000 - 4.999.999</option>
+                                    <option value="5.000.000-20.000.000">5.000.000 - 20.000.000</option>
+                                    <option value="tidak berpenghasilan">Tidak berpenghasilan</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -426,7 +421,7 @@
                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
                         <i data-lucide="contact" class="w-4 h-4 text-emerald-500"></i>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">F. Kontak Utama & Data Periodik</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">E. Kontak Utama & Data Periodik</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
@@ -459,7 +454,7 @@
                 <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-600">
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-300 bg-slate-100">
                         <i data-lucide="shield-check" class="w-4 h-4 text-orange-500"></i>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">G. Jaminan Sosial / Kesejahteraan Murid</h3>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">F. Jaminan Sosial / Kesejahteraan Murid</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <div>
@@ -544,7 +539,6 @@
         </div>
     </div>
 	
-	<!-- MODAL PERINGATAN DATA BELUM DISIMPAN -->
     <div id="unsavedModal" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div id="unsavedModalContent" class="bg-white rounded-3xl p-6 w-full max-w-[280px] shadow-2xl transform scale-95 transition-transform duration-300 text-center border border-slate-100">
             <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
@@ -584,13 +578,14 @@
         let activeNisn = "";
         let activeNama = "";
         let activeFoto = ""; 
-        let isFormDirty = false; // FLAG UNTUK UNSAVED CHANGES WARNING (IDEA 3)
+        let isFormDirty = false;
 
         history.replaceState({ page: 'list' }, '', window.location.pathname);
 
         window.onload = () => {
             lucide.createIcons();
             setupDateDropdowns();
+            initConditionalLogic(); // Menjalankan logika pertanyaan dinamis
             
             const cachedMaster = localStorage.getItem('master_student_list');
             if (cachedMaster) {
@@ -600,6 +595,58 @@
             
             fetchList();
         };
+
+        // ==========================================
+        // FITUR KONDISIONAL FORM (PERTANYAAN DINAMIS)
+        // ==========================================
+        function toggleSection(elementId, show, maxHeight = "1000px") {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            if (show) {
+                element.classList.remove('hidden');
+                setTimeout(() => {
+                    element.style.maxHeight = maxHeight;
+                    element.classList.remove('opacity-0');
+                    element.classList.add('opacity-100');
+                }, 10);
+            } else {
+                element.style.maxHeight = "0px";
+                element.classList.remove('opacity-100');
+                element.classList.add('opacity-0');
+                
+                // Set to hidden after transition finishes untuk mencegah glitch form space-y-6
+                setTimeout(() => {
+                    if (element.style.maxHeight === "0px") {
+                        element.classList.add('hidden');
+                    }
+                }, 700);
+
+                // Hapus data form di dalamnya jika disembunyikan
+                const inputs = element.querySelectorAll('input:not([type="radio"]), select, textarea');
+                inputs.forEach(input => input.value = "");
+            }
+        }
+
+        function toggleKIP(isPunya) {
+            toggleSection('wrapper_kip_section', isPunya, '80px');
+            if (!isPunya) saveCache();
+        }
+
+        function initConditionalLogic() {
+            // Trigger untuk opsi tempat tinggal -> Form Wali
+            const tempatTinggal = document.getElementById('tempatTinggal');
+            if (tempatTinggal) {
+                ['change', 'input'].forEach(evt => {
+                    tempatTinggal.addEventListener(evt, function() {
+                        // Munculkan jika tidak memilih "Bersama orang tua" dan tidak kosong
+                        const showWali = this.value !== 'Bersama orang tua' && this.value !== '';
+                        toggleSection('wrapper_wali_section', showWali, '1000px');
+                    });
+                });
+            }
+        }
+        // ==========================================
 
         function setupDateDropdowns() {
             const daySel = document.getElementById('dobDay');
@@ -639,7 +686,6 @@
             const container = document.getElementById('studentList');
             
             if(items.length === 0) {
-                // FALLBACK KE SKELETON JIKA ARRAY KOSONG
                 container.innerHTML = `
                     <div class="grid gap-3">
                         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between"><div class="flex items-center gap-3.5 w-full"><div class="w-10 h-10 rounded-xl skeleton flex-shrink-0"></div><div class="space-y-2 w-2/3"><div class="h-4 skeleton rounded w-3/4"></div><div class="h-3 skeleton rounded w-1/2"></div></div></div></div>
@@ -764,7 +810,6 @@
             if (window.location.search !== `?nisn=${activeNisn}`) {
                 history.pushState({ page: 'detail', nisn: activeNisn }, '', `?nisn=${activeNisn}`);
             }
-            // Reset status dirty karena data baru saja dimuat bersih
             isFormDirty = false;
         }
 
@@ -797,13 +842,20 @@
                 }
             });
 
+            // Trigger penyesuaian pertanyaan dinamis setelah data di-load
+            if (data['punyaKip'] === 'Ya') {
+                toggleKIP(true);
+            } else {
+                toggleKIP(false);
+            }
+            
+            const tt = document.getElementById('tempatTinggal');
+            if(tt) toggleSection('wrapper_wali_section', tt.value !== 'Bersama orang tua' && tt.value !== '', '1000px');
+
             loadCache(activeNisn);
-            isFormDirty = false; // Kunci ulang status agar tidak memicu warning secara instan
+            isFormDirty = false; 
         }
 
-// ==========================================
-        // SISTEM PERINGATAN UNSAVED CHANGES
-        // ==========================================
         let exitActionCallback = null;
 
         function openUnsavedModal(callback) {
@@ -834,15 +886,13 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
-        // POPSTATE INTERCEPTION (Tangkapan Swipe Back di HP)
         window.onpopstate = function(event) {
             if (isFormDirty) {
-                // Cegah navigasi instan dari browser
                 history.pushState({ page: 'detail', nisn: activeNisn }, '', `?nisn=${activeNisn}`);
                 
                 openUnsavedModal(() => {
                     isFormDirty = false;
-                    history.back(); // Lanjutkan proses kembali setelah konfirmasi
+                    history.back(); 
                 });
                 return;
             }
@@ -856,7 +906,6 @@
             }
         };
 
-        // MANUAL BACK BUTTON INTERCEPTION (Tombol Kembali)
         function goBack() {
             if (isFormDirty) {
                 openUnsavedModal(() => {
@@ -887,21 +936,11 @@
 			}
 		}
 
-        function toggleKIP(isPunya) {
-            const kipInput = document.getElementById('kip');
-            if(isPunya) {
-                kipInput.classList.remove('hidden');
-            } else {
-                kipInput.classList.add('hidden');
-                kipInput.value = '';
-                saveCache();
-            }
-        }
-
         document.querySelectorAll('.cacheable').forEach(el => {
             el.addEventListener('input', saveCache);
             el.addEventListener('change', saveCache);
         });
+        
 		const inputKoordinat = document.getElementById('koordinat');
 		if (inputKoordinat) {
 			['input', 'change', 'blur'].forEach(evt => {
@@ -916,7 +955,7 @@
             const formData = new FormData(document.getElementById('mainForm'));
             const data = Object.fromEntries(formData.entries());
             localStorage.setItem(`cache_${activeNisn}`, JSON.stringify(data));
-            isFormDirty = true; // Tandai form kotor karena ada perubahan input (IDEA 3)
+            isFormDirty = true; 
         }
 
         function loadCache(nisn) {
@@ -935,11 +974,15 @@
                     }
                 });
                 
+                // Menyesuaikan ulang logika tampilan berdasarkan cache
                 if(data['punyaKip'] === 'Ya') {
                     toggleKIP(true);
                 } else {
                     toggleKIP(false);
                 }
+                
+                const tt = document.getElementById('tempatTinggal');
+                if(tt) toggleSection('wrapper_wali_section', tt.value !== 'Bersama orang tua' && tt.value !== '', '1000px');
             }
 			if (document.getElementById('koordinat')) {
 				hitungJarakKeSekolah(document.getElementById('koordinat').value);
@@ -966,7 +1009,7 @@
                 const result = await res.json();
                 
                 if(result.status === 'success') {
-                    isFormDirty = false; // Matikan warning karena sudah aman disimpan di server
+                    isFormDirty = false;
                     notify("Sinkronisasi Sukses! Berkas Diperbarui.", "success");
                     localStorage.removeItem(`cache_${activeNisn}`);
                     localStorage.removeItem(`server_data_${activeNisn}`); 
