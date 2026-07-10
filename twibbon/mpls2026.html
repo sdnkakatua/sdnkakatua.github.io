@@ -324,7 +324,7 @@
         let liveVideoStream = null; 
         let isLiveCamera = false; 
         let liveCameraAnimation = null;
-        let currentFacingMode = 'user'; // 'user' = Depan, 'environment' = Belakang
+        let currentFacingMode = 'environment'; // 'user' = Depan, 'environment' = Belakang
         
         const liveVideo = document.createElement('video');
         liveVideo.setAttribute('autoplay', ''); 
@@ -626,7 +626,7 @@
         }
 
         startLiveCameraBtn.addEventListener('click', async () => {
-            currentFacingMode = 'user'; // Selalu mulai dari kamera depan default
+    currentFacingMode = 'environment'; // Selalu mulai dari kamera belakang default
             const ready = await initCameraStream(currentFacingMode);
             if (ready) {
                 isLiveCamera = true; 
