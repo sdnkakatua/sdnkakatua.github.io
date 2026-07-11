@@ -59,6 +59,10 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Utility class untuk hide scrollbar di carousel frame */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between text-slate-800 antialiased relative overflow-x-hidden">
@@ -84,7 +88,7 @@
         </div>
     </div>
 
-    <!-- Top Navigation / Header (Floating Glassmorphism, TIDAK LAGI STICKY) -->
+    <!-- Top Navigation / Header -->
     <header class="relative z-50 mx-4 sm:mx-auto max-w-5xl bg-white/70 backdrop-blur-lg border border-white/80 rounded-full px-5 py-3 shadow-xl shadow-indigo-500/5 mt-4 transition-all">
         <div class="flex justify-between items-center gap-3">
             <!-- Logo Area -->
@@ -111,7 +115,7 @@
     <!-- Main Workspace -->
     <main class="max-w-6xl mx-auto w-full flex-grow relative pb-12 pt-6">
         
-        <!-- BAGIAN ATAS: Admin Section & Card 1 (Pilih Foto) -->
+        <!-- BAGIAN ATAS: Admin Section & Cards Input -->
         <div class="px-4 mb-8 max-w-3xl mx-auto w-full space-y-6">
             
             <!-- SECTION ADMIN RAHASIA -->
@@ -131,10 +135,22 @@
                 </div>
             </div>
 
-            <!-- Langkah 1: Input Foto (CARD 1) -->
+            <!-- Langkah 1: Pilih Bingkai (FITUR BARU) -->
             <div class="bg-white/60 backdrop-blur-xl p-5 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-black text-sm">1</div>
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-sm">1</div>
+                    <h3 class="text-sm font-extrabold text-slate-700">Pilih Desain Bingkai</h3>
+                </div>
+                <!-- Container untuk Carousel Bingkai -->
+                <div class="flex gap-4 overflow-x-auto pb-2 snap-x hide-scrollbar" id="frameSelectorContainer">
+                    <!-- Thumbnail frame akan di-generate oleh JavaScript di sini -->
+                </div>
+            </div>
+
+            <!-- Langkah 2: Input Foto -->
+            <div class="bg-white/60 backdrop-blur-xl p-5 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-black text-sm">2</div>
                     <h3 class="text-sm font-extrabold text-slate-700">Pilih Foto Terbaikmu!</h3>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -157,7 +173,7 @@
             
         </div>
 
-        <!-- BAGIAN BAWAH: Frame & Card 2 (Sesuaikan Posisi) -->
+        <!-- BAGIAN BAWAH: Frame & Control Panel -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 px-4 items-start">
             
             <!-- LEFT COLUMN: Live Rendering Canvas (FRAME) -->
@@ -185,22 +201,12 @@
                             </button>
                             <!-- Beralih Kamera Depan/Belakang -->
                             <button id="switchCameraBtn" class="bg-white text-violet-600 p-3 rounded-full shadow-xl hover:bg-violet-50 transition-transform active:scale-90" title="Beralih Kamera">
-                                <svg xmlns="http://www.w3.org/2000/svg" 
-     class="h-6 w-6" fill="none" 
-     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-  <!-- Kamera lebih kecil -->
-  <rect x="7" y="9" width="10" height="6" rx="2" ry="2" />
-  <circle cx="12" cy="12" r="2" />
-  
-  <!-- Panah melingkar kiri -->
-  <path stroke-linecap="round" stroke-linejoin="round" 
-        d="M5 5l-2 2m0-2l2 2M5 5a9 9 0 0114 0" />
-  
-  <!-- Panah melingkar kanan -->
-  <path stroke-linecap="round" stroke-linejoin="round" 
-        d="M19 19l2-2m0 2l-2-2M19 19a9 9 0 01-14 0" />
-</svg>
-
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                  <rect x="7" y="9" width="10" height="6" rx="2" ry="2" />
+                                  <circle cx="12" cy="12" r="2" />
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5l-2 2m0-2l2 2M5 5a9 9 0 0114 0" />
+                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 19l2-2m0 2l-2-2M19 19a9 9 0 01-14 0" />
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -212,14 +218,14 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Control Matrix Panel (CARD 2) -->
+            <!-- RIGHT COLUMN: Control Matrix Panel -->
             <div class="lg:col-span-7 space-y-6 relative z-10">
                 
-                <!-- Langkah 2: Transform Matrix -->
+                <!-- Langkah 3: Transform Matrix -->
                 <div id="controlPanel" class="bg-white/60 backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white opacity-50 pointer-events-none transition-all duration-300">
                     <div class="flex justify-between items-center mb-5 border-b border-slate-200/50 pb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center font-black text-sm">2</div>
+                            <div class="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center font-black text-sm">3</div>
                             <h3 class="text-sm font-extrabold text-slate-700">Sesuaikan Posisi - Bisa Geser langsung pada Foto</h3>
                         </div>
                         <button id="resetTransform" class="text-[10px] font-extrabold text-rose-500 bg-white border border-rose-100 shadow-sm px-3 py-1.5 rounded-xl hover:bg-rose-50 hover:scale-105 transition-all">🔄 Reset</button>
@@ -262,7 +268,7 @@
                     </div>
                 </div>
 
-                <!-- Langkah 3: Ekspor Akhir -->
+                <!-- Langkah Ekspor Akhir -->
                 <div class="pt-2">
                     <button id="downloadBtn" class="w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 hover:from-violet-600 hover:via-fuchsia-600 hover:to-pink-600 text-white font-black text-sm py-4 px-6 rounded-[2rem] shadow-xl shadow-fuchsia-500/30 transition-all flex items-center justify-center gap-3 opacity-50 pointer-events-none active:scale-95 border-2 border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -311,6 +317,59 @@
         const panYRange = document.getElementById('panYRange');
         const rotateRange = document.getElementById('rotateRange');
         const rotateVal = document.getElementById('rotateVal');
+
+        // FITUR MULTIPLE FRAMES ==========================
+        const frameSelectorContainer = document.getElementById('frameSelectorContainer');
+        
+        // Silakan tambahkan atau ganti URL pada array ini dengan link Google Drive / Imgur bingkai yang lain
+        const frameList = [
+            { id: 'f1', url: 'https://lh3.googleusercontent.com/d/1rfHcPTPSdl3pNfoXBhSbnASIGWZ4OjG_', label: 'Frame 1' },
+            { id: 'f2', url: 'https://lh3.googleusercontent.com/d/18z_4bHsW07PuKDMxgmZNexQyXwcKbF1H', label: 'Frame 2' }, 
+			
+					
+            { id: 'f3', url: 'https://via.placeholder.com/1080x1080/fce7f3/db2777.png?text=Bingkai+3+(Ganti+Link)', label: 'Belum tersedia' },
+            { id: 'f4', url: 'https://via.placeholder.com/1080x1080/ccfbf1/059669.png?text=Bingkai+4+(Ganti+Link)', label: 'Belum tersedia' }
+        ];
+        
+        let activeFrameId = 'f1';
+
+        function renderFrameSelector() {
+            frameSelectorContainer.innerHTML = '';
+            frameList.forEach(frame => {
+                const isSelected = frame.id === activeFrameId;
+                
+                // Styling dinamis jika dipilih atau tidak
+                const borderClass = isSelected ? 'border-violet-500 scale-110 shadow-md shadow-violet-200' : 'border-white hover:border-violet-300 scale-100 hover:scale-105';
+                const opacityClass = isSelected ? 'opacity-100' : 'opacity-70 hover:opacity-100';
+                const textClass = isSelected ? 'text-violet-700' : 'text-slate-500';
+                
+                const frameDiv = document.createElement('div');
+                frameDiv.className = `flex-shrink-0 cursor-pointer transition-all duration-300 snap-center w-[72px] flex flex-col items-center gap-1.5 py-2`;
+                
+                // Disini kita gunakan langsung URL aslinya sebagai thumbnail (Browser akan melakukan cache otomatis)
+                frameDiv.innerHTML = `
+                    <div class="w-14 h-14 rounded-2xl overflow-hidden border-4 ${borderClass} transition-all bg-slate-100 flex items-center justify-center">
+                        <img src="${frame.url}" crossorigin="anonymous" class="w-full h-full object-cover ${opacityClass} transition-opacity" alt="${frame.label}">
+                    </div>
+                    <span class="text-[10px] font-extrabold ${textClass} text-center leading-tight whitespace-nowrap">${frame.label}</span>
+                `;
+                
+                frameDiv.addEventListener('click', () => {
+                    activeFrameId = frame.id;
+                    renderFrameSelector(); // Refresh UI selector
+                    
+                    // Ganti gambar frame utama
+                    frameImage.src = frame.url;
+                    statusMessage.innerHTML = `✨ <span class='text-violet-600 font-extrabold'>Memuat bingkai "${frame.label}"...</span>`;
+                });
+                
+                frameSelectorContainer.appendChild(frameDiv);
+            });
+        }
+        
+        // Panggil render saat pertama kali dimuat
+        renderFrameSelector();
+        // ===============================================
 
         let userPhoto = null;
         let frameImage = new Image();
@@ -387,18 +446,18 @@
         submitModalBtn.addEventListener('click', verifyPasscode);
         passcodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPasscode(); });
 
-        const driveDirectUrl = "https://lh3.googleusercontent.com/d/18z_4bHsW07PuKDMxgmZNexQyXwcKbF1H";
         frameImage.crossOrigin = "anonymous";
-        frameImage.src = driveDirectUrl;
+        // Load frame pertama secara default
+        frameImage.src = frameList[0].url;
 
         frameImage.onload = () => {
             configureCanvasDimensions(frameImage.naturalWidth, frameImage.naturalHeight);
-            statusMessage.innerHTML = "✅ <span class='text-emerald-600 font-extrabold'>bingkai mpls @sdnkakatua</span>";
+            statusMessage.innerHTML = "✅ <span class='text-emerald-600 font-extrabold'>Bingkai berhasil dimuat</span>";
         };
 
         frameImage.onerror = () => {
             configureCanvasDimensions(1080, 1080);
-            statusMessage.innerHTML = "⚠️ <span class='text-rose-500 font-extrabold'>Koneksi diblokir. Masuk mode admin.</span>";
+            statusMessage.innerHTML = "⚠️ <span class='text-rose-500 font-extrabold'>Koneksi diblokir / Error memuat bingkai.</span>";
         };
 
         function configureCanvasDimensions(width, height) {
@@ -420,6 +479,10 @@
                         configureCanvasDimensions(frameImage.naturalWidth, frameImage.naturalHeight);
                         statusMessage.innerHTML = "✅ <span class='text-violet-600 font-extrabold'>Bingkai kustom terpasang</span>";
                         showToast("Bingkai berhasil diganti!", 'success');
+                        
+                        // Hapus efek terpilih pada pilihan frame bawaan
+                        activeFrameId = null;
+                        renderFrameSelector();
                     };
                     frameImage.src = event.target.result;
                 };
@@ -626,7 +689,7 @@
         }
 
         startLiveCameraBtn.addEventListener('click', async () => {
-    currentFacingMode = 'environment'; // Selalu mulai dari kamera belakang default
+            currentFacingMode = 'environment'; // Selalu mulai dari kamera belakang default
             const ready = await initCameraStream(currentFacingMode);
             if (ready) {
                 isLiveCamera = true; 
