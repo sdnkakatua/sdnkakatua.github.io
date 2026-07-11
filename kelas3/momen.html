@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalScrapbook | SDN Kakatua</title>
+    
+    <!-- Script untuk mendeteksi Dark Mode Sistem sedini mungkin agar tidak berkedip (FOUC) -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <!-- Fonts, Tailwind, FontAwesome, Toastify, SweetAlert2 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { nunito: ['Nunito', 'sans-serif'] },
+                    colors: { kakatua: { light: '#e0f2fe', main: '#0ea5e9', dark: '#0369a1', accent: '#fde047' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estetika Background ala Kertas Album */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background-color: #f4f0e6; 
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Dark Mode Background */
+        html.dark body {
+            background-color: #1e293b;
+            background-image: 
+                linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        html.dark ::-webkit-scrollbar-track { background: #334155; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        #loading-overlay { backdrop-filter: blur(4px); }
+        
+        /* Desain Polaroid / Cetak Foto */
+        .album-card {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eaeaea;
+        }
+        html.dark .album-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        }
+        
+        .swal2-popup { border-radius: 1.5rem !important; padding: 2rem !important; }
+        html.dark .swal2-popup { background: #1e293b !important; color: #f8fafc !important; }
+        .swal2-title, .swal2-confirm, .swal2-cancel { font-family: 'Nunito', sans-serif !important; font-weight: bold !important; }
+        .swal2-confirm, .swal2-cancel { border-radius: 0.75rem !important; }
+
+        /* Custom Styles untuk Responsivitas Zoom Dinamis */
+        .zoom-level-1 { columns: 1 !important; grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+        .zoom-level-2 { columns: 2 !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .zoom-level-3 { columns: 3 !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        .zoom-level-4 { columns: 4 !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        .zoom-level-5 { columns: 5 !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+    </style>
+</head>
+<body class="text-slate-800 dark:text-slate-100 antialiased min-h-screen relative overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm sticky top-0 z-40 transition-colors duration-300">
+        <div class="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div onclick="handleLogoClick()" class="w-10 h-10 md:w-12 md:h-12 bg-kakatua-main text-white rounded-full flex items-center justify-center text-xl md:text-2xl shadow-md cursor-pointer hover:scale-105 transition-transform select-none shrink-0" title="Klik 3x untuk Login/Logout Admin">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-2xl font-bold text-kakatua-dark dark:text-kakatua-light leading-tight flex items-center gap-2">
+                        Digital Scrapbook 
+                        <span id="admin-badge" class="hidden bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider align-middle">Admin</span>
+                    </h1>
+                    <p class="text-xs md:text-sm font-semibold text-slate-500 dark:text-slate-400">Galley Kelas 3B - SDN Kakatua</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 md:gap-2">
+                <!-- Tombol Admin Controls (Hanya Ikon) -->
+                <div id="admin-controls" class="hidden gap-1.5 md:gap-2">
+                    <button onclick="openModal('uploadModal')" class="w-9 h-9 md:w-12 md:h-12 bg-white dark:bg-slate-800 border-2 border-kakatua-main text-kakatua-main hover:bg-kakatua-light dark:hover:bg-slate-700 rounded-xl transition duration-300 flex items-center justify-center shadow-sm" title="Unggah Foto">
+                        <i class="fa-solid fa-upload"></i>
+                    </button>
+                    <button onclick="openCameraModal()" class="w-9 h-9 md:w-12 md:h-12 bg-kakatua-main hover:bg-kakatua-dark text-white rounded-xl transition duration-300 flex items-center justify-center shadow-md" title="Buka Kamera">
+                        <i class="fa-solid fa-camera"></i>
+                    </button>
+                </div>
+                
+                <!-- Toggle Tampilan (Button Berurutan) -->
+                <button id="viewToggleBtn" onclick="cycleView()" class="w-9 h-9 md:w-12 md:h-12 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl flex items-center justify-center shadow-sm transition hover:bg-slate-300 dark:hover:bg-slate-600 ml-1 md:ml-2" title="Ubah Tampilan">
+                    <i id="view-icon" class="fa-solid fa-table-cells-large"></i>
+                </button>
+
+                <!-- Toggle Dark Mode -->
+                <button onclick="toggleDarkMode()" class="w-9 h-9 md:w-12 md:h-12 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-yellow-400 rounded-full flex items-center justify-center shadow-sm transition-transform hover:scale-105" title="Ganti Tema">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Passcode Mini Toast -->
+    <div id="adminToast" class="fixed top-4 left-1/2 transform -translate-x-1/2 -translate-y-20 opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2 bg-slate-800 p-2 rounded-2xl shadow-xl border border-slate-700">
+        <div class="pl-2 pr-1"><i class="fa-solid fa-lock text-slate-300 text-sm"></i></div>
+        <input type="password" id="adminPasscodeInput" placeholder="Passcode" class="w-24 px-3 py-1.5 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-xl outline-none focus:border-kakatua-main text-sm text-center" onkeypress="if(event.key === 'Enter') verifyAdminToast()">
+        <button onclick="verifyAdminToast()" class="bg-kakatua-main hover:bg-kakatua-dark text-white p-1.5 rounded-xl transition"><i class="fa-solid fa-check w-4 h-4 flex items-center justify-center"></i></button>
+        <button onclick="closeAdminToast()" class="text-slate-400 hover:text-white p-1.5 transition"><i class="fa-solid fa-xmark w-4 h-4 flex items-center justify-center"></i></button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8 relative">
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center bg-white/60 dark:bg-slate-800/60 backdrop-blur rounded-3xl shadow-sm border border-white dark:border-slate-700 mt-4 transition-colors">
+            <img src="https://cdn-icons-png.flaticon.com/512/7326/7326084.png" alt="Empty" class="w-40 h-40 opacity-50 mb-4 drop-shadow-md">
+            <h2 class="text-xl font-bold text-slate-500 dark:text-slate-400">Belum ada kenangan tersimpan</h2>
+            <p class="text-slate-400 dark:text-slate-500 mt-2">Masuk ke Mode Admin untuk mengunggah momen pertama!</p>
+        </div>
+        
+        <!-- Gallery Container -->
+        <div id="gallery" class="hidden mt-4 pb-10"></div>
+    </main>
+
+    <!-- Modal: Lightbox / Lihat Gambar Besar -->
+    <div id="imageModal" class="hidden fixed inset-0 bg-slate-900/90 z-[70] flex items-center justify-center px-4 backdrop-blur-sm transition-opacity opacity-0 duration-300" onclick="closeImageModal()">
+        <div class="relative w-full max-w-4xl flex justify-center items-center">
+            <button onclick="closeImageModal()" class="absolute -top-12 right-0 md:-right-8 text-white hover:text-slate-300 transition text-4xl drop-shadow-md"><i class="fa-solid fa-xmark"></i></button>
+            <img id="enlargedImage" src="" class="max-h-[85vh] max-w-full rounded-2xl shadow-2xl object-contain border-4 border-white/20 transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    <!-- Modal: Unggah Foto -->
+    <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-white dark:border-slate-700">
+            <div class="bg-kakatua-main px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-image mr-2"></i> Unggah Momen Baru</h3>
+                <button onclick="closeModal('uploadModal')" class="text-white hover:text-slate-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Pilih Foto</label>
+                    <input type="file" id="uploadInput" accept="image/*" class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-kakatua-light file:text-kakatua-dark hover:file:bg-blue-200 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Tanggal Kegiatan</label>
+                    <input type="date" id="uploadDate" class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-kakatua-main outline-none bg-slate-50 dark:bg-slate-700 dark:text-white">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Cerita Momen Ini</label>
+                    <textarea id="uploadDesc" rows="3" class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-kakatua-main outline-none resize-none bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Ceritakan keseruan di foto ini..."></textarea>
+                </div>
+                <button onclick="submitUpload()" class="w-full bg-kakatua-main hover:bg-kakatua-dark text-white font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md">
+                    Unggah ke Drive
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Kamera -->
+    <div id="cameraModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center px-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] border border-white dark:border-slate-700">
+            <div class="bg-slate-800 px-6 py-4 flex justify-between items-center text-white shrink-0">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera mr-2"></i> Jepret Langsung!</h3>
+                <button onclick="closeCameraModal()" class="text-white hover:text-slate-300 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                <div id="videoContainer" class="relative bg-black rounded-2xl overflow-hidden aspect-[4/3] shadow-inner flex items-center justify-center border-4 border-slate-100 dark:border-slate-700">
+                    <video id="cameraStream" class="w-full h-full object-cover" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" class="hidden"></canvas>
+                    <img id="cameraPreview" class="hidden w-full h-full object-cover" />
+                </div>
+                <div class="flex justify-center items-center gap-6">
+                    <button id="btnSwitchCamera" onclick="switchCamera()" class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+                        <i class="fa-solid fa-camera-rotate text-lg"></i>
+                    </button>
+                    <button id="btnCapture" onclick="takeSnapshot()" class="bg-kakatua-main text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg border-4 border-kakatua-light hover:scale-105 transition transform">
+                        <i class="fa-solid fa-camera text-2xl"></i>
+                    </button>
+                    <button id="btnRetake" onclick="resetCamera()" class="hidden bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+                        <i class="fa-solid fa-rotate-right text-lg"></i>
+                    </button>
+                </div>
+                <div id="cameraDetails" class="hidden space-y-4 mt-4 animate-fade-in">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Tanggal Kegiatan</label>
+                        <input type="date" id="cameraDate" class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-kakatua-main outline-none bg-slate-50 dark:bg-slate-700 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Cerita Momen Ini</label>
+                        <textarea id="cameraDesc" rows="2" class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-kakatua-main outline-none resize-none bg-slate-50 dark:bg-slate-700 dark:text-white" placeholder="Senyum ceria anak-anak..."></textarea>
+                    </div>
+                    <button onclick="submitCamera()" class="w-full bg-kakatua-accent text-slate-800 hover:bg-yellow-400 font-bold py-3 px-4 rounded-xl transition duration-300 shadow-md">
+                        Unggah ke Drive
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-slate-900/70 z-[60] flex flex-col items-center justify-center">
+        <div class="w-16 h-16 border-4 border-slate-300 border-t-kakatua-main rounded-full animate-spin mb-4"></div>
+        <h3 id="loading-text" class="text-white font-bold text-lg tracking-wide">Memuat...</h3>
+        <p class="text-slate-300 text-sm mt-1">Tunggu sebentar ya.</p>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
+
+    <script>
+        // =========================================================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxAIb2kFw4zkq-ugc1daBGgffVzoY2CxUsMzP-3bytd2i7N4AiD51XCLnclabB1nX9WfQ/exec"; 
+        // =========================================================================
+
+        moment.locale('id'); 
+        const CACHE_KEY = 'scrapbook_3b_data';
+        let memories = [];
+        let isAdmin = localStorage.getItem('scrapbook_admin') === 'true'; 
+        
+        let currentView = localStorage.getItem('scrapbook_view') || 'masonry'; 
+        const viewsList = ['masonry', 'list', 'kolase', 'detail', 'grid']; 
+
+        // State Pinch Zoom Dinamis (Default Kolom Responsif berdasarkan Lebar Layar Awal)
+        let columnsCount = window.innerWidth < 640 ? 1 : (window.innerWidth < 1024 ? 2 : 3);
+        let initialDist = 0;
+        let isPinchZooming = false;
+
+        // Setel ikon mode gelap & nilai toggle view saat pertama dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+            }
+            updateViewIcon(currentView);
+            setupPinchZoom(); // Mengaktifkan deteksi cubitan layar
+        });
+
+        // Toggle Dark Mode
+        function toggleDarkMode() {
+            const htmlElement = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        // Cycle Tampilan
+        function cycleView() {
+            let currentIndex = viewsList.indexOf(currentView);
+            let nextIndex = (currentIndex + 1) % viewsList.length;
+            currentView = viewsList[nextIndex];
+            
+            localStorage.setItem('scrapbook_view', currentView);
+            updateViewIcon(currentView);
+            renderGallery();
+        }
+
+        // Update ikon tombol tampilan berdasarkan mode aktif
+        function updateViewIcon(view) {
+            const iconEl = document.getElementById('view-icon');
+            const btnEl = document.getElementById('viewToggleBtn');
+            
+            iconEl.className = 'fa-solid'; 
+            
+            if (view === 'masonry') {
+                iconEl.classList.add('fa-table-cells-large');
+                btnEl.title = 'Tampilan: Masonry';
+            } else if (view === 'list') {
+                iconEl.classList.add('fa-list');
+                btnEl.title = 'Tampilan: List';
+            } else if (view === 'kolase') {
+                iconEl.classList.add('fa-border-all');
+                btnEl.title = 'Tampilan: Kolase';
+            } else if (view === 'detail') {
+                iconEl.classList.add('fa-image');
+                btnEl.title = 'Tampilan: Detail';
+            } else if (view === 'grid') {
+                iconEl.classList.add('fa-table-cells');
+                btnEl.title = 'Tampilan: Grid';
+            }
+        }
+
+        // --- Logika Deteksi Gerakan Pinch / Cubit ---
+        function setupPinchZoom() {
+            const gallery = document.getElementById('gallery');
+
+            gallery.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2 && (currentView === 'masonry' || currentView === 'grid')) {
+                    isPinchZooming = true;
+                    // Menghitung jarak awal antara dua jari
+                    initialDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            }, { passive: true });
+
+            gallery.addEventListener('touchmove', (e) => {
+                if (!isPinchZooming || e.touches.length !== 2) return;
+
+                const currentDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+
+                const diff = currentDist - initialDist;
+                
+                // Threshold gerakan cubitan agar sensitivitas terasa natural (min 40px perubahan)
+                if (Math.abs(diff) > 40) {
+                    if (diff > 0 && columnsCount > 1) {
+                        // Pinch Out (Jari merenggang) -> Kolom berkurang -> Ukuran kartu membesar
+                        columnsCount--;
+                        applyZoomClass();
+                        initialDist = currentDist; // Reset titik acuan
+                    } else if (diff < 0 && columnsCount < 5) {
+                        // Pinch In (Jari merapat) -> Kolom bertambah -> Ukuran kartu mengecil
+                        columnsCount++;
+                        applyZoomClass();
+                        initialDist = currentDist; // Reset titik acuan
+                    }
+                }
+            }, { passive: true });
+
+            gallery.addEventListener('touchend', () => {
+                isPinchZooming = false;
+            });
+        }
+
+        // Menerapkan perubahan kolom pada container galeri
+        function applyZoomClass() {
+            const gallery = document.getElementById('gallery');
+            
+            // Hapus kelas zoom level sebelumnya
+            for (let i = 1; i <= 5; i++) {
+                gallery.classList.remove(`zoom-level-${i}`);
+            }
+            
+            // Tambahkan kelas baru yang akan menimpa kolom Tailwind secara dinamis
+            gallery.classList.add(`zoom-level-${columnsCount}`);
+        }
+
+        function showLoading(text) {
+            document.getElementById('loading-text').innerText = text;
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        function applyAdminUI() {
+            const adminControls = document.getElementById('admin-controls');
+            const adminBadge = document.getElementById('admin-badge');
+            if (isAdmin) {
+                adminControls.classList.remove('hidden');
+                adminControls.classList.add('flex');
+                adminBadge.classList.remove('hidden');
+            } else {
+                adminControls.classList.add('hidden');
+                adminControls.classList.remove('flex');
+                adminBadge.classList.add('hidden');
+            }
+        }
+
+        // --- Fitur Cache & Sinkronisasi Background ---
+        async function initApp() {
+            if (GAS_URL === "MASUKKAN_URL_GAS_ANDA_DISINI") {
+                return showToast("Error: URL GAS belum dimasukkan!", "error");
+            }
+
+            applyAdminUI();
+
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            if (cachedData) {
+                try {
+                    memories = JSON.parse(cachedData);
+                    renderGallery();
+                } catch(e) { console.error("Cache Error", e); }
+            } else {
+                showLoading("Menyinkronkan untuk pertama kali...");
+            }
+
+            try {
+                const response = await fetch(GAS_URL);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const newDataStr = JSON.stringify(result.data);
+                    
+                    if (newDataStr !== cachedData) {
+                        memories = result.data;
+                        localStorage.setItem(CACHE_KEY, newDataStr);
+                        renderGallery();
+                        
+                        if(cachedData && memories.length > 0) {
+                            showToast("Data terbaru disinkronkan!", "success");
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal sinkronisasi background:", error);
+            } finally {
+                hideLoading(); 
+            }
+        }
+
+        // --- Admin Mode Logic ---
+        let clickCount = 0; let clickTimer = null;
+        function handleLogoClick() {
+            clickCount++;
+            if (clickCount === 1) {
+                clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+            } else if (clickCount === 3) {
+                clearTimeout(clickTimer);
+                clickCount = 0;
+                
+                if (isAdmin) {
+                    logoutAdmin();
+                } else {
+                    promptAdminToast();
+                }
+            }
+        }
+
+        function promptAdminToast() {
+            const toast = document.getElementById('adminToast');
+            toast.classList.remove('pointer-events-none', '-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-2', 'opacity-100', 'pointer-events-auto');
+            setTimeout(() => document.getElementById('adminPasscodeInput').focus(), 300);
+        }
+
+        function closeAdminToast() {
+            const toast = document.getElementById('adminToast');
+            toast.classList.remove('translate-y-2', 'opacity-100', 'pointer-events-auto');
+            toast.classList.add('-translate-y-20', 'opacity-0', 'pointer-events-none');
+            document.getElementById('adminPasscodeInput').value = '';
+        }
+
+        function verifyAdminToast() {
+            const pwd = document.getElementById('adminPasscodeInput').value;
+            if (pwd === "aic") {
+                isAdmin = true;
+                localStorage.setItem('scrapbook_admin', 'true'); 
+                applyAdminUI();
+                renderGallery(); 
+                closeAdminToast();
+                showToast("Berhasil masuk ke Mode Admin!", "success");
+            } else {
+                showToast("Passcode salah!", "error");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            localStorage.removeItem('scrapbook_admin'); 
+            applyAdminUI();
+            renderGallery(); 
+            showToast("Berhasil keluar dari Mode Admin.", "success");
+        }
+
+        // --- Lightbox ---
+        function openImageModal(imgSrc) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('enlargedImage');
+            img.src = imgSrc;
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            img.classList.remove('scale-95');
+            img.classList.add('scale-100');
+        }
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('enlargedImage');
+            modal.classList.add('opacity-0');
+            img.classList.remove('scale-100');
+            img.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // --- Render Gallery ---
+        function renderGallery() {
+            const container = document.getElementById('gallery');
+            const emptyState = document.getElementById('empty-state');
+            
+            container.innerHTML = '';
+            container.className = 'mt-4 pb-10'; 
+            
+            if (memories.length === 0) {
+                emptyState.classList.remove('hidden');
+                container.classList.add('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // Terapkan Class CSS awal
+            if (currentView === 'grid') {
+                container.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4', 'gap-6');
+                applyZoomClass(); // Terapkan zoom state jika mode mendukung
+            } else if (currentView === 'masonry') {
+                container.classList.add('columns-1', 'sm:columns-2', 'lg:columns-3', 'xl:columns-4', 'gap-6', 'space-y-6');
+                applyZoomClass(); // Terapkan zoom state jika mode mendukung
+            } else if (currentView === 'list') {
+                container.classList.add('flex', 'flex-col', 'gap-4', 'max-w-4xl', 'mx-auto', 'w-full');
+            } else if (currentView === 'kolase') {
+                container.classList.add('grid', 'grid-cols-2', 'md:grid-cols-4', 'lg:grid-cols-5', 'gap-2');
+            } else if (currentView === 'detail') {
+                container.classList.add('flex', 'flex-col', 'gap-10', 'max-w-2xl', 'mx-auto', 'w-full');
+            }
+
+            memories.sort((a, b) => b.timestamp - a.timestamp);
+
+            memories.forEach((item, index) => {
+                const formattedDate = moment(item.timestamp).utcOffset(8).format('DD MMM YYYY • HH:mm [WITA]');
+                const timeAgo = moment(item.timestamp).utcOffset(8).fromNow();
+                const delay = Math.min(index * 50, 500);
+                
+                const deleteBtnFull = isAdmin ? `<button onclick="deleteMemory('${item.id}')" class="mt-2 text-[10px] text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 px-2 py-1 rounded font-bold transition flex items-center justify-center gap-1 w-full"><i class="fa-solid fa-trash-can"></i> Hapus Momen</button>` : '';
+                const deleteBtnSmall = isAdmin ? `<button onclick="deleteMemory('${item.id}')" class="text-[10px] text-red-500 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition shadow-sm"><i class="fa-solid fa-trash-can"></i></button>` : '';
+
+                let cardHTML = '';
+
+                if (currentView === 'kolase') {
+                    cardHTML = `
+                    <div class="relative overflow-hidden group cursor-pointer aspect-square rounded-md animate-fade-in-up" style="animation-delay: ${delay}ms" onclick="openImageModal('${item.image}')">
+                        <img src="${item.image}" alt="Kenangan" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy">
+                        <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                            <p class="text-white text-xs line-clamp-2 font-medium">${item.desc}</p>
+                            ${isAdmin ? `<button onclick="event.stopPropagation(); deleteMemory('${item.id}')" class="text-red-400 mt-2 text-xs font-bold flex items-center gap-1 w-fit"><i class="fa-solid fa-trash-can"></i> Hapus</button>` : ''}
+                        </div>
+                    </div>`;
+
+                } else if (currentView === 'list') {
+                    cardHTML = `
+                    <div class="album-card animate-fade-in-up flex flex-row gap-4 items-center hover:shadow-lg transition-shadow duration-300" style="animation-delay: ${delay}ms">
+                        <div class="relative w-28 h-28 md:w-40 md:h-40 shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700 group cursor-pointer rounded-sm" onclick="openImageModal('${item.image}')">
+                            <img src="${item.image}" alt="Kenangan" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
+                        </div>
+                        <div class="flex flex-col justify-between h-full py-1 w-full"> 
+                            <div>
+                                <div class="text-[10px] font-bold text-kakatua-main bg-kakatua-light dark:bg-slate-800 w-fit px-2 py-0.5 rounded-full mb-1">
+                                    <i class="fa-regular fa-calendar mr-1"></i> ${moment(item.date).format('DD MMM YYYY')}
+                                </div>
+                                <p class="text-slate-700 dark:text-slate-200 font-medium leading-snug text-sm md:text-base line-clamp-2 md:line-clamp-3">${item.desc}</p>
+                            </div>
+                            <div class="mt-2 border-t border-slate-100 dark:border-slate-700 pt-2 flex justify-between items-center w-full">
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold">${timeAgo}</span>
+                                ${deleteBtnSmall}
+                            </div>
+                        </div>
+                    </div>`;
+
+                } else {
+                    const isMasonry = currentView === 'masonry';
+                    const wrapperClass = isMasonry ? 'break-inside-avoid inline-block w-full mb-6' : 'flex flex-col';
+                    const imgAspect = isMasonry ? '' : 'aspect-[4/3]'; 
+                    const textClass = currentView === 'detail' ? 'text-base md:text-lg' : 'text-sm';
+
+                    cardHTML = `
+                    <div class="album-card animate-fade-in-up transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ${wrapperClass}" style="animation-delay: ${delay}ms">
+                        
+                        <div class="relative ${imgAspect} overflow-hidden bg-slate-100 dark:bg-slate-700 group cursor-pointer mb-3 rounded-sm" onclick="openImageModal('${item.image}')">
+                            <div class="absolute inset-0 bg-slate-200 dark:bg-slate-600 animate-pulse z-0"></div>
+                            <img src="${item.image}" alt="Kenangan" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 relative z-10" loading="lazy" onload="this.previousElementSibling.style.display='none'">
+                            
+                            <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors duration-300 z-10 flex items-center justify-center">
+                                <i class="fa-solid fa-magnifying-glass-plus text-white opacity-0 group-hover:opacity-100 text-3xl transform scale-50 group-hover:scale-100 transition-all duration-300 drop-shadow-md"></i>
+                            </div>
+
+                            <div class="absolute top-2 right-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur text-[10px] font-bold px-2 py-1 rounded text-slate-700 dark:text-slate-200 shadow-sm z-20">
+                                <i class="fa-regular fa-calendar mr-1 text-kakatua-main"></i> ${moment(item.date).format('DD MMM YY')}
+                            </div>
+                        </div>
+                        
+                        <div class="px-1 flex-1 flex flex-col justify-between"> 
+                            <p class="text-slate-700 dark:text-slate-200 font-medium leading-snug mb-2 ${textClass}">${item.desc}</p>
+                            <div class="flex flex-col border-t border-slate-100 dark:border-slate-700 pt-2 mt-1">
+                                <div class="flex justify-between items-center w-full">
+                                    <span class="text-[9px] text-slate-400 dark:text-slate-500 font-bold">${formattedDate}</span>
+                                    <span class="text-[9px] text-kakatua-main bg-kakatua-light dark:bg-slate-800 px-2 py-0.5 rounded font-extrabold">${timeAgo}</span>
+                                </div>
+                                ${deleteBtnFull}
+                            </div>
+                        </div>
+                    </div>`;
+                }
+
+                container.insertAdjacentHTML('beforeend', cardHTML);
+            });
+        }
+
+        // --- Delete & Upload System ---
+        async function deleteMemory(fileId) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const result = await Swal.fire({
+                title: 'Hapus Kenangan?', text: "Foto ini akan dihapus permanen.", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal', reverseButtons: true,
+                background: isDark ? '#1e293b' : '#fff', color: isDark ? '#f8fafc' : '#1e293b'
+            });
+
+            if(result.isConfirmed) {
+                showLoading("Menghapus foto...");
+                try {
+                    const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', fileId: fileId }) });
+                    const resJson = await response.json();
+                    if (resJson.status === 'success') {
+                        memories = memories.filter(m => m.id !== fileId);
+                        localStorage.setItem(CACHE_KEY, JSON.stringify(memories)); 
+                        renderGallery();
+                        showToast("Berhasil dihapus!", "success");
+                    }
+                } catch (error) {
+                    showToast("Gagal menghapus jaringan bermasalah.", "error");
+                }
+                hideLoading();
+            }
+        }
+
+        async function uploadDataToDrive(base64Image, dateStr, desc) {
+            showLoading("Mengunggah ke Drive...");
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST', body: JSON.stringify({ action: 'upload', image: base64Image, date: dateStr, desc: desc })
+                });
+                const result = await response.json();
+                hideLoading();
+                
+                if (result.status === 'success') {
+                    showToast("Momen baru berhasil disimpan!", "success");
+                    initApp(); 
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                hideLoading();
+                showToast("Gagal mengunggah karena jaringan.", "error");
+                return false;
+            }
+        }
+
+        // --- Modals Form ---
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById('uploadDate').valueAsDate = new Date();
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if(id === 'uploadModal') {
+                document.getElementById('uploadInput').value = '';
+                document.getElementById('uploadDesc').value = '';
+            }
+        }
+        function submitUpload() {
+            const fileInput = document.getElementById('uploadInput');
+            const dateStr = document.getElementById('uploadDate').value;
+            const desc = document.getElementById('uploadDesc').value;
+
+            if (!fileInput.files[0] || !desc || !dateStr) return showToast("Lengkapi form dulu ya!", "error");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const success = await uploadDataToDrive(e.target.result, dateStr, desc);
+                if (success) closeModal('uploadModal');
+            };
+            reader.readAsDataURL(fileInput.files[0]); 
+        }
+
+        // --- Camera Logic ---
+        let videoStream = null; let capturedImageBase64 = null; let currentFacingMode = 'environment';
+        async function startCamera() {
+            try {
+                const video = document.getElementById('cameraStream');
+                video.style.transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: currentFacingMode }, audio: false });
+                video.srcObject = videoStream;
+            } catch (err) {
+                showToast("Tidak dapat mengakses kamera.", "error");
+                closeCameraModal();
+            }
+        }
+        function openCameraModal() {
+            document.getElementById('cameraModal').classList.remove('hidden');
+            document.getElementById('cameraDate').valueAsDate = new Date();
+            resetCameraUI(); startCamera();
+        }
+        function switchCamera() {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            stopCamera(); startCamera();
+        }
+        function closeCameraModal() {
+            document.getElementById('cameraModal').classList.add('hidden');
+            stopCamera(); document.getElementById('cameraDesc').value = '';
+        }
+        function stopCamera() {
+            if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+        }
+        function takeSnapshot() {
+            const video = document.getElementById('cameraStream');
+            const canvas = document.getElementById('cameraCanvas');
+            const preview = document.getElementById('cameraPreview');
+            
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            if (currentFacingMode === 'user') { context.translate(canvas.width, 0); context.scale(-1, 1); }
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            
+            video.classList.add('hidden'); preview.src = capturedImageBase64; preview.classList.remove('hidden');
+            document.getElementById('btnCapture').classList.add('hidden'); document.getElementById('btnSwitchCamera').classList.add('hidden');
+            document.getElementById('btnRetake').classList.remove('hidden'); document.getElementById('cameraDetails').classList.remove('hidden');
+            stopCamera(); 
+        }
+        function resetCamera() { resetCameraUI(); startCamera(); }
+        function resetCameraUI() {
+            capturedImageBase64 = null;
+            document.getElementById('cameraStream').classList.remove('hidden'); document.getElementById('cameraPreview').classList.add('hidden');
+            document.getElementById('btnCapture').classList.remove('hidden'); document.getElementById('btnSwitchCamera').classList.remove('hidden');
+            document.getElementById('btnRetake').classList.add('hidden'); document.getElementById('cameraDetails').classList.add('hidden');
+        }
+
+        async function submitCamera() {
+            const dateStr = document.getElementById('cameraDate').value;
+            const desc = document.getElementById('cameraDesc').value;
+
+            if (!capturedImageBase64 || !desc || !dateStr) return showToast("Ceritakan momen ini dulu!", "error");
+            
+            const success = await uploadDataToDrive(capturedImageBase64, dateStr, desc);
+            if (success) closeCameraModal();
+        }
+
+        // --- Utils ---
+        function showToast(message, type = "success") {
+            let bgColor = type === "success" ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff5f6d, #ffc371)";
+            Toastify({
+                text: message, duration: 3000, close: true, gravity: "top", position: "center", 
+                style: { background: bgColor, borderRadius: "10px", fontFamily: "'Nunito', sans-serif", fontWeight: "bold", padding: "12px 20px" }
+            }).showToast();
+        }
+
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+            .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        `;
+        document.head.appendChild(style);
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
