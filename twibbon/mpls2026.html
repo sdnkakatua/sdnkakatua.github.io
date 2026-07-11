@@ -135,7 +135,7 @@
                 </div>
             </div>
 
-            <!-- Langkah 1: Pilih Bingkai (FITUR BARU) -->
+            <!-- Langkah 1: Pilih Bingkai -->
             <div class="bg-white/60 backdrop-blur-xl p-5 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-black text-sm">1</div>
@@ -321,14 +321,44 @@
         // FITUR MULTIPLE FRAMES ==========================
         const frameSelectorContainer = document.getElementById('frameSelectorContainer');
         
-        // Silakan tambahkan atau ganti URL pada array ini dengan link Google Drive / Imgur bingkai yang lain
+        // --- MODIFIKASI: Penambahan photoArea per bingkai ---
         const frameList = [
-            { id: 'f1', url: 'https://lh3.googleusercontent.com/d/1rfHcPTPSdl3pNfoXBhSbnASIGWZ4OjG_', label: 'Frame 1' },
-            { id: 'f2', url: 'https://lh3.googleusercontent.com/d/18z_4bHsW07PuKDMxgmZNexQyXwcKbF1H', label: 'Frame 2' }, 
-			
-					
-            { id: 'f3', url: 'https://via.placeholder.com/1080x1080/fce7f3/db2777.png?text=Bingkai+3+(Ganti+Link)', label: 'Belum tersedia' },
-            { id: 'f4', url: 'https://via.placeholder.com/1080x1080/ccfbf1/059669.png?text=Bingkai+4+(Ganti+Link)', label: 'Belum tersedia' }
+            { 
+                id: 'f1', 
+                url: 'https://lh3.googleusercontent.com/d/1rfHcPTPSdl3pNfoXBhSbnASIGWZ4OjG_', 
+                label: 'Frame 1',
+                // Data photoArea spesifik untuk Bingkai 1 (menggunakan nilai asli HTML Anda)
+                photoArea: {
+                    centerXOffset: 0.50, // Pas di tengah horizontal
+                    centerYOffset: 0.60, // Agak ke bawah
+                    widthOffset: 0.60,   // Lebar area 60%
+                    heightOffset: 0.60   // Tinggi area 60%
+                }
+            },
+            { 
+                id: 'f2', 
+                url: 'https://lh3.googleusercontent.com/d/18z_4bHsW07PuKDMxgmZNexQyXwcKbF1H', 
+                label: 'Frame 2',
+                // Data photoArea spesifik untuk Bingkai 2 (Contoh: Diletakkan agak di tengah, ukuran lebih kecil)
+                photoArea: {
+                    centerXOffset: 1 / 2.65, // Posisi X (sekitar 0.377 dari lebar kanvas)
+                    centerYOffset: 0.40,     // Posisi Y (40% dari tinggi kanvas)
+                    widthOffset: 0.88,       // Lebar area (88% dari lebar kanvas)
+                    heightOffset: 0.88       // Tinggi area (88% dari lebar kanvas)
+                }
+            }, 
+            { 
+                id: 'f3', 
+                url: 'https://via.placeholder.com/1080x1080/fce7f3/db2777.png?text=Bingkai+3+(Ganti+Link)', 
+                label: 'Belum tersedia',
+                photoArea: { centerXOffset: 0.50, centerYOffset: 0.50, widthOffset: 0.70, heightOffset: 0.70 }
+            },
+            { 
+                id: 'f4', 
+                url: 'https://via.placeholder.com/1080x1080/ccfbf1/059669.png?text=Bingkai+4+(Ganti+Link)', 
+                label: 'Belum tersedia',
+                photoArea: { centerXOffset: 0.50, centerYOffset: 0.50, widthOffset: 0.70, heightOffset: 0.70 }
+            }
         ];
         
         let activeFrameId = 'f1';
@@ -346,7 +376,6 @@
                 const frameDiv = document.createElement('div');
                 frameDiv.className = `flex-shrink-0 cursor-pointer transition-all duration-300 snap-center w-[72px] flex flex-col items-center gap-1.5 py-2`;
                 
-                // Disini kita gunakan langsung URL aslinya sebagai thumbnail (Browser akan melakukan cache otomatis)
                 frameDiv.innerHTML = `
                     <div class="w-14 h-14 rounded-2xl overflow-hidden border-4 ${borderClass} transition-all bg-slate-100 flex items-center justify-center">
                         <img src="${frame.url}" crossorigin="anonymous" class="w-full h-full object-cover ${opacityClass} transition-opacity" alt="${frame.label}">
@@ -530,17 +559,26 @@
         panYRange.addEventListener('input', (e) => { panY = parseInt(e.target.value); renderMatrix(); });
         rotateRange.addEventListener('input', (e) => { angleDegrees = parseInt(e.target.value); rotateVal.innerText = angleDegrees + "°"; renderMatrix(); });
 
+        // --- MODIFIKASI: Fungsi renderMatrix diperbarui ---
         function renderMatrix() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // 1. Ambil data photoArea dari frame yang sedang aktif
+            const activeFrameData = frameList.find(frame => frame.id === activeFrameId);
+            
+            // Fallback (jika user upload frame kustom, gunakan posisi default)
+            const photoArea = activeFrameData ? activeFrameData.photoArea : { 
+                centerXOffset: 1/2.65, centerYOffset: 0.40, widthOffset: 0.88, heightOffset: 0.88 
+            };
+
+            // 2. Kalkulasi ukuran & posisi dinamis dari objek photoArea
+            const cutoutWidth = canvas.width * photoArea.widthOffset; 
+            const cutoutHeight = canvas.width * photoArea.heightOffset;         
+            const targetX = canvas.width * photoArea.centerXOffset;         
+            const targetY = canvas.height * photoArea.centerYOffset;     
+
             if (userPhoto) {
                 ctx.save();
-                const cutoutWidth = canvas.width * 0.88; 
-                const cutoutHeight = cutoutWidth;         
-                
-                const targetX = canvas.width / 2.65;         
-                const targetY = canvas.height * 0.40;     
-
                 const ratio = Math.max(cutoutWidth / userPhoto.width, cutoutHeight / userPhoto.height);
                 const drawWidth = userPhoto.width * ratio * scale;
                 const drawHeight = userPhoto.height * ratio * scale;
@@ -555,13 +593,16 @@
                 ctx.fillStyle = "#94a3b8";
                 ctx.font = "bold " + Math.max(16, canvas.width * 0.04) + "px 'Nunito', sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText("Area Foto Kamu", canvas.width / 2.8, canvas.height * 0.42); 
+                
+                // 3. Posisikan teks panduan agar tepat di tengah target area baru
+                ctx.fillText("Area Foto Kamu", targetX, targetY + (canvas.height * 0.02)); 
             }
 
             if (frameImage.complete && frameImage.naturalWidth !== 0) {
                 ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
             }
         }
+        // ===============================================
 
         downloadBtn.addEventListener('click', () => {
             if (!userPhoto) return;
