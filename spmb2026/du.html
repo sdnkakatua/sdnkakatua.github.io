@@ -844,6 +844,13 @@
                 return matchesSearch && matchesStatus && matchesClass;
             });
 
+            // MENGURUTKAN NAMA BERDASARKAN ALFABET (A-Z)
+            filteredOrder.sort((a, b) => {
+                const nameA = (sheetData[a]['Nama Lengkap'] || '').toLowerCase();
+                const nameB = (sheetData[b]['Nama Lengkap'] || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
             if (filteredOrder.length === 0) {
                 const emptyHtml = `<tr><td colspan="4" class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-folder-open text-3xl mb-3 text-slate-600"></i><br>Data siswa tidak ditemukan.</td></tr>`;
                 if (tbodyA) tbodyA.innerHTML = emptyHtml;
