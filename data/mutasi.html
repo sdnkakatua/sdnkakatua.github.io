@@ -138,6 +138,22 @@
                 </div>
             </div>
 
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
+    <div class="text-center min-w-[50px]">
+        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-user-graduate text-emerald-400 mr-1"></i>Aktif</p>
+        <h2 id="stat-class-c" class="text-xl font-black text-emerald-400">0</h2>
+    </div>
+    <div class="w-px h-8 bg-slate-700"></div>
+    <div class="text-center min-w-[50px]">
+        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
+        <h2 id="stat-class-c-male" class="text-xl font-black text-sky-400">0</h2>
+    </div>
+    <div class="text-center min-w-[50px]">
+        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
+        <h2 id="stat-class-c-female" class="text-xl font-black text-pink-400">0</h2>
+    </div>
+</div>
+
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
                 <div class="text-center min-w-[50px]">
                     <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-right-from-bracket text-fuchsia-400 mr-1"></i>Keluar</p>
@@ -177,11 +193,12 @@
                         <i class="fa-solid fa-chalkboard-user text-slate-500"></i>
                     </div>
                     <select id="filterClass" class="clean-input pl-10 w-full cursor-pointer appearance-none">
-                        <option value="ALL">Semua Mutasi</option>
-                        <option value="Mutasi Masuk">Mutasi Masuk</option>
-                        <option value="Mutasi Keluar">Mutasi Keluar</option>
-                        <option value="Belum ada status">Belum ada status</option>
-                    </select>
+    <option value="ALL">Semua Mutasi</option>
+    <option value="Mutasi Masuk">Mutasi Masuk</option>
+    <option value="Siswa Aktif">Siswa Aktif</option>
+    <option value="Mutasi Keluar">Mutasi Keluar</option>
+    <option value="Belum ada status">Belum ada status</option>
+</select>
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
                     </div>
@@ -261,14 +278,14 @@
         <div id="containerC" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mt-6 flex flex-col">
             <div class="bg-emerald-900/30 p-3 border-b border-slate-700 font-bold text-emerald-400 flex justify-between items-center px-4 md:px-6">
                 <div class="flex items-center gap-3">
-                    <span><i class="fa-solid fa-user-graduate mr-2"></i>Siswa Aktif</span>
+                    <span><i class="fa-solid fa-user-graduate mr-2"></i>CURRENT STUDENT / Siswa Aktif</span>
                 </div>
                 <span id="badge-count-c" class="bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
             </div>
 
             <!-- Grid Rombel Tujuan (Kelas 1A - Kelas 6B) -->
             <div class="p-4 md:p-6 border-b border-slate-700/50">
-                <p class="hidden text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wider">Pilih Rombel Tujuan:</p>
+                <p class="text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wider">Pilih Rombel Tujuan:</p>
                 <div id="rombelGridContainerC" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     <!-- Cards Rombel akan dibuat secara otomatis via JS -->
                 </div>
@@ -427,21 +444,23 @@
             return 28; 
         }
 
-        function countStudentsInRombel(rombel, excludeNisn = null) {
-            if (!rombel) return 0;
-            const normTarget = rombel.trim().toUpperCase();
-            let count = 0;
-            Object.keys(sheetData).forEach(nisn => {
-                if (nisn === excludeNisn) return;
-                const item = sheetData[nisn];
-                const studentRombel = (item['Rombel Tujuan'] || item['rombelTujuan'] || '').trim().toUpperCase();
-                const studentStatus = item['Kelas'] || item['kelas'];
-                if (studentStatus === 'Mutasi Masuk' && studentRombel === normTarget) {
-                    count++;
-                }
-            });
-            return count;
+function countStudentsInRombel(rombel, excludeNisn = null) {
+    if (!rombel) return 0;
+    const normTarget = rombel.trim().toUpperCase();
+    let count = 0;
+    Object.keys(sheetData).forEach(nisn => {
+        if (nisn === excludeNisn) return;
+        const item = sheetData[nisn];
+        const studentRombel = (item['Rombel Tujuan'] || item['rombelTujuan'] || '').trim().toUpperCase();
+        const studentStatus = item['Kelas'] || item['kelas'];
+        
+        // [UPDATE] Tambahkan kondisi untuk menghitung 'Siswa Aktif'
+        if ((studentStatus === 'Mutasi Masuk' || studentStatus === 'Siswa Aktif') && studentRombel === normTarget) {
+            count++;
         }
+    });
+    return count;
+}
 
         function checkRombelCapacity(rombel, excludeNisn = null) {
             if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
@@ -554,7 +573,7 @@
                                 <div class="col-span-2 text-center">Aksi</div>
                             </div>
 
-                            <div id="custom-quota-list" class="max-h-48s overflow-y-auto mb-3 pr-1">
+                            <div id="custom-quota-list" class="max-h-48 overflow-y-auto mb-3 pr-1">
                                 ${customQuotaHtml || '<p class="text-slate-500 text-xs italic py-2 text-center bg-slate-900/50 rounded-lg border border-slate-800">Belum ada kuota khusus. Tambahkan di bawah.</p>'}
                             </div>
                             
@@ -1213,53 +1232,64 @@
             });
         }
 
-        async function simpanData(nisn, btnElement) {
-            if (!isAdmin) return;
-            const form = document.getElementById(`form_${nisn}`);
-            if (!form) return;
+async function simpanData(nisn, btnElement) {
+    if (!isAdmin) return;
+    const form = document.getElementById(`form_${nisn}`);
+    if (!form) return;
 
-            const selectedKelas = form.querySelector('[name="kelas"]').value;
-            const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
+    const selectedKelas = form.querySelector('[name="kelas"]').value;
+    const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
+    const isVerifiedChecked = form.querySelector('[name="statusVerifikasi"]').checked;
 
-            if (selectedKelas === 'Mutasi Masuk' && selectedRombel) {
-                const cap = checkRombelCapacity(selectedRombel, nisn);
-                if (cap.isFull) {
-                    const confirmSave = await Swal.fire({
-                        title: '⚠️ Kapasitas Rombel Penuh!',
-                        html: `
-                            <div class="text-left text-sm text-slate-300">
-                                Rombel <b class="text-amber-400 font-bold">${cap.rombel}</b> telah mencapai batas kuota terpasang!
-                                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 my-3 flex justify-between items-center">
-                                    <span>Siswa Masuk Terdaftar:</span>
-                                    <span class="font-bold text-rose-400 text-base">${cap.count} / ${cap.quota} Siswa</span>
-                                </div>
-                                Apakah Anda tetap yakin ingin memasukkan siswa ini ke Rombel <b class="text-white">${cap.rombel}</b>?
-                            </div>
-                        `,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Tetap Simpan',
-                        cancelButtonText: 'Batal',
-                        customClass: {
-                            popup: 'clean-popup',
-                            confirmButton: 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors',
-                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-5 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
-                        }
-                    });
+    // [UPDATE] Otomatisasi Perubahan Status Mutasi
+    let finalKelas = selectedKelas;
+    if (isVerifiedChecked && selectedKelas === 'Mutasi Masuk') {
+        finalKelas = 'Siswa Aktif';
+    } else if (!isVerifiedChecked && selectedKelas === 'Siswa Aktif') {
+        finalKelas = 'Mutasi Masuk';
+    }
 
-                    if (!confirmSave.isConfirmed) {
-                        return;
-                    }
+    // [UPDATE] Pengecekan Kapasitas Rombel
+    if ((finalKelas === 'Mutasi Masuk' || finalKelas === 'Siswa Aktif') && selectedRombel) {
+        const cap = checkRombelCapacity(selectedRombel, nisn);
+        if (cap.isFull) {
+            const confirmSave = await Swal.fire({
+                title: '⚠️ Kapasitas Rombel Penuh!',
+                html: `
+                    <div class="text-left text-sm text-slate-300">
+                        Rombel <b class="text-amber-400 font-bold">${cap.rombel}</b> telah mencapai batas kuota terpasang!
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 my-3 flex justify-between items-center">
+                            <span>Siswa Masuk Terdaftar:</span>
+                            <span class="font-bold text-rose-400 text-base">${cap.count} / ${cap.quota} Siswa</span>
+                        </div>
+                        Apakah Anda tetap yakin ingin memasukkan siswa ini ke Rombel <b class="text-white">${cap.rombel}</b>?
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Tetap Simpan',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-5 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
                 }
+            });
+
+            if (!confirmSave.isConfirmed) {
+                return;
             }
+        }
+    }
 
-            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
-            btnElement.disabled = true;
+    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+    btnElement.disabled = true;
 
-            const updatedData = {
-                nisn: nisn,
-                nama: form.querySelector('[name="nama"]').value,
-                kelas: selectedKelas,
+    const updatedData = {
+        nisn: nisn,
+        nama: form.querySelector('[name="nama"]').value,
+        kelas: finalKelas, // Gunakan finalKelas di sini
+        // ... (biarkan sisa kode di dalam updatedData seperti semula)
                 gender: form.querySelector('[name="gender"]').value,
                 tanggalMutasi: form.querySelector('[name="tanggalMutasi"]').value,
                 asalTujuanSekolah: form.querySelector('[name="asalTujuanSekolah"]').value,
@@ -1404,7 +1434,12 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Status Mutasi</label>
-                                ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none"><option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option><option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option><option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option></select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
+                                ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none">
+    <option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option>
+    <option value="Siswa Aktif" ${kelasVal==='Siswa Aktif'?'selected':''}>Siswa Aktif</option>
+    <option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option>
+    <option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option>
+</select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Kelamin</label>
@@ -1560,8 +1595,9 @@
 
                 const { trMain, trDetails } = buildRow(nisn, student);
 
-                if (classVal === 'Mutasi Masuk') {
-                    if (isVerified) {
+// [UPDATE] Tangani juga status 'Siswa Aktif'
+                if (classVal === 'Mutasi Masuk' || classVal === 'Siswa Aktif') {
+                    if (isVerified || classVal === 'Siswa Aktif') {
                         counts.c++;
                         if (normGender === 'L') counts.c_m++;
                         if (normGender === 'P') counts.c_f++;
@@ -1664,30 +1700,44 @@
             updateStats(counts);
         }
 
-        function updateStats(counts) {
-            document.getElementById('stat-verified').innerText = counts.v;
-            document.getElementById('stat-unverified').innerText = counts.uv;
-            document.getElementById('stat-total').innerText = (counts.a + counts.b + counts.c + counts.u);
-            document.getElementById('stat-male').innerText = counts.m;
-            document.getElementById('stat-female').innerText = counts.f;
-            
-            document.getElementById('stat-class-a').innerText = counts.a + counts.c;
-            document.getElementById('stat-class-a-male').innerText = counts.a_m + counts.c_m;
-            document.getElementById('stat-class-a-female').innerText = counts.a_f + counts.c_f;
-            
-            document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
-            document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
-            
-            const badgeU = document.getElementById('badge-count-u');
-            if (badgeU) badgeU.innerText = counts.u + ' Siswa';
+function updateStats(counts) {
+    document.getElementById('stat-verified').innerText = counts.v;
+    document.getElementById('stat-unverified').innerText = counts.uv;
+    
+    // PERUBAHAN DI SINI: Total = Aktif (c) + Masuk (a) - Keluar (b)
+    document.getElementById('stat-total').innerText = (counts.c + counts.a);
+    
+// Jika Anda ingin Laki-laki dan Perempuan juga dihitung dengan (Aktif + Masuk - Keluar)
+    document.getElementById('stat-male').innerText = (counts.c_m + counts.a_m);
+    document.getElementById('stat-female').innerText = (counts.c_f + counts.a_f);
+    
+    // Statistik Masuk
+    document.getElementById('stat-class-a').innerText = counts.a;
+    document.getElementById('stat-class-a-male').innerText = counts.a_m;
+    document.getElementById('stat-class-a-female').innerText = counts.a_f;
+    
+    // Statistik Aktif
+    const statC = document.getElementById('stat-class-c');
+    if (statC) {
+        statC.innerText = counts.c;
+        document.getElementById('stat-class-c-male').innerText = counts.c_m;
+        document.getElementById('stat-class-c-female').innerText = counts.c_f;
+    }
+    
+    document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
+    document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
+    
+    const badgeU = document.getElementById('badge-count-u');
+    if (badgeU) badgeU.innerText = counts.u + ' Siswa';
 
-            const badgeC = document.getElementById('badge-count-c');
-            if (badgeC) badgeC.innerText = counts.c + ' Siswa';
-            
-            document.getElementById('stat-class-b').innerText = counts.b;
-            document.getElementById('stat-class-b-male').innerText = counts.b_m;
-            document.getElementById('stat-class-b-female').innerText = counts.b_f;
-        }
+    const badgeC = document.getElementById('badge-count-c');
+    if (badgeC) badgeC.innerText = counts.c + ' Siswa';
+    
+    // Statistik Keluar
+    document.getElementById('stat-class-b').innerText = counts.b;
+    document.getElementById('stat-class-b-male').innerText = counts.b_m;
+    document.getElementById('stat-class-b-female').innerText = counts.b_f;
+}
     </script>
 </body>
 </html>
