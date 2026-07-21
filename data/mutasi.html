@@ -62,7 +62,6 @@
 
         .leaflet-container { z-index: 10 !important; }
 
-        /* Styling Khusus Cetak / PDF */
         @media print {
             body { background-color: #ffffff !important; color: #000000 !important; padding: 0 !important; }
             .no-print, #btn-admin-toggle, #sync-status, .no-print-col { display: none !important; }
@@ -74,7 +73,6 @@
             th, td { border-bottom: 1px solid #94a3b8 !important; padding: 8px !important; background: transparent !important; }
             .clean-checkbox { border-color: #000000 !important; background: transparent !important; }
             .clean-checkbox:checked { background-color: #000000 !important; }
-            /* Khusus Grid Layout Saat Di-Print */
             .grid { display: block !important; }
             .grid > div { margin-bottom: 24px !important; break-inside: avoid; }
         }
@@ -165,13 +163,18 @@
                 <input type="text" id="searchInput" class="clean-input pl-10 w-full" placeholder="Cari Nama atau NISN...">
             </div>
             
-            <div class="w-full md:w-auto flex flex-col md:flex-row gap-4">
+            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
+                <!-- Tombol Atur Kuota Rombel Admin -->
+                <button id="btn-kuota" onclick="openQuotaSettings()" class="hidden bg-amber-600/20 hover:bg-amber-600 text-amber-400 hover:text-white border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center whitespace-nowrap">
+                    <i class="fa-solid fa-sliders mr-2"></i> Kuota Rombel
+                </button>
+
                 <!-- Tombol Tambah Data Khusus Admin -->
                 <button id="btn-tambah" onclick="tambahData()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center shadow-lg shadow-indigo-900/20 whitespace-nowrap">
                     <i class="fa-solid fa-user-plus mr-2"></i> Tambah Siswa
                 </button>
 
-                <div class="w-full md:w-52 relative">
+                <div class="w-full sm:w-52 relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-chalkboard-user text-slate-500"></i>
                     </div>
@@ -188,7 +191,6 @@
             </div>
         </div>
 
-        <!-- Container Belum Ada Status (Disembunyikan jika kosong) -->
         <div id="containerU" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mb-6 hidden">
             <div class="bg-amber-900/30 p-3 border-b border-slate-700 text-center font-bold text-amber-400 flex items-center justify-between px-6">
                 <span><i class="fa-solid fa-triangle-exclamation mr-2"></i>Status Mutasi Belum Ditentukan</span>
@@ -209,10 +211,8 @@
             </div>
         </div>
 
-        <!-- Grid untuk Mutasi Masuk (Kiri) dan Mutasi Keluar (Kanan) -->
         <div id="gridKelas" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            <!-- KARTU MUTASI MASUK -->
             <div id="cardKelasA" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden flex flex-col">
                 <div class="bg-indigo-900/30 p-3 border-b border-slate-700 font-bold text-indigo-400 flex justify-between items-center px-4 md:px-6">
                     <div class="flex items-center gap-3">
@@ -235,7 +235,6 @@
                 </div>
             </div>
 
-            <!-- KARTU MUTASI KELUAR -->
             <div id="cardKelasB" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden flex flex-col">
                 <div class="bg-fuchsia-900/30 p-3 border-b border-slate-700 font-bold text-fuchsia-400 flex justify-between items-center px-4 md:px-6">
                     <div class="flex items-center gap-3">
@@ -276,8 +275,7 @@
     </div>
 
     <script>
-        // !!! WAJIB GANTI DENGAN URL DEPLOYMENT APPS SCRIPT KAMU !!!
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw68q25VyMu_EAVD3kLNJDt0I_xhocPUTf_m7Ik0xTxSkNfoMbp_HnV59u0OPM0xbbM/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYbrYrCjEgb1_xnXQdaz-rEsro_IxnvVopCQgisjLgbPrbrHliN7tBRQQcea1Wocxk/exec';
 
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
@@ -299,6 +297,12 @@
         let userRole = sessionStorage.getItem('spmb_role') || 'guest';
         let isAdmin = userRole === 'admin';
         let isGuru = userRole === 'guru';
+
+        // --- PENGATURAN KUOTA ROMBEL BARU (Per Tingkat Kelas) ---
+        // Default kuota per kelas jika belum di set (Kelas 1 sampai 6 default 28)
+        const initGradeQuotas = { '1': 28, '2': 28, '3': 28, '4': 28, '5': 28, '6': 28 };
+        let defaultGradeQuotas = JSON.parse(localStorage.getItem('spmb_defaultGradeQuotas')) || initGradeQuotas;
+        let customQuotas = JSON.parse(localStorage.getItem('spmb_customQuotas')) || {};
 
         document.addEventListener('DOMContentLoaded', () => {
             updateAdminUI();
@@ -324,6 +328,309 @@
                 }
             });
         });
+
+        // --- MANAJEMEN KUOTA ROMBEL ---
+        function getRombelQuota(rombel) {
+            if (!rombel) return 28; // fallback absolute
+            const norm = rombel.trim().toUpperCase();
+            
+            // 1. Cek apakah ada di kuota khusus
+            if (customQuotas[norm] !== undefined) {
+                const val = customQuotas[norm];
+                return (typeof val === 'object' && val !== null) ? parseInt(val.kuota) : parseInt(val);
+            }
+            
+            // 2. Cek angka pertama pada rombel untuk mengetahui tingkat kelas (Contoh: "1A" -> "1")
+            const gradeMatch = norm.match(/\d/);
+            if (gradeMatch && defaultGradeQuotas[gradeMatch[0]] !== undefined) {
+                return parseInt(defaultGradeQuotas[gradeMatch[0]]);
+            }
+
+            // 3. Jika tidak ada angka, fallback ke kuota default 28
+            return 28; 
+        }
+
+        function countStudentsInRombel(rombel, excludeNisn = null) {
+            if (!rombel) return 0;
+            const normTarget = rombel.trim().toUpperCase();
+            let count = 0;
+            Object.keys(sheetData).forEach(nisn => {
+                if (nisn === excludeNisn) return;
+                const item = sheetData[nisn];
+                const studentRombel = (item['Rombel Tujuan'] || '').trim().toUpperCase();
+                const studentStatus = item['Kelas'];
+                if (studentStatus === 'Mutasi Masuk' && studentRombel === normTarget) {
+                    count++;
+                }
+            });
+            return count;
+        }
+
+        function checkRombelCapacity(rombel, excludeNisn = null) {
+            if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
+            const normRombel = rombel.trim().toUpperCase();
+            const count = countStudentsInRombel(normRombel, excludeNisn);
+            const quota = getRombelQuota(normRombel);
+            return {
+                isFull: count >= quota,
+                count: count,
+                quota: quota,
+                rombel: normRombel
+            };
+        }
+
+        // --- HELPER UNTUK KALKULASI INTERAKTIF KUOTA ROMBEL ---
+        function recalcQuotaRow(r) {
+            const kInput = document.getElementById(`quota_val_${r}`);
+            const tInput = document.getElementById(`quota_terisi_${r}`);
+            const sInput = document.getElementById(`quota_sisa_${r}`);
+            if (kInput && tInput && sInput) {
+                const k = parseInt(kInput.value) || 0;
+                const t = parseInt(tInput.value) || 0;
+                sInput.value = k - t;
+            }
+        }
+
+        function updateNewRombelSisa() {
+            const kInput = document.getElementById('new-rombel-quota');
+            const tInput = document.getElementById('new-rombel-terisi');
+            const sInput = document.getElementById('new-rombel-sisa');
+            if (kInput && tInput && sInput) {
+                const k = parseInt(kInput.value) || 0;
+                const t = parseInt(tInput.value) || 0;
+                sInput.value = k - t;
+            }
+        }
+
+        function openQuotaSettings() {
+            if (!isAdmin) return;
+            
+            let customQuotaHtml = '';
+            Object.keys(customQuotas).forEach(r => {
+                let item = customQuotas[r];
+                let qVal = typeof item === 'object' ? item.kuota : item;
+                let autoTerisi = countStudentsInRombel(r);
+                let tVal = (typeof item === 'object' && item.terisi !== undefined) ? item.terisi : autoTerisi;
+                let sVal = (typeof item === 'object' && item.sisa !== undefined) ? item.sisa : (qVal - tVal);
+
+                customQuotaHtml += `
+                    <div class="grid grid-cols-12 gap-2 items-center bg-slate-900 p-2 rounded-lg border border-slate-700 mb-2">
+                        <div class="col-span-3">
+                            <input type="text" id="quota_name_${r}" value="${r}" class="clean-input font-bold text-indigo-400 uppercase text-xs py-1" readonly>
+                        </div>
+                        <div class="col-span-3">
+                            <input type="number" id="quota_val_${r}" value="${qVal}" oninput="recalcQuotaRow('${r}')" class="clean-input text-center font-bold text-xs py-1">
+                        </div>
+                        <div class="col-span-2">
+                            <input type="number" id="quota_terisi_${r}" value="${tVal}" oninput="recalcQuotaRow('${r}')" class="clean-input text-center font-bold text-emerald-400 text-xs py-1">
+                        </div>
+                        <div class="col-span-2">
+                            <input type="number" id="quota_sisa_${r}" value="${sVal}" class="clean-input text-center font-bold text-amber-400 text-xs py-1" readonly>
+                        </div>
+                        <div class="col-span-2 flex justify-center">
+                            <button type="button" onclick="deleteCustomQuota('${r}')" class="text-rose-400 hover:text-rose-300 p-1 transition-colors" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Bangun input untuk kuota kelas 1 sampai 6
+            let gradeInputsHtml = '';
+            for (let i = 1; i <= 6; i++) {
+                let currentVal = defaultGradeQuotas[i.toString()] || 28;
+                gradeInputsHtml += `
+                    <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700 flex flex-col justify-center items-center">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kelas ${i}</span>
+                        <input type="number" id="def_grade_${i}" class="clean-input w-full text-center py-1.5 font-bold" value="${currentVal}">
+                    </div>
+                `;
+            }
+
+            Swal.fire({
+                title: 'Pengaturan Kuota Rombel',
+                width: '650px',
+                html: `
+                    <div class="text-left text-sm text-slate-300 space-y-4 mt-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-bold uppercase mb-2 block border-b border-slate-700 pb-1">Kuota Standar Default Per Tingkat Kelas</label>
+                            <p class="text-[11px] text-slate-500 mb-3">Sistem otomatis mendeteksi kelas dari angka pertama Rombel (Contoh: "1A" akan memakai kuota "Kelas 1").</p>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                ${gradeInputsHtml}
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-700 pt-3">
+                            <label class="text-[10px] text-slate-400 font-bold uppercase mb-2 block">Pengecualian / Detail Kuota Per Rombel</label>
+                            <p class="text-[11px] text-slate-500 mb-3">Atur Nama Rombel, Kuota, Terisi, dan Sisa yang akan tersinkronkan langsung ke Spreadsheet.</p>
+                            
+                            <!-- Header Kolom -->
+                            <div class="grid grid-cols-12 gap-2 mb-2 px-2 text-[10px] font-bold text-slate-400 uppercase">
+                                <div class="col-span-3">Nama Rombel</div>
+                                <div class="col-span-3 text-center">Kuota</div>
+                                <div class="col-span-2 text-center">Terisi</div>
+                                <div class="col-span-2 text-center">Sisa</div>
+                                <div class="col-span-2 text-center">Aksi</div>
+                            </div>
+
+                            <div id="custom-quota-list" class="max-h-48 overflow-y-auto mb-3 pr-1">
+                                ${customQuotaHtml || '<p class="text-slate-500 text-xs italic py-2 text-center bg-slate-900/50 rounded-lg border border-slate-800">Belum ada kuota khusus. Tambahkan di bawah.</p>'}
+                            </div>
+                            
+                            <!-- Form Tambah Rombel Baru -->
+                            <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-2">
+                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">Tambah Rombel Baru</span>
+                                <div class="grid grid-cols-12 gap-2 items-center">
+                                    <div class="col-span-3">
+                                        <input type="text" id="new-rombel-name" placeholder="Rombel (1A)" class="clean-input uppercase text-xs py-1.5">
+                                    </div>
+                                    <div class="col-span-3">
+                                        <input type="number" id="new-rombel-quota" placeholder="Kuota" oninput="updateNewRombelSisa()" class="clean-input text-xs text-center py-1.5">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <input type="number" id="new-rombel-terisi" placeholder="Terisi" oninput="updateNewRombelSisa()" class="clean-input text-xs text-center py-1.5 text-emerald-400">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <input type="number" id="new-rombel-sisa" placeholder="Sisa" class="clean-input text-xs text-center py-1.5 text-amber-400" readonly>
+                                    </div>
+                                    <div class="col-span-2 flex justify-center">
+                                        <button type="button" onclick="addCustomQuota()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors flex items-center justify-center w-full"><i class="fa-solid fa-plus mr-1"></i> Tambah</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan Semua Kuota',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold border border-slate-600 mr-2'
+                },
+                preConfirm: () => {
+                    let newGradeQuotas = {};
+                    // Simpan nilai kuota kelas 1-6
+                    for(let i = 1; i <= 6; i++) {
+                        let val = parseInt(document.getElementById(`def_grade_${i}`).value);
+                        if (!val || val < 1) {
+                            Swal.showValidationMessage(`Kuota Kelas ${i} minimal 1!`);
+                            return false;
+                        }
+                        newGradeQuotas[i.toString()] = val;
+                    }
+                    
+                    // Simpan nilai kuota khusus, terisi, dan sisa
+                    let rombelListData = [];
+                    Object.keys(customQuotas).forEach(r => {
+                        const kInput = document.getElementById(`quota_val_${r}`);
+                        const tInput = document.getElementById(`quota_terisi_${r}`);
+                        const sInput = document.getElementById(`quota_sisa_${r}`);
+                        
+                        if (kInput) {
+                            const kuota = parseInt(kInput.value) || 28;
+                            const terisi = tInput ? (parseInt(tInput.value) || 0) : countStudentsInRombel(r);
+                            const sisa = sInput ? (parseInt(sInput.value) || (kuota - terisi)) : (kuota - terisi);
+                            
+                            customQuotas[r] = { kuota, terisi, sisa };
+                            rombelListData.push({
+                                namaRombel: r,
+                                kuota: kuota,
+                                terisi: terisi,
+                                sisa: sisa
+                            });
+                        }
+                    });
+
+                    return { newGradeQuotas, customQuotas, rombelListData };
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    defaultGradeQuotas = result.value.newGradeQuotas;
+                    customQuotas = result.value.customQuotas;
+                    
+                    // Simpan Lokal
+                    localStorage.setItem('spmb_defaultGradeQuotas', JSON.stringify(defaultGradeQuotas));
+                    localStorage.setItem('spmb_customQuotas', JSON.stringify(customQuotas));
+                    
+                    cleanToast.fire({ title: 'Menyimpan & Menyinkronkan Kuota...', icon: 'info' });
+
+                    // Sinkronkan ke Spreadsheet
+                    try {
+                        const response = await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify({
+                                action: 'updateKuota',
+                                defaultGradeQuotas: defaultGradeQuotas,
+                                customQuotas: customQuotas,
+                                rombelList: result.value.rombelListData
+                            })
+                        });
+                        const resData = await response.json();
+                        if (resData.result === 'success') {
+                            cleanToast.fire({ title: 'Pengaturan Kuota Disimpan & Tersinkron!', icon: 'success' });
+                        } else {
+                            cleanToast.fire({ title: 'Tersimpan Lokal, Gagal Sinkron Ke Spreadsheet', icon: 'warning' });
+                        }
+                    } catch (err) {
+                        console.error('Gagal sinkron kuota:', err);
+                        cleanToast.fire({ title: 'Tersimpan Lokal (Offline)', icon: 'warning' });
+                    }
+
+                    renderTable();
+                }
+            });
+        }
+
+        function addCustomQuota() {
+            const rName = document.getElementById('new-rombel-name').value.trim().toUpperCase();
+            const rQuota = parseInt(document.getElementById('new-rombel-quota').value);
+            const rTerisiInput = document.getElementById('new-rombel-terisi').value;
+            
+            const autoTerisi = countStudentsInRombel(rName);
+            const rTerisi = (rTerisiInput !== '') ? parseInt(rTerisiInput) : autoTerisi;
+            const rSisa = rQuota - rTerisi;
+            
+            if (!rName) {
+                cleanToast.fire({ title: 'Isi nama rombel!', icon: 'warning' });
+                return;
+            }
+            if (isNaN(rQuota) || rQuota < 1) {
+                cleanToast.fire({ title: 'Isi jumlah kuota yang valid!', icon: 'warning' });
+                return;
+            }
+
+            customQuotas[rName] = { kuota: rQuota, terisi: rTerisi, sisa: rSisa };
+            localStorage.setItem('spmb_customQuotas', JSON.stringify(customQuotas));
+            openQuotaSettings();
+        }
+
+        function deleteCustomQuota(rombel) {
+            delete customQuotas[rombel];
+            localStorage.setItem('spmb_customQuotas', JSON.stringify(customQuotas));
+            openQuotaSettings();
+        }
+
+        function updateRombelBadge(nisn) {
+            const form = document.getElementById(`form_${nisn}`);
+            if(!form) return;
+            const rombelVal = form.querySelector('[name="rombelTujuan"]').value;
+            const badgeEl = document.getElementById(`rombel_capacity_badge_${nisn}`);
+            if(!badgeEl) return;
+
+            if(!rombelVal.trim()) {
+                badgeEl.innerHTML = '';
+                return;
+            }
+
+            const cap = checkRombelCapacity(rombelVal, nisn);
+            if(cap.isFull) {
+                badgeEl.innerHTML = `<span class="text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Penuh (${cap.count}/${cap.quota})</span>`;
+            } else {
+                badgeEl.innerHTML = `<span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-users mr-1"></i>Terisi: ${cap.count}/${cap.quota}</span>`;
+            }
+        }
 
         function buildDriveThumbnail(url) {
             if (!url || url.trim() === '') return '';
@@ -452,19 +759,23 @@
         function updateAdminUI() {
             const badge = document.getElementById('btn-admin-toggle');
             const btnTambah = document.getElementById('btn-tambah');
+            const btnKuota = document.getElementById('btn-kuota');
             
             if (isAdmin) {
                 badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full cursor-pointer select-none hover:bg-emerald-500/20";
                 badge.innerHTML = '<i class="fa-solid fa-lock-open mr-1 fa-beat-fade"></i>Admin | Database SDN Kakatua';
                 if(btnTambah) btnTambah.classList.remove('hidden');
+                if(btnKuota) btnKuota.classList.remove('hidden');
             } else if (isGuru) {
                 badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 rounded-full cursor-pointer select-none hover:bg-teal-500/20";
                 badge.innerHTML = '<i class="fa-solid fa-chalkboard-user mr-1 fa-beat-fade"></i>Guru | Database SDN Kakatua';
                 if(btnTambah) btnTambah.classList.add('hidden');
+                if(btnKuota) btnKuota.classList.add('hidden');
             } else {
                 badge.className = "px-3 py-1 text-xs font-semibold tracking-wider text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded-full cursor-pointer select-none hover:bg-indigo-500/20";
                 badge.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> Database SDN Kakatua';
                 if(btnTambah) btnTambah.classList.add('hidden');
+                if(btnKuota) btnKuota.classList.add('hidden');
             }
         }
 
@@ -603,7 +914,6 @@
             }
         }
 
-        // Fitur Tambah Data
         function tambahData() {
             if (!isAdmin) return;
             
@@ -617,12 +927,20 @@
                         <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap Siswa</label>
                         <input type="text" id="swal-nama" class="clean-input mb-4" placeholder="Ketik Nama Lengkap...">
                         
-                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
-                        <select id="swal-kelas" class="clean-input mb-2 cursor-pointer">
-                            <option value="Belum ada status">-- Pilih Status --</option>
-                            <option value="Mutasi Masuk">Mutasi Masuk</option>
-                            <option value="Mutasi Keluar">Mutasi Keluar</option>
-                        </select>
+                        <div class="grid grid-cols-2 gap-3 mb-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
+                                <select id="swal-kelas" class="clean-input cursor-pointer">
+                                    <option value="Belum ada status">-- Pilih Status --</option>
+                                    <option value="Mutasi Masuk">Mutasi Masuk</option>
+                                    <option value="Mutasi Keluar">Mutasi Keluar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan</label>
+                                <input type="text" id="swal-rombel" class="clean-input uppercase" placeholder="Contoh: 1A, 3B">
+                            </div>
+                        </div>
                     </div>
                 `,
                 showCancelButton: true,
@@ -637,6 +955,7 @@
                     const nisn = document.getElementById('swal-nisn').value.trim();
                     const nama = document.getElementById('swal-nama').value.trim();
                     const kelas = document.getElementById('swal-kelas').value;
+                    const rombel = document.getElementById('swal-rombel').value.trim().toUpperCase();
 
                     if (!nisn) {
                         Swal.showValidationMessage('NISN wajib diisi!');
@@ -646,20 +965,30 @@
                         Swal.showValidationMessage('NISN tersebut sudah terdaftar di Database!');
                         return false;
                     }
-                    return { nisn, nama, kelas };
+
+                    // PENGECEKAN KUOTA SAAT TAMBAH
+                    if (kelas === 'Mutasi Masuk' && rombel) {
+                        const cap = checkRombelCapacity(rombel);
+                        if (cap.isFull) {
+                            Swal.showValidationMessage(`Rombel ${cap.rombel} sudah penuh! (${cap.count}/${cap.quota} Siswa)`);
+                            return false;
+                        }
+                    }
+
+                    return { nisn, nama, kelas, rombel };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const { nisn, nama, kelas } = result.value;
+                    const { nisn, nama, kelas, rombel } = result.value;
                     
                     const newDataToSave = {
                         action: 'add',
-                        nisn: nisn, nama: nama, kelas: kelas,
-                        gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', rombelTujuan: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
+                        nisn: nisn, nama: nama, kelas: kelas, rombelTujuan: rombel,
+                        gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
                     };
                     
                     const localDisplayData = {
-                        'Nama Lengkap': nama, 'Kelas': kelas, 'Status Verifikasi': 'Belum'
+                        'Nama Lengkap': nama, 'Kelas': kelas, 'Rombel Tujuan': rombel, 'Status Verifikasi': 'Belum'
                     };
 
                     sheetData[nisn] = localDisplayData;
@@ -678,7 +1007,6 @@
             });
         }
 
-        // Fitur Hapus Data
         function hapusData(nisn) {
             if (!isAdmin) return;
 
@@ -722,10 +1050,46 @@
             });
         }
 
-        function simpanData(nisn, btnElement) {
+        async function simpanData(nisn, btnElement) {
             if (!isAdmin) return;
             const form = document.getElementById(`form_${nisn}`);
             if (!form) return;
+
+            const selectedKelas = form.querySelector('[name="kelas"]').value;
+            const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
+
+            // PENGONTROL KUOTA & KAPASITAS ROMBEL (CLASS CAPACITY GUARD)
+            if (selectedKelas === 'Mutasi Masuk' && selectedRombel) {
+                const cap = checkRombelCapacity(selectedRombel, nisn);
+                if (cap.isFull) {
+                    const confirmSave = await Swal.fire({
+                        title: '⚠️ Kapasitas Rombel Penuh!',
+                        html: `
+                            <div class="text-left text-sm text-slate-300">
+                                Rombel <b class="text-amber-400 font-bold">${cap.rombel}</b> telah mencapai batas kuota terpasang!
+                                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 my-3 flex justify-between items-center">
+                                    <span>Siswa Masuk Terdaftar:</span>
+                                    <span class="font-bold text-rose-400 text-base">${cap.count} / ${cap.quota} Siswa</span>
+                                </div>
+                                Apakah Anda tetap yakin ingin memasukkan siswa ini ke Rombel <b class="text-white">${cap.rombel}</b>?
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Tetap Simpan',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-5 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
+                        }
+                    });
+
+                    if (!confirmSave.isConfirmed) {
+                        return; // Batal simpan jika admin memilih batal
+                    }
+                }
+            }
 
             btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
             btnElement.disabled = true;
@@ -733,11 +1097,11 @@
             const updatedData = {
                 nisn: nisn,
                 nama: form.querySelector('[name="nama"]').value,
-                kelas: form.querySelector('[name="kelas"]').value,
+                kelas: selectedKelas,
                 gender: form.querySelector('[name="gender"]').value,
                 tanggalMutasi: form.querySelector('[name="tanggalMutasi"]').value,
                 asalTujuanSekolah: form.querySelector('[name="asalTujuanSekolah"]').value,
-                rombelTujuan: form.querySelector('[name="rombelTujuan"]').value,
+                rombelTujuan: selectedRombel,
                 phone: form.querySelector('[name="phone"]').value,
                 statusVerifikasi: form.querySelector('[name="statusVerifikasi"]').checked ? 'Sudah Verif' : 'Belum',
                 
@@ -825,12 +1189,6 @@
                 ? `<img src="${thumbUrl}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-slate-600 cursor-pointer hover:border-indigo-400 transition" onclick="openLightbox('${student['Pas Foto']}', '${student['Nama Lengkap']}')">` 
                 : `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-500 text-xs"><i class="fa-solid fa-user"></i></div>`;
             
-            let badgeClass = 'bg-slate-700 text-slate-300';
-            let iconClass = 'fa-solid fa-user';
-            
-            if(student['Kelas'] === 'Mutasi Masuk') { badgeClass = 'bg-indigo-500/20 text-indigo-300'; iconClass = 'fa-solid fa-right-to-bracket'; }
-            else if(student['Kelas'] === 'Mutasi Keluar') { badgeClass = 'bg-fuchsia-500/20 text-fuchsia-300'; iconClass = 'fa-solid fa-right-from-bracket'; }
-            
             const trMain = document.createElement('tr');
             trMain.className = `border-b border-slate-700/50 hover:bg-slate-700/20 transition-colors cursor-pointer ${vBorder}`;
             trMain.onclick = (e) => { if(!e.target.closest('input') && !e.target.closest('img') && !e.target.closest('a') && !e.target.closest('.clean-checkbox') && !e.target.closest('button')) toggleDetails(nisn); };
@@ -845,7 +1203,8 @@
                 phoneBadge = `<div class="w-8 h-8 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center cursor-not-allowed" title="Tidak ada nomor WA"><i class="fa-brands fa-whatsapp text-lg"></i></div>`;
             }
             
-            /* DITAMBAHKAN ID icon_${nisn} DISINI AGAR FITUR ACCORDION (BUKA-TUTUP DETAIL) BERJALAN LANCAR */
+            const rombelText = student['Rombel Tujuan'] ? `<span class="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-semibold"><i class="fa-solid fa-door-open mr-1"></i>${student['Rombel Tujuan']}</span>` : '';
+
             trMain.innerHTML = `
                 <td class="px-2 py-3 text-center align-middle">${vIcon}</td>
                 <td class="px-2 py-3 text-center align-middle">${photoEl}</td>
@@ -854,8 +1213,9 @@
                         <div class="font-bold text-white text-base leading-tight mb-1 truncate max-w-[200px] md:max-w-[300px]">${student['Nama Lengkap'] || '-'}</div>
                         <i id="icon_${nisn}" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform"></i>
                     </div>
-                    <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
                         <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">${nisn}</span>
+                        ${rombelText}
                     </div>
                 </td>
                 <td class="px-2 py-3 text-center align-middle no-print-col">${phoneBadge}</td>
@@ -864,6 +1224,16 @@
             const trDetails = document.createElement('tr');
             trDetails.className = "bg-slate-900/30";
             
+            // INDIKATOR KAPASITAS KELAS BERJALAN REAL-TIME
+            const rombelVal = student['Rombel Tujuan'] || '';
+            const capInfo = checkRombelCapacity(rombelVal, nisn);
+            let capacityBadge = '';
+            if (rombelVal) {
+                capacityBadge = capInfo.isFull 
+                    ? `<span class="text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Penuh (${capInfo.count}/${capInfo.quota})</span>`
+                    : `<span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-users mr-1"></i>Terisi: ${capInfo.count}/${capInfo.quota}</span>`;
+            }
+
             let editForm = `
                 <div id="form_${nisn}" class="p-4 md:p-6 text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div class="space-y-4">
@@ -882,7 +1252,13 @@
                             <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Mutasi</label><input type="date" name="tanggalMutasi" value="${student['Tanggal Mutasi'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                             <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Asal/Tujuan Sekolah</label><input type="text" name="asalTujuanSekolah" value="${student['Asal/Tujuan Sekolah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                         </div>
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan (Kelas & Bagian)</label><input type="text" name="rombelTujuan" value="${student['Rombel Tujuan'] || ''}" class="clean-input" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}></div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-[10px] text-slate-400 font-bold uppercase block">Rombel Tujuan</label>
+                                <span id="rombel_capacity_badge_${nisn}">${capacityBadge}</span>
+                            </div>
+                            <input type="text" name="rombelTujuan" value="${student['Rombel Tujuan'] || ''}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}>
+                        </div>
                         <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nomor HP (WA)</label><input type="text" name="phone" value="${student['Nomor HP (WhatsApp)'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                         <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Link Pas Foto (Gdrive)</label><input type="text" name="foto" value="${student['Pas Foto'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                         
