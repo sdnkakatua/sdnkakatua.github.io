@@ -979,97 +979,164 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
             }
         }
 
-        function tambahData() {
-            if (!isAdmin) return;
-            
-            Swal.fire({
-                title: 'Tambah Data Baru',
-                html: `
-                    <div class="text-left mt-4">
-                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NISN (Wajib - Unik)</label>
-                        <input type="text" id="swal-nisn" class="clean-input mb-4" placeholder="Ketik NISN...">
-                        
-                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap Siswa</label>
-                        <input type="text" id="swal-nama" class="clean-input mb-4" placeholder="Ketik Nama Lengkap...">
-                        
-                        <div class="grid grid-cols-2 gap-3 mb-2">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
-                                <select id="swal-kelas" class="clean-input cursor-pointer">
-                                    <option value="Belum ada status">-- Pilih Status --</option>
-                                    <option value="Mutasi Masuk">Mutasi Masuk</option>
-                                    <option value="Mutasi Keluar">Mutasi Keluar</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan</label>
-                                <input type="text" id="swal-rombel" class="clean-input uppercase" placeholder="Contoh: 1A, 3B">
-                            </div>
+function tambahData() {
+    if (!isAdmin) return;
+    
+    Swal.fire({
+        title: 'Tambah Data Baru',
+        html: `
+            <div class="text-left mt-4">
+                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NISN (Wajib - Unik)</label>
+                <input type="text" id="swal-nisn" class="clean-input mb-4" placeholder="Ketik NISN...">
+                
+                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap Siswa</label>
+                <input type="text" id="swal-nama" class="clean-input mb-4" placeholder="Ketik Nama Lengkap...">
+                
+                <div class="grid grid-cols-2 gap-3 mb-2">
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
+                        <select id="swal-kelas" class="clean-input cursor-pointer">
+                            <option value="Belum ada status">-- Pilih Status --</option>
+                            <option value="Mutasi Masuk">Mutasi Masuk</option>
+                            <option value="Mutasi Keluar">Mutasi Keluar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan</label>
+                        <select id="swal-rombel" class="clean-input cursor-pointer mb-1">
+                            <option value="">-- Pilih Rombel --</option>
+                            <option value="Kelas 1A">Kelas 1A</option>
+                            <option value="Kelas 1B">Kelas 1B</option>
+                            <option value="Kelas 2A">Kelas 2A</option>
+                            <option value="Kelas 2B">Kelas 2B</option>
+                            <option value="Kelas 3A">Kelas 3A</option>
+                            <option value="Kelas 3B">Kelas 3B</option>
+                            <option value="Kelas 4A">Kelas 4A</option>
+                            <option value="Kelas 4B">Kelas 4B</option>
+                            <option value="Kelas 5A">Kelas 5A</option>
+                            <option value="Kelas 5B">Kelas 5B</option>
+                            <option value="Kelas 6A">Kelas 6A</option>
+                            <option value="Kelas 6B">Kelas 6B</option>
+                        </select>
+                        <!-- Container untuk Statistik Rombel -->
+                        <div id="swal-rombel-stats" class="hidden mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300">
                         </div>
                     </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Buat Data',
-                cancelButtonText: 'Batal',
-                customClass: {
-                    popup: 'clean-popup',
-                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
-                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
-                },
-                preConfirm: () => {
-                    const nisn = document.getElementById('swal-nisn').value.trim();
-                    const nama = document.getElementById('swal-nama').value.trim();
-                    const kelas = document.getElementById('swal-kelas').value;
-                    const rombel = document.getElementById('swal-rombel').value.trim().toUpperCase();
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Buat Data',
+        cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'clean-popup',
+            confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
+            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
+        },
+        didOpen: () => {
+            const rombelSelect = document.getElementById('swal-rombel');
+            const statsContainer = document.getElementById('swal-rombel-stats');
 
-                    if (!nisn) {
-                        Swal.showValidationMessage('NISN wajib diisi!');
-                        return false;
-                    }
-                    if (sheetData[nisn]) {
-                        Swal.showValidationMessage('NISN tersebut sudah terdaftar di Database!');
-                        return false;
-                    }
+            // Event listener saat pilihan Rombel berubah
+            rombelSelect.addEventListener('change', (e) => {
+                const selectedRombel = e.target.value.trim().toUpperCase();
+                
+                if (selectedRombel) {
+                    // Ambil data kapasitas menggunakan fungsi yang sudah ada di kode Anda
+                    const cap = checkRombelCapacity(selectedRombel);
+                    const sisaKuota = cap.quota - cap.count;
+                    const sisaColor = sisaKuota > 0 ? 'text-emerald-400' : 'text-rose-400';
 
-                    if (kelas === 'Mutasi Masuk' && rombel) {
-                        const cap = checkRombelCapacity(rombel);
-                        if (cap.isFull) {
-                            Swal.showValidationMessage(`Rombel ${cap.rombel} sudah penuh! (${cap.count}/${cap.quota} Siswa)`);
-                            return false;
-                        }
-                    }
-
-                    return { nisn, nama, kelas, rombel };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const { nisn, nama, kelas, rombel } = result.value;
-                    
-                    const newDataToSave = {
-                        action: 'add',
-                        nisn: nisn, nama: nama, kelas: kelas, rombelTujuan: rombel,
-                        gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
-                    };
-                    
-                    const localDisplayData = {
-                        'Nama Lengkap': nama, 'Kelas': kelas, 'Rombel Tujuan': rombel, 'Status Verifikasi': 'Belum'
-                    };
-
-                    sheetData[nisn] = localDisplayData;
-                    sheetOrder.unshift(nisn); 
-                    
-                    localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
-                    localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
-                    
-                    pendingSync[nisn] = newDataToSave;
-                    localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
-                    
-                    cleanToast.fire({ title: 'Data Berhasil Dibuat!', icon: 'success' });
-                    renderTable();
-                    silentBackgroundSync();
+                    statsContainer.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <span>Kuota Maksimal</span>
+                            <span class="font-bold text-white">${cap.quota}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span>Siswa Terdaftar</span>
+                            <span class="font-bold text-indigo-400">${cap.count}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1 mt-1 border-t border-slate-700/50">
+                            <span>Sisa Kuota</span>
+                            <span class="font-bold ${sisaColor}">${sisaKuota}</span>
+                        </div>
+                    `;
+                    statsContainer.classList.remove('hidden');
+                } else {
+                    statsContainer.innerHTML = '';
+                    statsContainer.classList.add('hidden');
                 }
             });
+        },
+        preConfirm: () => {
+            const nisn = document.getElementById('swal-nisn').value.trim();
+            const nama = document.getElementById('swal-nama').value.trim();
+            const kelas = document.getElementById('swal-kelas').value;
+            const rombel = document.getElementById('swal-rombel').value.trim().toUpperCase();
+
+            // --- VALIDASI WAJIB UNTUK SEMUA INPUT ---
+            if (!nisn) {
+                Swal.showValidationMessage('NISN wajib diisi!');
+                return false;
+            }
+            if (!nama) {
+                Swal.showValidationMessage('Nama Lengkap wajib diisi!');
+                return false;
+            }
+            if (kelas === 'Belum ada status' || !kelas) {
+                Swal.showValidationMessage('Jenis Mutasi wajib dipilih!');
+                return false;
+            }
+            if (!rombel) {
+                Swal.showValidationMessage('Rombel Tujuan wajib dipilih!');
+                return false;
+            }
+            // ----------------------------------------
+
+            if (sheetData[nisn]) {
+                Swal.showValidationMessage('NISN tersebut sudah terdaftar di Database!');
+                return false;
+            }
+
+            if (kelas === 'Mutasi Masuk' && rombel) {
+                const cap = checkRombelCapacity(rombel);
+                if (cap.isFull) {
+                    Swal.showValidationMessage(`Rombel ${cap.rombel} sudah penuh! Sisa Kuota: 0`);
+                    return false;
+                }
+            }
+
+            return { nisn, nama, kelas, rombel };
         }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { nisn, nama, kelas, rombel } = result.value;
+            
+            const newDataToSave = {
+                action: 'add',
+                nisn: nisn, nama: nama, kelas: kelas, rombelTujuan: rombel,
+                gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
+            };
+            
+            const localDisplayData = {
+                'Nama Lengkap': nama, 'Kelas': kelas, 'Rombel Tujuan': rombel, 'Status Verifikasi': 'Belum'
+            };
+
+            sheetData[nisn] = localDisplayData;
+            sheetOrder.unshift(nisn); 
+            
+            localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+            localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+            
+            pendingSync[nisn] = newDataToSave;
+            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+            
+            cleanToast.fire({ title: 'Data Berhasil Dibuat!', icon: 'success' });
+            renderTable();
+            silentBackgroundSync();
+        }
+    });
+}
 
         function hapusData(nisn) {
             if (!isAdmin) return;
