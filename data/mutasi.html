@@ -164,12 +164,10 @@
             </div>
             
             <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
-                <!-- Tombol Atur Kuota Rombel Admin -->
                 <button id="btn-kuota" onclick="openQuotaSettings()" class="hidden bg-amber-600/20 hover:bg-amber-600 text-amber-400 hover:text-white border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center whitespace-nowrap">
                     <i class="fa-solid fa-sliders mr-2"></i> Kuota Rombel
                 </button>
 
-                <!-- Tombol Tambah Data Khusus Admin -->
                 <button id="btn-tambah" onclick="tambahData()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center shadow-lg shadow-indigo-900/20 whitespace-nowrap">
                     <i class="fa-solid fa-user-plus mr-2"></i> Tambah Siswa
                 </button>
@@ -192,7 +190,7 @@
         </div>
 
         <div id="containerU" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mb-6 hidden">
-            <div class="bg-amber-900/30 p-3 border-b border-slate-700 text-center font-bold text-amber-400 flex items-center justify-between px-6">
+            <div class="bg-amber-900/30 p-3 border-b border-slate-700 font-bold text-amber-400 flex items-center justify-between px-6">
                 <span><i class="fa-solid fa-triangle-exclamation mr-2"></i>Status Mutasi Belum Ditentukan</span>
                 <span id="badge-count-u" class="bg-amber-500/20 text-amber-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
             </div>
@@ -259,6 +257,43 @@
 
         </div>
 
+        <!-- CURRENT STUDENT CARD (DIPERBARUI) -->
+        <div id="containerC" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mt-6 flex flex-col">
+            <div class="bg-emerald-900/30 p-3 border-b border-slate-700 font-bold text-emerald-400 flex justify-between items-center px-4 md:px-6">
+                <div class="flex items-center gap-3">
+                    <span><i class="fa-solid fa-user-graduate mr-2"></i>Siswa Aktif</span>
+                </div>
+                <span id="badge-count-c" class="bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+            </div>
+
+            <!-- Grid Rombel Tujuan (Kelas 1A - Kelas 6B) -->
+            <div class="p-4 md:p-6 border-b border-slate-700/50">
+                <p class="hidden text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wider">Pilih Rombel Tujuan:</p>
+                <div id="rombelGridContainerC" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    <!-- Cards Rombel akan dibuat secara otomatis via JS -->
+                </div>
+            </div>
+
+            <!-- Header Rombel Terpilih & Tabel List Siswa -->
+            <div id="rombelDetailSectionC" class="overflow-x-auto flex-1">
+                <div id="selectedRombelHeaderC" class="bg-slate-900/60 px-6 py-3 border-b border-slate-700 text-slate-300 text-sm font-bold flex items-center justify-between">
+                    <span id="selectedRombelTitleC"><i class="fa-solid fa-hand-pointer mr-2 text-emerald-400"></i>Klik salah satu Rombel di atas untuk melihat daftar siswa</span>
+                    <span id="selectedRombelCountC" class="text-xs bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded-full hidden">0 Siswa</span>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/80 border-b border-slate-700 text-slate-400 text-sm uppercase tracking-wider">
+                            <th class="px-2 py-4 font-semibold text-center w-12">Verif</th>
+                            <th class="px-2 py-4 font-semibold text-center w-16">Foto</th>
+                            <th class="px-4 py-4 font-semibold">Nama & Info</th>
+                            <th class="px-2 py-4 font-semibold text-center w-16 no-print-col">WA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBodyC" class="text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
     <!-- Lightbox Modal -->
@@ -280,6 +315,10 @@
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
 
+        // List Rombel Tujuan Standar
+        const targetRombelsList = ['Kelas 1A', 'Kelas 1B', 'Kelas 2A', 'Kelas 2B', 'Kelas 3A', 'Kelas 3B', 'Kelas 4A', 'Kelas 4B', 'Kelas 5A', 'Kelas 5B', 'Kelas 6A', 'Kelas 6B'];
+        let selectedRombelC = null; // Menyimpan status Rombel mana yang sedang diklik
+
         const cleanToast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -298,7 +337,6 @@
         let isAdmin = userRole === 'admin';
         let isGuru = userRole === 'guru';
 
-        // --- PENGATURAN KUOTA ROMBEL BARU (Per Tingkat Kelas) ---
         const initGradeQuotas = { '1': 28, '2': 28, '3': 28, '4': 28, '5': 28, '6': 28 };
         let defaultGradeQuotas = JSON.parse(localStorage.getItem('spmb_defaultGradeQuotas')) || initGradeQuotas;
         let customQuotas = JSON.parse(localStorage.getItem('spmb_customQuotas')) || {};
@@ -328,20 +366,27 @@
             });
         });
 
-        // --- FUNGSI PENENTUAN JENIS KELAMIN PINTAR ---
+        function selectRombelC(rombelName) {
+            if (selectedRombelC === rombelName) {
+                selectedRombelC = null; // Toggle/Tutup jika diklik ulang
+            } else {
+                selectedRombelC = rombelName;
+            }
+            renderTable();
+        }
+
         function getNormalizedGender(genderVal, nikVal) {
             let g = String(genderVal || '').trim().toUpperCase();
             if (g === 'L' || g.startsWith('LAKI') || g === 'M' || g === 'MALE') return 'L';
             if (g === 'P' || g.startsWith('PEREM') || g.startsWith('WANITA') || g === 'F' || g === 'FEMALE') return 'P';
             
-            // Auto-detect dari NIK 16 digit jika kolom gender kosong/belum diisi
             if (nikVal) {
                 const cleanNik = String(nikVal).replace(/\D/g, '');
                 if (cleanNik.length === 16) {
                     const dayPart = parseInt(cleanNik.substring(6, 8), 10);
                     if (!isNaN(dayPart)) {
-                        if (dayPart > 40 && dayPart <= 71) return 'P'; // Wanita: Tanggal Lahir + 40
-                        if (dayPart >= 1 && dayPart <= 31) return 'L'; // Pria: Tanggal Lahir Biasa
+                        if (dayPart > 40 && dayPart <= 71) return 'P';
+                        if (dayPart >= 1 && dayPart <= 31) return 'L';
                     }
                 }
             }
@@ -365,7 +410,6 @@
             }
         }
 
-        // --- MANAJEMEN KUOTA ROMBEL ---
         function getRombelQuota(rombel) {
             if (!rombel) return 28; 
             const norm = rombel.trim().toUpperCase();
@@ -399,31 +443,27 @@
             return count;
         }
 
-function checkRombelCapacity(rombel, excludeNisn = null) {
-    if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
-    const normRombel = rombel.trim().toUpperCase();
-    
-    // 1. Ambil batas maksimal kuota
-    const quota = getRombelQuota(normRombel);
-    let count = 0;
+        function checkRombelCapacity(rombel, excludeNisn = null) {
+            if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
+            const normRombel = rombel.trim().toUpperCase();
+            
+            const quota = getRombelQuota(normRombel);
+            let count = 0;
 
-    // 2. PERBAIKAN: Prioritaskan membaca jumlah 'terisi' dari database (customQuotas)
-    if (customQuotas[normRombel] && customQuotas[normRombel].terisi !== undefined) {
-        count = parseInt(customQuotas[normRombel].terisi);
-    } else {
-        // 3. Fallback: Jika admin belum mengatur kuota kelas ini, baru hitung manual data mutasi
-        count = countStudentsInRombel(normRombel, excludeNisn);
-    }
+            if (customQuotas[normRombel] && customQuotas[normRombel].terisi !== undefined) {
+                count = parseInt(customQuotas[normRombel].terisi);
+            } else {
+                count = countStudentsInRombel(normRombel, excludeNisn);
+            }
 
-    return {
-        isFull: count >= quota,
-        count: count,
-        quota: quota,
-        rombel: normRombel
-    };
-}
+            return {
+                isFull: count >= quota,
+                count: count,
+                quota: quota,
+                rombel: normRombel
+            };
+        }
 
-        // --- HELPER UNTUK KALKULASI INTERAKTIF KUOTA ROMBEL ---
         function recalcQuotaRow(r) {
             const kInput = document.getElementById(`quota_val_${r}`);
             const tInput = document.getElementById(`quota_terisi_${r}`);
@@ -493,8 +533,8 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
                 title: 'Pengaturan Kuota Rombel',
                 width: '650px',
                 html: `
-                    <div class="text-left text-sm text-slate-300 space-y-4 mt-2">
-                        <div>
+                    <div class="text-left text-sm text-slate-300 space-y-0 mt-2">
+                        <div class="hidden">
                             <label class="text-[10px] text-slate-400 font-bold uppercase mb-2 block border-b border-slate-700 pb-1">Kuota Standar Default Per Tingkat Kelas</label>
                             <p class="text-[11px] text-slate-500 mb-3">Sistem otomatis mendeteksi kelas dari angka pertama Rombel (Contoh: "1A" akan memakai kuota "Kelas 1").</p>
                             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -503,10 +543,10 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
                         </div>
 
                         <div class="border-t border-slate-700 pt-3">
-                            <label class="text-[10px] text-slate-400 font-bold uppercase mb-2 block">Pengecualian / Detail Kuota Per Rombel</label>
-                            <p class="text-[11px] text-slate-500 mb-3">Atur Nama Rombel, Kuota, Terisi, dan Sisa yang akan tersinkronkan langsung ke Spreadsheet.</p>
+                            <label class="hidden text-[10px] text-slate-400 font-bold uppercase mb-2 block">Pengecualian / Detail Kuota Per Rombel</label>
+                            <p class="hidden text-[11px] text-slate-500 mb-3">Atur Nama Rombel, Kuota, Terisi, dan Sisa yang akan tersinkronkan langsung ke Spreadsheet.</p>
                             
-                            <div class="grid grid-cols-12 gap-2 mb-2 px-2 text-[10px] font-bold text-slate-400 uppercase">
+                            <div class="grid grid-cols-12 gap-2 mb-2 px-4 text-[10px] font-bold text-slate-400 uppercase">
                                 <div class="col-span-3">Nama Rombel</div>
                                 <div class="col-span-3 text-center">Kuota</div>
                                 <div class="col-span-2 text-center">Terisi</div>
@@ -514,12 +554,12 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
                                 <div class="col-span-2 text-center">Aksi</div>
                             </div>
 
-                            <div id="custom-quota-list" class="max-h-48 overflow-y-auto mb-3 pr-1">
+                            <div id="custom-quota-list" class="max-h-48s overflow-y-auto mb-3 pr-1">
                                 ${customQuotaHtml || '<p class="text-slate-500 text-xs italic py-2 text-center bg-slate-900/50 rounded-lg border border-slate-800">Belum ada kuota khusus. Tambahkan di bawah.</p>'}
                             </div>
                             
                             <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-2">
-                                <span class="text-[10px] font-bold text-indigo-400 uppercase block">Tambah Rombel Baru</span>
+                                <span class="hidden text-[10px] font-bold text-indigo-400 uppercase block">Tambah Rombel Baru</span>
                                 <div class="grid grid-cols-12 gap-2 items-center">
                                     <div class="col-span-3">
                                         <input type="text" id="new-rombel-name" placeholder="Rombel (1A)" class="clean-input uppercase text-xs py-1.5">
@@ -593,7 +633,6 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
                     
                     cleanToast.fire({ title: 'Menyimpan & Menyinkronkan Kuota...', icon: 'info' });
 
-                    // --- SINKRONISASI PERBAIKAN KE SPREADSHEET (SHEET2) ---
                     try {
                         const response = await fetch(SCRIPT_URL, {
                             method: 'POST',
@@ -945,7 +984,6 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
 
         async function pullFreshData() {
             try {
-                // Ambil Data Siswa Utama
                 const res = await fetch(SCRIPT_URL);
                 const result = await res.json();
                 if(result.result === 'success') {
@@ -959,7 +997,6 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
                     localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
                 }
 
-                // Ambil Data Kuota Rombel dari Sheet2
                 const resKuota = await fetch(SCRIPT_URL + '?action=getKuota');
                 const resultKuota = await resKuota.json();
                 if (resultKuota.result === 'success' && Array.isArray(resultKuota.list)) {
@@ -979,164 +1016,159 @@ function checkRombelCapacity(rombel, excludeNisn = null) {
             }
         }
 
-function tambahData() {
-    if (!isAdmin) return;
-    
-    Swal.fire({
-        title: 'Tambah Data Baru',
-        html: `
-            <div class="text-left mt-4">
-                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NISN (Wajib - Unik)</label>
-                <input type="text" id="swal-nisn" class="clean-input mb-4" placeholder="Ketik NISN...">
-                
-                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap Siswa</label>
-                <input type="text" id="swal-nama" class="clean-input mb-4" placeholder="Ketik Nama Lengkap...">
-                
-                <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div>
-                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
-                        <select id="swal-kelas" class="clean-input cursor-pointer">
-                            <option value="Belum ada status">-- Pilih Status --</option>
-                            <option value="Mutasi Masuk">Mutasi Masuk</option>
-                            <option value="Mutasi Keluar">Mutasi Keluar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan</label>
-                        <select id="swal-rombel" class="clean-input cursor-pointer mb-1">
-                            <option value="">-- Pilih Rombel --</option>
-                            <option value="Kelas 1A">Kelas 1A</option>
-                            <option value="Kelas 1B">Kelas 1B</option>
-                            <option value="Kelas 2A">Kelas 2A</option>
-                            <option value="Kelas 2B">Kelas 2B</option>
-                            <option value="Kelas 3A">Kelas 3A</option>
-                            <option value="Kelas 3B">Kelas 3B</option>
-                            <option value="Kelas 4A">Kelas 4A</option>
-                            <option value="Kelas 4B">Kelas 4B</option>
-                            <option value="Kelas 5A">Kelas 5A</option>
-                            <option value="Kelas 5B">Kelas 5B</option>
-                            <option value="Kelas 6A">Kelas 6A</option>
-                            <option value="Kelas 6B">Kelas 6B</option>
-                        </select>
-                        <!-- Container untuk Statistik Rombel -->
-                        <div id="swal-rombel-stats" class="hidden mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300">
+        function tambahData() {
+            if (!isAdmin) return;
+            
+            Swal.fire({
+                title: 'Tambah Data Baru',
+                html: `
+                    <div class="text-left mt-4">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NISN (Wajib - Unik)</label>
+                        <input type="text" id="swal-nisn" class="clean-input mb-4" placeholder="Ketik NISN...">
+                        
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap Siswa</label>
+                        <input type="text" id="swal-nama" class="clean-input mb-4" placeholder="Ketik Nama Lengkap...">
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Mutasi</label>
+                                <select id="swal-kelas" class="clean-input cursor-pointer">
+                                    <option value="Belum ada status">-- Pilih Status --</option>
+                                    <option value="Mutasi Masuk">Mutasi Masuk</option>
+                                    <option value="Mutasi Keluar">Mutasi Keluar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Rombel Tujuan</label>
+                                <select id="swal-rombel" class="clean-input cursor-pointer mb-1">
+                                    <option value="">-- Pilih Rombel --</option>
+                                    <option value="Kelas 1A">Kelas 1A</option>
+                                    <option value="Kelas 1B">Kelas 1B</option>
+                                    <option value="Kelas 2A">Kelas 2A</option>
+                                    <option value="Kelas 2B">Kelas 2B</option>
+                                    <option value="Kelas 3A">Kelas 3A</option>
+                                    <option value="Kelas 3B">Kelas 3B</option>
+                                    <option value="Kelas 4A">Kelas 4A</option>
+                                    <option value="Kelas 4B">Kelas 4B</option>
+                                    <option value="Kelas 5A">Kelas 5A</option>
+                                    <option value="Kelas 5B">Kelas 5B</option>
+                                    <option value="Kelas 6A">Kelas 6A</option>
+                                    <option value="Kelas 6B">Kelas 6B</option>
+                                </select>
+                                <div id="swal-rombel-stats" class="hidden mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Buat Data',
-        cancelButtonText: 'Batal',
-        customClass: {
-            popup: 'clean-popup',
-            confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
-            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
-        },
-        didOpen: () => {
-            const rombelSelect = document.getElementById('swal-rombel');
-            const statsContainer = document.getElementById('swal-rombel-stats');
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Buat Data',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'clean-popup',
+                    confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-3'
+                },
+                didOpen: () => {
+                    const rombelSelect = document.getElementById('swal-rombel');
+                    const statsContainer = document.getElementById('swal-rombel-stats');
 
-            // Event listener saat pilihan Rombel berubah
-            rombelSelect.addEventListener('change', (e) => {
-                const selectedRombel = e.target.value.trim().toUpperCase();
-                
-                if (selectedRombel) {
-                    // Ambil data kapasitas menggunakan fungsi yang sudah ada di kode Anda
-                    const cap = checkRombelCapacity(selectedRombel);
-                    const sisaKuota = cap.quota - cap.count;
-                    const sisaColor = sisaKuota > 0 ? 'text-emerald-400' : 'text-rose-400';
+                    rombelSelect.addEventListener('change', (e) => {
+                        const selectedRombel = e.target.value.trim().toUpperCase();
+                        
+                        if (selectedRombel) {
+                            const cap = checkRombelCapacity(selectedRombel);
+                            const sisaKuota = cap.quota - cap.count;
+                            const sisaColor = sisaKuota > 0 ? 'text-emerald-400' : 'text-rose-400';
 
-                    statsContainer.innerHTML = `
-                        <div class="flex justify-between items-center mb-1">
-                            <span>Kuota Maksimal</span>
-                            <span class="font-bold text-white">${cap.quota}</span>
-                        </div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span>Siswa Terdaftar</span>
-                            <span class="font-bold text-indigo-400">${cap.count}</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-1 mt-1 border-t border-slate-700/50">
-                            <span>Sisa Kuota</span>
-                            <span class="font-bold ${sisaColor}">${sisaKuota}</span>
-                        </div>
-                    `;
-                    statsContainer.classList.remove('hidden');
-                } else {
-                    statsContainer.innerHTML = '';
-                    statsContainer.classList.add('hidden');
+                            statsContainer.innerHTML = `
+                                <div class="flex justify-between items-center mb-1">
+                                    <span>Kuota Maksimal</span>
+                                    <span class="font-bold text-white">${cap.quota}</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span>Siswa Terdaftar</span>
+                                    <span class="font-bold text-indigo-400">${cap.count}</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1 mt-1 border-t border-slate-700/50">
+                                    <span>Sisa Kuota</span>
+                                    <span class="font-bold ${sisaColor}">${sisaKuota}</span>
+                                </div>
+                            `;
+                            statsContainer.classList.remove('hidden');
+                        } else {
+                            statsContainer.innerHTML = '';
+                            statsContainer.classList.add('hidden');
+                        }
+                    });
+                },
+                preConfirm: () => {
+                    const nisn = document.getElementById('swal-nisn').value.trim();
+                    const nama = document.getElementById('swal-nama').value.trim();
+                    const kelas = document.getElementById('swal-kelas').value;
+                    const rombel = document.getElementById('swal-rombel').value.trim().toUpperCase();
+
+                    if (!nisn) {
+                        Swal.showValidationMessage('NISN wajib diisi!');
+                        return false;
+                    }
+                    if (!nama) {
+                        Swal.showValidationMessage('Nama Lengkap wajib diisi!');
+                        return false;
+                    }
+                    if (kelas === 'Belum ada status' || !kelas) {
+                        Swal.showValidationMessage('Jenis Mutasi wajib dipilih!');
+                        return false;
+                    }
+                    if (!rombel) {
+                        Swal.showValidationMessage('Rombel Tujuan wajib dipilih!');
+                        return false;
+                    }
+
+                    if (sheetData[nisn]) {
+                        Swal.showValidationMessage('NISN tersebut sudah terdaftar di Database!');
+                        return false;
+                    }
+
+                    if (kelas === 'Mutasi Masuk' && rombel) {
+                        const cap = checkRombelCapacity(rombel);
+                        if (cap.isFull) {
+                            Swal.showValidationMessage(`Rombel ${cap.rombel} sudah penuh! Sisa Kuota: 0`);
+                            return false;
+                        }
+                    }
+
+                    return { nisn, nama, kelas, rombel };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { nisn, nama, kelas, rombel } = result.value;
+                    
+                    const newDataToSave = {
+                        action: 'add',
+                        nisn: nisn, nama: nama, kelas: kelas, rombelTujuan: rombel,
+                        gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
+                    };
+                    
+                    const localDisplayData = {
+                        'Nama Lengkap': nama, 'Kelas': kelas, 'Rombel Tujuan': rombel, 'Status Verifikasi': 'Belum'
+                    };
+
+                    sheetData[nisn] = localDisplayData;
+                    sheetOrder.unshift(nisn); 
+                    
+                    localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+                    localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+                    
+                    pendingSync[nisn] = newDataToSave;
+                    localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
+                    
+                    cleanToast.fire({ title: 'Data Berhasil Dibuat!', icon: 'success' });
+                    renderTable();
+                    silentBackgroundSync();
                 }
             });
-        },
-        preConfirm: () => {
-            const nisn = document.getElementById('swal-nisn').value.trim();
-            const nama = document.getElementById('swal-nama').value.trim();
-            const kelas = document.getElementById('swal-kelas').value;
-            const rombel = document.getElementById('swal-rombel').value.trim().toUpperCase();
-
-            // --- VALIDASI WAJIB UNTUK SEMUA INPUT ---
-            if (!nisn) {
-                Swal.showValidationMessage('NISN wajib diisi!');
-                return false;
-            }
-            if (!nama) {
-                Swal.showValidationMessage('Nama Lengkap wajib diisi!');
-                return false;
-            }
-            if (kelas === 'Belum ada status' || !kelas) {
-                Swal.showValidationMessage('Jenis Mutasi wajib dipilih!');
-                return false;
-            }
-            if (!rombel) {
-                Swal.showValidationMessage('Rombel Tujuan wajib dipilih!');
-                return false;
-            }
-            // ----------------------------------------
-
-            if (sheetData[nisn]) {
-                Swal.showValidationMessage('NISN tersebut sudah terdaftar di Database!');
-                return false;
-            }
-
-            if (kelas === 'Mutasi Masuk' && rombel) {
-                const cap = checkRombelCapacity(rombel);
-                if (cap.isFull) {
-                    Swal.showValidationMessage(`Rombel ${cap.rombel} sudah penuh! Sisa Kuota: 0`);
-                    return false;
-                }
-            }
-
-            return { nisn, nama, kelas, rombel };
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const { nisn, nama, kelas, rombel } = result.value;
-            
-            const newDataToSave = {
-                action: 'add',
-                nisn: nisn, nama: nama, kelas: kelas, rombelTujuan: rombel,
-                gender: '', skor: '', pilihan: '', tanggalMutasi: '', asalTujuanSekolah: '', phone: '', statusVerifikasi: 'Belum', nik: '', nokk: '', nipd: '', tempatLahir: '', tanggalLahir: '', noAkta: '', beratBadan: '', tinggiBadan: '', lingkarKepala: '', alamat: '', lintang: '', bujur: '', jarakSekolah: '', namaAyah: '', nikAyah: '', namaIbu: '', nikIbu: '', foto: ''
-            };
-            
-            const localDisplayData = {
-                'Nama Lengkap': nama, 'Kelas': kelas, 'Rombel Tujuan': rombel, 'Status Verifikasi': 'Belum'
-            };
-
-            sheetData[nisn] = localDisplayData;
-            sheetOrder.unshift(nisn); 
-            
-            localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
-            localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
-            
-            pendingSync[nisn] = newDataToSave;
-            localStorage.setItem('spmb_pendingSync', JSON.stringify(pendingSync));
-            
-            cleanToast.fire({ title: 'Data Berhasil Dibuat!', icon: 'success' });
-            renderTable();
-            silentBackgroundSync();
-        }
-    });
-}
 
         function hapusData(nisn) {
             if (!isAdmin) return;
@@ -1360,14 +1392,6 @@ function tambahData() {
 
             const trDetails = document.createElement('tr');
             trDetails.className = "bg-slate-900/30";
-            
-            const capInfo = checkRombelCapacity(rombelTujuanVal, nisn);
-            let capacityBadge = '';
-            if (rombelTujuanVal) {
-                capacityBadge = capInfo.isFull 
-                    ? `<span class="text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Penuh (${capInfo.count}/${capInfo.quota})</span>`
-                    : `<span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-users mr-1"></i>Terisi: ${capInfo.count}/${capInfo.quota}</span>`;
-            }
 
             const rawGender = student['Jenis Kelamin'] || student['gender'] || '';
             const rawNik = student['NIK'] || student['nik'] || '';
@@ -1394,7 +1418,6 @@ function tambahData() {
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <label class="text-[10px] text-slate-400 font-bold uppercase block">Rombel Tujuan</label>
-                                
                             </div>
                             <input type="text" name="rombelTujuan" value="${rombelTujuanVal}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}>
                         </div>
@@ -1488,23 +1511,29 @@ function tambahData() {
             const tbodyA = document.getElementById('studentTableBodyA');
             const tbodyB = document.getElementById('studentTableBodyB');
             const tbodyU = document.getElementById('studentTableBodyU');
+            const tbodyC = document.getElementById('studentTableBodyC');
+            const rombelGridC = document.getElementById('rombelGridContainerC');
             
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
             const filterClassVal = document.getElementById('filterClass').value;
 
-            tbodyA.innerHTML = ''; tbodyB.innerHTML = ''; tbodyU.innerHTML = '';
+            tbodyA.innerHTML = ''; tbodyB.innerHTML = ''; tbodyU.innerHTML = ''; tbodyC.innerHTML = '';
 
-            let counts = { a: 0, b: 0, u: 0, v: 0, uv: 0, m: 0, f: 0, a_m: 0, a_f: 0, b_m: 0, b_f: 0 };
+            let counts = { a: 0, b: 0, c: 0, u: 0, v: 0, uv: 0, m: 0, f: 0, a_m: 0, a_f: 0, b_m: 0, b_f: 0, c_m: 0, c_f: 0 };
             
+            // Map pengelompokan siswa aktif per Rombel untuk Current Student
+            let currentStudentsByRombel = {};
+            targetRombelsList.forEach(r => currentStudentsByRombel[r] = []);
+
             if(!sheetOrder || sheetOrder.length === 0) {
                 const emptyHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Belum ada data atau sedang memuat...</td></tr>`;
-                tbodyA.innerHTML = emptyHTML; tbodyB.innerHTML = emptyHTML; tbodyU.innerHTML = emptyHTML;
+                tbodyA.innerHTML = emptyHTML; tbodyB.innerHTML = emptyHTML; tbodyU.innerHTML = emptyHTML; tbodyC.innerHTML = emptyHTML;
                 document.getElementById('containerU').classList.add('hidden');
                 updateStats(counts);
                 return;
             }
 
-            let renderedA = 0; let renderedB = 0; let renderedU = 0;
+            let renderedA = 0; let renderedB = 0; let renderedU = 0; let renderedC = 0;
 
             sheetOrder.forEach(nisn => {
                 const student = sheetData[nisn];
@@ -1525,7 +1554,6 @@ function tambahData() {
                 const rawNik = student['NIK'] || student['nik'] || '';
                 const normGender = getNormalizedGender(rawGender, rawNik);
 
-                // Update Stats
                 if (isVerified) counts.v++; else counts.uv++;
                 if (normGender === 'L') counts.m++;
                 if (normGender === 'P') counts.f++;
@@ -1533,12 +1561,29 @@ function tambahData() {
                 const { trMain, trDetails } = buildRow(nisn, student);
 
                 if (classVal === 'Mutasi Masuk') {
-                    counts.a++;
-                    if (normGender === 'L') counts.a_m++;
-                    if (normGender === 'P') counts.a_f++;
-                    tbodyA.appendChild(trMain);
-                    tbodyA.appendChild(trDetails);
-                    renderedA++;
+                    if (isVerified) {
+                        counts.c++;
+                        if (normGender === 'L') counts.c_m++;
+                        if (normGender === 'P') counts.c_f++;
+
+                        // Kelompokkan siswa berdasarkan Rombel Tujuan
+                        const rName = (student['Rombel Tujuan'] || student['rombelTujuan'] || '').trim();
+                        // Cari rName pada list standar (Case Insensitive & Trim)
+                        const matchedRombel = targetRombelsList.find(r => r.toLowerCase() === rName.toLowerCase()) || rName;
+
+                        if (!currentStudentsByRombel[matchedRombel]) {
+                            currentStudentsByRombel[matchedRombel] = [];
+                        }
+                        currentStudentsByRombel[matchedRombel].push({ trMain, trDetails });
+                        renderedC++;
+                    } else {
+                        counts.a++;
+                        if (normGender === 'L') counts.a_m++;
+                        if (normGender === 'P') counts.a_f++;
+                        tbodyA.appendChild(trMain);
+                        tbodyA.appendChild(trDetails);
+                        renderedA++;
+                    }
                 } else if (classVal === 'Mutasi Keluar') {
                     counts.b++;
                     if (normGender === 'L') counts.b_m++;
@@ -1554,37 +1599,94 @@ function tambahData() {
                 }
             });
 
-            // Update UI based on rendered content
+            // 1. Render Grid Card Rombel (Kelas 1A - Kelas 6B)
+            if (rombelGridC) {
+                rombelGridC.innerHTML = '';
+                targetRombelsList.forEach(rombel => {
+                    const studentList = currentStudentsByRombel[rombel] || [];
+                    const count = studentList.length;
+                    const isSelected = selectedRombelC === rombel;
+
+                    const cardBtn = document.createElement('button');
+                    cardBtn.type = 'button';
+                    cardBtn.onclick = () => selectRombelC(rombel);
+                    cardBtn.className = `p-3 rounded-lg border text-left transition-all duration-200 flex flex-col justify-between ${
+                        isSelected 
+                        ? 'bg-emerald-600/30 border-emerald-500 text-white shadow-lg shadow-emerald-950/50 scale-[1.02]' 
+                        : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:border-emerald-500/50 hover:bg-slate-800'
+                    }`;
+
+                    cardBtn.innerHTML = `
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-bold text-sm ${isSelected ? 'text-emerald-400' : 'text-slate-200'}">${rombel}</span>
+                            <i class="fa-solid fa-graduation-cap text-xs ${isSelected ? 'text-emerald-400' : 'text-slate-500'}"></i>
+                        </div>
+                        <div class="text-[11px] font-semibold ${count > 0 ? 'text-emerald-400' : 'text-slate-500'}">
+                            ${count} Siswa
+                        </div>
+                    `;
+                    rombelGridC.appendChild(cardBtn);
+                });
+            }
+
+            // 2. Render Tabel Siswa dari Rombel yang Terpilih
+            const titleEl = document.getElementById('selectedRombelTitleC');
+            const countEl = document.getElementById('selectedRombelCountC');
+
+            if (selectedRombelC) {
+                const activeSiswaList = currentStudentsByRombel[selectedRombelC] || [];
+                if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-2 text-emerald-400"></i>Daftar Siswa — ${selectedRombelC}`;
+                if (countEl) {
+                    countEl.innerText = `${activeSiswaList.length} Siswa`;
+                    countEl.classList.remove('hidden');
+                }
+
+                if (activeSiswaList.length === 0) {
+                    tbodyC.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-user-slash text-3xl mb-2 opacity-50 block"></i>Belum ada siswa aktif di ${selectedRombelC}</td></tr>`;
+                } else {
+                    activeSiswaList.forEach(item => {
+                        tbodyC.appendChild(item.trMain);
+                        tbodyC.appendChild(item.trDetails);
+                    });
+                }
+            } else {
+                if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-hand-pointer mr-2 text-emerald-400"></i>Klik salah satu Rombel di atas untuk melihat daftar siswa`;
+                if (countEl) countEl.classList.add('hidden');
+                tbodyC.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-arrow-up text-2xl mb-2 opacity-50 block animate-bounce"></i>Pilih Rombel (Kelas 1A - Kelas 6B) di atas</td></tr>`;
+            }
+
             if (renderedA === 0) tbodyA.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
             if (renderedB === 0) tbodyB.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
             if (renderedU === 0) tbodyU.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
             
             document.getElementById('containerU').classList.toggle('hidden', renderedU === 0 && filterClassVal !== 'Belum ada status');
-            document.getElementById('cardKelasA').classList.toggle('hidden', renderedA === 0 && filterClassVal === 'Belum ada status');
-            document.getElementById('cardKelasB').classList.toggle('hidden', renderedB === 0 && filterClassVal === 'Belum ada status');
-
+            
             updateStats(counts);
         }
 
         function updateStats(counts) {
             document.getElementById('stat-verified').innerText = counts.v;
             document.getElementById('stat-unverified').innerText = counts.uv;
-            document.getElementById('stat-total').innerText = (counts.a + counts.b + counts.u);
+            document.getElementById('stat-total').innerText = (counts.a + counts.b + counts.c + counts.u);
             document.getElementById('stat-male').innerText = counts.m;
             document.getElementById('stat-female').innerText = counts.f;
             
-            document.getElementById('stat-class-a').innerText = counts.a;
-            document.getElementById('stat-class-a-male').innerText = counts.a_m;
-            document.getElementById('stat-class-a-female').innerText = counts.a_f;
-            document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
+            document.getElementById('stat-class-a').innerText = counts.a + counts.c;
+            document.getElementById('stat-class-a-male').innerText = counts.a_m + counts.c_m;
+            document.getElementById('stat-class-a-female').innerText = counts.a_f + counts.c_f;
             
-            document.getElementById('stat-class-b').innerText = counts.b;
-            document.getElementById('stat-class-b-male').innerText = counts.b_m;
-            document.getElementById('stat-class-b-female').innerText = counts.b_f;
+            document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
             document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
             
             const badgeU = document.getElementById('badge-count-u');
             if (badgeU) badgeU.innerText = counts.u + ' Siswa';
+
+            const badgeC = document.getElementById('badge-count-c');
+            if (badgeC) badgeC.innerText = counts.c + ' Siswa';
+            
+            document.getElementById('stat-class-b').innerText = counts.b;
+            document.getElementById('stat-class-b-male').innerText = counts.b_m;
+            document.getElementById('stat-class-b-female').innerText = counts.b_f;
         }
     </script>
 </body>
