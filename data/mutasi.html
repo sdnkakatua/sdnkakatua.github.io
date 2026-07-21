@@ -275,7 +275,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYbrYrCjEgb1_xnXQdaz-rEsro_IxnvVopCQgisjLgbPrbrHliN7tBRQQcea1Wocxk/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQoUonNs4Ks-JFC01c2e6fd-Y0L8Al_MoXXVsXARN6lZbdXCCrccBwsttjfE-jTcx4/exec';
 
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
@@ -299,7 +299,6 @@
         let isGuru = userRole === 'guru';
 
         // --- PENGATURAN KUOTA ROMBEL BARU (Per Tingkat Kelas) ---
-        // Default kuota per kelas jika belum di set (Kelas 1 sampai 6 default 28)
         const initGradeQuotas = { '1': 28, '2': 28, '3': 28, '4': 28, '5': 28, '6': 28 };
         let defaultGradeQuotas = JSON.parse(localStorage.getItem('spmb_defaultGradeQuotas')) || initGradeQuotas;
         let customQuotas = JSON.parse(localStorage.getItem('spmb_customQuotas')) || {};
@@ -329,24 +328,58 @@
             });
         });
 
+        // --- FUNGSI PENENTUAN JENIS KELAMIN PINTAR ---
+        function getNormalizedGender(genderVal, nikVal) {
+            let g = String(genderVal || '').trim().toUpperCase();
+            if (g === 'L' || g.startsWith('LAKI') || g === 'M' || g === 'MALE') return 'L';
+            if (g === 'P' || g.startsWith('PEREM') || g.startsWith('WANITA') || g === 'F' || g === 'FEMALE') return 'P';
+            
+            // Auto-detect dari NIK 16 digit jika kolom gender kosong/belum diisi
+            if (nikVal) {
+                const cleanNik = String(nikVal).replace(/\D/g, '');
+                if (cleanNik.length === 16) {
+                    const dayPart = parseInt(cleanNik.substring(6, 8), 10);
+                    if (!isNaN(dayPart)) {
+                        if (dayPart > 40 && dayPart <= 71) return 'P'; // Wanita: Tanggal Lahir + 40
+                        if (dayPart >= 1 && dayPart <= 31) return 'L'; // Pria: Tanggal Lahir Biasa
+                    }
+                }
+            }
+            return '';
+        }
+
+        function validate16DigitsAndAutoGender(input, nisn) {
+            validate16Digits(input);
+            if (input.value.length === 16 && nisn) {
+                const form = document.getElementById(`form_${nisn}`);
+                if (form) {
+                    const genderSelect = form.querySelector('[name="gender"]');
+                    if (genderSelect && !genderSelect.value) {
+                        const detected = getNormalizedGender('', input.value);
+                        if (detected) {
+                            genderSelect.value = detected;
+                            cleanToast.fire({ title: `Jenis Kelamin terdeteksi: ${detected === 'L' ? 'Laki-laki' : 'Perempuan'}`, icon: 'info' });
+                        }
+                    }
+                }
+            }
+        }
+
         // --- MANAJEMEN KUOTA ROMBEL ---
         function getRombelQuota(rombel) {
-            if (!rombel) return 28; // fallback absolute
+            if (!rombel) return 28; 
             const norm = rombel.trim().toUpperCase();
             
-            // 1. Cek apakah ada di kuota khusus
             if (customQuotas[norm] !== undefined) {
                 const val = customQuotas[norm];
                 return (typeof val === 'object' && val !== null) ? parseInt(val.kuota) : parseInt(val);
             }
             
-            // 2. Cek angka pertama pada rombel untuk mengetahui tingkat kelas (Contoh: "1A" -> "1")
             const gradeMatch = norm.match(/\d/);
             if (gradeMatch && defaultGradeQuotas[gradeMatch[0]] !== undefined) {
                 return parseInt(defaultGradeQuotas[gradeMatch[0]]);
             }
 
-            // 3. Jika tidak ada angka, fallback ke kuota default 28
             return 28; 
         }
 
@@ -357,8 +390,8 @@
             Object.keys(sheetData).forEach(nisn => {
                 if (nisn === excludeNisn) return;
                 const item = sheetData[nisn];
-                const studentRombel = (item['Rombel Tujuan'] || '').trim().toUpperCase();
-                const studentStatus = item['Kelas'];
+                const studentRombel = (item['Rombel Tujuan'] || item['rombelTujuan'] || '').trim().toUpperCase();
+                const studentStatus = item['Kelas'] || item['kelas'];
                 if (studentStatus === 'Mutasi Masuk' && studentRombel === normTarget) {
                     count++;
                 }
@@ -366,18 +399,29 @@
             return count;
         }
 
-        function checkRombelCapacity(rombel, excludeNisn = null) {
-            if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
-            const normRombel = rombel.trim().toUpperCase();
-            const count = countStudentsInRombel(normRombel, excludeNisn);
-            const quota = getRombelQuota(normRombel);
-            return {
-                isFull: count >= quota,
-                count: count,
-                quota: quota,
-                rombel: normRombel
-            };
-        }
+function checkRombelCapacity(rombel, excludeNisn = null) {
+    if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
+    const normRombel = rombel.trim().toUpperCase();
+    
+    // 1. Ambil batas maksimal kuota
+    const quota = getRombelQuota(normRombel);
+    let count = 0;
+
+    // 2. PERBAIKAN: Prioritaskan membaca jumlah 'terisi' dari database (customQuotas)
+    if (customQuotas[normRombel] && customQuotas[normRombel].terisi !== undefined) {
+        count = parseInt(customQuotas[normRombel].terisi);
+    } else {
+        // 3. Fallback: Jika admin belum mengatur kuota kelas ini, baru hitung manual data mutasi
+        count = countStudentsInRombel(normRombel, excludeNisn);
+    }
+
+    return {
+        isFull: count >= quota,
+        count: count,
+        quota: quota,
+        rombel: normRombel
+    };
+}
 
         // --- HELPER UNTUK KALKULASI INTERAKTIF KUOTA ROMBEL ---
         function recalcQuotaRow(r) {
@@ -434,7 +478,6 @@
                 `;
             });
 
-            // Bangun input untuk kuota kelas 1 sampai 6
             let gradeInputsHtml = '';
             for (let i = 1; i <= 6; i++) {
                 let currentVal = defaultGradeQuotas[i.toString()] || 28;
@@ -463,7 +506,6 @@
                             <label class="text-[10px] text-slate-400 font-bold uppercase mb-2 block">Pengecualian / Detail Kuota Per Rombel</label>
                             <p class="text-[11px] text-slate-500 mb-3">Atur Nama Rombel, Kuota, Terisi, dan Sisa yang akan tersinkronkan langsung ke Spreadsheet.</p>
                             
-                            <!-- Header Kolom -->
                             <div class="grid grid-cols-12 gap-2 mb-2 px-2 text-[10px] font-bold text-slate-400 uppercase">
                                 <div class="col-span-3">Nama Rombel</div>
                                 <div class="col-span-3 text-center">Kuota</div>
@@ -476,7 +518,6 @@
                                 ${customQuotaHtml || '<p class="text-slate-500 text-xs italic py-2 text-center bg-slate-900/50 rounded-lg border border-slate-800">Belum ada kuota khusus. Tambahkan di bawah.</p>'}
                             </div>
                             
-                            <!-- Form Tambah Rombel Baru -->
                             <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700 space-y-2">
                                 <span class="text-[10px] font-bold text-indigo-400 uppercase block">Tambah Rombel Baru</span>
                                 <div class="grid grid-cols-12 gap-2 items-center">
@@ -510,7 +551,6 @@
                 },
                 preConfirm: () => {
                     let newGradeQuotas = {};
-                    // Simpan nilai kuota kelas 1-6
                     for(let i = 1; i <= 6; i++) {
                         let val = parseInt(document.getElementById(`def_grade_${i}`).value);
                         if (!val || val < 1) {
@@ -520,7 +560,6 @@
                         newGradeQuotas[i.toString()] = val;
                     }
                     
-                    // Simpan nilai kuota khusus, terisi, dan sisa
                     let rombelListData = [];
                     Object.keys(customQuotas).forEach(r => {
                         const kInput = document.getElementById(`quota_val_${r}`);
@@ -549,22 +588,21 @@
                     defaultGradeQuotas = result.value.newGradeQuotas;
                     customQuotas = result.value.customQuotas;
                     
-                    // Simpan Lokal
                     localStorage.setItem('spmb_defaultGradeQuotas', JSON.stringify(defaultGradeQuotas));
                     localStorage.setItem('spmb_customQuotas', JSON.stringify(customQuotas));
                     
                     cleanToast.fire({ title: 'Menyimpan & Menyinkronkan Kuota...', icon: 'info' });
 
-                    // Sinkronkan ke Spreadsheet
+                    // --- SINKRONISASI PERBAIKAN KE SPREADSHEET (SHEET2) ---
                     try {
                         const response = await fetch(SCRIPT_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify({
                                 action: 'updateKuota',
+                                kuotaRombel: result.value.rombelListData,
                                 defaultGradeQuotas: defaultGradeQuotas,
-                                customQuotas: customQuotas,
-                                rombelList: result.value.rombelListData
+                                customQuotas: customQuotas
                             })
                         });
                         const resData = await response.json();
@@ -584,12 +622,18 @@
         }
 
         function addCustomQuota() {
-            const rName = document.getElementById('new-rombel-name').value.trim().toUpperCase();
-            const rQuota = parseInt(document.getElementById('new-rombel-quota').value);
-            const rTerisiInput = document.getElementById('new-rombel-terisi').value;
+            const rNameInput = document.getElementById('new-rombel-name');
+            const rQuotaInput = document.getElementById('new-rombel-quota');
+            const rTerisiInput = document.getElementById('new-rombel-terisi');
+            
+            if(!rNameInput || !rQuotaInput) return;
+
+            const rName = rNameInput.value.trim().toUpperCase();
+            const rQuota = parseInt(rQuotaInput.value);
+            const rTerisiVal = rTerisiInput ? rTerisiInput.value : '';
             
             const autoTerisi = countStudentsInRombel(rName);
-            const rTerisi = (rTerisiInput !== '') ? parseInt(rTerisiInput) : autoTerisi;
+            const rTerisi = (rTerisiVal !== '') ? parseInt(rTerisiVal) : autoTerisi;
             const rSisa = rQuota - rTerisi;
             
             if (!rName) {
@@ -900,17 +944,38 @@
         }
 
         async function pullFreshData() {
-            const res = await fetch(SCRIPT_URL);
-            const result = await res.json();
-            if(result.result === 'success') {
-                sheetData = {}; sheetOrder = [];
-                result.data.forEach(item => { 
-                    if(item.NISN && item.NISN.trim() !== '') {
-                        sheetData[item.NISN] = item; sheetOrder.push(item.NISN);
-                    }
-                });
-                localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
-                localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+            try {
+                // Ambil Data Siswa Utama
+                const res = await fetch(SCRIPT_URL);
+                const result = await res.json();
+                if(result.result === 'success') {
+                    sheetData = {}; sheetOrder = [];
+                    result.data.forEach(item => { 
+                        if(item.NISN && String(item.NISN).trim() !== '') {
+                            sheetData[item.NISN] = item; sheetOrder.push(item.NISN);
+                        }
+                    });
+                    localStorage.setItem('spmb_sheetData', JSON.stringify(sheetData));
+                    localStorage.setItem('spmb_sheetOrder', JSON.stringify(sheetOrder));
+                }
+
+                // Ambil Data Kuota Rombel dari Sheet2
+                const resKuota = await fetch(SCRIPT_URL + '?action=getKuota');
+                const resultKuota = await resKuota.json();
+                if (resultKuota.result === 'success' && Array.isArray(resultKuota.list)) {
+                    resultKuota.list.forEach(k => {
+                        if (k.namaRombel) {
+                            customQuotas[k.namaRombel.toUpperCase()] = {
+                                kuota: parseInt(k.kuota) || 0,
+                                terisi: parseInt(k.terisi) || 0,
+                                sisa: parseInt(k.sisa) || 0
+                            };
+                        }
+                    });
+                    localStorage.setItem('spmb_customQuotas', JSON.stringify(customQuotas));
+                }
+            } catch (err) {
+                console.error("Gagal menarik data baru:", err);
             }
         }
 
@@ -966,7 +1031,6 @@
                         return false;
                     }
 
-                    // PENGECEKAN KUOTA SAAT TAMBAH
                     if (kelas === 'Mutasi Masuk' && rombel) {
                         const cap = checkRombelCapacity(rombel);
                         if (cap.isFull) {
@@ -1010,7 +1074,7 @@
         function hapusData(nisn) {
             if (!isAdmin) return;
 
-            const namaSiswa = sheetData[nisn] ? sheetData[nisn]['Nama Lengkap'] : 'Siswa ini';
+            const namaSiswa = sheetData[nisn] ? (sheetData[nisn]['Nama Lengkap'] || sheetData[nisn]['nama']) : 'Siswa ini';
 
             Swal.fire({
                 title: 'Hapus Data?',
@@ -1058,7 +1122,6 @@
             const selectedKelas = form.querySelector('[name="kelas"]').value;
             const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
 
-            // PENGONTROL KUOTA & KAPASITAS ROMBEL (CLASS CAPACITY GUARD)
             if (selectedKelas === 'Mutasi Masuk' && selectedRombel) {
                 const cap = checkRombelCapacity(selectedRombel, nisn);
                 if (cap.isFull) {
@@ -1086,7 +1149,7 @@
                     });
 
                     if (!confirmSave.isConfirmed) {
-                        return; // Batal simpan jika admin memilih batal
+                        return;
                     }
                 }
             }
@@ -1180,13 +1243,20 @@
         }
 
         function buildRow(nisn, student) {
-            const isVerified = student['Status Verifikasi'] === 'Sudah Verif';
+            const statusVerifVal = student['Status Verifikasi'] || student['statusVerifikasi'];
+            const isVerified = statusVerifVal === 'Sudah Verif';
             const vIcon = isVerified ? '<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>' : '<i class="fa-regular fa-circle text-slate-600 text-lg"></i>';
             const vBorder = isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent';
             
-            const thumbUrl = buildDriveThumbnail(student['Pas Foto']);
+            const pasFotoVal = student['Pas Foto'] || student['foto'];
+            const namaLengkapVal = student['Nama Lengkap'] || student['nama'] || '-';
+            const phoneVal = student['Nomor HP (WhatsApp)'] || student['phone'] || '';
+            const rombelTujuanVal = student['Rombel Tujuan'] || student['rombelTujuan'] || '';
+            const kelasVal = student['Kelas'] || student['kelas'] || '';
+
+            const thumbUrl = buildDriveThumbnail(pasFotoVal);
             const photoEl = thumbUrl 
-                ? `<img src="${thumbUrl}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-slate-600 cursor-pointer hover:border-indigo-400 transition" onclick="openLightbox('${student['Pas Foto']}', '${student['Nama Lengkap']}')">` 
+                ? `<img src="${thumbUrl}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-slate-600 cursor-pointer hover:border-indigo-400 transition" onclick="openLightbox('${pasFotoVal}', '${namaLengkapVal}')">` 
                 : `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-500 text-xs"><i class="fa-solid fa-user"></i></div>`;
             
             const trMain = document.createElement('tr');
@@ -1194,8 +1264,8 @@
             trMain.onclick = (e) => { if(!e.target.closest('input') && !e.target.closest('img') && !e.target.closest('a') && !e.target.closest('.clean-checkbox') && !e.target.closest('button')) toggleDetails(nisn); };
             
             let phoneBadge = '';
-            if (student['Nomor HP (WhatsApp)'] && student['Nomor HP (WhatsApp)'].trim() !== '') {
-                const cleanedPhone = student['Nomor HP (WhatsApp)'].replace(/\D/g, '');
+            if (phoneVal && phoneVal.trim() !== '') {
+                const cleanedPhone = phoneVal.replace(/\D/g, '');
                 let waLink = `https://wa.me/${cleanedPhone}`;
                 if (cleanedPhone.startsWith('0')) waLink = `https://wa.me/62${cleanedPhone.substring(1)}`;
                 phoneBadge = `<a href="${waLink}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors" onclick="event.stopPropagation()" title="Chat WA"><i class="fa-brands fa-whatsapp text-lg"></i></a>`;
@@ -1203,14 +1273,14 @@
                 phoneBadge = `<div class="w-8 h-8 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center cursor-not-allowed" title="Tidak ada nomor WA"><i class="fa-brands fa-whatsapp text-lg"></i></div>`;
             }
             
-            const rombelText = student['Rombel Tujuan'] ? `<span class="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-semibold"><i class="fa-solid fa-door-open mr-1"></i>${student['Rombel Tujuan']}</span>` : '';
+            const rombelText = rombelTujuanVal ? `<span class="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-semibold"><i class="fa-solid fa-door-open mr-1"></i>${rombelTujuanVal}</span>` : '';
 
             trMain.innerHTML = `
                 <td class="px-2 py-3 text-center align-middle">${vIcon}</td>
                 <td class="px-2 py-3 text-center align-middle">${photoEl}</td>
                 <td class="px-4 py-3 align-middle">
                     <div class="flex items-center justify-between">
-                        <div class="font-bold text-white text-base leading-tight mb-1 truncate max-w-[200px] md:max-w-[300px]">${student['Nama Lengkap'] || '-'}</div>
+                        <div class="font-bold text-white text-base leading-tight mb-1 truncate max-w-[200px] md:max-w-[300px]">${namaLengkapVal}</div>
                         <i id="icon_${nisn}" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform"></i>
                     </div>
                     <div class="flex items-center gap-2 mt-1 flex-wrap">
@@ -1224,50 +1294,52 @@
             const trDetails = document.createElement('tr');
             trDetails.className = "bg-slate-900/30";
             
-            // INDIKATOR KAPASITAS KELAS BERJALAN REAL-TIME
-            const rombelVal = student['Rombel Tujuan'] || '';
-            const capInfo = checkRombelCapacity(rombelVal, nisn);
+            const capInfo = checkRombelCapacity(rombelTujuanVal, nisn);
             let capacityBadge = '';
-            if (rombelVal) {
+            if (rombelTujuanVal) {
                 capacityBadge = capInfo.isFull 
                     ? `<span class="text-rose-400 bg-rose-500/10 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Penuh (${capInfo.count}/${capInfo.quota})</span>`
                     : `<span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-users mr-1"></i>Terisi: ${capInfo.count}/${capInfo.quota}</span>`;
             }
 
+            const rawGender = student['Jenis Kelamin'] || student['gender'] || '';
+            const rawNik = student['NIK'] || student['nik'] || '';
+            const normGender = getNormalizedGender(rawGender, rawNik);
+
             let editForm = `
                 <div id="form_${nisn}" class="p-4 md:p-6 text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div class="space-y-4">
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" value="${student['Nama Lengkap'] || ''}" class="clean-input font-semibold text-white" ${!isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" value="${namaLengkapVal}" class="clean-input font-semibold text-white" ${!isAdmin ? 'readonly' : ''}></div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Status Mutasi</label>
-                                ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none"><option value="Mutasi Masuk" ${student['Kelas']==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option><option value="Mutasi Keluar" ${student['Kelas']==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option><option value="Belum ada status" ${student['Kelas']==='Belum ada status'?'selected':''}>Belum ada status</option></select>` : `<input type="text" value="${student['Kelas']||''}" class="clean-input" readonly>`}
+                                ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none"><option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option><option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option><option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option></select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Kelamin</label>
-                                ${isAdmin ? `<select name="gender" class="clean-input cursor-pointer appearance-none"><option value="">--Pilih--</option><option value="L" ${student['Jenis Kelamin']==='L'?'selected':''}>Laki-laki</option><option value="P" ${student['Jenis Kelamin']==='P'?'selected':''}>Perempuan</option></select>` : `<input type="text" value="${student['Jenis Kelamin']==='L'?'Laki-laki':student['Jenis Kelamin']==='P'?'Perempuan':''}" class="clean-input" readonly>`}
+                                ${isAdmin ? `<select name="gender" class="clean-input cursor-pointer appearance-none"><option value="">--Pilih--</option><option value="L" ${normGender==='L'?'selected':''}>Laki-laki</option><option value="P" ${normGender==='P'?'selected':''}>Perempuan</option></select>` : `<input type="text" value="${normGender==='L'?'Laki-laki':normGender==='P'?'Perempuan':''}" class="clean-input" readonly>`}
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Mutasi</label><input type="date" name="tanggalMutasi" value="${student['Tanggal Mutasi'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Asal/Tujuan Sekolah</label><input type="text" name="asalTujuanSekolah" value="${student['Asal/Tujuan Sekolah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Mutasi</label><input type="date" name="tanggalMutasi" value="${student['Tanggal Mutasi'] || student['tanggalMutasi'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Asal/Tujuan Sekolah</label><input type="text" name="asalTujuanSekolah" value="${student['Asal/Tujuan Sekolah'] || student['asalTujuanSekolah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                         </div>
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <label class="text-[10px] text-slate-400 font-bold uppercase block">Rombel Tujuan</label>
-                                <span id="rombel_capacity_badge_${nisn}">${capacityBadge}</span>
+                                
                             </div>
-                            <input type="text" name="rombelTujuan" value="${student['Rombel Tujuan'] || ''}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}>
+                            <input type="text" name="rombelTujuan" value="${rombelTujuanVal}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}>
                         </div>
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nomor HP (WA)</label><input type="text" name="phone" value="${student['Nomor HP (WhatsApp)'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Link Pas Foto (Gdrive)</label><input type="text" name="foto" value="${student['Pas Foto'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nomor HP (WA)</label><input type="text" name="phone" value="${phoneVal}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Link Pas Foto (Gdrive)</label><input type="text" name="foto" value="${pasFotoVal}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                         
                         <div class="mt-6 border-t border-slate-700 pt-4">
                             <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-map-location-dot mr-2"></i>Data Alamat</h4>
-                            <div class="mb-3"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jalan / Dusun / RT / RW</label><input type="text" name="alamat" value="${student['Jalan / Dusun / RT / RW'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div class="mb-3"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jalan / Dusun / RT / RW</label><input type="text" name="alamat" value="${student['Jalan / Dusun / RT / RW'] || student['alamat'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                             <div class="grid grid-cols-2 gap-3 mb-2">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" value="${student['Lintang'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" value="${student['Bujur'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" value="${student['Lintang'] || student['lintang'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" value="${student['Bujur'] || student['bujur'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                             <div class="flex gap-2 mb-3">
                                 ${isAdmin ? `<button type="button" onclick="getLocation('${nisn}')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-2 rounded transition-colors text-slate-300 border border-slate-600"><i class="fa-solid fa-location-crosshairs mr-1"></i> Deteksi GPS</button>` : ''}
@@ -1276,7 +1348,7 @@
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jarak Lokasi ke Sekolah</label>
                                 <div class="flex gap-2">
-                                    <input type="text" name="jarakSekolah" value="${student['Jarak Lokasi ke Sekolah'] || ''}" class="clean-input bg-slate-800/50" readonly>
+                                    <input type="text" name="jarakSekolah" value="${student['Jarak Lokasi ke Sekolah'] || student['jarakSekolah'] || ''}" class="clean-input bg-slate-800/50" readonly>
                                     ${isAdmin ? `<button type="button" onclick="updateDistance('${nisn}')" class="bg-indigo-600 hover:bg-indigo-700 px-3 rounded transition-colors"><i class="fa-solid fa-calculator text-white"></i></button>` : ''}
                                 </div>
                             </div>
@@ -1287,34 +1359,34 @@
                         <div class="border-b border-slate-700 pb-4 mb-4">
                             <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-id-card mr-2"></i>Data Identitas</h4>
                             <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Siswa (16 Digit)</label><input type="text" name="nik" value="${student['NIK'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. KK (16 Digit)</label><input type="text" name="nokk" value="${student['No. KK'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Siswa (16 Digit)</label><input type="text" name="nik" value="${rawNik}" maxlength="16" oninput="validate16DigitsAndAutoGender(this, '${nisn}')" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. KK (16 Digit)</label><input type="text" name="nokk" value="${student['No. KK'] || student['nokk'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                             <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIPD</label><input type="text" name="nipd" value="${student['NIPD'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. Akta Kelahiran</label><input type="text" name="noAkta" value="${student['No. Akta Kelahiran'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIPD</label><input type="text" name="nipd" value="${student['NIPD'] || student['nipd'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. Akta Kelahiran</label><input type="text" name="noAkta" value="${student['No. Akta Kelahiran'] || student['noAkta'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" value="${student['Tempat Lahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" value="${student['Tanggal Lahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" value="${student['Tempat Lahir'] || student['tempatLahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" value="${student['Tanggal Lahir'] || student['tanggalLahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                         </div>
 
                         <div class="border-b border-slate-700 pb-4 mb-4 flex gap-3">
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Berat (kg)</label><input type="number" name="beratBadan" value="${student['Berat Badan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tinggi (cm)</label><input type="number" name="tinggiBadan" value="${student['Tinggi Badan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lingkar (cm)</label><input type="number" name="lingkarKepala" value="${student['Lingkar Kepala'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Berat (kg)</label><input type="number" name="beratBadan" value="${student['Berat Badan'] || student['beratBadan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tinggi (cm)</label><input type="number" name="tinggiBadan" value="${student['Tinggi Badan'] || student['tinggiBadan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
+                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lingkar (cm)</label><input type="number" name="lingkarKepala" value="${student['Lingkar Kepala'] || student['lingkarKepala'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
                         </div>
 
                         <div>
                             <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-people-roof mr-2"></i>Data Orang Tua</h4>
                             <div class="grid grid-cols-[1fr_1.2fr] gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" value="${student['Nama Ayah Kandung'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ayah (16 Digit)</label><input type="text" name="nikAyah" value="${student['NIK Ayah'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" value="${student['Nama Ayah Kandung'] || student['namaAyah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ayah (16 Digit)</label><input type="text" name="nikAyah" value="${student['NIK Ayah'] || student['nikAyah'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                             <div class="grid grid-cols-[1fr_1.2fr] gap-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" value="${student['Nama Ibu Kandung'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ibu (16 Digit)</label><input type="text" name="nikIbu" value="${student['NIK Ibu'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" value="${student['Nama Ibu Kandung'] || student['namaIbu'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
+                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ibu (16 Digit)</label><input type="text" name="nikIbu" value="${student['NIK Ibu'] || student['nikIbu'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
                             </div>
                         </div>
                     </div>
@@ -1371,78 +1443,81 @@
                 const student = sheetData[nisn];
                 if (!student) return;
 
-                const nMatch = student['Nama Lengkap']?.toLowerCase().includes(searchVal);
-                const isNisnMatch = nisn.toLowerCase().includes(searchVal);
+                const namaVal = student['Nama Lengkap'] || student['nama'] || '';
+                const nMatch = namaVal.toLowerCase().includes(searchVal);
+                const isNisnMatch = String(nisn).toLowerCase().includes(searchVal);
                 if (searchVal && !nMatch && !isNisnMatch) return;
 
-                if (filterClassVal !== 'ALL' && student['Kelas'] !== filterClassVal) return;
+                const classVal = student['Kelas'] || student['kelas'];
+                if (filterClassVal !== 'ALL' && classVal !== filterClassVal) return;
 
-                counts.v += (student['Status Verifikasi'] === 'Sudah Verif' ? 1 : 0);
-                counts.uv += (student['Status Verifikasi'] !== 'Sudah Verif' ? 1 : 0);
+                const verifVal = student['Status Verifikasi'] || student['statusVerifikasi'];
+                const isVerified = verifVal === 'Sudah Verif';
                 
-                const isMale = student['Jenis Kelamin'] === 'L';
-                const isFemale = student['Jenis Kelamin'] === 'P';
-                
-                if (isMale) counts.m++;
-                if (isFemale) counts.f++;
+                const rawGender = student['Jenis Kelamin'] || student['gender'] || '';
+                const rawNik = student['NIK'] || student['nik'] || '';
+                const normGender = getNormalizedGender(rawGender, rawNik);
+
+                // Update Stats
+                if (isVerified) counts.v++; else counts.uv++;
+                if (normGender === 'L') counts.m++;
+                if (normGender === 'P') counts.f++;
 
                 const { trMain, trDetails } = buildRow(nisn, student);
 
-                if (student['Kelas'] === 'Mutasi Masuk') { 
-                    tbodyA.appendChild(trMain); tbodyA.appendChild(trDetails); 
-                    counts.a++; if(isMale) counts.a_m++; if(isFemale) counts.a_f++;
+                if (classVal === 'Mutasi Masuk') {
+                    counts.a++;
+                    if (normGender === 'L') counts.a_m++;
+                    if (normGender === 'P') counts.a_f++;
+                    tbodyA.appendChild(trMain);
+                    tbodyA.appendChild(trDetails);
                     renderedA++;
-                }
-                else if (student['Kelas'] === 'Mutasi Keluar') { 
-                    tbodyB.appendChild(trMain); tbodyB.appendChild(trDetails); 
-                    counts.b++; if(isMale) counts.b_m++; if(isFemale) counts.b_f++;
+                } else if (classVal === 'Mutasi Keluar') {
+                    counts.b++;
+                    if (normGender === 'L') counts.b_m++;
+                    if (normGender === 'P') counts.b_f++;
+                    tbodyB.appendChild(trMain);
+                    tbodyB.appendChild(trDetails);
                     renderedB++;
-                }
-                else { 
-                    tbodyU.appendChild(trMain); tbodyU.appendChild(trDetails); 
-                    counts.u++; 
+                } else {
+                    counts.u++;
+                    tbodyU.appendChild(trMain);
+                    tbodyU.appendChild(trDetails);
                     renderedU++;
                 }
             });
 
-            const emptyRow = `<tr><td colspan="4" class="py-8 text-center text-slate-500 text-xs font-semibold uppercase tracking-wider">Tidak ada data ditemukan</td></tr>`;
-            if (renderedA === 0) tbodyA.innerHTML = emptyRow;
-            if (renderedB === 0) tbodyB.innerHTML = emptyRow;
+            // Update UI based on rendered content
+            if (renderedA === 0) tbodyA.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
+            if (renderedB === 0) tbodyB.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
+            if (renderedU === 0) tbodyU.innerHTML = '<tr><td colspan="4" class="py-12 text-center text-slate-500"><i class="fa-solid fa-folder-open text-4xl mb-3 opacity-50 block"></i>Tidak ada data ditemukan</td></tr>';
             
-            if (renderedU === 0 && counts.u === 0) {
-                document.getElementById('containerU').classList.add('hidden');
-            } else {
-                document.getElementById('containerU').classList.remove('hidden');
-                if (renderedU === 0) tbodyU.innerHTML = emptyRow;
-            }
+            document.getElementById('containerU').classList.toggle('hidden', renderedU === 0 && filterClassVal !== 'Belum ada status');
+            document.getElementById('cardKelasA').classList.toggle('hidden', renderedA === 0 && filterClassVal === 'Belum ada status');
+            document.getElementById('cardKelasB').classList.toggle('hidden', renderedB === 0 && filterClassVal === 'Belum ada status');
 
-            document.getElementById('badge-count-a').innerText = `${renderedA} Siswa`;
-            document.getElementById('badge-count-b').innerText = `${renderedB} Siswa`;
-            document.getElementById('badge-count-u').innerText = `${renderedU} Siswa`;
-            
             updateStats(counts);
         }
 
-        function updateStats(c) {
-            animateNumber('stat-verified', c.v); animateNumber('stat-unverified', c.uv);
-            animateNumber('stat-total', c.a + c.b + c.u); animateNumber('stat-male', c.m); animateNumber('stat-female', c.f);
-            animateNumber('stat-class-a', c.a); animateNumber('stat-class-a-male', c.a_m); animateNumber('stat-class-a-female', c.a_f);
-            animateNumber('stat-class-b', c.b); animateNumber('stat-class-b-male', c.b_m); animateNumber('stat-class-b-female', c.b_f);
-        }
-
-        function animateNumber(id, endVal) {
-            const obj = document.getElementById(id);
-            if (!obj) return;
-            const startVal = parseInt(obj.innerText) || 0;
-            if (startVal === endVal) { obj.innerText = endVal; return; }
-            const duration = 500; const startTime = performance.now();
-            function step(currentTime) {
-                let progress = (currentTime - startTime) / duration;
-                if (progress > 1) progress = 1;
-                obj.innerText = Math.floor(startVal + (endVal - startVal) * progress);
-                if (progress < 1) requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
+        function updateStats(counts) {
+            document.getElementById('stat-verified').innerText = counts.v;
+            document.getElementById('stat-unverified').innerText = counts.uv;
+            document.getElementById('stat-total').innerText = (counts.a + counts.b + counts.u);
+            document.getElementById('stat-male').innerText = counts.m;
+            document.getElementById('stat-female').innerText = counts.f;
+            
+            document.getElementById('stat-class-a').innerText = counts.a;
+            document.getElementById('stat-class-a-male').innerText = counts.a_m;
+            document.getElementById('stat-class-a-female').innerText = counts.a_f;
+            document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
+            
+            document.getElementById('stat-class-b').innerText = counts.b;
+            document.getElementById('stat-class-b-male').innerText = counts.b_m;
+            document.getElementById('stat-class-b-female').innerText = counts.b_f;
+            document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
+            
+            const badgeU = document.getElementById('badge-count-u');
+            if (badgeU) badgeU.innerText = counts.u + ' Siswa';
         }
     </script>
 </body>
