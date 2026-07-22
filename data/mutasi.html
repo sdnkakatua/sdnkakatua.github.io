@@ -138,21 +138,21 @@
                 </div>
             </div>
 
-<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
-    <div class="text-center min-w-[50px]">
-        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-user-graduate text-emerald-400 mr-1"></i>Aktif</p>
-        <h2 id="stat-class-c" class="text-xl font-black text-emerald-400">0</h2>
-    </div>
-    <div class="w-px h-8 bg-slate-700"></div>
-    <div class="text-center min-w-[50px]">
-        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
-        <h2 id="stat-class-c-male" class="text-xl font-black text-sky-400">0</h2>
-    </div>
-    <div class="text-center min-w-[50px]">
-        <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
-        <h2 id="stat-class-c-female" class="text-xl font-black text-pink-400">0</h2>
-    </div>
-</div>
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-user-graduate text-emerald-400 mr-1"></i>Aktif</p>
+                    <h2 id="stat-class-c" class="text-xl font-black text-emerald-400">0</h2>
+                </div>
+                <div class="w-px h-8 bg-slate-700"></div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-mars text-sky-400 mr-1"></i>Laki</p>
+                    <h2 id="stat-class-c-male" class="text-xl font-black text-sky-400">0</h2>
+                </div>
+                <div class="text-center min-w-[50px]">
+                    <p class="text-[10px] text-slate-400 font-bold mb-1 uppercase tracking-wider"><i class="fa-solid fa-venus text-pink-400 mr-1"></i>Pr</p>
+                    <h2 id="stat-class-c-female" class="text-xl font-black text-pink-400">0</h2>
+                </div>
+            </div>
 
             <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-md flex items-center justify-center gap-4 flex-1 md:flex-none">
                 <div class="text-center min-w-[50px]">
@@ -193,12 +193,12 @@
                         <i class="fa-solid fa-chalkboard-user text-slate-500"></i>
                     </div>
                     <select id="filterClass" class="clean-input pl-10 w-full cursor-pointer appearance-none">
-    <option value="ALL">Semua Mutasi</option>
-    <option value="Mutasi Masuk">Mutasi Masuk</option>
-    <option value="Siswa Aktif">Siswa Aktif</option>
-    <option value="Mutasi Keluar">Mutasi Keluar</option>
-    <option value="Belum ada status">Belum ada status</option>
-</select>
+                        <option value="ALL">Semua Mutasi</option>
+                        <option value="Mutasi Masuk">Mutasi Masuk</option>
+                        <option value="Siswa Aktif">Siswa Aktif</option>
+                        <option value="Mutasi Keluar">Mutasi Keluar</option>
+                        <option value="Belum ada status">Belum ada status</option>
+                    </select>
                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
                     </div>
@@ -209,7 +209,13 @@
         <div id="containerU" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mb-6 hidden">
             <div class="bg-amber-900/30 p-3 border-b border-slate-700 font-bold text-amber-400 flex items-center justify-between px-6">
                 <span><i class="fa-solid fa-triangle-exclamation mr-2"></i>Status Mutasi Belum Ditentukan</span>
-                <span id="badge-count-u" class="bg-amber-500/20 text-amber-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold flex gap-1.5">
+                        <span class="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20"><i class="fa-solid fa-mars mr-1"></i><span id="count-u-male">0</span></span>
+                        <span class="text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20"><i class="fa-solid fa-venus mr-1"></i><span id="count-u-female">0</span></span>
+                    </span>
+                    <span id="badge-count-u" class="bg-amber-500/20 text-amber-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -233,7 +239,13 @@
                     <div class="flex items-center gap-3">
                         <span><i class="fa-solid fa-right-to-bracket mr-2"></i>Mutasi Masuk</span>
                     </div>
-                    <span id="badge-count-a" class="bg-indigo-500/20 text-indigo-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold flex gap-1.5">
+                            <span class="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20"><i class="fa-solid fa-mars mr-1"></i><span id="count-a-male">0</span></span>
+                            <span class="text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20"><i class="fa-solid fa-venus mr-1"></i><span id="count-a-female">0</span></span>
+                        </span>
+                        <span id="badge-count-a" class="bg-indigo-500/20 text-indigo-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                    </div>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-collapse">
@@ -255,7 +267,13 @@
                     <div class="flex items-center gap-3">
                         <span><i class="fa-solid fa-right-from-bracket mr-2"></i>Mutasi Keluar</span>
                     </div>
-                    <span id="badge-count-b" class="bg-fuchsia-500/20 text-fuchsia-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold flex gap-1.5">
+                            <span class="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20"><i class="fa-solid fa-mars mr-1"></i><span id="count-b-male">0</span></span>
+                            <span class="text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20"><i class="fa-solid fa-venus mr-1"></i><span id="count-b-female">0</span></span>
+                        </span>
+                        <span id="badge-count-b" class="bg-fuchsia-500/20 text-fuchsia-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                    </div>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-collapse">
@@ -274,13 +292,19 @@
 
         </div>
 
-        <!-- CURRENT STUDENT CARD (DIPERBARUI) -->
+        <!-- CURRENT STUDENT CARD -->
         <div id="containerC" class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden mt-6 flex flex-col">
             <div class="bg-emerald-900/30 p-3 border-b border-slate-700 font-bold text-emerald-400 flex justify-between items-center px-4 md:px-6">
                 <div class="flex items-center gap-3">
                     <span><i class="fa-solid fa-user-graduate mr-2"></i>CURRENT STUDENT / Siswa Aktif</span>
                 </div>
-                <span id="badge-count-c" class="bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold flex gap-1.5">
+                        <span class="text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full border border-sky-500/20"><i class="fa-solid fa-mars mr-1"></i><span id="count-c-male">0</span></span>
+                        <span class="text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full border border-pink-500/20"><i class="fa-solid fa-venus mr-1"></i><span id="count-c-female">0</span></span>
+                    </span>
+                    <span id="badge-count-c" class="bg-emerald-500/20 text-emerald-300 py-0.5 px-2 rounded-full text-xs">0 Siswa</span>
+                </div>
             </div>
 
             <!-- Grid Rombel Tujuan (Kelas 1A - Kelas 6B) -->
@@ -444,23 +468,22 @@
             return 28; 
         }
 
-function countStudentsInRombel(rombel, excludeNisn = null) {
-    if (!rombel) return 0;
-    const normTarget = rombel.trim().toUpperCase();
-    let count = 0;
-    Object.keys(sheetData).forEach(nisn => {
-        if (nisn === excludeNisn) return;
-        const item = sheetData[nisn];
-        const studentRombel = (item['Rombel Tujuan'] || item['rombelTujuan'] || '').trim().toUpperCase();
-        const studentStatus = item['Kelas'] || item['kelas'];
-        
-        // [UPDATE] Tambahkan kondisi untuk menghitung 'Siswa Aktif'
-        if ((studentStatus === 'Mutasi Masuk' || studentStatus === 'Siswa Aktif') && studentRombel === normTarget) {
-            count++;
+        function countStudentsInRombel(rombel, excludeNisn = null) {
+            if (!rombel) return 0;
+            const normTarget = rombel.trim().toUpperCase();
+            let count = 0;
+            Object.keys(sheetData).forEach(nisn => {
+                if (nisn === excludeNisn) return;
+                const item = sheetData[nisn];
+                const studentRombel = (item['Rombel Tujuan'] || item['rombelTujuan'] || '').trim().toUpperCase();
+                const studentStatus = item['Kelas'] || item['kelas'];
+                
+                if ((studentStatus === 'Mutasi Masuk' || studentStatus === 'Siswa Aktif') && studentRombel === normTarget) {
+                    count++;
+                }
+            });
+            return count;
         }
-    });
-    return count;
-}
 
         function checkRombelCapacity(rombel, excludeNisn = null) {
             if (!rombel || !rombel.trim()) return { isFull: false, count: 0, quota: 28, rombel: '' };
@@ -606,7 +629,7 @@ function countStudentsInRombel(rombel, excludeNisn = null) {
                 customClass: {
                     popup: 'clean-popup',
                     confirmButton: 'bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-semibold transition-colors',
-                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold border border-slate-600 mr-2'
+                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-6 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
                 },
                 preConfirm: () => {
                     let newGradeQuotas = {};
@@ -1232,64 +1255,61 @@ function countStudentsInRombel(rombel, excludeNisn = null) {
             });
         }
 
-async function simpanData(nisn, btnElement) {
-    if (!isAdmin) return;
-    const form = document.getElementById(`form_${nisn}`);
-    if (!form) return;
+        async function simpanData(nisn, btnElement) {
+            if (!isAdmin) return;
+            const form = document.getElementById(`form_${nisn}`);
+            if (!form) return;
 
-    const selectedKelas = form.querySelector('[name="kelas"]').value;
-    const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
-    const isVerifiedChecked = form.querySelector('[name="statusVerifikasi"]').checked;
+            const selectedKelas = form.querySelector('[name="kelas"]').value;
+            const selectedRombel = form.querySelector('[name="rombelTujuan"]').value.trim();
+            const isVerifiedChecked = form.querySelector('[name="statusVerifikasi"]').checked;
 
-    // [UPDATE] Otomatisasi Perubahan Status Mutasi
-    let finalKelas = selectedKelas;
-    if (isVerifiedChecked && selectedKelas === 'Mutasi Masuk') {
-        finalKelas = 'Siswa Aktif';
-    } else if (!isVerifiedChecked && selectedKelas === 'Siswa Aktif') {
-        finalKelas = 'Mutasi Masuk';
-    }
-
-    // [UPDATE] Pengecekan Kapasitas Rombel
-    if ((finalKelas === 'Mutasi Masuk' || finalKelas === 'Siswa Aktif') && selectedRombel) {
-        const cap = checkRombelCapacity(selectedRombel, nisn);
-        if (cap.isFull) {
-            const confirmSave = await Swal.fire({
-                title: '⚠️ Kapasitas Rombel Penuh!',
-                html: `
-                    <div class="text-left text-sm text-slate-300">
-                        Rombel <b class="text-amber-400 font-bold">${cap.rombel}</b> telah mencapai batas kuota terpasang!
-                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 my-3 flex justify-between items-center">
-                            <span>Siswa Masuk Terdaftar:</span>
-                            <span class="font-bold text-rose-400 text-base">${cap.count} / ${cap.quota} Siswa</span>
-                        </div>
-                        Apakah Anda tetap yakin ingin memasukkan siswa ini ke Rombel <b class="text-white">${cap.rombel}</b>?
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Tetap Simpan',
-                cancelButtonText: 'Batal',
-                customClass: {
-                    popup: 'clean-popup',
-                    confirmButton: 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors',
-                    cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-5 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
-                }
-            });
-
-            if (!confirmSave.isConfirmed) {
-                return;
+            let finalKelas = selectedKelas;
+            if (isVerifiedChecked && selectedKelas === 'Mutasi Masuk') {
+                finalKelas = 'Siswa Aktif';
+            } else if (!isVerifiedChecked && selectedKelas === 'Siswa Aktif') {
+                finalKelas = 'Mutasi Masuk';
             }
-        }
-    }
 
-    btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
-    btnElement.disabled = true;
+            if ((finalKelas === 'Mutasi Masuk' || finalKelas === 'Siswa Aktif') && selectedRombel) {
+                const cap = checkRombelCapacity(selectedRombel, nisn);
+                if (cap.isFull) {
+                    const confirmSave = await Swal.fire({
+                        title: '⚠️ Kapasitas Rombel Penuh!',
+                        html: `
+                            <div class="text-left text-sm text-slate-300">
+                                Rombel <b class="text-amber-400 font-bold">${cap.rombel}</b> telah mencapai batas kuota terpasang!
+                                <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 my-3 flex justify-between items-center">
+                                    <span>Siswa Masuk Terdaftar:</span>
+                                    <span class="font-bold text-rose-400 text-base">${cap.count} / ${cap.quota} Siswa</span>
+                                </div>
+                                Apakah Anda tetap yakin ingin memasukkan siswa ini ke Rombel <b class="text-white">${cap.rombel}</b>?
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Tetap Simpan',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            popup: 'clean-popup',
+                            confirmButton: 'bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors',
+                            cancelButton: 'bg-slate-700 hover:bg-slate-600 text-slate-300 px-5 py-2.5 rounded-lg font-semibold transition-colors border border-slate-600 mr-2'
+                        }
+                    });
 
-    const updatedData = {
-        nisn: nisn,
-        nama: form.querySelector('[name="nama"]').value,
-        kelas: finalKelas, // Gunakan finalKelas di sini
-        // ... (biarkan sisa kode di dalam updatedData seperti semula)
+                    if (!confirmSave.isConfirmed) {
+                        return;
+                    }
+                }
+            }
+
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Menyimpan...';
+            btnElement.disabled = true;
+
+            const updatedData = {
+                nisn: nisn,
+                nama: form.querySelector('[name="nama"]').value,
+                kelas: finalKelas,
                 gender: form.querySelector('[name="gender"]').value,
                 tanggalMutasi: form.querySelector('[name="tanggalMutasi"]').value,
                 asalTujuanSekolah: form.querySelector('[name="asalTujuanSekolah"]').value,
@@ -1435,11 +1455,11 @@ async function simpanData(nisn, btnElement) {
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Status Mutasi</label>
                                 ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none">
-    <option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option>
-    <option value="Siswa Aktif" ${kelasVal==='Siswa Aktif'?'selected':''}>Siswa Aktif</option>
-    <option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option>
-    <option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option>
-</select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
+                                    <option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option>
+                                    <option value="Siswa Aktif" ${kelasVal==='Siswa Aktif'?'selected':''}>Siswa Aktif</option>
+                                    <option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option>
+                                    <option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option>
+                                </select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
                             </div>
                             <div>
                                 <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Kelamin</label>
@@ -1554,7 +1574,7 @@ async function simpanData(nisn, btnElement) {
 
             tbodyA.innerHTML = ''; tbodyB.innerHTML = ''; tbodyU.innerHTML = ''; tbodyC.innerHTML = '';
 
-            let counts = { a: 0, b: 0, c: 0, u: 0, v: 0, uv: 0, m: 0, f: 0, a_m: 0, a_f: 0, b_m: 0, b_f: 0, c_m: 0, c_f: 0 };
+            let counts = { a: 0, b: 0, c: 0, u: 0, v: 0, uv: 0, m: 0, f: 0, a_m: 0, a_f: 0, b_m: 0, b_f: 0, c_m: 0, c_f: 0, u_m: 0, u_f: 0 };
             
             // Map pengelompokan siswa aktif per Rombel untuk Current Student
             let currentStudentsByRombel = {};
@@ -1595,22 +1615,19 @@ async function simpanData(nisn, btnElement) {
 
                 const { trMain, trDetails } = buildRow(nisn, student);
 
-// [UPDATE] Tangani juga status 'Siswa Aktif'
                 if (classVal === 'Mutasi Masuk' || classVal === 'Siswa Aktif') {
                     if (isVerified || classVal === 'Siswa Aktif') {
                         counts.c++;
                         if (normGender === 'L') counts.c_m++;
                         if (normGender === 'P') counts.c_f++;
 
-                        // Kelompokkan siswa berdasarkan Rombel Tujuan
                         const rName = (student['Rombel Tujuan'] || student['rombelTujuan'] || '').trim();
-                        // Cari rName pada list standar (Case Insensitive & Trim)
                         const matchedRombel = targetRombelsList.find(r => r.toLowerCase() === rName.toLowerCase()) || rName;
 
                         if (!currentStudentsByRombel[matchedRombel]) {
                             currentStudentsByRombel[matchedRombel] = [];
                         }
-                        currentStudentsByRombel[matchedRombel].push({ trMain, trDetails });
+                        currentStudentsByRombel[matchedRombel].push({ trMain, trDetails, gender: normGender });
                         renderedC++;
                     } else {
                         counts.a++;
@@ -1629,6 +1646,8 @@ async function simpanData(nisn, btnElement) {
                     renderedB++;
                 } else {
                     counts.u++;
+                    if (normGender === 'L') counts.u_m++;
+                    if (normGender === 'P') counts.u_f++;
                     tbodyU.appendChild(trMain);
                     tbodyU.appendChild(trDetails);
                     renderedU++;
@@ -1641,6 +1660,8 @@ async function simpanData(nisn, btnElement) {
                 targetRombelsList.forEach(rombel => {
                     const studentList = currentStudentsByRombel[rombel] || [];
                     const count = studentList.length;
+                    const rMale = studentList.filter(s => s.gender === 'L').length;
+                    const rFemale = studentList.filter(s => s.gender === 'P').length;
                     const isSelected = selectedRombelC === rombel;
 
                     const cardBtn = document.createElement('button');
@@ -1657,8 +1678,12 @@ async function simpanData(nisn, btnElement) {
                             <span class="font-bold text-sm ${isSelected ? 'text-emerald-400' : 'text-slate-200'}">${rombel}</span>
                             <i class="fa-solid fa-graduation-cap text-xs ${isSelected ? 'text-emerald-400' : 'text-slate-500'}"></i>
                         </div>
-                        <div class="text-[11px] font-semibold ${count > 0 ? 'text-emerald-400' : 'text-slate-500'}">
-                            ${count} Siswa
+                        <div class="flex items-center justify-between text-[11px] font-semibold">
+                            <span class="${count > 0 ? 'text-emerald-400' : 'text-slate-500'}">${count} Siswa</span>
+                            <span class="text-[10px] space-x-1">
+                                <span class="text-sky-400"><i class="fa-solid fa-mars"></i> ${rMale}</span>
+                                <span class="text-pink-400"><i class="fa-solid fa-venus"></i> ${rFemale}</span>
+                            </span>
                         </div>
                     `;
                     rombelGridC.appendChild(cardBtn);
@@ -1671,9 +1696,12 @@ async function simpanData(nisn, btnElement) {
 
             if (selectedRombelC) {
                 const activeSiswaList = currentStudentsByRombel[selectedRombelC] || [];
+                const rMale = activeSiswaList.filter(s => s.gender === 'L').length;
+                const rFemale = activeSiswaList.filter(s => s.gender === 'P').length;
+
                 if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-chalkboard-user mr-2 text-emerald-400"></i>Daftar Siswa — ${selectedRombelC}`;
                 if (countEl) {
-                    countEl.innerText = `${activeSiswaList.length} Siswa`;
+                    countEl.innerHTML = `<span class="text-sky-400 mr-2"><i class="fa-solid fa-mars mr-1"></i>${rMale}</span><span class="text-pink-400 mr-2"><i class="fa-solid fa-venus mr-1"></i>${rFemale}</span><span class="text-slate-300 border-l border-slate-700 pl-2">${activeSiswaList.length} Siswa</span>`;
                     countEl.classList.remove('hidden');
                 }
 
@@ -1700,44 +1728,50 @@ async function simpanData(nisn, btnElement) {
             updateStats(counts);
         }
 
-function updateStats(counts) {
-    document.getElementById('stat-verified').innerText = counts.v;
-    document.getElementById('stat-unverified').innerText = counts.uv;
-    
-    // PERUBAHAN DI SINI: Total = Aktif (c) + Masuk (a) - Keluar (b)
-    document.getElementById('stat-total').innerText = (counts.c + counts.a);
-    
-// Jika Anda ingin Laki-laki dan Perempuan juga dihitung dengan (Aktif + Masuk - Keluar)
-    document.getElementById('stat-male').innerText = (counts.c_m + counts.a_m);
-    document.getElementById('stat-female').innerText = (counts.c_f + counts.a_f);
-    
-    // Statistik Masuk
-    document.getElementById('stat-class-a').innerText = counts.a;
-    document.getElementById('stat-class-a-male').innerText = counts.a_m;
-    document.getElementById('stat-class-a-female').innerText = counts.a_f;
-    
-    // Statistik Aktif
-    const statC = document.getElementById('stat-class-c');
-    if (statC) {
-        statC.innerText = counts.c;
-        document.getElementById('stat-class-c-male').innerText = counts.c_m;
-        document.getElementById('stat-class-c-female').innerText = counts.c_f;
-    }
-    
-    document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
-    document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
-    
-    const badgeU = document.getElementById('badge-count-u');
-    if (badgeU) badgeU.innerText = counts.u + ' Siswa';
+        function updateStats(counts) {
+            document.getElementById('stat-verified').innerText = counts.v;
+            document.getElementById('stat-unverified').innerText = counts.uv;
+            
+            document.getElementById('stat-total').innerText = (counts.c + counts.a);
+            document.getElementById('stat-male').innerText = (counts.c_m + counts.a_m);
+            document.getElementById('stat-female').innerText = (counts.c_f + counts.a_f);
+            
+            // Statistik Mutasi Masuk
+            document.getElementById('stat-class-a').innerText = counts.a;
+            document.getElementById('stat-class-a-male').innerText = counts.a_m;
+            document.getElementById('stat-class-a-female').innerText = counts.a_f;
+            if (document.getElementById('count-a-male')) document.getElementById('count-a-male').innerText = counts.a_m;
+            if (document.getElementById('count-a-female')) document.getElementById('count-a-female').innerText = counts.a_f;
+            
+            // Statistik Siswa Aktif
+            const statC = document.getElementById('stat-class-c');
+            if (statC) {
+                statC.innerText = counts.c;
+                document.getElementById('stat-class-c-male').innerText = counts.c_m;
+                document.getElementById('stat-class-c-female').innerText = counts.c_f;
+            }
+            if (document.getElementById('count-c-male')) document.getElementById('count-c-male').innerText = counts.c_m;
+            if (document.getElementById('count-c-female')) document.getElementById('count-c-female').innerText = counts.c_f;
 
-    const badgeC = document.getElementById('badge-count-c');
-    if (badgeC) badgeC.innerText = counts.c + ' Siswa';
-    
-    // Statistik Keluar
-    document.getElementById('stat-class-b').innerText = counts.b;
-    document.getElementById('stat-class-b-male').innerText = counts.b_m;
-    document.getElementById('stat-class-b-female').innerText = counts.b_f;
-}
+            // Statistik Mutasi Keluar
+            document.getElementById('stat-class-b').innerText = counts.b;
+            document.getElementById('stat-class-b-male').innerText = counts.b_m;
+            document.getElementById('stat-class-b-female').innerText = counts.b_f;
+            if (document.getElementById('count-b-male')) document.getElementById('count-b-male').innerText = counts.b_m;
+            if (document.getElementById('count-b-female')) document.getElementById('count-b-female').innerText = counts.b_f;
+
+            // Badges Total
+            document.getElementById('badge-count-a').innerText = counts.a + ' Siswa';
+            document.getElementById('badge-count-b').innerText = counts.b + ' Siswa';
+            
+            const badgeU = document.getElementById('badge-count-u');
+            if (badgeU) badgeU.innerText = counts.u + ' Siswa';
+            if (document.getElementById('count-u-male')) document.getElementById('count-u-male').innerText = counts.u_m || 0;
+            if (document.getElementById('count-u-female')) document.getElementById('count-u-female').innerText = counts.u_f || 0;
+
+            const badgeC = document.getElementById('badge-count-c');
+            if (badgeC) badgeC.innerText = counts.c + ' Siswa';
+        }
     </script>
 </body>
 </html>
