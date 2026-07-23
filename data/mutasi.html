@@ -170,6 +170,68 @@
                 </div>
             </div>
         </div>
+		
+		<!-- SYARAT MUTASI MASUK (Expandable) -->
+        <div class="mb-6 max-w-7xl mx-auto no-print">
+            <details class="bg-slate-800 border border-slate-700 rounded-xl shadow-md overflow-hidden group">
+                <summary class="bg-indigo-900/40 p-4 font-bold text-indigo-400 flex justify-between items-center cursor-pointer list-none hover:bg-indigo-900/60 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Syarat Mutasi Masuk</span>
+                    </div>
+                    <span class="transition duration-300 group-open:rotate-180">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </span>
+                </summary>
+                <div class="p-5 border-t border-slate-700 text-sm text-slate-300 bg-slate-800">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-file-signature text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">Surat Keterangan Pindah</strong>
+                                <span class="text-slate-400">Dikeluarkan oleh sekolah asal, ditandatangani kepala sekolah sebagai persetujuan resmi.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-file-contract text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">Surat Keterangan Mutasi</strong>
+                                <span class="text-slate-400">Dikeluarkan oleh sekolah asal, Dari Dapodik/EMIS.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-handshake-angle text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">Surat Kesediaan Menerima</strong>
+                                <span class="text-slate-400">Dari sekolah tujuan, menyatakan siap menerima siswa.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-book-open text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">Rapor Asli dan Fotokopi</strong>
+                                <span class="text-slate-400">Menunjukkan riwayat nilai, biasanya dilegalisir.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-id-card-clip text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">NISN</strong>
+                                <span class="text-slate-400">Nomor Induk Siswa Nasional sebagai identitas pendidikan.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-folder-open text-emerald-500 mt-1"></i>
+                            <div>
+                                <strong class="text-white block mb-0.5">Kartu Keluarga & Akta Kelahiran</strong>
+                                <span class="text-slate-400">Fotokopi dokumen identitas siswa.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+        <!-- END SYARAT MUTASI MASUK -->
 
         <div class="mb-6 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md no-print">
             <div class="flex-1 relative">
@@ -351,7 +413,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQoUonNs4Ks-JFC01c2e6fd-Y0L8Al_MoXXVsXARN6lZbdXCCrccBwsttjfE-jTcx4/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcX7TReqGBc8gzkHr5n8NIH0lue4cMGqCPRcMkv16cf8zl02DKg11YNnhGiEr1bdcr/exec';
 
         const SCH_LAT = -5.159400; 
         const SCH_LON = 119.410720;
@@ -1391,176 +1453,235 @@
             }
         }
 
-        function buildRow(nisn, student) {
-            const statusVerifVal = student['Status Verifikasi'] || student['statusVerifikasi'];
-            const isVerified = statusVerifVal === 'Sudah Verif';
-            const vIcon = isVerified ? '<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>' : '<i class="fa-regular fa-circle text-slate-600 text-lg"></i>';
-            const vBorder = isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent';
-            
-            const pasFotoVal = student['Pas Foto'] || student['foto'];
-            const namaLengkapVal = student['Nama Lengkap'] || student['nama'] || '-';
-            const phoneVal = student['Nomor HP (WhatsApp)'] || student['phone'] || '';
-            const rombelTujuanVal = student['Rombel Tujuan'] || student['rombelTujuan'] || '';
-            const kelasVal = student['Kelas'] || student['kelas'] || '';
-
-            const thumbUrl = buildDriveThumbnail(pasFotoVal);
-            const photoEl = thumbUrl 
-                ? `<img src="${thumbUrl}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-slate-600 cursor-pointer hover:border-indigo-400 transition" onclick="openLightbox('${pasFotoVal}', '${namaLengkapVal}')">` 
-                : `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-500 text-xs"><i class="fa-solid fa-user"></i></div>`;
-            
-            const trMain = document.createElement('tr');
-            trMain.className = `border-b border-slate-700/50 hover:bg-slate-700/20 transition-colors cursor-pointer ${vBorder}`;
-            trMain.onclick = (e) => { if(!e.target.closest('input') && !e.target.closest('img') && !e.target.closest('a') && !e.target.closest('.clean-checkbox') && !e.target.closest('button')) toggleDetails(nisn); };
-            
-            let phoneBadge = '';
-            if (phoneVal && phoneVal.trim() !== '') {
-                const cleanedPhone = phoneVal.replace(/\D/g, '');
-                let waLink = `https://wa.me/${cleanedPhone}`;
-                if (cleanedPhone.startsWith('0')) waLink = `https://wa.me/62${cleanedPhone.substring(1)}`;
-                phoneBadge = `<a href="${waLink}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors" onclick="event.stopPropagation()" title="Chat WA"><i class="fa-brands fa-whatsapp text-lg"></i></a>`;
-            } else {
-                phoneBadge = `<div class="w-8 h-8 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center cursor-not-allowed" title="Tidak ada nomor WA"><i class="fa-brands fa-whatsapp text-lg"></i></div>`;
+function buildRow(nisn, student) {
+    // Helper untuk membersihkan dan mencocokkan key secara fleksibel
+    const getSafeValue = (possibleKeys) => {
+        // 1. Cek exact match
+        for (let k of possibleKeys) {
+            if (student[k] !== undefined && student[k] !== null && student[k] !== '') {
+                return student[k];
             }
-            
-            const rombelText = rombelTujuanVal ? `<span class="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-semibold"><i class="fa-solid fa-door-open mr-1"></i>${rombelTujuanVal}</span>` : '';
-
-            trMain.innerHTML = `
-                <td class="px-2 py-3 text-center align-middle">${vIcon}</td>
-                <td class="px-2 py-3 text-center align-middle">${photoEl}</td>
-                <td class="px-4 py-3 align-middle">
-                    <div class="flex items-center justify-between">
-                        <div class="font-bold text-white text-base leading-tight mb-1 truncate max-w-[200px] md:max-w-[300px]">${namaLengkapVal}</div>
-                        <i id="icon_${nisn}" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform"></i>
-                    </div>
-                    <div class="flex items-center gap-2 mt-1 flex-wrap">
-                        <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">${nisn}</span>
-                        ${rombelText}
-                    </div>
-                </td>
-                <td class="px-2 py-3 text-center align-middle no-print-col">${phoneBadge}</td>
-            `;
-
-            const trDetails = document.createElement('tr');
-            trDetails.className = "bg-slate-900/30";
-
-            const rawGender = student['Jenis Kelamin'] || student['gender'] || '';
-            const rawNik = student['NIK'] || student['nik'] || '';
-            const normGender = getNormalizedGender(rawGender, rawNik);
-
-            let editForm = `
-                <div id="form_${nisn}" class="p-4 md:p-6 text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div class="space-y-4">
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" value="${namaLengkapVal}" class="clean-input font-semibold text-white" ${!isAdmin ? 'readonly' : ''}></div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Status Mutasi</label>
-                                ${isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none">
-                                    <option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option>
-                                    <option value="Siswa Aktif" ${kelasVal==='Siswa Aktif'?'selected':''}>Siswa Aktif</option>
-                                    <option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option>
-                                    <option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option>
-                                </select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Kelamin</label>
-                                ${isAdmin ? `<select name="gender" class="clean-input cursor-pointer appearance-none"><option value="">--Pilih--</option><option value="L" ${normGender==='L'?'selected':''}>Laki-laki</option><option value="P" ${normGender==='P'?'selected':''}>Perempuan</option></select>` : `<input type="text" value="${normGender==='L'?'Laki-laki':normGender==='P'?'Perempuan':''}" class="clean-input" readonly>`}
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Mutasi</label><input type="date" name="tanggalMutasi" value="${student['Tanggal Mutasi'] || student['tanggalMutasi'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Asal/Tujuan Sekolah</label><input type="text" name="asalTujuanSekolah" value="${student['Asal/Tujuan Sekolah'] || student['asalTujuanSekolah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label class="text-[10px] text-slate-400 font-bold uppercase block">Rombel Tujuan</label>
-                            </div>
-                            <input type="text" name="rombelTujuan" value="${rombelTujuanVal}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${!isAdmin ? 'readonly' : ''}>
-                        </div>
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nomor HP (WA)</label><input type="text" name="phone" value="${phoneVal}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Link Pas Foto (Gdrive)</label><input type="text" name="foto" value="${pasFotoVal}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                        
-                        <div class="mt-6 border-t border-slate-700 pt-4">
-                            <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-map-location-dot mr-2"></i>Data Alamat</h4>
-                            <div class="mb-3"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jalan / Dusun / RT / RW</label><input type="text" name="alamat" value="${student['Jalan / Dusun / RT / RW'] || student['alamat'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div class="grid grid-cols-2 gap-3 mb-2">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" value="${student['Lintang'] || student['lintang'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" value="${student['Bujur'] || student['bujur'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                            <div class="flex gap-2 mb-3">
-                                ${isAdmin ? `<button type="button" onclick="getLocation('${nisn}')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-2 rounded transition-colors text-slate-300 border border-slate-600"><i class="fa-solid fa-location-crosshairs mr-1"></i> Deteksi GPS</button>` : ''}
-                                ${isAdmin ? `<button type="button" onclick="openMap('${nisn}')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-2 rounded transition-colors text-slate-300 border border-slate-600"><i class="fa-solid fa-map mr-1"></i> Buka Peta</button>` : ''}
-                            </div>
-                            <div>
-                                <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jarak Lokasi ke Sekolah</label>
-                                <div class="flex gap-2">
-                                    <input type="text" name="jarakSekolah" value="${student['Jarak Lokasi ke Sekolah'] || student['jarakSekolah'] || ''}" class="clean-input bg-slate-800/50" readonly>
-                                    ${isAdmin ? `<button type="button" onclick="updateDistance('${nisn}')" class="bg-indigo-600 hover:bg-indigo-700 px-3 rounded transition-colors"><i class="fa-solid fa-calculator text-white"></i></button>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4 mt-6 md:mt-0">
-                        <div class="border-b border-slate-700 pb-4 mb-4">
-                            <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-id-card mr-2"></i>Data Identitas</h4>
-                            <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Siswa (16 Digit)</label><input type="text" name="nik" value="${rawNik}" maxlength="16" oninput="validate16DigitsAndAutoGender(this, '${nisn}')" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. KK (16 Digit)</label><input type="text" name="nokk" value="${student['No. KK'] || student['nokk'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIPD</label><input type="text" name="nipd" value="${student['NIPD'] || student['nipd'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. Akta Kelahiran</label><input type="text" name="noAkta" value="${student['No. Akta Kelahiran'] || student['noAkta'] || ''}" class="clean-input text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" value="${student['Tempat Lahir'] || student['tempatLahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" value="${student['Tanggal Lahir'] || student['tanggalLahir'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                        </div>
-
-                        <div class="border-b border-slate-700 pb-4 mb-4 flex gap-3">
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Berat (kg)</label><input type="number" name="beratBadan" value="${student['Berat Badan'] || student['beratBadan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tinggi (cm)</label><input type="number" name="tinggiBadan" value="${student['Tinggi Badan'] || student['tinggiBadan'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
-                            <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lingkar (cm)</label><input type="number" name="lingkarKepala" value="${student['Lingkar Kepala'] || student['lingkarKepala'] || ''}" class="clean-input text-center" ${!isAdmin ? 'readonly' : ''}></div>
-                        </div>
-
-                        <div>
-                            <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-people-roof mr-2"></i>Data Orang Tua</h4>
-                            <div class="grid grid-cols-[1fr_1.2fr] gap-3 mb-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" value="${student['Nama Ayah Kandung'] || student['namaAyah'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ayah (16 Digit)</label><input type="text" name="nikAyah" value="${student['NIK Ayah'] || student['nikAyah'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                            <div class="grid grid-cols-[1fr_1.2fr] gap-3">
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" value="${student['Nama Ibu Kandung'] || student['namaIbu'] || ''}" class="clean-input" ${!isAdmin ? 'readonly' : ''}></div>
-                                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ibu (16 Digit)</label><input type="text" name="nikIbu" value="${student['NIK Ibu'] || student['nikIbu'] || ''}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${!isAdmin ? 'readonly' : ''}></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${isAdmin ? `
-                    <div class="md:col-span-2">
-                        <div class="flex items-center gap-3 p-4 rounded-lg border bg-slate-800/50 ${isVerified ? 'border-emerald-500/30' : 'border-amber-500/30'}">
-                            <input type="checkbox" name="statusVerifikasi" id="verif_${nisn}" class="clean-checkbox" ${isVerified ? 'checked' : ''}>
-                            <label for="verif_${nisn}" class="text-sm font-semibold cursor-pointer ${isVerified ? 'text-emerald-400' : 'text-amber-400'}">
-                                ${isVerified ? 'Data Sudah Diverifikasi' : 'Tandai Data Sudah Diverifikasi'}
-                            </label>
-                        </div>
-                        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4 border-t border-slate-700 pt-5">
-                            <button type="button" onclick="hapusData('${nisn}')" class="w-full sm:w-auto bg-rose-600/20 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/50 px-6 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center">
-                                <i class="fa-solid fa-trash-can mr-2"></i>Hapus Data
-                            </button>
-                            <button onclick="simpanData('${nisn}', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center">
-                                <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
-                            </button>
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-            
-            trDetails.innerHTML = `<td colspan="4" class="p-0 border-b border-slate-700"><div id="details_${nisn}" class="details-row"><div class="details-content">${editForm}</div></div></td>`;
-            
-            return { trMain, trDetails };
         }
+        
+        // 2. Cek normalized key (lowercase & tanpa simbol/spasi)
+        const normalizedStudentKeys = {};
+        for (let k in student) {
+            normalizedStudentKeys[k.toLowerCase().replace(/[^a-z0-9]/g, '')] = student[k];
+        }
+        
+        for (let k of possibleKeys) {
+            let normKey = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (normalizedStudentKeys[normKey] !== undefined && normalizedStudentKeys[normKey] !== null && normalizedStudentKeys[normKey] !== '') {
+                return normalizedStudentKeys[normKey];
+            }
+        }
+        return '';
+    };
+
+    const safeHTML = (val) => String(val).replace(/"/g, '&quot;');
+
+    // EKSTRAK VARIABEL UTAMA
+    const statusVerifVal = getSafeValue(['Status Verifikasi', 'statusVerifikasi']);
+    const isVerified = statusVerifVal === 'Sudah Verif';
+    const vIcon = isVerified ? '<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>' : '<i class="fa-regular fa-circle text-slate-600 text-lg"></i>';
+    const vBorder = isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent';
+
+    const pasFotoVal = getSafeValue(['Pas Foto', 'foto']);
+    const namaLengkapVal = safeHTML(getSafeValue(['Nama Lengkap', 'nama']) || '-');
+
+    const phoneVal = safeHTML(getSafeValue(['Nomor HP (WhatsApp)', 'Nomor HP', 'phone', 'nohp', 'hp']));
+    const rombelTujuanVal = safeHTML(getSafeValue(['Rombel Tujuan', 'rombelTujuan']));
+    const kelasVal = safeHTML(getSafeValue(['Kelas', 'kelas']));
+
+    const rawGender = getSafeValue(['Jenis Kelamin', 'gender', 'jk']);
+    const rawNik = safeHTML(getSafeValue(['NIK', 'nik']));
+    const normGender = typeof getNormalizedGender === 'function' ? getNormalizedGender(rawGender, rawNik) : rawGender;
+
+    // --- PERBAIKAN KHUSUS KOLOM J, N, O, P, Q, U ---
+    const nokkVal = safeHTML(getSafeValue(['nokk', 'No. KK', 'noKk', 'nokartukeluarga', 'No KK', 'no_kk'])); // Kolom J
+    const nipdVal = safeHTML(getSafeValue(['NIPD', 'nipd'])); // Kolom K
+    const tempatLahirVal = safeHTML(getSafeValue(['Tempat Lahir', 'tempatLahir'])); 
+    const tanggalLahirVal = safeHTML(getSafeValue(['Tanggal Lahir', 'tanggalLahir']));
+
+    const noAktaVal = safeHTML(getSafeValue(['No. Akta Kelahiran', 'noAkta', 'akta', 'noaktakelahiran', 'no_akta', 'No Akta Kelahiran', 'No. Akta'])); // Kolom N
+    const beratBadanVal = safeHTML(getSafeValue(['Berat Badan', 'beratBadan', 'berat', 'beratbadan', 'bb'])); // Kolom O
+    const tinggiBadanVal = safeHTML(getSafeValue(['Tinggi Badan', 'tinggiBadan', 'tinggi', 'tinggibadan', 'tb'])); // Kolom P
+    const lingkarKepalaVal = safeHTML(getSafeValue(['Lingkar Kepala', 'lingkarKepala', 'lingkar', 'lingkarkepala', 'lk'])); // Kolom Q
+    
+    const alamatVal = safeHTML(getSafeValue(['Jalan / Dusun / RT / RW', 'alamat', 'jalan'])); // Kolom R
+    const lintangVal = safeHTML(getSafeValue(['Lintang', 'lintang'])); 
+    const bujurVal = safeHTML(getSafeValue(['Bujur', 'bujur']));
+
+    const jarakSekolahVal = safeHTML(getSafeValue(['Jarak Lokasi ke Sekolah', 'Jarak Ke Sekolah', 'jarakSekolah', 'jarak', 'jaraklokasi', 'jaraklokasikesekolah'])); // Kolom U
+    
+    const namaAyahVal = safeHTML(getSafeValue(['Nama Ayah Kandung', 'namaAyah', 'ayah']));
+    const nikAyahVal = safeHTML(getSafeValue(['NIK Ayah', 'nikAyah']));
+    const namaIbuVal = safeHTML(getSafeValue(['Nama Ibu Kandung', 'namaIbu', 'ibu']));
+    const nikIbuVal = safeHTML(getSafeValue(['NIK Ibu', 'nikIbu']));
+    const tanggalMutasiVal = safeHTML(getSafeValue(['Tanggal Mutasi', 'tanggalMutasi']));
+    const asalTujuanVal = safeHTML(getSafeValue(['Asal/Tujuan Sekolah', 'asalTujuanSekolah']));
+
+    // ... (Sisa fungsi buildRow ke bawah tetap sama seperti kode Anda sebelumnya)
+
+    // Amankan Thumbnail Drive
+    const thumbUrl = typeof buildDriveThumbnail === 'function' ? buildDriveThumbnail(pasFotoVal) : pasFotoVal;
+    const photoEl = thumbUrl 
+        ? `<img src="${thumbUrl}" alt="Foto" class="w-10 h-10 rounded-full object-cover border border-slate-600 cursor-pointer hover:border-indigo-400 transition" onclick="openLightbox('${pasFotoVal}', '${namaLengkapVal}')">` 
+        : `<div class="w-10 h-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-500 text-xs"><i class="fa-solid fa-user"></i></div>`;
+    
+    const trMain = document.createElement('tr');
+    trMain.className = `border-b border-slate-700/50 hover:bg-slate-700/20 transition-colors cursor-pointer ${vBorder}`;
+    trMain.onclick = (e) => { 
+        if(typeof toggleDetails === 'function' && !e.target.closest('input') && !e.target.closest('img') && !e.target.closest('a') && !e.target.closest('.clean-checkbox') && !e.target.closest('button')) {
+            toggleDetails(nisn); 
+        }
+    };
+    
+    let phoneBadge = '';
+    if (phoneVal && phoneVal.trim() !== '') {
+        const cleanedPhone = phoneVal.replace(/\D/g, '');
+        let waLink = `https://wa.me/${cleanedPhone}`;
+        if (cleanedPhone.startsWith('0')) waLink = `https://wa.me/62${cleanedPhone.substring(1)}`;
+        phoneBadge = `<a href="${waLink}" target="_blank" class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors" onclick="event.stopPropagation()" title="Chat WA"><i class="fa-brands fa-whatsapp text-lg"></i></a>`;
+    } else {
+        phoneBadge = `<div class="w-8 h-8 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center cursor-not-allowed" title="Tidak ada nomor WA"><i class="fa-brands fa-whatsapp text-lg"></i></div>`;
+    }
+    
+    const rombelText = rombelTujuanVal ? `<span class="text-xs bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded font-semibold"><i class="fa-solid fa-door-open mr-1"></i>${rombelTujuanVal}</span>` : '';
+
+    trMain.innerHTML = `
+        <td class="px-2 py-3 text-center align-middle">${vIcon}</td>
+        <td class="px-2 py-3 text-center align-middle">${photoEl}</td>
+        <td class="px-4 py-3 align-middle">
+            <div class="flex items-center justify-between">
+                <div class="font-bold text-white text-base leading-tight mb-1 truncate max-w-[200px] md:max-w-[300px]">${namaLengkapVal}</div>
+                <i id="icon_${nisn}" class="fa-solid fa-chevron-down text-slate-500 text-xs transition-transform"></i>
+            </div>
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">${nisn}</span>
+                ${rombelText}
+            </div>
+        </td>
+        <td class="px-2 py-3 text-center align-middle no-print-col">${phoneBadge}</td>
+    `;
+
+    const trDetails = document.createElement('tr');
+    trDetails.className = "bg-slate-900/30";
+
+    let editForm = `
+        <div id="form_${nisn}" class="p-4 md:p-6 text-sm grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div class="space-y-4">
+                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap</label><input type="text" name="nama" value="${namaLengkapVal}" class="clean-input font-semibold text-white" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Status Mutasi</label>
+                        ${typeof isAdmin !== 'undefined' && isAdmin ? `<select name="kelas" class="clean-input cursor-pointer appearance-none">
+                            <option value="Mutasi Masuk" ${kelasVal==='Mutasi Masuk'?'selected':''}>Mutasi Masuk</option>
+                            <option value="Siswa Aktif" ${kelasVal==='Siswa Aktif'?'selected':''}>Siswa Aktif</option>
+                            <option value="Mutasi Keluar" ${kelasVal==='Mutasi Keluar'?'selected':''}>Mutasi Keluar</option>
+                            <option value="Belum ada status" ${kelasVal==='Belum ada status'?'selected':''}>Belum ada status</option>
+                        </select>` : `<input type="text" value="${kelasVal}" class="clean-input" readonly>`}
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jenis Kelamin</label>
+                        ${typeof isAdmin !== 'undefined' && isAdmin ? `<select name="gender" class="clean-input cursor-pointer appearance-none"><option value="">--Pilih--</option><option value="L" ${normGender==='L'?'selected':''}>Laki-laki</option><option value="P" ${normGender==='P'?'selected':''}>Perempuan</option></select>` : `<input type="text" value="${normGender==='L'?'Laki-laki':normGender==='P'?'Perempuan':''}" class="clean-input" readonly>`}
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Mutasi</label><input type="date" name="tanggalMutasi" value="${tanggalMutasiVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Asal/Tujuan Sekolah</label><input type="text" name="asalTujuanSekolah" value="${asalTujuanVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[10px] text-slate-400 font-bold uppercase block">Rombel Tujuan</label>
+                    </div>
+                    <input type="text" name="rombelTujuan" value="${rombelTujuanVal}" oninput="updateRombelBadge('${nisn}')" class="clean-input uppercase font-bold" placeholder="Contoh: 1A, 2B" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}>
+                </div>
+                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nomor HP (WA)</label><input type="text" name="phone" value="${phoneVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Link Pas Foto (Gdrive)</label><input type="text" name="foto" value="${pasFotoVal}" class="clean-input text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                
+                <div class="mt-6 border-t border-slate-700 pt-4">
+                    <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-map-location-dot mr-2"></i>Data Alamat</h4>
+                    <div class="mb-3"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jalan / Dusun / RT / RW</label><input type="text" name="alamat" value="${alamatVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lintang (Latitude)</label><input type="text" name="lintang" value="${lintangVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Bujur (Longitude)</label><input type="text" name="bujur" value="${bujurVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                    <div class="flex gap-2 mb-3">
+                        ${typeof isAdmin !== 'undefined' && isAdmin ? `<button type="button" onclick="getLocation('${nisn}')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-2 rounded transition-colors text-slate-300 border border-slate-600"><i class="fa-solid fa-location-crosshairs mr-1"></i> Deteksi GPS</button>` : ''}
+                        ${typeof isAdmin !== 'undefined' && isAdmin ? `<button type="button" onclick="openMap('${nisn}')" class="flex-1 bg-slate-700 hover:bg-slate-600 text-xs py-2 rounded transition-colors text-slate-300 border border-slate-600"><i class="fa-solid fa-map mr-1"></i> Buka Peta</button>` : ''}
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Jarak Lokasi ke Sekolah</label>
+                        <div class="flex gap-2">
+                            <input type="text" name="jarakSekolah" value="${jarakSekolahVal}" class="clean-input bg-slate-800/50" readonly>
+                            ${typeof isAdmin !== 'undefined' && isAdmin ? `<button type="button" onclick="updateDistance('${nisn}')" class="bg-indigo-600 hover:bg-indigo-700 px-3 rounded transition-colors"><i class="fa-solid fa-calculator text-white"></i></button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 mt-6 md:mt-0">
+                <div class="border-b border-slate-700 pb-4 mb-4">
+                    <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-id-card mr-2"></i>Data Identitas</h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Siswa (16 Digit)</label><input type="text" name="nik" value="${rawNik}" maxlength="16" oninput="validate16DigitsAndAutoGender(this, '${nisn}')" class="clean-input font-mono text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. KK (16 Digit)</label><input type="text" name="nokk" value="${nokkVal}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIPD</label><input type="text" name="nipd" value="${nipdVal}" class="clean-input text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. Akta Kelahiran</label><input type="text" name="noAkta" value="${noAktaVal}" class="clean-input text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tempat Lahir</label><input type="text" name="tempatLahir" value="${tempatLahirVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tanggal Lahir</label><input type="date" name="tanggalLahir" value="${tanggalLahirVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                </div>
+
+                <div class="border-b border-slate-700 pb-4 mb-4 flex gap-3">
+                    <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Berat (kg)</label><input type="number" name="beratBadan" value="${beratBadanVal}" class="clean-input text-center" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Tinggi (cm)</label><input type="number" name="tinggiBadan" value="${tinggiBadanVal}" class="clean-input text-center" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    <div class="flex-1"><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Lingkar (cm)</label><input type="number" name="lingkarKepala" value="${lingkarKepalaVal}" class="clean-input text-center" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                </div>
+
+                <div>
+                    <h4 class="text-indigo-400 font-bold mb-3 flex items-center"><i class="fa-solid fa-people-roof mr-2"></i>Data Orang Tua</h4>
+                    <div class="grid grid-cols-[1fr_1.2fr] gap-3 mb-3">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ayah</label><input type="text" name="namaAyah" value="${namaAyahVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ayah (16 Digit)</label><input type="text" name="nikAyah" value="${nikAyahVal}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                    <div class="grid grid-cols-[1fr_1.2fr] gap-3">
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Ibu</label><input type="text" name="namaIbu" value="${namaIbuVal}" class="clean-input" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                        <div><label class="text-[10px] text-slate-400 font-bold uppercase mb-1 block">NIK Ibu (16 Digit)</label><input type="text" name="nikIbu" value="${nikIbuVal}" maxlength="16" oninput="validate16Digits(this)" class="clean-input font-mono text-xs" ${typeof isAdmin !== 'undefined' && !isAdmin ? 'readonly' : ''}></div>
+                    </div>
+                </div>
+            </div>
+            
+            ${typeof isAdmin !== 'undefined' && isAdmin ? `
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-3 p-4 rounded-lg border bg-slate-800/50 ${isVerified ? 'border-emerald-500/30' : 'border-amber-500/30'}">
+                    <input type="checkbox" name="statusVerifikasi" id="verif_${nisn}" class="clean-checkbox" ${isVerified ? 'checked' : ''}>
+                    <label for="verif_${nisn}" class="text-sm font-semibold cursor-pointer ${isVerified ? 'text-emerald-400' : 'text-amber-400'}">
+                        ${isVerified ? 'Data Sudah Diverifikasi' : 'Tandai Data Sudah Diverifikasi'}
+                    </label>
+                </div>
+                <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4 border-t border-slate-700 pt-5">
+                    <button type="button" onclick="hapusData('${nisn}')" class="w-full sm:w-auto bg-rose-600/20 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/50 px-6 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-trash-can mr-2"></i>Hapus Data
+                    </button>
+                    <button onclick="simpanData('${nisn}', this)" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-hdd mr-2"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    trDetails.innerHTML = `<td colspan="4" class="p-0 border-b border-slate-700"><div id="details_${nisn}" class="details-row"><div class="details-content">${editForm}</div></div></td>`;
+    
+    return { trMain, trDetails };
+}
 
         function renderTable() {
             const tbodyA = document.getElementById('studentTableBodyA');
