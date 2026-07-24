@@ -12,6 +12,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Tambahan Library SheetJS untuk export format .xlsx -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 	
     <script>
         tailwind.config = {
@@ -149,7 +152,7 @@
                         <i class="fa-solid fa-map-location-dot text-4xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Peta Zonasi</h3>
-                    <p class="text-slate-500 text-xs leading-relaxed px-2">Lihat persebaran wilayah domisili siswa.</p>
+                    <p class="text-slate-500 text-xs leading-relaxed px-2">Lihat persebaran Wilayah domisili siswa.</p>
                 </div>
             </div>
 
@@ -201,8 +204,14 @@
                         <h2 id="list-title" class="text-3xl font-extrabold text-slate-800 tracking-tight">Daftar Entitas</h2>
                         <p class="text-slate-500 mt-1">Ketuk nama untuk membuka kunci akses data.</p>
                     </div>
-                    <div class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0">
-                        <i class="fa-solid fa-list-ul"></i> <span id="list-count">0 Data</span>
+                    <!-- Ditambahkan Grup Flex Untuk Unduh Absen & List Count -->
+                    <div class="flex items-center gap-3 shrink-0">
+                        <button id="btn-unduh-absen" onclick="unduhAbsenKelas()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> Unduh Absen
+                        </button>
+                        <div class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shrink-0">
+                            <i class="fa-solid fa-list-ul"></i> <span id="list-count">0 Data</span>
+                        </div>
                     </div>
                 </div>
 
@@ -251,10 +260,7 @@
                 </div>
 
                 <div>
-                    <div class="flex items-center gap-3 mb-6 relative z-10">
-                        <div class="h-8 w-1.5 bg-blue-500 rounded-full"></div>
-                        <h3 class="text-lg font-bold text-slate-800">Informasi Rinci</h3>
-                    </div>
+				
                     <div id="detail-fields" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-sm bg-slate-50 p-6 rounded-2xl border border-slate-100 relative z-10"></div>
                     
                     <div id="upload-section-siswa" class="hidden mt-8 space-y-4 relative z-10">
@@ -870,7 +876,11 @@
             renderListView(filteredData, currentType, false, currentSelectedClass !== 'ALL' ? currentSelectedClass : null);
         }
 
-        function renderListView(data, type, isInit = false, selectedKelas = null) {
+function renderListView(data, type, isInit = false, selectedKelas = null) {
+            // 1. Sinkronisasi variabel state global agar sesuai dengan fungsi unduhAbsenKelas()
+            currentType = type;
+            currentSelectedClass = selectedKelas;
+
             data.sort((a, b) => {
                 const nameA = (a.nama || '').toString();
                 const nameB = (b.nama || '').toString();
@@ -885,8 +895,24 @@
             document.getElementById('list-title').innerText = type === 'siswa' ? (selectedKelas ? (isAlumni ? selectedKelas : `Siswa Kelas ${selectedKelas}`) : 'Pangkalan Data Siswa') : 'Pangkalan Data GTK';
             document.getElementById('list-count').innerText = `${data.length} Data`;
 
-            if (data.length === 0) { emptyState.classList.remove('hidden'); } 
-            else {
+            // 2. Atur Tampilan Tombol Unduh Data Excel
+            const btnUnduh = document.getElementById('btn-unduh-absen');
+            if (btnUnduh) {
+                // Hapus !isAlumni agar tombol unduh excel juga bisa dipakai untuk data Alumni
+                if (type === 'siswa' && selectedKelas && selectedKelas !== 'ALL') {
+                    btnUnduh.classList.remove('hidden');
+                    
+                    // Opsional: Sesuaikan teks tombol karena sekarang mengunduh seluruh data (bukan cuma absen)
+                    // Jika Anda menggunakan innerHTML/innerText pada tombol ini, Anda bisa mengaktifkan baris di bawah:
+                    // btnUnduh.innerHTML = `<i class="fa-solid fa-file-excel mr-1.5"></i> Unduh Data ${isAlumni ? selectedKelas : 'Kelas'}`;
+                } else {
+                    btnUnduh.classList.add('hidden');
+                }
+            }
+
+            if (data.length === 0) { 
+                emptyState.classList.remove('hidden'); 
+            } else {
                 emptyState.classList.add('hidden');
                 data.forEach((item) => {
                     const originalIndex = globalCachedList.findIndex(x => x.id === item.id);
@@ -911,7 +937,131 @@
             }
             ['section-dashboard', 'section-class-list', 'section-detail', 'section-master-map'].forEach(id => document.getElementById(id).classList.add('hidden')); 
             ['section-list', 'btn-back'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+        }        
+// --- FITUR UNDUH ABSEN KELAS (DIPERBARUI DENGAN DATA LENGKAP) ---
+function unduhAbsenKelas() {
+    if (currentType !== 'siswa' || !currentSelectedClass || currentSelectedClass === 'ALL') {
+        showToast("Pilih kelas terlebih dahulu untuk mengunduh absen.", "error");
+        return;
+    }
+
+    // Filter dan urutkan data siswa sesuai kelas yang dipilih
+    const filteredData = globalCachedList.filter(item => item.kelas === currentSelectedClass);
+    filteredData.sort((a, b) => {
+        const nameA = (a.nama || '').toString();
+        const nameB = (b.nama || '').toString();
+        return nameA.localeCompare(nameB, 'id', { numeric: true, sensitivity: 'base' });
+    });
+
+    // Map data ke format Excel dengan mengambil SEMUA data rinci
+    const dataToExport = filteredData.map((item, index) => {
+        let jk = (item.jenis_kelamin || item['Jenis Kelamin'] || '').toString().trim().toUpperCase();
+        let lp = '';
+        
+        if (jk === 'P' || jk === 'PEREMPUAN') {
+            lp = 'P';
+        } else if (jk === 'L' || jk === 'LAKI-LAKI') {
+            lp = 'L';
+        } else {
+            lp = (item.nama && item.nama.length % 2 === 0 ? 'L' : 'P');
         }
+        
+        return {
+            "Nomor": index + 1,
+            "NISN": item.nisn || item.NISN || "-",
+            "Nama Lengkap": item.nama || item['Nama Lengkap'] || "-",
+            "L/P": lp,
+            
+            // --- Informasi Rinci ---
+            "No. KK": item['No. KK'] || "-",
+            "Tempat & Tanggal Lahir": item['Tempat & Tanggal Lahir'] || item.tanggal_lahir || item['Tanggal Lahir'] || "-",
+            "Agama": item['Agama'] || "-",
+            "Nomor WA": item['Nomor WA'] || "-",
+            "Email": item['Email'] || "-",
+            "Berat Badan": item['Berat Badan'] || "-",
+            "Tinggi Badan": item['Tinggi Badan'] || "-",
+            "Lingkar Kepala": item['Lingkar Kepala'] || "-",
+            "Alamat": item['Alamat'] || "-",
+            "Kelurahan": item['Kelurahan'] || "-",
+            "Kecamatan": item['Kecamatan'] || "-",
+            "Titik Koordinat": item['Titik Koordinat'] || "-",
+            "Jarak Rumah Ke Sekolah": item['Jarak Rumah Ke Sekolah'] || "-",
+            "Jumlah Saudara": item['Jumlah Saudara'] || "-",
+            "Penerima KPS": item['Penerima KPS'] || "-",
+            "No. KPS": item['No. KPS'] || "-",
+            "Nomor PIP": item['Nomor PIP'] || "-",
+            
+            // --- Informasi Orang Tua ---
+            "Nama Ayah": item['Nama Ayah'] || "-",
+            "NIK Ayah": item['NIK Ayah'] || "-",
+            "Tahun Lahir Ayah": item['Tahun Lahir Ayah'] || "-",
+            "Pendidikan Ayah": item['Pendidikan Ayah'] || "-",
+            "Pekerjaan Ayah": item['Pekerjaan Ayah'] || "-",
+            "Penghasilan Ayah": item['Penghasilan Ayah'] || "-",
+            
+            "Nama Ibu": item['Nama Ibu'] || "-",
+            "NIK Ibu": item['NIK Ibu'] || "-",
+            "Tahun Lahir Ibu": item['Tahun Lahir Ibu'] || "-",
+            "Pendidikan Ibu": item['Pendidikan Ibu'] || "-",
+            "Pekerjaan Ibu": item['Pekerjaan Ibu'] || "-",
+            "Penghasilan Ibu": item['Penghasilan Ibu'] || "-",
+
+            // --- Link Berkas Dokumen ---
+            "Link File KK": item['File KK'] || "-",
+            "Link File Akta": item['File Akta'] || "-"
+        };
+    });
+
+    if (dataToExport.length === 0) {
+        showToast("Tidak ada data siswa untuk diunduh.", "error");
+        return;
+    }
+
+    try {
+        // Generate Sheet
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        
+        // Menyesuaikan lebar kolom Excel agar lebih rapi saat dibuka
+        const wscols = [
+            {wch: 8},   // Nomor
+            {wch: 15},  // NISN
+            {wch: 40},  // Nama Lengkap
+            {wch: 8},   // L/P
+            {wch: 20},  // No. KK
+            {wch: 25},  // Tempat & Tanggal Lahir
+            {wch: 12},  // Agama
+            {wch: 15},  // Nomor WA
+            {wch: 25},  // Email
+            {wch: 12},  // Berat Badan
+            {wch: 12},  // Tinggi Badan
+            {wch: 15},  // Lingkar Kepala
+            {wch: 40},  // Alamat
+            {wch: 20},  // Kelurahan
+            {wch: 20},  // Kecamatan
+            {wch: 25},  // Titik Koordinat
+            {wch: 25},  // Jarak Rumah
+            {wch: 15},  // Jumlah Saudara
+            {wch: 15},  // Penerima KPS
+            {wch: 20},  // No. KPS
+            {wch: 20},  // Nomor PIP
+            // Orang tua bisa disetel standar lebarnya
+            {wch: 25}, {wch: 20}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 20},
+            {wch: 25}, {wch: 20}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 20},
+            {wch: 40}, {wch: 40} // Link file
+        ];
+        worksheet['!cols'] = wscols;
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, `Data Kelas ${currentSelectedClass}`);
+        
+        // Eksekusi Unduhan File
+        XLSX.writeFile(workbook, `Data_Siswa_Kelas_${currentSelectedClass}.xlsx`);
+        showToast("Berhasil mengunduh data lengkap siswa!", "success");
+    } catch (error) {
+        console.error(error);
+        showToast("Terjadi kesalahan saat memproses file Excel.", "error");
+    }
+}
 
         // --- SECURITY VALIDATION CRYPT ---
         let currentVerificationIndex = -1;
@@ -1044,7 +1194,7 @@
                     iconWrapper.className = "bg-emerald-50 text-emerald-600 p-4 rounded-2xl shrink-0"; icon.className = "fa-solid fa-graduation-cap text-3xl";
                 }
                 
-                sub.innerHTML = `<i class="fa-regular fa-id-card"></i> ${isAlumniDetail ? (info["Kelas"] || 'Alumni') : 'Kelas: ' + (info["Kelas"] || '-')} &nbsp;•&nbsp; NIK: ${info["NIK"] || '-'}`;
+                sub.innerHTML = ` ${isAlumniDetail ? (info["Kelas"] || 'Alumni') : 'NIK: ' + (info["NIK"] || '-')} <br> NISN: ${info["NISN"] || '-'}  &nbsp;-•-&nbsp; Kelas: ${info["Kelas"] || '-'} <br> NIPD: ${info["NIPD"] || '-'}  &nbsp;-•-&nbsp; Desil: ${info["Desil"] || '-'}`;
                 document.getElementById('upload-section-siswa').classList.remove('hidden');
 				document.getElementById('dokumen-tambahan-section').classList.remove('hidden');
 
@@ -1081,8 +1231,8 @@
                         iframe.src = ""; 
                     }
                 });
-                
-                function getDrivePreviewUrl(url) {
+				
+				function getDrivePreviewUrl(url) {
                     if (!url) return null;
                     const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/) || url.match(/id=([a-zA-Z0-9-_]+)/);
                     if (match && match[1]) {
@@ -1090,7 +1240,7 @@
                     }
                     return null; 
                 }
-				
+                
                 ['kk', 'akta'].forEach(type => {
                     const field = type === 'kk' ? 'File KK' : 'File Akta'; const btnLihat = document.getElementById(`btn-lihat-${type}`);
                     const iconBtn = document.getElementById(`icon-btn-${type}`); const textBtn = document.getElementById(`text-btn-${type}`);
@@ -1098,7 +1248,35 @@
                     else { btnLihat.classList.add('hidden'); iconBtn.className = 'fa-solid fa-cloud-arrow-up'; textBtn.innerText = 'Pilih & Unggah'; }
                 });
 
-                ['NIK', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Nama Ibu Kandung', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Nomor WA', 'Email', 'Alamat', 'Titik Koordinat', 'Jarak Rumah Ke Sekolah'].forEach(f => appendField(f, info[f]));
+                // --- AWAL PENAMBAHAN INFORMASI RINCI ---
+                const infoRinciHeader = document.createElement('div');
+                infoRinciHeader.className = "col-span-1 sm:col-span-2 lg:col-span-3 mt-2"; 
+                infoRinciHeader.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4 relative z-10">
+                        <div class="h-8 w-1.5 bg-blue-500 rounded-full"></div>
+                        <h3 class="text-lg font-bold text-slate-800">Informasi Rinci</h3>
+                    </div>
+                `;
+                document.getElementById('detail-fields').appendChild(infoRinciHeader);
+                // --- AKHIR PENAMBAHAN INFORMASI RINCI ---
+
+                // (Catatan: Pastikan array ini berisi field untuk Siswa/Informasi Rinci)
+                ['No. KK', 'Tempat & Tanggal Lahir', 'Jenis Kelamin', 'Agama', 'Nomor WA', 'Email', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Alamat', 'Kelurahan', 'Kecamatan', 'Titik Koordinat', 'Jarak Rumah Ke Sekolah', 'Jumlah Saudara', 'Penerima KPS', 'No. KPS', 'Nomor PIP'].forEach(f => appendField(f, info[f]));
+        
+                // --- AWAL PENAMBAHAN INFORMASI ORANG TUA ---
+                const infoOrangTuaHeader = document.createElement('div');
+                infoOrangTuaHeader.className = "col-span-1 sm:col-span-2 lg:col-span-3 mt-6"; 
+                infoOrangTuaHeader.innerHTML = `
+                    <div class="flex items-center gap-3 mb-4 relative z-10">
+                        <div class="h-8 w-1.5 bg-blue-500 rounded-full"></div>
+                        <h3 class="text-lg font-bold text-slate-800">Informasi Orang Tua</h3>
+                    </div>
+                `;
+                document.getElementById('detail-fields').appendChild(infoOrangTuaHeader);
+                // --- AKHIR PENAMBAHAN INFORMASI ORANG TUA ---
+                
+                // (Catatan: Pastikan array ini diubah ke field yang sesuai untuk Orang Tua jika diperlukan)
+                ['Nama Ayah', 'NIK Ayah', 'Tahun Lahir Ayah', 'Pendidikan Ayah', 'Pekerjaan Ayah', 'Penghasilan Ayah', 'Nama Ibu', 'NIK Ibu', 'Tahun Lahir Ibu', 'Pendidikan Ibu', 'Pekerjaan Ibu', 'Penghasilan Ibu'].forEach(f => appendField(f, info[f]));
             }
             
             // Tambahkan Tombol Hapus Jika Admin Aktif
@@ -1118,7 +1296,7 @@
         }
 
         function appendField(label, val) {
-            const editableFields = ['Nomor WA', 'Email', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala'];
+            const editableFields = ['Nomor WA', 'Email', 'Berat Badan', 'Tinggi Badan', 'Lingkar Kepala', 'Jumlah Saudara', 'Nama Ayah', 'NIK Ayah', 'Tahun Lahir Ayah', 'Pendidikan Ayah', 'Pekerjaan Ayah', 'Penghasilan Ayah', 'Pendidikan Ibu', 'Pekerjaan Ibu', 'Penghasilan Ibu'];
             // Admin bisa mengedit SEMUA field, user biasa hanya field tertentu
             // Jarak tidak bisa diedit secara manual
             const isEditable = (isAdminActive || editableFields.includes(label)) && label !== 'Jarak Rumah Ke Sekolah'; 
@@ -1171,7 +1349,7 @@
             document.getElementById('section-master-map').classList.remove('hidden'); document.getElementById('btn-back').classList.remove('hidden');
 
             if(!localCache['siswa']) {
-                showToast('Mengunduh data peta sebaran wilayah...', 'info'); await fetchList('siswa'); 
+                showToast('Mengunduh data peta sebaran Wilayah...', 'info'); await fetchList('siswa'); 
                 ['section-dashboard', 'section-class-list', 'section-list'].forEach(id => document.getElementById(id).classList.add('hidden'));
             }
 
