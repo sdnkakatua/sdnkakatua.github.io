@@ -610,7 +610,7 @@
                             <input type="number" id="quota_val_${r}" value="${qVal}" oninput="recalcQuotaRow('${r}')" class="clean-input text-center font-bold text-xs py-1">
                         </div>
                         <div class="col-span-2">
-                            <input type="number" id="quota_terisi_${r}" value="${tVal}" oninput="recalcQuotaRow('${r}')" class="clean-input text-center font-bold text-emerald-400 text-xs py-1">
+                            <input type="number" id="quota_terisi_${r}" value="${tVal}" oninput="recalcQuotaRow('${r}')" class="clean-input text-center font-bold text-emerald-400 text-xs py-1" readonly>
                         </div>
                         <div class="col-span-2">
                             <input type="number" id="quota_sisa_${r}" value="${sVal}" class="clean-input text-center font-bold text-amber-400 text-xs py-1" readonly>
@@ -672,7 +672,7 @@
                                         <input type="number" id="new-rombel-quota" placeholder="Kuota" oninput="updateNewRombelSisa()" class="clean-input text-xs text-center py-1.5">
                                     </div>
                                     <div class="col-span-2">
-                                        <input type="number" id="new-rombel-terisi" placeholder="Terisi" oninput="updateNewRombelSisa()" class="clean-input text-xs text-center py-1.5 text-emerald-400">
+                                        <input type="number" id="new-rombel-terisi" placeholder="Terisi" oninput="updateNewRombelSisa()" class="clean-input text-xs text-center py-1.5 text-emerald-400" readonly>
                                     </div>
                                     <div class="col-span-2">
                                         <input type="number" id="new-rombel-sisa" placeholder="Sisa" class="clean-input text-xs text-center py-1.5 text-amber-400" readonly>
