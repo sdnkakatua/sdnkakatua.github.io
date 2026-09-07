@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ihsan Syah: Blok Dienes</title>
+    <style>
+        :root {
+            --hundreds: #3b82f6; --tens: #22c55e; --ones: #facc15;    
+            /* Ukuran Balok Kompak */
+            --h-size: 45px;
+            --t-width: 10px;
+            --o-size: 10px;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e2e8f0; margin: 0; padding: 10px;
+        }
+        .container {
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            max-width: 1200px; margin: auto;
+        }
+        h1 { text-align: center; color: #1e293b; margin-top: 0; font-size: 20px; }
+        .instructions { text-align: center; color: #64748b; margin-bottom: 12px; font-weight: 500; font-size: 13px; }
+        
+        .control-panel {
+            background: #f8fafc; padding: 10px; border-radius: 10px;
+            margin-bottom: 15px; border: 1px solid #cbd5e1;
+            display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; align-items: center;
+        }
+        
+        input, select {
+            padding: 6px; font-size: 13px; width: 65px;
+            border: 2px solid #cbd5e1; border-radius: 6px; text-align: center;
+        }
+        select { width: auto; font-weight: bold; cursor: pointer; }
+        
+        button {
+            padding: 6px 10px; font-size: 12px; font-weight: bold;
+            color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary { background-color: #4f46e5; }
+        .btn-primary:hover { background-color: #4338ca; }
+        
+        .mode-btn { background-color: #e2e8f0; color: #475569; border: 2px solid transparent; }
+        .mode-btn:hover { background-color: #cbd5e1; }
+        .mode-btn.active-drag { background-color: #3b82f6; color: white; }
+        .mode-btn.active-drag-all { background-color: #8b5cf6; color: white; } 
+        .mode-btn.active-select { background-color: #ec4899; color: white; } 
+        .mode-btn.active-break { background-color: #f59e0b; color: white; }
+
+        .btn-action { background-color: #10b981; } 
+        .btn-action:hover { background-color: #059669; }
+        .btn-auto { background-color: #0ea5e9; } /* Warna khusus tombol otomatis */
+        .btn-auto:hover { background-color: #0284c7; }
+
+        /* Layout Workspace */
+        .workspace { display: flex; gap: 12px; min-height: 400px; flex-direction: row; }
+        
+        @media (max-width: 768px) {
+            .workspace { flex-direction: column; }
+            .control-panel { gap: 4px; }
+            button { font-size: 11px; padding: 5px 8px; }
+        }
+
+        .board-column { flex: 1; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .main-board { background: #ffffff; border: 2px solid #64748b; }
+        .main-board h3 { margin: 0; border-bottom: 2px solid #cbd5e1; padding-bottom: 6px; font-size: 15px; }
+        .secondary-board { background: #f1f5f9; border: 2px dashed #94a3b8; overflow-y: auto; max-height: 600px; }
+        .secondary-board h3 { margin: 0; border-bottom: 2px dashed #cbd5e1; padding-bottom: 6px; font-size: 15px; }
+
+        /* Struktur Kolom Nilai Tempat */
+        .place-value-board { display: flex; gap: 6px; width: 100%; margin-top: 6px; }
+        .pv-column {
+            flex: 1; display: flex; flex-direction: column; 
+            border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px;
+            background: rgba(255,255,255,0.7); min-height: 80px;
+        }
+        .pv-header {
+            font-size: 11px; font-weight: bold; color: #475569; text-align: center;
+            border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px;
+        }
+
+        /* Drop Zones */
+        .drop-zone {
+            background: white; border: 2px solid #94a3b8; border-radius: 8px;
+            padding: 15px 8px 8px; position: relative; transition: 0.2s;
+        }
+        .drop-zone.drag-over { background: #e0f2fe; border-color: #0284c7; }
+        .zone-label {
+            position: absolute; top: -10px; left: 10px; font-size: 11px;
+            background: #475569; color: white; padding: 2px 8px; border-radius: 10px; font-weight: bold;
+        }
+        .trash-zone { border-color: #ef4444; background: #fef2f2; }
+        .trash-zone .zone-label { background: #ef4444; }
+        .trash-zone.drag-over { background: #fee2e2; border-color: #b91c1c; }
+
+        /* Blocks - Ukuran Dikecilkan */
+        .block-container { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; align-content: flex-start; }
+        .block { cursor: grab; transition: 0.1s; position: relative; flex-shrink: 0; }
+        .block:active { cursor: grabbing; transform: scale(0.95); }
+        
+        .block.selected { box-shadow: 0 0 0 2px #ef4444, 0 2px 4px rgba(0,0,0,0.3); transform: translateY(-2px); z-index: 10; }
+        .block.mode-select { cursor: pointer; }
+        .block.mode-select:hover { transform: translateY(-1px); }
+        .block.mode-break { cursor: pointer; }
+        .block.mode-break:hover { transform: scale(1.05); }
+        
+        .h-block {
+            width: var(--h-size); height: var(--h-size); background-color: var(--hundreds);
+            border: 1px solid #1e3a8a; border-radius: 3px;
+            display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr);
+        }
+        .h-block div, .t-block div { border: 0.5px solid rgba(255,255,255,0.3); pointer-events: none; }
+        .t-block {
+            width: var(--t-width); height: var(--h-size); background-color: var(--tens);
+            border: 1px solid #14532d; border-radius: 3px; display: flex; flex-direction: column;
+        }
+        .o-block { width: var(--o-size); height: var(--o-size); background-color: var(--ones); border: 1px solid #713f12; border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧮 Math - Block Dienes - Ihsan Syah</h1>
+    <div class="instructions" id="instructionText">Siapkan soal untuk memulai simulasi.</div>
+    
+    <div class="control-panel">
+        <input type="number" id="num1" value="3" min="1" placeholder="N1">
+        <select id="operator">
+            <option value="+">+</option>
+            <option value="-">-</option>
+            <option value="*" selected>x</option>
+            <option value="/">÷</option>
+        </select>
+        <input type="number" id="num2" value="124" min="1" placeholder="N2">
+        <button class="btn-primary" onclick="setupBoard()">Mulai</button>
+        
+        <div style="border-left: 1px solid #cbd5e1; height: 20px; margin: 0 2px;"></div>
+        
+        <button id="btnDrag" class="mode-btn active-drag" onclick="setMode('drag')" title="Tarik 1 balok">✋ Tarik 1</button>
+        <button id="btnDragAll" class="mode-btn" onclick="setMode('dragAll')" title="Tarik semua balok sejenis">📦 Tarik Semua</button>
+        <button id="btnSelect" class="mode-btn" onclick="setMode('select')" title="Pilih beberapa balok">☑️ Pilih & Tarik</button>
+        
+        <div style="border-left: 1px solid #cbd5e1; height: 20px; margin: 0 2px;"></div>
+        
+        <button id="btnBreak" class="mode-btn" onclick="setMode('break')" title="Pecah balok">🔨 Pecah 1</button>
+        <button class="btn-action" onclick="groupSelected()" title="Gabungkan 10 balok terpilih">🔗 Gabung 10</button>
+        <button class="btn-auto" onclick="autoCalculate()" title="Hitung hasil secara otomatis">🪄 Hitung Otomatis</button>
+    </div>
+
+    <div class="workspace">
+        <div class="board-column main-board drop-zone" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="handleDrop(event, 'main')">
+            <h3>Papan Utama (Total: <span id="mainTotal">0</span>)</h3>
+            <div class="place-value-board">
+                <div class="pv-column"><div class="pv-header">Ratusan</div><div class="block-container" id="mainH"></div></div>
+                <div class="pv-column"><div class="pv-header">Puluhan</div><div class="block-container" id="mainT"></div></div>
+                <div class="pv-column"><div class="pv-header">Satuan</div><div class="block-container" id="mainO"></div></div>
+            </div>
+        </div>
+
+        <div class="board-column secondary-board">
+            <h3 id="secondaryTitle">Area Interaksi</h3>
+            <div id="secondaryContainer" style="display: flex; flex-direction: column; gap: 15px; padding-top: 5px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = { main: emptyValue(), baskets: [], trash: emptyValue(), operator: '+' };
+    let currentMode = 'drag'; 
+    let targetNum2 = 0; 
+
+    function emptyValue() { return { h:0, t:0, o:0, sel: {h:0, t:0, o:0} }; }
+    function parseValue(num) {
+        return { h: Math.floor(num / 100), t: Math.floor((num % 100) / 10), o: num % 10, sel: { h:0, t:0, o:0 } };
+    }
+    function calcTotal(obj) { return (obj.h * 100) + (obj.t * 10) + obj.o; }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btnDrag').className = 'mode-btn ' + (mode === 'drag' ? 'active-drag' : '');
+        document.getElementById('btnDragAll').className = 'mode-btn ' + (mode === 'dragAll' ? 'active-drag-all' : '');
+        document.getElementById('btnSelect').className = 'mode-btn ' + (mode === 'select' ? 'active-select' : '');
+        document.getElementById('btnBreak').className = 'mode-btn ' + (mode === 'break' ? 'active-break' : '');
+        render(); 
+    }
+
+    function setupBoard() {
+        const n1 = parseInt(document.getElementById('num1').value);
+        const n2 = parseInt(document.getElementById('num2').value);
+        const op = document.getElementById('operator').value;
+
+        if(isNaN(n1) || isNaN(n2) || n1 < 0 || n2 < 0) return alert("Masukkan angka positif.");
+
+        state.operator = op; targetNum2 = n2;
+        state.baskets = []; state.trash = emptyValue();
+        
+        let instText = "";
+        if (op === '+') {
+            state.main = parseValue(n1); state.baskets.push(parseValue(n2));
+            instText = `Tarik balok dari Area Interaksi ke Papan Utama. Gunakan 'Gabung 10' jika satuan menumpuk!`;
+        } else if (op === '-') {
+            if(n1 < n2) return alert("Angka 1 harus lebih besar dari Angka 2.");
+            state.main = parseValue(n1);
+            instText = `Buang balok sejumlah ${n2} ke Tempat Sampah. Gunakan 'Pecah 1' jika nilai tidak cukup.`;
+        } else if (op === '*') {
+            state.main = emptyValue();
+            for(let i=0; i<n1; i++) state.baskets.push(parseValue(n2));
+            instText = `Simulasi Operasi Hitung, | + | - | x | : | untuk SD`;
+        } else if (op === '/') {
+            if(n2 === 0) return alert("Tidak bisa dibagi nol.");
+            state.main = parseValue(n1);
+            for(let i=0; i<n2; i++) state.baskets.push(emptyValue());
+            instText = `Bagikan balok di Papan Utama secara adil ke dalam ${n2} keranjang.`;
+        }
+
+        document.getElementById('instructionText').innerText = instText;
+        setMode('drag'); render();
+    }
+
+    // Fungsi Hitung Otomatis
+    function autoCalculate() {
+        const n1 = parseInt(document.getElementById('num1').value);
+        const n2 = parseInt(document.getElementById('num2').value);
+        const op = state.operator;
+
+        if(isNaN(n1) || isNaN(n2) || n1 < 0 || n2 < 0) return alert("Pastikan angka sudah benar.");
+
+        if (op === '+') {
+            state.main = parseValue(n1 + n2);
+            state.baskets = [emptyValue()]; // Kosongkan keranjang setelah ditambahkan
+        } else if (op === '-') {
+            if (n1 < n2) return alert("Angka 1 harus lebih besar dari Angka 2.");
+            state.main = parseValue(n1 - n2);
+            state.trash = parseValue(n2); // Buang jumlah pengurangan ke tempat sampah
+        } else if (op === '*') {
+            state.main = parseValue(n1 * n2);
+            state.baskets = state.baskets.map(() => emptyValue()); // Kosongkan keranjang perkalian
+        } else if (op === '/') {
+            if (n2 === 0) return alert("Tidak bisa dibagi nol.");
+            const hasilBagi = Math.floor(n1 / n2);
+            const sisa = n1 % n2;
+            state.main = parseValue(sisa); // Sisa ditaruh di papan utama
+            state.baskets = state.baskets.map(() => parseValue(hasilBagi)); // Hasil didistribusikan ke setiap keranjang
+        }
+        
+        render(); // Perbarui tampilan UI
+    }
+
+    function getObjRef(id) {
+        if (id === 'main') return state.main;
+        if (id === 'trash') return state.trash;
+        if (id.startsWith('basket_')) return state.baskets[parseInt(id.split('_')[1])];
+        return null;
+    }
+
+    function handleBlockClick(sourceId, type, isSelected) {
+        let obj = getObjRef(sourceId);
+        if (currentMode === 'break') {
+            if (sourceId === 'trash') return alert("Balok di tempat sampah tidak bisa dipecah.");
+            if (type === 'h' && obj.h > 0) { obj.h--; obj.t += 10; }
+            else if (type === 't' && obj.t > 0) { obj.t--; obj.o += 10; }
+            else if (type === 'o') return alert("Satuan tidak bisa dipecah lagi!");
+            obj.sel = {h:0, t:0, o:0}; 
+        } 
+        else if (currentMode === 'select') {
+            if (isSelected) obj.sel[type]--; else obj.sel[type]++;
+        }
+        render();
+    }
+
+    function groupSelected() {
+        let grouped = false;
+        let sources = ['main', 'trash'];
+        state.baskets.forEach((_, i) => sources.push(`basket_${i}`));
+
+        sources.forEach(id => {
+            let obj = getObjRef(id);
+            if (obj.sel.o === 10) { obj.o -= 10; obj.sel.o = 0; obj.t += 1; grouped = true; }
+            else if (obj.sel.o > 10) alert(`Di ${id}: Pilih tepat 10 Satuan!`);
+            
+            if (obj.sel.t === 10) { obj.t -= 10; obj.sel.t = 0; obj.h += 1; grouped = true; }
+            else if (obj.sel.t > 10) alert(`Di ${id}: Pilih tepat 10 Puluhan!`);
+        });
+        if (!grouped) alert("Gagal. Pilih tepat 10 balok sejenis yang berada di dalam satu kotak wilayah yang sama!");
+        render();
+    }
+
+    function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function leaveDrop(e) { e.currentTarget.classList.remove('drag-over'); }
+
+    function handleDragStart(e, sourceId, type, isSelected) {
+        let obj = getObjRef(sourceId);
+        let payload = {};
+
+        if (currentMode === 'drag') { payload[type] = 1; } 
+        else if (currentMode === 'dragAll') { payload[type] = obj[type]; } 
+        else if (currentMode === 'select') {
+            if (!isSelected) { e.preventDefault(); return; }
+            payload = { h: obj.sel.h, t: obj.sel.t, o: obj.sel.o };
+        } else { e.preventDefault(); return; }
+
+        e.dataTransfer.setData("text/plain", JSON.stringify({ source: sourceId, payload: payload }));
+    }
+
+    function handleDrop(e, targetId) {
+        e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+        try {
+            const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+            const { source, payload } = data;
+            if (source === targetId) return;
+
+            let srcObj = getObjRef(source);
+            let tgtObj = getObjRef(targetId);
+            
+            ['h', 't', 'o'].forEach(t => {
+                let amt = payload[t] || 0;
+                if (amt > 0 && srcObj[t] >= amt) {
+                    srcObj[t] -= amt; tgtObj[t] += amt;
+                    if (srcObj.sel[t] > srcObj[t]) srcObj.sel[t] = srcObj[t];
+                }
+            });
+            render();
+        } catch(err) {}
+    }
+
+    function renderBlockElements(container, count, selCount, type, sourceId) {
+        container.innerHTML = '';
+        for(let i=0; i<selCount; i++) container.appendChild(createBlockDiv(type, sourceId, true));
+        for(let i=0; i<count - selCount; i++) container.appendChild(createBlockDiv(type, sourceId, false));
+    }
+
+    function createBlockDiv(type, sourceId, isSelected) {
+        let div = document.createElement('div');
+        let className = type === 'h' ? 'h-block' : type === 't' ? 't-block' : 'o-block';
+        
+        div.className = `block ${className}`;
+        if (isSelected) div.classList.add('selected');
+        if (currentMode === 'break') div.classList.add('mode-break');
+        else if (currentMode === 'select') div.classList.add('mode-select');
+        
+        div.draggable = (currentMode === 'drag' || currentMode === 'dragAll' || (currentMode === 'select' && isSelected));
+        div.ondragstart = (e) => handleDragStart(e, sourceId, type, isSelected);
+        div.onclick = () => handleBlockClick(sourceId, type, isSelected);
+        
+        if(type === 'h') for(let j=0; j<100; j++) div.appendChild(document.createElement('div'));
+        if(type === 't') for(let j=0; j<10; j++) div.appendChild(document.createElement('div'));
+        
+        return div;
+    }
+
+    function createPlaceValueBoard(obj, idPrefix) {
+        let pvBoard = document.createElement('div');
+        pvBoard.className = 'place-value-board';
+
+        let createCol = (title, count, selCount, type) => {
+            let col = document.createElement('div'); col.className = 'pv-column';
+            let hdr = document.createElement('div'); hdr.className = 'pv-header'; hdr.innerText = title;
+            let container = document.createElement('div'); container.className = 'block-container';
+            renderBlockElements(container, count, selCount, type, idPrefix);
+            col.append(hdr, container);
+            return col;
+        };
+
+        pvBoard.appendChild(createCol('Ratusan', obj.h, obj.sel.h, 'h'));
+        pvBoard.appendChild(createCol('Puluhan', obj.t, obj.sel.t, 't'));
+        pvBoard.appendChild(createCol('Satuan', obj.o, obj.sel.o, 'o'));
+        return pvBoard;
+    }
+
+    function render() {
+        document.getElementById('mainTotal').innerText = calcTotal(state.main);
+        renderBlockElements(document.getElementById('mainH'), state.main.h, state.main.sel.h, 'h', 'main');
+        renderBlockElements(document.getElementById('mainT'), state.main.t, state.main.sel.t, 't', 'main');
+        renderBlockElements(document.getElementById('mainO'), state.main.o, state.main.sel.o, 'o', 'main');
+
+        const secContainer = document.getElementById('secondaryContainer');
+        const secTitle = document.getElementById('secondaryTitle');
+        secContainer.innerHTML = '';
+
+        if (state.operator === '-') {
+            secTitle.innerText = "Area Pengurang (Buang Balok)";
+            let trashZone = document.createElement('div');
+            trashZone.className = 'drop-zone trash-zone';
+            trashZone.ondragover = allowDrop; trashZone.ondragleave = leaveDrop;
+            trashZone.ondrop = (e) => handleDrop(e, 'trash');
+            
+            let totalTrash = calcTotal(state.trash);
+            let status = totalTrash === targetNum2 ? '✅ Tepat!' : (totalTrash > targetNum2 ? '❌ Kelebihan!' : '');
+            trashZone.innerHTML = `<div class="zone-label">Terkumpul: ${totalTrash} / ${targetNum2} ${status}</div>`;
+            
+            trashZone.appendChild(createPlaceValueBoard(state.trash, 'trash'));
+            secContainer.appendChild(trashZone);
+        } else {
+            secTitle.innerText = state.operator === '/' ? "Keranjang Pembagian" : "Keranjang Sumber (Kelompok)";
+            state.baskets.forEach((basket, idx) => {
+                let basketZone = document.createElement('div');
+                basketZone.className = 'drop-zone';
+                basketZone.ondragover = allowDrop; basketZone.ondragleave = leaveDrop;
+                basketZone.ondrop = (e) => handleDrop(e, `basket_${idx}`);
+                basketZone.innerHTML = `<div class="zone-label">Kelompok ${idx + 1} (Isi: ${calcTotal(basket)})</div>`;
+                
+                basketZone.appendChild(createPlaceValueBoard(basket, `basket_${idx}`));
+                secContainer.appendChild(basketZone);
+            });
+        }
+    }
+
+    setupBoard();
+</script>
+</body>
+</html>
