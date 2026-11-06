@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Pemberian PIP 2026 - UPT SPF SDN Kakatua</title>
+    <meta name="description" content="Pemberian Beasiswa (PIP) Tahun 2026 UPT SPF SD Negeri Kakatua. Cek data dan status aktivasinya di sini.">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Pengumuman Pemberian PIP 2026 - SDN Kakatua">
+    <meta property="og:description" content="Pemberian Beasiswa (PIP) Tahun 2026 UPT SPF SD Negeri Kakatua.">
+    <meta property="og:image" content="https://puslapdik.kemendikdasmen.go.id/wp-content/uploads/2023/05/desain-PIP.jpg"> 
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        .modal-active { overflow: hidden; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="antialiased text-gray-800 relative min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-green-600 to-emerald-700 text-white shadow-lg py-8 px-4 sm:px-6 lg:px-8 mb-8 rounded-b-3xl">
+        <div class="max-w-5xl mx-auto text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 tracking-tight">SK Pemberian Beasiswa PIP</h1>
+            <p class="text-green-100 text-lg font-medium">UPT SPF SD NEGERI KAKATUA - TAHUN 2026</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow w-full">
+        
+        <div class="bg-green-50 border-l-4 border-green-500 rounded-r-lg p-4 mb-6 shadow-sm flex items-start space-x-3">
+            <svg class="w-6 h-6 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+                <h3 class="text-green-800 font-semibold text-base">Informasi Penting</h3>
+                <p class="text-green-700 text-sm mt-1">- Silakan <strong>klik pada baris nama siswa</strong> untuk melihat detail lengkap.<br>- Pastikan <strong>Nomor Rekening Sesuai dan Aktif</strong> (cek no.Rek pada detail siswa).<br>- Jadwal pencairan berbeda sesuai data masing-masing siswa. Silakan buka detail siswa untuk melihat keterangan pencairan.<br>- Hubungi <strong>Operator (Pak Ihsan) </strong>untuk Informasi lebih lengkap.</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+            <div class="flex items-center text-gray-600">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <span class="font-medium text-sm">Filter Berdasarkan Kelas:</span>
+            </div>
+            <select id="filterRombel" class="w-full sm:w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block p-2.5 font-medium outline-none transition-colors">
+                <option value="Semua">Semua Kelas</option>
+            </select>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap min-w-[600px]">
+                    <thead>
+                        <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100">
+                            <th class="p-4 font-semibold text-sm text-green-800 w-16 text-center">No</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Nama Siswa</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Rombel</th>
+                            <th class="p-4 font-semibold text-sm text-green-800">Tempat, Tanggal Lahir</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="no-data" class="hidden py-8 text-center text-gray-500">
+                Data tidak ditemukan untuk kelas ini.
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <a href="https://wa.me/6282395223314" target="_blank" class="inline-flex items-center justify-center text-gray-500 hover:text-green-600 font-medium text-sm transition-colors group">
+                <svg class="w-5 h-5 mr-2 text-gray-400 group-hover:text-green-500 transition-colors" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.573-.187-.981-.365-1.739-.755-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.418-.099.823z"/></svg>
+                &copy; Operator - SDN Kakatua 2026
+            </a>
+            <p class="text-xs text-gray-400 mt-1">Klik untuk menghubungi via WhatsApp</p>
+        </div>
+    </footer>
+
+    <div id="student-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-gray-900 bg-opacity-60 backdrop-blur-sm fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto overflow-hidden transform transition-all">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-white text-lg font-bold">Detail Siswa</h3>
+                <button onclick="closeModal()" class="text-green-100 hover:text-white transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="text-center mb-4">
+                    <div id="modal-nama" class="text-xl font-bold text-gray-800 uppercase whitespace-normal"></div>
+                    <span id="modal-rombel" class="inline-block mt-1 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full"></span>
+                </div>
+                <div class="space-y-3 text-sm border-t border-gray-100 pt-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">NISN</span>
+                        <span id="modal-nisn" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Nomor Rekening</span>
+                        <span id="modal-rekening" class="text-blue-600 font-bold text-right tracking-wide"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Tempat, Tgl Lahir</span>
+                        <span id="modal-ttl" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Nama Ibu Kandung</span>
+                        <span id="modal-ibu" class="text-gray-800 font-semibold text-right"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">No. SK</span>
+                        <span id="modal-sk" class="text-gray-800 font-semibold text-right text-xs"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Status Pencairan</span>
+                        <span id="modal-status" class="text-red-600 font-bold text-right bg-red-50 px-2 py-0.5 rounded"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between border-b border-gray-50 pb-2">
+                        <span class="text-gray-500 font-medium">Keterangan Pencairan</span>
+                        <span id="modal-keterangan" class="text-gray-800 font-semibold text-right text-xs"></span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between pt-1">
+                        <span class="text-gray-500 font-medium">Pengusul</span>
+                        <span id="modal-pengusul" class="text-gray-800 font-semibold text-right text-xs"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 text-right">
+                <button onclick="closeModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data derived from the provided document, now with Nomor Rekening
+        let students = [
+            {
+                        "nama": "MUHAMMAD FAHRIAN",
+                        "rombel": "Kelas 6 A",
+                        "ibu": "MUSDALIFA",
+                        "ttl": "MAKASSAR, 24 Mei 2014",
+                        "nisn": "3143437143",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015551501",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012405140002"
+            },
+            {
+                        "nama": "ADREENA ALESHA SHEVA",
+                        "rombel": "Kelas 2 A",
+                        "ibu": "MARDIANA",
+                        "ttl": "MAKASSAR, 19 Maret 2019",
+                        "nisn": "3195613957",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015367504",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371015903190001"
+            },
+            {
+                        "nama": "MALAIKHA ALISHBA WANIA",
+                        "rombel": "Kelas 2 B",
+                        "ibu": "WITA ANDRIANI",
+                        "ttl": "MAKASSAR, 3 Februari 2019",
+                        "nisn": "3191499918",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015456507",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014302190001"
+            },
+            {
+                        "nama": "SAUCHAR",
+                        "rombel": "Kelas 6 B",
+                        "ibu": "MEGAWATI PATTA",
+                        "ttl": "MAKASSAR, 5 April 2015",
+                        "nisn": "3156922542",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015366508",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014504150002"
+            },
+            {
+                        "nama": "MUH. ASKA DAFFA",
+                        "rombel": "Kelas 6 B",
+                        "ibu": "HERLINA",
+                        "ttl": "MAKASSAR, 12 Desember 2014",
+                        "nisn": "3144633339",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015727500",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371011212140002"
+            },
+            {
+                        "nama": "NADIA RAMADHANI HARTONO",
+                        "rombel": "Kelas 2 A",
+                        "ibu": "A R I A N T I",
+                        "ttl": "MAKASSAR, 23 Mei 2018",
+                        "nisn": "3183073288",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015526506",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371016305180002"
+            },
+            {
+                        "nama": "FARDAN ALFARIZ",
+                        "rombel": "Kelas 5 A",
+                        "ibu": "KHAIRUROH",
+                        "ttl": "TEGAL, 1 Juli 2016",
+                        "nisn": "3163399311",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015556501",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "3328040107160003"
+            },
+            {
+                        "nama": "KHANZA MAKAILA AZALIA SINAGA",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "MANTANG",
+                        "ttl": "MAKASSAR, 16 Februari 2017",
+                        "nisn": "3171579748",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015376503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371015602170001"
+            },
+            {
+                        "nama": "AINUN MAHYA ARIF",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "SYARIFA HAERANA MASDAR",
+                        "ttl": "MAKASSAR, 2 Desember 2017",
+                        "nisn": "3179196384",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015639503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014212170001"
+            },
+            {
+                        "nama": "AZRIEL DZAQI RAMADHAN. H",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "LINA KARLINA",
+                        "ttl": "MAKASSAR, 25 Mei 2018",
+                        "nisn": "3182904855",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015567502",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012505180001"
+            },
+            {
+                        "nama": "ZENIA ASIFA MECCA",
+                        "rombel": "Kelas 2 A",
+                        "ibu": "ILMALA",
+                        "ttl": "MAKASSAR, 19 April 2019",
+                        "nisn": "3195282526",
+                        "sk": "169/PLPP.1.1/BP/SK.54/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Drs. H. ANDI MUAWIYAH RAMLY, M.Si",
+                        "rekening": "305001015255503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 09 Juli 2026",
+                        "nominal": "450000",
+                        "nik": "7371015904190001"
+            },
+            {
+                        "nama": "AFDAL PUTRA ALGAZALI",
+                        "rombel": "Kelas 4 B",
+                        "ibu": "HIJRIAWANTI",
+                        "ttl": "MAKASSAR, 23 Desember 2016",
+                        "nisn": "3164830296",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015700508",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012312160001"
+            },
+            {
+                        "nama": "NURDZALIKA LIYASRI ATJO",
+                        "rombel": "Kelas 4 A",
+                        "ibu": "PURNAMA SATI A H",
+                        "ttl": "MAKASSAR, 6 Januari 2016",
+                        "nisn": "3168304901",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015606500",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014601160002"
+            },
+            {
+                        "nama": "ADINDA KHANZA",
+                        "rombel": "Kelas 6 A",
+                        "ibu": "ARWINI PUSPITA",
+                        "ttl": "MAKASSAR, 9 Juni 2014",
+                        "nisn": "3146817048",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015525500",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014906140001"
+            },
+            {
+                        "nama": "MUHAMMAD RIZKY ALDIANSYAH",
+                        "rombel": "Kelas 6 B",
+                        "ibu": "FARIDAH",
+                        "ttl": "MAKASSAR, 13 November 2014",
+                        "nisn": "0147593888",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015652501",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371101311140002"
+            },
+            {
+                        "nama": "MUHAMMAD ALFAUZAN WHIRA",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "HASNIATI",
+                        "ttl": "MAKASSAR, 20 Mei 2017",
+                        "nisn": "3177158927",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015680504",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012005170001"
+            },
+            {
+                        "nama": "PRISILLIA MAGDALENA PASUR",
+                        "rombel": "Kelas 5 B",
+                        "ibu": "MARSELINA K",
+                        "ttl": "MAKASSAR, 1 Maret 2016",
+                        "nisn": "3161488734",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015371503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014103160002"
+            },
+            {
+                        "nama": "NANDHA SEPRIYANI AHYANA",
+                        "rombel": "Kelas 3 A",
+                        "ibu": "EKA PUTRI APRILIAYANTI",
+                        "ttl": "MAKASSAR, 12 September 2017",
+                        "nisn": "3170858937",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015485506",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371015209170001"
+            },
+            {
+                        "nama": "NAURA PUTRI RUSTI RAMADHANI",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "SITTI HAPSAH",
+                        "ttl": "MAKASSAR, 20 Juni 2017",
+                        "nisn": "3178779051",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015448504",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371016006170001"
+            },
+            {
+                        "nama": "DINDHA GUSTI SRI WAHYUNI",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "ENDANG ISPRIYANTI",
+                        "ttl": "MAKASSAR, 25 Agustus 2017",
+                        "nisn": "3176035958",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015654503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371016508170001"
+            },
+            {
+                        "nama": "MUH. ABID ADAM AL-FAJAR",
+                        "rombel": "Kelas 5 B",
+                        "ibu": "FITRIYANI",
+                        "ttl": "MAKASSAR, 10 Januari 2016",
+                        "nisn": "3165247619",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015667506",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371011001160001"
+            },
+            {
+                        "nama": "NIZAR AL KAHFI",
+                        "rombel": "Kelas 3 A",
+                        "ibu": "SUKMAWATI",
+                        "ttl": "MAKASSAR, 22 Juli 2017",
+                        "nisn": "3172608105",
+                        "sk": "502/PLPP.1.1/BP/SK.174/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "EVA STEVANY RATABA",
+                        "rekening": "305001015249502",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 5 November 2026",
+                        "nominal": "450000",
+                        "nik": "7371012207170001"
+            },
+            {
+                        "nama": "REYHANA NUR SALSHABILLA",
+                        "rombel": "Kelas 4 A",
+                        "ibu": "ENDANG",
+                        "ttl": "MAKASSAR, 31 Maret 2017",
+                        "nisn": "3178356056",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015645504",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371017103170002"
+            },
+            {
+                        "nama": "MUHAMMAD ABRI ANDI",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "NURLELA",
+                        "ttl": "MAKASSAR, 5 Oktober 2017",
+                        "nisn": "3178822008",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015392509",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371010510170001"
+            },
+            {
+                        "nama": "AQHIFA PUTRI UMAIZA",
+                        "rombel": "Kelas 3 A",
+                        "ibu": "DEWI SARTIKA",
+                        "ttl": "MAKASSAR, 17 Januari 2018",
+                        "nisn": "3183858885",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015474505",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371015701180002"
+            },
+            {
+                        "nama": "NUR AINA ZAHRA",
+                        "rombel": "Kelas 4 A",
+                        "ibu": "KURNIA",
+                        "ttl": "MAKASSAR, 16 April 2016",
+                        "nisn": "3160582969",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015575505",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371015604160001"
+            },
+            {
+                        "nama": "NUR ZAHRA ADAWIYA",
+                        "rombel": "Kelas 3 A",
+                        "ibu": "JULIANA",
+                        "ttl": "MAKASSAR, 21 September 2017",
+                        "nisn": "3171807111",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015582502",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7306106109170001"
+            },
+            {
+                        "nama": "MUH.QIFAR AL-GHAFUR",
+                        "rombel": "Kelas 2 A",
+                        "ibu": "DEWI SARTIKA",
+                        "ttl": "MAKASSAR, 16 Maret 2019",
+                        "nisn": "3196898432",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015484500",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371011603190002"
+            },
+            {
+                        "nama": "PUTRI AISYAH SHAH",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "HASIA DG. KANANG",
+                        "ttl": "MAKASSAR, 27 Juni 2018",
+                        "nisn": "3183402032",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015713501",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371016706180004"
+            },
+            {
+                        "nama": "TALITA HASNA HUMAIRA",
+                        "rombel": "Kelas 4 B",
+                        "ibu": "MIRNA",
+                        "ttl": "MAKASSAR, 25 Agustus 2017",
+                        "nisn": "3171992750",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015541506",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371016508170003"
+            },
+            {
+                        "nama": "ASKAYRA AZZAHRA",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "ERNAWATI",
+                        "ttl": "NENGO, 17 April 2018",
+                        "nisn": "3189085650",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015659503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7308145704180001"
+            },
+            {
+                        "nama": "ABDUL HANAN AL FARIZI RACHMADI",
+                        "rombel": "Kelas 3 B",
+                        "ibu": "MURDIAH",
+                        "ttl": "MAKASSAR, 20 Mei 2017",
+                        "nisn": "3178910689",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015542502",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012105170004"
+            },
+            {
+                        "nama": "MUH. AKHYAR SYAWAL",
+                        "rombel": "Kelas 2 A",
+                        "ibu": "DARMIYUNINSIH",
+                        "ttl": "MAKASSAR, 29 Juni 2019",
+                        "nisn": "3196380124",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015473509",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371012906190001"
+            },
+            {
+                        "nama": "SAHL UBAID",
+                        "rombel": "Kelas 2 B",
+                        "ibu": "YULIANI",
+                        "ttl": "MAKASSAR, 29 Maret 2019",
+                        "nisn": "3196557506",
+                        "sk": "23/PLPP.1.1/BP/SK.9/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "RATIH MEGASARI SINGKARRU, MSc",
+                        "rekening": "005001202632507",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 18 Mei 2026",
+                        "nominal": "450000",
+                        "nik": "7371012903190001"
+            },
+            {
+                        "nama": "NAILA MUAZARA ULFA",
+                        "rombel": "Kelas 5 B",
+                        "ibu": "WATI RAHAYUNI",
+                        "ttl": "MAKASSAR, 30 Juni 2015",
+                        "nisn": "3159855953",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015626500",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371047006150001"
+            },
+            {
+                        "nama": "AZKA ZENA ADININGRUM",
+                        "rombel": "Kelas 4 A",
+                        "ibu": "SITI ROMANTIKA SUDARKO PUTRI",
+                        "ttl": "MAKASSAR, 2 Mei 2017",
+                        "nisn": "3172714997",
+                        "sk": "348/PLPP.1.1/BP/SK.113/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Dr. Hj. KURNIASIH MUFIDAYATI, M.Si",
+                        "rekening": "305001015250503",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 15 September 2026",
+                        "nominal": "450000",
+                        "nik": "7371014205170001"
+            },
+            {
+                        "nama": "QUEEN KHADIJAH RACHMADI",
+                        "rombel": "Kelas 2 B",
+                        "ibu": "MURDIAH",
+                        "ttl": "MAKASSAR, 1 Agustus 2018",
+                        "nisn": "3186834549",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015552507",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371014108180001"
+            },
+            {
+                        "nama": "ABDUL FATHURRAHMAN FACHRUL",
+                        "rombel": "Kelas 3 A",
+                        "ibu": "MULYATI",
+                        "ttl": "MAKASSAR, 11 September 2017",
+                        "nisn": "3170704045",
+                        "sk": "258/PLPP.1.1/BP/SK.92/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Kota Makassar",
+                        "rekening": "305001015550505",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371011109170003"
+            },
+            {
+                        "nama": "MUHAMMAD MURSI",
+                        "rombel": "Kelas 6 A",
+                        "ibu": "IRMA",
+                        "ttl": "MAKASSAR, 12 Juni 2014",
+                        "nisn": "0148133242",
+                        "sk": "253/PLPP.1.1/BP/SK.87/2026",
+                        "status": "Belum Cair",
+                        "pengusul": "Dr. Hj. KURNIASIH MUFIDAYATI, M.Si",
+                        "rekening": "305001015256509",
+                        "keterangan": "Mulai bisa dicairkan PALING CEPAT tanggal 12 Agustus 2026",
+                        "nominal": "450000",
+                        "nik": "7371011206140003"
+            }
+];
+
+        // Assign unique IDs before sort so we can reference them safely for the modal
+        students.forEach((student, index) => {
+            student.id = index;
+        });
+
+        // Sort data based on Rombel first, then Alphabetically by Nama
+        students.sort((a, b) => {
+            const rombelCompare = a.rombel.localeCompare(b.rombel);
+            if (rombelCompare !== 0) {
+                return rombelCompare;
+            }
+            return a.nama.localeCompare(b.nama);
+        });
+
+        const tbody = document.getElementById('student-table-body');
+        const modal = document.getElementById('student-modal');
+        const filterSelect = document.getElementById('filterRombel');
+        const noDataText = document.getElementById('no-data');
+
+        // Extract unique 'rombel' values for the select dropdown
+        const uniqueRombel = [...new Set(students.map(s => s.rombel))].sort();
+        uniqueRombel.forEach(rombel => {
+            const option = document.createElement('option');
+            option.value = rombel;
+            option.textContent = rombel;
+            filterSelect.appendChild(option);
+        });
+
+        // Render Table Function based on filter
+        function renderTable(filterValue) {
+            tbody.innerHTML = '';
+            
+            let filteredStudents = students;
+            if (filterValue !== 'Semua') {
+                filteredStudents = students.filter(s => s.rombel === filterValue);
+            }
+
+            if (filteredStudents.length === 0) {
+                noDataText.classList.remove('hidden');
+            } else {
+                noDataText.classList.add('hidden');
+                
+                filteredStudents.forEach((student, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-gray-50 hover:bg-green-50/60 cursor-pointer transition-colors group";
+                    // Using student.id so the modal gets the exact correct data from original array
+                    tr.onclick = () => openModal(student);
+                    
+                    tr.innerHTML = `
+                        <td class="p-4 text-sm text-gray-500 text-center">${index + 1}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 group-hover:text-green-700 transition-colors">${student.nama}</td>
+                        <td class="p-4 text-sm text-gray-600">
+                            <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-md text-xs font-medium">${student.rombel}</span>
+                        </td>
+                        <td class="p-4 text-sm text-gray-600">${student.ttl}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // Initialize table on first load
+        renderTable('Semua');
+
+        // Event listener for filter dropdown
+        filterSelect.addEventListener('change', function(e) {
+            renderTable(e.target.value);
+        });
+
+        // Modal Functions
+        function openModal(student) {
+            document.getElementById('modal-nama').textContent = student.nama;
+            document.getElementById('modal-rombel').textContent = student.rombel;
+            document.getElementById('modal-nisn').textContent = student.nisn;
+            document.getElementById('modal-rekening').textContent = student.rekening;
+            document.getElementById('modal-ttl').textContent = student.ttl;
+            document.getElementById('modal-ibu').textContent = student.ibu;
+            document.getElementById('modal-sk').textContent = student.sk;
+            document.getElementById('modal-status').textContent = student.status;
+            document.getElementById('modal-keterangan').textContent = student.keterangan || 'Tidak tercantum';
+            document.getElementById('modal-pengusul').textContent = student.pengusul;
+            
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-active');
+        }
+
+        // Close modal when clicking outside the content
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
